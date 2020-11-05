@@ -1,6 +1,6 @@
 # Network Impairment on Linux
 
-Very often we need to simulate different network conditions in order to gauge how our software under adverse conditions.  While there's plenty of commercial and free tools available to do this, we at RTS like to get our hands dirty.  So we built a little script (``impair.sh``) that runs on Linux and impairs traffic on a network interface.
+Very often we need to simulate different network conditions in order to gauge how our software works under adverse conditions.  While there's plenty of commercial and free tools available to do this, we at RTS like to get our hands dirty.  So we built a little script (``impair.sh``) that runs on Linux and impairs traffic on a network interface.
 
 These impairments are grouped into various "profiles" that we've developed over years of working with commercial and government customers.  Feel free to add or modify profiles as you see fit.
 
