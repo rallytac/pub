@@ -1,0 +1,7 @@
+SRCS = Mingage.cpp WorkQueue.cpp
+MAIN = mingage.exe
+INCPATH = ..\..\..\api\c\include
+LIBPATH = ..\..\..\bin\latest\win_ia32
+
+$(MAIN): $(SRCS)
+	cl /EHsc /Fe"$(MAIN)" /I. /I"$(INCPATH)" $(SRCS) engage-shared.lib /link /LIBPATH:"$(LIBPATH)"

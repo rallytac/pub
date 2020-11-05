@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AboutActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/ivAppLogo"
+            android:layout_width="48dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_app_logo" />
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/app_name"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/ivContact"
+            app:layout_constraintStart_toEndOf="@+id/ivAppLogo"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:onClick="onClickContact"
+            app:layout_constraintBottom_toBottomOf="@+id/tvAppName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvAppName"
+            app:srcCompat="@drawable/ic_outline_contacts_24px" />
+
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/about_version_placeholder"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/tvAppName"
+            app:layout_constraintTop_toBottomOf="@+id/tvAppName" />
+
+        <TextView
+            android:id="@+id/tvCopyright"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/copyright"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/tvAppName"
+            app:layout_constraintTop_toBottomOf="@+id/tvVersion" />
+
+        <TextView
+            android:id="@+id/tvDeviceHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/about_device_id"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCopyright" />
+
+        <ImageView
+            android:id="@+id/ivSystemInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:onClick="onClickSystemInfo"
+            app:layout_constraintBottom_toBottomOf="@+id/tvDeviceHeader"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvDeviceHeader"
+            app:srcCompat="@drawable/ic_outline_info_24px" />
+
+        <EditText
+            android:id="@+id/etDeviceId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:enabled="false"
+            android:inputType="none"
+            android:textIsSelectable="true"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvDeviceHeader"
+            app:layout_constraintTop_toBottomOf="@+id/tvDeviceHeader" />
+
+        <TextView
+            android:id="@+id/tvLicenseHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/about_license_key"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etDeviceId" />
+
+        <TextView
+            android:id="@+id/tvLicenseKeyStaticText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/about_enter_license_key"
+            app:layout_constraintEnd_toEndOf="@+id/etLicenseKey"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+            app:layout_constraintTop_toBottomOf="@+id/tvLicenseHeader" />
+
+        <EditText
+            android:id="@+id/etLicenseKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/about_license_key"
+            android:inputType="textCapCharacters"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/ivScanLicenseKey"
+            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+            app:layout_constraintTop_toBottomOf="@+id/tvLicenseKeyStaticText" />
+
+        <ImageView
+            android:id="@+id/ivScanLicenseKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="8dp"
+            android:onClick="onClickScanLicenseKey"
+            app:layout_constraintBottom_toBottomOf="@+id/tvLicenseHeader"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvLicenseHeader"
+            app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
+
+
+        <ImageView
+            android:id="@+id/ivShareLicenseKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:onClick="onClickShareLicenseKey"
+            app:layout_constraintBottom_toBottomOf="@+id/etLicenseKey"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/etLicenseKey"
+            app:srcCompat="@drawable/ic_visibility"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/tvActivationHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/about_activation_code"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etLicenseKey" />
+
+        <TextView
+            android:id="@+id/tvActivationCodeStaticText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/about_enter_activation_code"
+            app:layout_constraintEnd_toStartOf="@+id/ivWebFetchActivationCode"
+            app:layout_constraintStart_toStartOf="@+id/tvActivationHeader"
+            app:layout_constraintTop_toBottomOf="@+id/tvActivationHeader" />
+
+        <ImageView
+            android:id="@+id/ivWebFetchActivationCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:onClick="onClickGetActivationCodeOnline"
+            app:layout_constraintBottom_toBottomOf="@+id/tvActivationCodeStaticText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvActivationCodeStaticText"
+            app:srcCompat="@drawable/ic_outline_cloud_download_24px" />
+
+        <EditText
+            android:id="@+id/etActivationCode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/about_hint_activation_code"
+            android:inputType="textCapCharacters"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/ivScanActivationCode"
+            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+            app:layout_constraintTop_toBottomOf="@+id/tvActivationCodeStaticText" />
+
+        <ImageView
+            android:id="@+id/ivScanActivationCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:onClick="onClickScanActivationCode"
+            app:layout_constraintBottom_toBottomOf="@+id/etActivationCode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/etActivationCode"
+            app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
+
+
+        <TextView
+            android:id="@+id/tvLicensingMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+            app:layout_constraintTop_toBottomOf="@+id/etActivationCode" />
+
+
+        <Button
+            android:id="@+id/btnDeactivate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#E91E63"
+            android:backgroundTintMode="src_atop"
+            android:onClick="onClickDeactivate"
+            android:text="@string/about_btn_deactivate"
+            android:textColor="#FFFFFF"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvLicensingMessage" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

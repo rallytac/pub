@@ -1,0 +1,112 @@
+{
+        "id":"",
+        "listenPort":7443,
+        "interfaceName":"",
+        "multicastInterfaceName":"",
+        "requireFips":false,
+        "allowMulticastForwarding":false,
+        "ioPools":-1,
+        "allowPeerForwarding":false,
+        "forwardDiscoveredGroups":false,
+
+        "statusReport":
+        {
+                "enabled":true,
+                "fileName":"/tmp/${id}_status.json",
+                "intervalSecs":30,
+                "includeLinks":true,
+                "includePeerLinkDetails":true,
+                "includeClientLinkDetails":false
+        },
+
+        "linkGraph":
+        {
+                "enabled":true,
+                "fileName":"/tmp/${id}_links.dot",
+                "minRefreshSecs":5,
+                "includeDigraphEnclosure":true,
+                "includeClients":false,
+                "coreRpStyling":"[shape=hexagon color=firebrick style=filled]",
+                "leafRpStyling":"[shape=box color=gray style=filled]",
+                "clientStyling":"[dir=none]"
+        },        
+
+        "externalHealthCheckResponder":
+        {
+                "listenPort":0,
+                "immediateClose":true
+        },
+        
+        "certificate":
+        {
+                "certificate":"@/etc/rallypointd/rtsFactoryDefaultRpSrv.pem",
+                "key":"@/etc/rallypointd/rtsFactoryDefaultRpSrv.key"
+        },
+
+        "tls":
+        {
+                "verifyPeers":true,
+                "allowSelfSignedCertificates":false,
+                "caCertificates":
+                [
+                        "@/etc/rallypointd/rtsCA.pem"
+                ]
+        },
+
+        "peeringConfigurationFileName": "",
+        "peeringConfigurationFileCheckSecs":30,
+
+        "discovery": 
+        {
+                "ssdp": 
+                {
+                        "enabled":false,
+                        "ageTimeoutMs":30000,
+                        "searchTerms":
+                        [
+                                "engage:eu",
+                                "engage:rp",
+                                "engage:gc"
+                        ],
+                        "address": 
+                        {
+                                "address": "239.255.255.250",
+                                "port": 1900
+                        },
+                        "advertising":
+                        {
+                                "enabled":false,
+                                "intervalMs":20000
+                        }
+                },
+                "sap": 
+                {
+                        "enabled":false,
+                        "ageTimeoutMs":30000,
+                        "address": 
+                        {
+                                "address": "224.2.127.254",
+                                "port": 9875
+                        },
+                        "advertising":
+                        {
+                                "enabled":false,
+                                "intervalMs":20000
+                        }
+                },
+                "cistech": 
+                {
+                        "enabled":false,
+                        "ageTimeoutMs":10000,
+                        "address": 
+                        {
+                                "address": "239.192.1.42",
+                                "port": 5354
+                        }
+                },
+                "trellisware": 
+                {
+                        "enabled":false
+                }
+        }        
+}

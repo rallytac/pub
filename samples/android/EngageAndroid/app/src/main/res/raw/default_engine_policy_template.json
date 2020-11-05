@@ -1,0 +1,104 @@
+{
+  "dataDirectory":"<filled in by app>",
+
+  "database":{
+    "enabled":true,
+    "type":2,
+    "fixedFileName":"",
+    "forceMaintenance":true,
+    "reclaimSpace":true
+  },
+
+  "internals":{
+    "disableWatchdog":false,
+    "watchdogIntervalMs":1000,
+    "watchdogHangDetectionMs":2000,
+    "housekeeperIntervalMs":1000,
+    "maxTxSecs":86400,
+    "logTaskQueueStatsIntervalMs":0,
+    "enableLazySpeakerClosure":false
+  },
+
+  "licensing":{
+    "entitlement":"<filled in by app>",
+    "key":"<filled in by app>",
+    "activationCode":"",
+    "manufacturerId":"<filled in by app>"
+  },
+
+  "networking":{
+    "defaultNic":"<filled in by app>",
+    "maxOutputQueuePackets":100,
+    "rtpJitterMinMs":100,
+    "rtpJitterMaxFactor":8,
+    "rtpJitterTrimPercentage":10,
+    "rtpJitterUnderrunReductionThresholdMs":1500,
+    "rtpLatePacketSequenceRange":5,
+    "rtpLatePacketTimestampRangeMs":2000,
+    "rtpInboundProcessorInactivityMs":2000,
+    "multicastRejoinSecs":8,
+    "rpLeafConnectTimeoutSecs":10,
+    "maxReconnectPauseMs":5000,
+    "reconnectFailurePauseIncrementMs":500,
+    "sendFailurePauseMs":1000,
+    "rallypointRtTestIntervalMs":30000,
+    "logRtpJitterBufferStats":true,
+    "rtpJtterLatencyMode": 0,
+    "rtpJitterUnderrunReductionAger": 100,
+    "rtpJitterForceTrimAtMs": 0
+  },
+
+  "audio":{
+    "internalRate":16000,
+    "internalChannels":2,
+    "microphoneQueueMs":60,
+    "outputGainPercentage":0,
+    "allowOutputOnTransmit": true,
+    "enableAec":true
+  },
+
+  "security":{
+    "certificate":{
+      "certificate":"<filled in by app>",
+      "key":"<filled in by app>"
+    }
+  },
+
+  "timelines": {
+    "enabled":true,
+    "storageRoot":"",
+    "maxStorageQuotaMb":128,
+    "maxEventAgeSecs":86400,
+    "maxEvents":1000,
+    "groomingIntervalSecs":300,
+    "autosaveIntervalSecs":90,
+    "disableSigningAndVerification":false
+  },
+
+  "discovery": {
+    "ssdp": {
+      "enabled":false,
+      "ageTimeoutMs":30000,
+      "searchTerms":[
+        "engage:eu",
+        "engage:rp",
+        "engage:gc"
+      ],
+      "address": {
+        "address": "239.255.255.250",
+        "port": 1900
+      }
+    },
+    "cistech": {
+      "enabled":false,
+      "ageTimeoutMs":5000,
+      "address": {
+        "address": "234.10.10.21",
+        "port": 21080
+      }
+    },
+    "trellisware": {
+      "enabled":false
+    }
+  }
+}

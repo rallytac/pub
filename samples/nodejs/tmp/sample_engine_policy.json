@@ -1,0 +1,102 @@
+{
+    "dataDirectory":"$HOME",
+
+    "internals":{
+        "disableWatchdog":true,
+        "watchdogIntervalMs":1000,
+        "watchdogHangDetectionMs":2000,
+        "housekeeperIntervalMs":1000,
+        "maxTxSecs":30
+    },
+
+    "timelines": {
+        "enabled":true,
+	    "storageRoot":"",
+        "maxStorageQuotaMb":128,
+        "maxEventAgeSecs":2592000,
+	    "maxEvents":10000,
+	    "groomingIntervalSecs":1800
+    },
+
+    "licensing":{
+        "entitlement": "",
+        "key":"",
+        "activationCode": ""
+    },
+
+    "networking":{
+        "defaultNic":"",
+        "maxOutputQueuePackets":100,
+        "rtpJitterMinMs":500,
+        "rtpJitterMaxMs":1000,
+        "rtpLatePacketSequenceRange":5,
+        "rtpLatePacketTimestampRangeMs":2000,
+        "rtpInboundProcessorInactivityMs":2000,
+        "multicastRejoinSecs":8,
+        "rpLeafConnectTimeoutSecs":10,
+        "maxReconnectPauseMs":5000,
+        "reconnectFailurePauseIncrementMs":500,
+        "sendFailurePauseMs":1000,
+	    "rallypointRtTestIntervalMs":60000
+    },
+
+    "audio":{
+        "speakerQueueMs":250,
+        "microphoneQueueMs":60,
+        "pcmSamplingRate":16000,
+        "pcmMinPlatformSampleCount":250,
+        "pcmMaxSamplesInQueue":1000,
+        "pcmSpeakerBuffers":5,
+        "outputChannels":2,
+        "outputGainPercentage":0
+    },
+
+    "security":{
+        "certificate":{
+            "certificate":"-----BEGIN CERTIFICATE-----\nMIIDZjCCAscCCQCty2HImU4h4TAKBggqhkjOPQQDAjCB9TELMAkGA1UEBhMCVVMx\nEzARBgNVBAgMCldhc2hpbmd0b24xEDAOBgNVBAcMB1NlYXR0bGUxJTAjBgNVBAoM\nHFJhbGx5IFRhY3RpY2FsIFN5c3RlbXMsIEluYy4xSDBGBgNVBAsMPyhjKSAyMDE5\nIFJhbGx5IFRhY3RpY2FsIFN5c3RlbXMsIEluYy4gLSBGb3IgYXV0aG9yaXplZCB1\nc2Ugb25seTEpMCcGA1UEAwwgUmFsbHkgVGFjdGljYWwgU3lzdGVtcyBSb290IENB\nIDExIzAhBgkqhkiG9w0BCQEWFHN1cHBvcnRAcmFsbHl0YWMuY29tMB4XDTE5MDkw\nNzAxNTMwNloXDTI5MDkwNDAxNTMwNlowgfcxCzAJBgNVBAYTAlVTMRMwEQYDVQQI\nDApXYXNoaW5ndG9uMRAwDgYDVQQHDAdTZWF0dGxlMSUwIwYDVQQKDBxSYWxseSBU\nYWN0aWNhbCBTeXN0ZW1zLCBJbmMuMUgwRgYDVQQLDD8oYykgMjAxOSBSYWxseSBU\nYWN0aWNhbCBTeXN0ZW1zLCBJbmMuIC0gRm9yIGF1dGhvcml6ZWQgdXNlIG9ubHkx\nKzApBgNVBAMMIkVuZ2FnZSBGYWN0b3J5IERlZmF1bHQgQ2VydGlmaWNhdGUxIzAh\nBgkqhkiG9w0BCQEWFHN1cHBvcnRAcmFsbHl0YWMuY29tMIGbMBAGByqGSM49AgEG\nBSuBBAAjA4GGAAQBFaIWniVXPmTjO4IcJmbXYCoKOSbqEjavLotDznTjEe0A+SJH\na4YLbIj5xTsfgq6RWRHpzFBuvOC2ToKbR6/92jIB0bHZlHL2vN6ADQi7qSC2RJEK\nJVIs1PLYfNfvNUhRvJJICPDJZ2D7xfXwxPpjLlZh+JhT6DBuGqR6QxtTRDNgpp4w\nCgYIKoZIzj0EAwIDgYwAMIGIAkIBCtpJbtTuIRs7V4xOH8It78m1dv00gfHqOG0c\nMrUJHXJFLlT9yBTjiqK4NQsaYQgWiSrYpGLQ1I9h6A/D1yVId78CQgFa33PUA2nW\nTLabPBpdN3lno75IMHBHZ/nIPWW+KhZHzcS2pEXFT9X+KuKLpCZzos7/ZYr+tWJr\nlsr93Xdm0Z9nJA==\n-----END CERTIFICATE-----\n",
+            "key":"-----BEGIN EC PARAMETERS-----\nBgUrgQQAIw==\n-----END EC PARAMETERS-----\n-----BEGIN EC PRIVATE KEY-----\nMIHbAgEBBEGXacsoDqNimVk60h7drTtFxBZsps6o3iXqUbLhJHuE9UmCqqyrAJOD\nVWcd4DDNGVSmOo1vj7+ng4mog2u71tbxJqAHBgUrgQQAI6GBiQOBhgAEARWiFp4l\nVz5k4zuCHCZm12AqCjkm6hI2ry6LQ8504xHtAPkiR2uGC2yI+cU7H4KukVkR6cxQ\nbrzgtk6Cm0ev/doyAdGx2ZRy9rzegA0Iu6kgtkSRCiVSLNTy2HzX7zVIUbySSAjw\nyWdg+8X18MT6Yy5WYfiYU+gwbhqkekMbU0QzYKae\n-----END EC PRIVATE KEY-----\n"
+        }
+    },
+
+    "discovery": {
+        "ssdp": {
+            "enabled":false,
+            "ageTimeoutMs":30000,
+            "searchTerms":[
+                "engage:eu",
+                "engage:rp",
+                "engage:gc"
+            ],
+            "address": {
+                "address": "239.255.255.250",
+                "port": 1900
+            },
+            "advertising":{
+                "enabled":false,
+                "intervalMs":2000
+            }
+        },
+        "sap": {
+            "enabled":false,
+            "address": {
+                "address": "224.2.127.254",
+                "port": 9875
+            },
+            "advertising":{
+                "enabled":true,
+                "intervalMs":2000
+            }
+        },
+        "cistech": {
+            "enabled":false,
+            "ageTimeoutMs":5000,
+            "address": {
+                "address": "239.192.1.42",
+                "port": 5354
+            }
+        },
+        "trellisware": {
+            "enabled":false
+        }
+    }
+}

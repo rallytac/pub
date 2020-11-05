@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Engage</string>
+    <string name="file_content_provider">com.rallytac.engageandroid.generic</string>
+    <string name="share_mission_activity_action">com.rallytac.engageandroid.rts.ShareMissionActivity</string>
+
+    <string name="copyright">Copyright (c) 2019 Rally Tactical Systems, Inc.</string>
+    <string name="licensing_manufacturerId"></string>
+    <string name="licensing_entitlement">{d8d689b8-7f13-48b1-94e0-091e679058d6}</string>
+
+    <string name="generated_user_id_email_domain">\@demo.rallytac.com</string>
+
+    <string name="support_email_address">support@demo.rallytac.com</string>
+    <string name="sales_email_address">sales@demo.rallytac.com</string>
+    <string name="home_website_address">https://www.demo.rallytac.com</string>
+
+    <string name="mission_hub_address">https://s3.us-east-2.amazonaws.com/rts-missions</string>
+
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false"></string>
+    <string name="default_rallypoint">demo.rallytac.com</string>
+
+    <string name="opt_allow_multiple_channel_view">1</string>
+    <string name="opt_lock_orientation">-2</string>
+    <string name="opt_ptt_latching">0</string>
+    <string name="opt_experimental_general_enabled">1</string>
+    <string name="opt_experimental_human_biometrics_enabled">1</string>
+    <string name="opt_firebase_analytics_enabled">1</string>
+
+    <string name="fmt_user_alias_id_generate">GEN%1$08X</string>
+    <string name="fmt_user_display_name_generate">Engage User - %1$s</string>
+
+    <string name="license_key"></string>
+    <string name="activation_code"></string>
+
+    <string name="preload_rp_use">0</string>
+    <string name="preload_rp_address"></string>
+    <string name="preload_rp_port">0</string>
+</resources>

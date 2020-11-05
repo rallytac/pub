@@ -1,0 +1,87 @@
+{ 
+    "id":"{1a9b8eed-21eb-41fc-a6f9-2a6733b160d8}",
+    "name":"Mingage Demo Mission",
+    "description":"Just a demo",
+    "groups":[ 
+       { 
+          "id":"{2a207569-154f-4c97-b59a-4e805dbf5e35}",
+          "name":"Mission Control",
+          "type":2,
+          "cryptoPassword":"03718654A5663427311F0A0BE704BC65CA732AA8280509365EE4B711B3FB1A43",
+          "rx":{ 
+             "address":"234.42.42.99",
+             "port":19999
+          },
+          "tx":{ 
+             "address":"234.42.42.99",
+             "port":19999
+          }
+       },
+
+       
+       { 
+          "id":"{770bc400-a0ea-4e7e-a624-20e2b6d2706b}",
+          "name":"Alpha",
+          "type":1,
+          "cryptoPassword":"84788DD4A5883EE1311E1A04F704BC650A2A2AA82805931A5EE4B0EA9C4B1DEF",
+          "rx":{ 
+             "address":"234.42.42.1",
+             "port":18000
+          },
+          "tx":{ 
+             "address":"234.42.42.1",
+             "port":18000
+          },
+          "txAudio":{ 
+             "encoder":25,
+             "framingMs":60,
+             "noHdrExt":false,
+             "fdx":false
+          }
+       },
+
+
+       { 
+          "id":"{9d4c3587-f736-455c-83ab-19c7169c1228}",
+          "name":"Bravo",
+          "type":1,
+          "rx":{ 
+             "address":"234.42.42.2",
+             "port":18002
+          },
+          "tx":{ 
+             "address":"234.42.42.2",
+             "port":18002
+          },
+          "txAudio":{ 
+             "encoder":25,
+             "framingMs":60,
+             "noHdrExt":false,
+             "fdx":false
+          }
+       },
+
+
+       { 
+          "id":"{e7280f07-6712-463f-a811-cc3ed4128cd9}",
+          "name":"Charlie",
+          "type":1,
+          "cryptoPassword":"0521202069301D08AF3A34E9B1FAB0AF091E6F01E9F67C4FD0633554268A378F",
+          "rx":{ 
+             "address":"234.42.42.3",
+             "port":18004
+          },
+          "tx":{ 
+             "address":"234.42.42.3",
+             "port":18004
+          },
+          "txAudio":{ 
+             "encoder":25,
+             "framingMs":60,
+             "noHdrExt":false,
+             "fdx":false
+          }
+       }
+    ]
+ }
+ 

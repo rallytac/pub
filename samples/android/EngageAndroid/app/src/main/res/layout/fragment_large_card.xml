@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBlack"
+    android:fadingEdge="vertical">
+
+    <ImageView
+        android:id="@+id/ivCard"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:srcCompat="@drawable/ic_single_channel_background_secure_idle" />
+
+    <TextView
+        android:id="@+id/tvGroupName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/placeholder"
+        android:textColor="@android:color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+
+        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        app:layout_constraintStart_toStartOf="@+id/ivCard"
+        app:layout_constraintTop_toTopOf="@+id/ivCard" />
+
+    <TextView
+        android:id="@+id/tvTalkerList"
+        android:layout_width="0dp"
+        android:layout_height="23dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/placeholder"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/ivCard"
+        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
+        app:layout_constraintTop_toBottomOf="@+id/tvGroupName" />
+
+    <TextView
+        android:id="@+id/tvMemberCount"
+        android:layout_width="0dp"
+        android:layout_height="23dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/placeholder"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/ivCard"
+        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
+        app:layout_constraintTop_toBottomOf="@+id/tvTalkerList" />
+
+    <ImageView
+        android:id="@+id/ivSpeaker"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="42dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivCard"
+        app:srcCompat="@drawable/ic_speaker_on" />
+
+    <ImageView
+        android:id="@+id/ivNetError"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="42dp"
+        android:layout_marginBottom="24dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_net_error" />
+
+    <ImageView
+        android:id="@+id/ivNetFailover"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="42dp"
+        android:layout_marginBottom="24dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
+        app:layout_constraintEnd_toStartOf="@+id/ivNetError"
+        app:srcCompat="@drawable/ic_net_failover" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

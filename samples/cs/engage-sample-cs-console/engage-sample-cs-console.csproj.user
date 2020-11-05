@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartArguments>-ep:z:/global/github/pub/configurations/sample_engine_policy.json -mission:z:/global/github/pub/configurations/sample_mission_template.json</StartArguments>
+    <StartWorkingDirectory>z:/global/github/pub/samples</StartWorkingDirectory>
+  </PropertyGroup>
+</Project>

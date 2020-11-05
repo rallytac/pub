@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="10dp"
+    android:paddingStart="40dp"
+    android:paddingEnd="0dp"
+    android:clipToPadding="false">
+
+    <TextView
+        android:textColor="#fff"
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:elevation="2dp"
+        android:padding="0dp"
+        android:text="@string/placeholder"
+        android:textAlignment="textEnd"
+        android:textSize="10dp" />
+
+    <TextView
+        android:layout_below="@+id/timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/message_body"
+        android:background="@drawable/ic_sent_message"
+        android:textColor="#fff"
+        android:padding="10dp"
+        android:elevation="2dp"
+        android:textSize="14dp"
+        android:layout_alignParentEnd="true"
+        android:text="@string/placeholder" />
+
+</RelativeLayout>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/ivCard"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_multi_channel_background_clear_idle" />
+
+    <ImageView
+        android:id="@+id/ivSpeaker"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/ivCard"
+        app:layout_constraintTop_toTopOf="@+id/ivCard"
+        app:srcCompat="@drawable/ic_speaker_on" />
+
+    <ImageView
+        android:id="@+id/ivPttEnable"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/ivCard"
+        app:layout_constraintTop_toBottomOf="@+id/ivSpeaker"
+        app:srcCompat="@drawable/ic_ptt_unmuted" />
+
+    <TextView
+        android:id="@+id/tvGroupName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:text="Group 1"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/ivCard"
+        app:layout_constraintTop_toTopOf="@+id/ivCard" />
+
+    <TextView
+        android:id="@+id/tvTalkerList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="[Talkers]"
+        android:textColor="@android:color/white"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
+        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
+        app:layout_constraintTop_toBottomOf="@+id/ivSpeaker"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <ImageView
+        android:id="@+id/ivNetError"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPttEnable"
+        app:layout_constraintEnd_toStartOf="@+id/ivPttEnable"
+        app:layout_constraintTop_toTopOf="@+id/ivPttEnable"
+        app:srcCompat="@drawable/ic_net_error"
+        android:visibility="invisible"/>
+
+
+    <ImageView
+        android:id="@+id/ivNetFailover"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPttEnable"
+        app:layout_constraintEnd_toStartOf="@+id/ivNetError"
+        app:layout_constraintTop_toTopOf="@+id/ivPttEnable"
+        app:srcCompat="@drawable/ic_net_failover"
+        android:visibility="invisible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

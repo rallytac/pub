@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/menu_mission">
+        <menu>
+            <item
+                android:id="@+id/action_missions"
+                android:title="@string/menu_list" />
+
+            <item
+                android:id="@+id/action_share"
+                android:title="@string/menu_share" />
+
+            <item
+                android:id="@+id/action_scan"
+                android:title="@string/menu_scan" />
+
+            <item
+                android:id="@+id/action_load"
+                android:title="@string/menu_load" />
+
+            <item
+                android:id="@+id/action_download"
+                android:title="@string/menu_download" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_security"
+        android:title="@string/menu_security" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/menu_settings" />
+
+    <item
+        android:id="@+id/action_dev_json_policy_editor"
+        android:title="JSON Policy Editor"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_about"
+        android:title="@string/menu_about" />
+
+    <item
+        android:id="@+id/action_contact"
+        android:title="@string/menu_contact" />
+
+    <item
+        android:id="@+id/action_dev_test"
+        android:title="@string/menu_developer_testing"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_shutdown"
+        android:title="@string/menu_shutdown" />
+</menu>

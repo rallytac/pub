@@ -1,0 +1,17 @@
+[
+  {
+    "host":
+    {
+      "address":"demo.rallytac.com",
+      "port":7443
+    },
+    "certificate":"@../../../certificates/rtsFactoryDefaultEngage.pem",
+    "certificateKey":"@../../../certificates/rtsFactoryDefaultEngage.key",
+    "verifyPeer":false,
+    "allowSelfSignedCertificate":true,
+    "caCertificates":
+    [
+      "@../../../certificates/rtsCA.pem"
+    ]
+  }
+]

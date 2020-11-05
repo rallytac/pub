@@ -1,0 +1,105 @@
+{
+    "dataDirectory":"./",
+    
+    "internals":{
+        "disableWatchdog":false,
+        "watchdogIntervalMs":1000,
+        "watchdogHangDetectionMs":2000,
+        "housekeeperIntervalMs":1000,
+        "maxTxSecs":30
+    },
+
+    "timelines": {
+        "enabled":false,
+	"storageRoot":"",
+        "maxStorageQuotaMb":128,
+        "maxEventAgeSecs":2592000,
+	"maxEvents":10000,
+	"groomingIntervalSecs":1800
+    },
+
+    "licensing":{
+        "entitlement": "",
+        "key":"",
+        "activationCode": ""
+    },
+
+    "networking":{
+        "defaultNic":"",
+        "maxOutputQueuePackets":100,
+        "rtpJitterMinMs":500,
+        "rtpJitterMaxMs":1000,
+        "rtpLatePacketSequenceRange":5,
+        "rtpLatePacketTimestampRangeMs":2000,
+        "rtpInboundProcessorInactivityMs":2000,
+        "multicastRejoinSecs":8,
+        "rpLeafConnectTimeoutSecs":10,
+        "maxReconnectPauseMs":5000,
+        "reconnectFailurePauseIncrementMs":500,
+        "sendFailurePauseMs":1000,
+        "rallypointRtTestIntervalMs":60000,
+        "logRtpJitterBufferStats":false
+    },
+
+    "audio":{
+        "internalRate":16000,
+        "internalChannels":1,
+        "inputRate":16000,
+        "inputChannels":1,
+        "inputBufferMs":20,
+        "outputRate":16000,
+        "outputChannels":2,
+        "outputBufferMs":20,
+        "outputGainPercentage":0,
+        "allowOutputOnTransmit":false
+    },
+
+    "security":{
+        "certificate":{
+            "certificate":"@../certificates/rtsFactoryDefaultEngage.pem",
+            "key":"@../certificates/rtsFactoryDefaultEngage.key"
+        }
+    },
+
+    "discovery": {
+        "ssdp": {
+            "enabled":false,
+            "ageTimeoutMs":30000,
+            "searchTerms":[
+                "engage:eu",
+                "engage:rp",
+                "engage:gc"
+            ],
+            "address": {
+                "address": "239.255.255.250",
+                "port": 1900
+            },
+            "advertising":{
+                "enabled":false,
+                "intervalMs":2000
+            }
+        },
+        "sap": {
+            "enabled":false,
+            "address": {
+                "address": "224.2.127.254",
+                "port": 9875
+            },
+            "advertising":{
+                "enabled":false,
+                "intervalMs":2000
+            }
+        },
+        "cistech": {
+            "enabled":false,
+            "ageTimeoutMs":5000,
+            "address": {
+                "address": "239.192.1.42",
+                "port": 5354
+            }
+        },
+        "trellisware": {
+            "enabled":false
+        }
+    }
+}
