@@ -24,7 +24,7 @@ The profiles offered by ``impair.sh`` are currently as follows:
 |sat|Satellite|900|100|5.0|0.8|
 |cecom1|CECOM Standard|750|80|12.0|0.1|
 |cecom2|CECOM 2|1500|160|25.0|0.5|
-|awful|Truly Awful|3000|400|25.0|2.0|
+|awful|Truly Awful|3000|300|30.0|3.0|
 
 Most of the above are fairly self-explanatory with the exception of `cecom1` and `cecom2`.  These are profiles we developed in conjunction with the US Army's [Communications Electronics Command](https://www.army.mil/cecom) to simulate the kinds of environments that could be encountered on a typical military enterprise network (`cecom1`) as well as tactical battlefield field environments (`cecom2`).
 
@@ -40,7 +40,7 @@ To impair `ens33` with a `wifi` profile:
 $ ./impair.sh ens33 wifi
 ```
 
-To remove all impairments on `ens33:
+To remove all impairments on `ens33`:
 ```shell
 $ ./impair.sh ens33 none
 ```

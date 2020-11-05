@@ -80,6 +80,9 @@ elif [ "$2" == "cecom1" ]; then
 elif [ "$2" == "cecom2" ]; then
 	apply_tc "${2}" "1500" "160" "25" "0.5"
 	
+elif [ "$2" == "awful" ]; then
+	apply_tc "${2}" "3000" "300" "30" "3.0"
+	
 else
 	echo "ERROR: Unknown profile name '${2}'."
 	show_help
