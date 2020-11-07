@@ -3,6 +3,13 @@
 <details>
 <summary>1.189.9026</summary>
 
+### api/c/include
+- [ConfigurationObjects.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/ConfigurationObjects.h)
+- [Constants.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/Constants.h)
+- [EngageAudioDevice.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/EngageAudioDevice.h)
+- [EngageIntegralDataTypes.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/EngageIntegralDataTypes.h)
+- [EngageInterface.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/EngageInterface.h)
+- [Platform.h](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/api/c/include/Platform.h)
 ### android
 - [Engine.java](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/android/Engine.java)
 - [engage-engine-release-1.189.9026.aar](https://bintray.com/rallytac/pub/download_file?file_path=1.189.9026/android/engage-engine-release-1.189.9026.aar)
