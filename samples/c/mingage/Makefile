@@ -1,3 +1,7 @@
+#
+# Copyright (c) 2020 Rally Tactical Systems, Inc.
+#
+
 CC := gcc
 CXX := g++
 CFLAGS := -Wall -std=c++11 -fPIC 

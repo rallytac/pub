@@ -1,12 +1,15 @@
 #!/bin/bash
+#
+# Copyright (c) 2020 Rally Tactical Systems, Inc.
+#
 
 DESIRED_VERSION=$1
 UNAME_S=`(uname -s | tr A-Z a-z)`
 ARCH=`(uname -p | tr A-Z a-z)`
 
 if [[ "${UNAME_S}" == *"darwin"* ]]; then
-	BINPLATFORM="darwin_x64"
-	BINSOEXT="dylib"
+	BIN_PLATFORM="darwin_x64"
+	BIN_OS_LIB_EXT="dylib"
 else
 	echo "ERROR: Cannot determine operating system"
 	exit 1
@@ -30,6 +33,7 @@ function fetchVersionFiles()
 		if [[ $? != "0" ]]; then
 			rm -rf ${3}
 			echo "ERROR: Error while downloading ${3}"
+			exit 1
 		fi
 	}
 
@@ -38,7 +42,7 @@ function fetchVersionFiles()
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "ConfigurationObjects.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "Constants.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "Platform.h"
-	fetchBintrayFile "${DESIRED_VERSION}" "${BINPLATFORM}" "libengage-shared.${BINSOEXT}"	
+	fetchBintrayFile "${DESIRED_VERSION}" "${BIN_PLATFORM}" "libengage-shared.${BIN_OS_LIB_EXT}"
 }
 
 function checkIfVersionExistsAndExitIfNot()

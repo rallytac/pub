@@ -62,15 +62,26 @@ Notice that ``"*** IMPORTANT ***"`` banner displayed during the process?  What i
 
 
 ### Windows Platforms
-Things are a little different on Windows.  Instead of using make as above, instead use Microsoft's nmake utility and tell it to use the win.nmake file:
+Things are a little different on Windows of course.  Instead of using `make` as above, use Microsoft's `nmake` utility and tell it to use the `win.nmake` file. Also, there's a Windows version of `getengage` named `getengage.cmd` which works the same way as described above.
+
+So, to get our dependencies, either run (for Engage version 1.189.9026):
 ```shell
-c:\> nmake /f win.nmake
-Z:\Global\github\pub\samples\c\mingage>nmake /f win.nmake
+> getengage.cmd 1.189.9026
+```
+
+or 
+```shell
+> nmake /f win.nmake depends VER=1.189.9026
+```
+
+And the, to build it all:
+```shell
+> nmake /f win.nmake
 
 Microsoft (R) Program Maintenance Utility Version 14.16.27031.1
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
-        cl /EHsc /Fe"mingage.exe" /I. /I"..\..\..\api\c\include" Mingage.cpp WorkQueue.cpp engage-shared.lib /link /LIBPATH:"..\..\..\bin\latest\win_ia32"
+cl /EHsc /Fe"mingage.exe" /DWIN32 /I. /I".\engage" Mingage.cpp WorkQueue.cpp engage-shared.lib /link /LIBPATH:".\engage"
 Microsoft (R) C/C++ Optimizing Compiler Version 19.16.27031.1 for x86
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
@@ -81,10 +92,27 @@ Microsoft (R) Incremental Linker Version 14.16.27031.1
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
 /out:mingage.exe
-/LIBPATH:..\..\..\bin\latest\win_ia32
+/LIBPATH:.\engage
 Mingage.obj
 WorkQueue.obj
 engage-shared.lib
+
+****************************** IMPORTANT ******************************
+engaged-shared.dll has been placed in '.\engage'
+Be sure to include it in your PATH variable
+***********************************************************************
+```
+
+
+### Cleaning
+To clean things up by removed all compiled binaries as well as downloaded dependencies, follow the `make`/`nmake` process with ``clean`` as the target to be built.  For example
+```shell
+$ make clean
+```
+
+or, on Windows:
+```shell
+> nmake /f win.nmake clean
 ```
 
 ## Running

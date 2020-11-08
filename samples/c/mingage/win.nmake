@@ -1,7 +1,27 @@
+#
+# Copyright (c) 2020 Rally Tactical Systems, Inc.
+#
+
 SRCS = Mingage.cpp WorkQueue.cpp
 MAIN = mingage.exe
-INCPATH = ..\..\..\api\c\include
-LIBPATH = ..\..\..\bin\latest\win_ia32
+INCPATH = .\engage
+LIBPATH = .\engage
+LIBNAME = engaged-shared.dll
+VER = 1.189.9026
 
 $(MAIN): $(SRCS)
-	cl /EHsc /Fe"$(MAIN)" /I. /I"$(INCPATH)" $(SRCS) engage-shared.lib /link /LIBPATH:"$(LIBPATH)"
+	cl /EHsc /Fe"$(MAIN)" /DWIN32 /I. /I"$(INCPATH)" $(SRCS) engage-shared.lib /link /LIBPATH:"$(LIBPATH)"
+	@echo.
+	@echo ****************************** IMPORTANT ******************************
+	@echo $(LIBNAME) has been placed in '$(LIBPATH)'
+	@echo Be sure to include it in your PATH variable
+	@echo ***********************************************************************
+
+clean:
+	@if exist engage rd engage /s /q 2> nul:
+	@del *.obj 2> nul:
+	@del $(MAIN) 2> nul:
+
+depend: depends
+depends:
+	@getengage.cmd $(VER)
