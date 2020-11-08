@@ -5,27 +5,61 @@ Mingage is a minimal Engage-powered application that serves to demonstrate some 
 ## Building
 
 ### Non-Windows Platforms
-Mingage is built using a simple make file so all you should need to do it to run the make command:
+Mingage is built using a simple make file so all you should need to do it to use plain old `make`.
+
+#### Dependencies
+Now, because mingage uses the Engage Engine, it's going to have a dependency on the Engine and its API header files.  While these can all be found on Bintray and pretty easy to download, we though we'd make life a little bit easier and provide a simple way to get them onto your machine - and do it based on the version of Engage that you want.
+
+We've done this by providing the `getengage.sh` which takes a single paramater - being the Engage version number.  If you want to use `getengage.sh` directly, simply invoke it as follows (for the mythical version ``1.2.3.4``):
+
+```shell
+$ ./getengage.sh 1.2.3.4
+```
+
+Better yet, you can have `make` invoke `getengage.sh`, passing in a version number from inside the `Makefile` or the version overridden in a parameter to `make`.  
+
+This is done by having `make` build the ``depends`` target.  For example, to use the version number specified in the Makefile (which is ``1.189.9026`` as of this writing), simply do the following:
+```shell
+$ make depends
+
+Fetching EngageInterface.h from 1.189.9026/api/c/include ...
+Fetching EngageIntegralDataTypes.h from 1.189.9026/api/c/include ...
+Fetching ConfigurationObjects.h from 1.189.9026/api/c/include ...
+Fetching Constants.h from 1.189.9026/api/c/include ...
+Fetching Platform.h from 1.189.9026/api/c/include ...
+Fetching libengage-shared.dylib from 1.189.9026/darwin_x64 ...
+```
+
+If you want to specify a version number, override the `VER` variable inside the Makefile as follow.  [We'll use ``1.2.3.4`` as the version for this example which is going to purposefully result in an error as there is no version ``1.2.3.4``:
+```shell
+$ make depends VER=1.2.3.4
+
+Error encountered while checking for Engage version 1.2.3.4.  This may be an invalid version or a connection could not be established to the file publication system.
+make: *** [depends] Error 1
+```
+
+#### Building
+Once your dependencies are in place you don't need to update them unless you've invoked `make clean` or don't have the in place anymore (maybe you deleted all the files?).
+
+Anyway ... once you've got the dependencies, just run `make`.  You should see something like the following (this example came from an Apple Mac by the way):
+
 
 ```shell
 $ make
-//
-//
-// NOTE: libengage-shared will be copied locally from ../../../bin/latest/darwin_x64
-//
-//       Be sure to 'export LD_LIBRARY_PATH=./'
-//
-//
-g++ -c -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I../../../api/c/include Mingage.cpp  -o Mingage.o
-g++ -c -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I../../../api/c/include WorkQueue.cpp  -o WorkQueue.o
-g++ -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I../../../api/c/include -o mingage Mingage.o WorkQueue.o -L. -lengage-shared -lpthread -lstdc++
+
+g++ -c -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I./engage Mingage.cpp  -o Mingage.o
+g++ -c -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I./engage WorkQueue.cpp  -o WorkQueue.o
+g++ -Wall -std=c++11 -fPIC  -DNDEBUG -O3 -I. -I./engage -o mingage Mingage.o WorkQueue.o -L./engage -lengage-shared -lpthread -lstdc++
+
+****************************** IMPORTANT ******************************
+libengage-shared.dylib has been placed in './engage'
+Be sure to 'export LD_LIBRARY_PATH=./engage' if your OS requires it
+***********************************************************************
 ```
 >Your compiler might produce warnings for the "***-Wno-psabi***" option.  This can be expected when compiling for non-ARM platforms and can generally be ignored.
 
-Part of the make process is to copy the Engage runtime library from the `bin/latest` to the local directory and then link with it.  Be sure that you tell the operating system where to find it
-```shell
-export LD_LIBRARY_PATH=./
-```
+Notice that ``"*** IMPORTANT ***"`` banner displayed during the process?  What it's telling you is that the Engage Engine library (`libengage-shared`) has been placed in the `./engage` directory underneath the current directory.  Make sure that your `LD_LIBRARY_PATH` environment variable points to that directory or wherever you've placed the Engage Engine library.  If you don't, your operating system will likely complain loudly that it cannot find `libengage-shared`.
+
 
 ### Windows Platforms
 Things are a little different on Windows.  Instead of using make as above, instead use Microsoft's nmake utility and tell it to use the win.nmake file:

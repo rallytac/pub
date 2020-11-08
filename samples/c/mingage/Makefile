@@ -1,9 +1,8 @@
 CC := gcc
 CXX := g++
-
 CFLAGS := -Wall -std=c++11 -fPIC 
-
 #CFLGAS += -Wno-psabi
+VER := 1.189.9026
 
 ifeq ($(DEBUG), 1)
     CFLAGS += -DDEBUG -O0 -ggdb
@@ -15,45 +14,42 @@ UNAME_S := $(shell uname -s | tr A-Z a-z)
 ARCH := $(shell uname -p | tr A-Z a-z)
 
 ifeq ($(UNAME_S), darwin)
-	LIBSRC = ../../../bin/latest/darwin_x64
+	LIBNAME=libengage-shared.dylib
 else ifeq ($(ARCH), x86_64)
-        LIBSRC := ../../../bin/latest/linux_x64
+	LIBNAME=libengage-shared.so
 else ifeq ($(ARCH), aarch64)
-        LIBSRC := ../../../bin/latest/linux_arm64
+	LIBNAME=libengage-shared.so
 endif
 
-INCLUDES =  -I. -I../../../api/c/include
-LFLAGS = -L.
+INCLUDES =  -I. -I./engage
+LFLAGS = -L./engage
 LIBS = -lengage-shared -lpthread -lstdc++
-
 SRCS = Mingage.cpp WorkQueue.cpp
 OBJS = $(SRCS:.cpp=.o)
-
-$(info //)
-$(info //)
-$(info // NOTE: libengage-shared will be copied locally from $(LIBSRC))
-$(info //)
-$(info //       Be sure to 'export LD_LIBRARY_PATH=./ if your OS requires it')
-$(info //)
-$(info //)
 
 MAIN = mingage
 
 .PHONY: depend clean
 
-all:    $(MAIN)
+all:    $(MAIN)	
 
 $(MAIN): $(OBJS) 
-	@cp $(LIBSRC)/libengage-shared.* .
 	$(CXX) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
+	@echo ""
+	@echo "****************************** IMPORTANT ******************************"
+	@echo "$(LIBNAME) has been placed in './engage'"
+	@echo "Be sure to 'export LD_LIBRARY_PATH=./engage' if your OS requires it"
+	@echo "***********************************************************************"
 
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $(INCLUDES) $<  -o $@
 
 clean:
-	$(RM) *.o *~ $(MAIN) libengage-shared.*
+	${RM} *.o *~ $(MAIN)
+	${RM} -r engage
 
-depend: $(SRCS)
-	makedepend $(INCLUDES) $^
-
+depend: depends
+depends:
+	@getengage.sh $(VER)
+	
 # DO NOT DELETE THIS LINE -- make depend needs it
