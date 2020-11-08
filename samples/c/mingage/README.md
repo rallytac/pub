@@ -62,6 +62,10 @@ Notice that ``"*** IMPORTANT ***"`` banner displayed during the process?  What i
 
 
 ### Windows Platforms
+>**SUPER IMPORTANT**
+>
+>As you'll be doing this on the command line in Windows you'll need to be sure that you're using the correct command-line environment.  If you're using Microsoft Visual Studio, use the Microsoft-provided versions of VCVARS.BAT to set this up or, better yet, use the command-line shortcuts for your build environment that were installed when you installed Visual Studio.
+
 Things are a little different on Windows of course.  Instead of using `make` as above, use Microsoft's `nmake` utility and tell it to use the `win.nmake` file. Also, there's a Windows version of `getengage` named `getengage.cmd` which works the same way as described above.
 
 So, to get our dependencies, either run (for Engage version 1.189.9026):
