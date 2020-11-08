@@ -105,7 +105,7 @@ Be sure to include it in your PATH variable
 
 
 ### Cleaning
-To clean things up by removed all compiled binaries as well as downloaded dependencies, follow the `make`/`nmake` process with ``clean`` as the target to be built.  For example
+To clean things up by removing all compiled binaries as well as downloaded dependencies follow the `make`/`nmake` process with ``clean`` as the target to be built.  For example
 ```shell
 $ make clean
 ```
