@@ -453,8 +453,8 @@ int main(int argc, char *argv[])
                 std::string nm = g_groups[g_currentState.currentChannel].at("name");
                 std::cout << std::endl
                           << "****************** STATUS ************************" << std::endl
-                          << (g_useRp ? "rallypoint mode" : "multicast mode")
-                          << " for current group: " << nm << " (" << id << ")" << std::endl
+                          << "Mode : " << (g_useRp ? "unicast (rallypoint)" : "multicast") << std::endl
+                          << "Group: " << nm << " (" << id << ")" << std::endl
                           << "**************************************************" << std::endl
                           << std::endl;
             }));
