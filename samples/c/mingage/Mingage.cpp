@@ -437,6 +437,7 @@ int main(int argc, char *argv[])
         }
         else if( buff[0] == 'h' || buff[0] == '?' )
         {
+            std::cout << "****************** HELP ************************" << std::endl;
             std::cout << "quit/q    ......................... quit" << std::endl;
             std::cout << "status/s  ......................... show status" << std::endl;
             std::cout << "next/n    ......................... next channel" << std::endl;
@@ -444,6 +445,7 @@ int main(int argc, char *argv[])
             std::cout << "txoff/x   ......................... transmit off" << std::endl;
             std::cout << "rp/r      ......................... switch to rallypoint connection" << std::endl;
             std::cout << "mc/m      ......................... switch to multicast connection" << std::endl;
+            std::cout << "************************************************" << std::endl;
         }
         else if( buff[0] == 's' )
         {
