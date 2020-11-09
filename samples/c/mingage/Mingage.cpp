@@ -451,7 +451,8 @@ int main(int argc, char *argv[])
             {
                 std::string id = g_groups[g_currentState.currentChannel].at("id");
                 std::string nm = g_groups[g_currentState.currentChannel].at("name");
-                std::cout << "current group: " << nm << " (" << id << ")" << std::endl;
+                std::cout << (g_useRp ? "rallypoint mode" : "multicast mode")
+                          << " for current group: " << nm << " (" << id << ")" << std::endl;
             }));
         }
         else if( buff[0] == 'n' )
