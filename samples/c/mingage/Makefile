@@ -54,6 +54,6 @@ clean:
 
 depend: depends
 depends:
-	@getengage.sh $(VER)
+	@./getengage.sh $(VER)
 	
 # DO NOT DELETE THIS LINE -- make depend needs it

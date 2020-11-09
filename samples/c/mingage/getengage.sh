@@ -8,11 +8,22 @@ UNAME_S=`(uname -s | tr A-Z a-z)`
 
 # What OS is this for?
 if [[ "${UNAME_S}" == *"darwin"* ]]; then
-	BIN_PLATFORM="darwin_x64"
 	BIN_OS_LIB_EXT="dylib"
-else
+	BIN_PLATFORM="darwin_x64"
+elif [[ "${UNAME_S}" == *"linux"* ]]; then
+	BIN_OS_LIB_EXT="so"
+	BIN_PLATFORM="linux"
+
 	ARCH=`(uname -p | tr A-Z a-z)`
-	
+	if [[ "${ARCH}" == "x86_64" ]]; then
+		BIN_PLATFORM="${BIN_PLATFORM}_x64"
+	else
+		# TODO: Check for ARM as well as 32-bit Intel
+		
+		echo "ERROR: Cannot determine CPU architecture"
+		exit 1
+	fi
+else
 	echo "ERROR: Cannot determine operating system"
 	exit 1
 fi
