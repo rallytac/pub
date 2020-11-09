@@ -423,8 +423,9 @@ void showStatus()
         std::string nm = g_groups[g_currentState.currentChannel].at("name");
         std::cout << std::endl
                     << "****************** STATUS ************************" << std::endl
-                    << "Mode : " << (g_useRp ? "unicast (rallypoint)" : "multicast") << std::endl
-                    << "Group: " << nm << " (" << id << ")" << std::endl
+                    << "Mode   : " << (g_useRp ? "unicast (rallypoint)" : "multicast") << std::endl
+                    << "Group  : " << nm << " (" << id << ")" << std::endl
+                    << "Logging: " << (g_verboseLogging ? "verbose" : "limited") << std::endl
                     << "**************************************************" << std::endl
                     << std::endl;
     }));
