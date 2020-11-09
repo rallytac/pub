@@ -40,6 +40,7 @@ static WorkQueue                    g_wq;
 static StateTracker_t               g_currentState;
 static bool                         g_useRp = false;
 static bool                         g_reload = false;
+static bool                         g_verboseLogging = false;
 
 void createAllGroups();
 void joinGroup(const char *pId);
@@ -280,7 +281,6 @@ void onEngineStarted(const char *pEventExtraJson)
     }));
 }
 
-
 bool registerCallbacks()
 {
     EngageEvents_t callback;
@@ -305,7 +305,6 @@ bool registerCallbacks()
     return (engageRegisterEventCallbacks(&callback) == ENGAGE_RESULT_OK);
 }
 
-
 void createAllGroups()
 {  
     for(size_t x = 0; x < g_groups.size(); x++)
@@ -313,7 +312,6 @@ void createAllGroups()
         engageCreateGroup(g_groups[x].dump().c_str());
     }
 }
-
 
 void joinGroup(const char *pId)
 {
@@ -332,7 +330,6 @@ void joinGroup(const char *pId)
     }
 }
 
-
 void deleteAllGroups()
 {
     for(size_t i = 0; i < g_groups.size(); i++)
@@ -341,7 +338,6 @@ void deleteAllGroups()
         engageDeleteGroup(id.c_str());
     }
 }
-
 
 char* readFile(const char* fileName)
 {
@@ -360,7 +356,6 @@ char* readFile(const char* fileName)
 
     return output;
 }
-
 
 void loadMission()
 {
@@ -401,7 +396,176 @@ bool readInput(char *buff, size_t maxSize)
     return true;
 }
 
+void showHelp()
+{
+    g_wq.submit(([]()
+    {
+        std::cout << "****************** HELP ************************" << std::endl;
+        std::cout << "q  ......................... quit" << std::endl;
+        std::cout << "l  ......................... toggle verbose logging" << std::endl;
+        std::cout << "s  ......................... show status" << std::endl;
+        std::cout << "g  ......................... show groups" << std::endl;
+        std::cout << "n  ......................... next group" << std::endl;
+        std::cout << "p  ......................... previous group" << std::endl;
+        std::cout << "t  ......................... transmit on" << std::endl;
+        std::cout << "x  ......................... transmit off" << std::endl;
+        std::cout << "r  ......................... switch to rallypoint connection" << std::endl;
+        std::cout << "m  ......................... switch to multicast connection" << std::endl;
+        std::cout << "************************************************" << std::endl;
+    }));
+}
 
+void showStatus()
+{
+    g_wq.submit(([]()
+    {
+        std::string id = g_groups[g_currentState.currentChannel].at("id");
+        std::string nm = g_groups[g_currentState.currentChannel].at("name");
+        std::cout << std::endl
+                    << "****************** STATUS ************************" << std::endl
+                    << "Mode : " << (g_useRp ? "unicast (rallypoint)" : "multicast") << std::endl
+                    << "Group: " << nm << " (" << id << ")" << std::endl
+                    << "**************************************************" << std::endl
+                    << std::endl;
+    }));
+}
+
+void showGroups()
+{
+    g_wq.submit(([]()
+    {
+        std::cout << std::endl << "****************** GROUPS ************************" << std::endl;
+
+        for(size_t i = 0; i < g_groups.size(); i++)
+        {
+            std::cout << g_groups[i].at("name") << " (" << g_groups[i].at("id") << ")";
+            
+            std::string id = g_groups[i].at("id");
+            std::string comp = g_groups[g_currentState.currentChannel].at("id");
+            if( id.compare(comp) == 0 )
+            {
+                std::cout <<  " <--- ACTIVE GROUP";
+            }
+            std::cout << std::endl;
+        }
+
+        std::cout << "**************************************************" << std::endl;
+    }));
+}
+
+void showUnrecognizedCommand()
+{
+    g_wq.submit(([]()
+    {
+        std::cout << "error: not a recognized command" << std::endl;
+    }));
+}
+
+void beginTransmitOnActiveGroup()
+{
+    g_wq.submit(([]()
+    {
+        std::string groupID = g_groups[g_currentState.currentChannel].at("id");
+        engageBeginGroupTx(groupID.c_str(),0,0);
+    }));
+}
+
+void endTransmitOnActiveGroup()
+{
+    g_wq.submit(([]()
+    {
+        std::string groupID = g_groups[g_currentState.currentChannel].at("id");
+        engageEndGroupTx(groupID.c_str());
+    }));
+}
+
+void switchToRpMode()
+{
+    g_wq.submit(([]()
+    {
+        g_useRp = true;
+        g_reload = true;
+        deleteAllGroups();
+    }));
+}
+
+void switchToMcMode()
+{
+    g_wq.submit(([]()
+    {
+        g_useRp = false;
+        g_reload = true;
+        deleteAllGroups();
+    }));
+}
+
+void goToNextGroup()
+{        
+    g_wq.submit(([]()
+    {
+        std::string group = g_groups[g_currentState.currentChannel].at("id");
+        std::string name = g_groups[g_currentState.currentChannel].at("name");    
+
+        g_currentState.currentChannel++;
+
+        if((size_t)g_currentState.currentChannel >= g_groups.size())
+        {
+            g_currentState.currentChannel = 1;
+        }
+
+        std::string newGroup = g_groups[g_currentState.currentChannel].at("id");
+        std::string newName = g_groups[g_currentState.currentChannel].at("name");
+
+        std::cout << "leaving '" << name << "', going to '" << newName << std::endl;
+
+        engageLeaveGroup(group.c_str());
+        engageJoinGroup(newGroup.c_str());
+    }));
+}
+
+void goToPreviousGroup()
+{        
+    g_wq.submit(([]()
+    {
+        std::string group = g_groups[g_currentState.currentChannel].at("id");
+        std::string name = g_groups[g_currentState.currentChannel].at("name");    
+
+        g_currentState.currentChannel--;
+
+        if((size_t)g_currentState.currentChannel == 0)
+        {
+            g_currentState.currentChannel = g_groups.size() - 1;
+        }
+
+        std::string newGroup = g_groups[g_currentState.currentChannel].at("id");
+        std::string newName = g_groups[g_currentState.currentChannel].at("name");
+
+        std::cout << "leaving '" << name << "', going to '" << newName << std::endl;
+
+        engageLeaveGroup(group.c_str());
+        engageJoinGroup(newGroup.c_str());
+    }));
+}
+
+void toggleVerboseLogging()
+{
+    g_wq.submit(([]()
+    {
+        g_verboseLogging = !g_verboseLogging;
+        if(g_verboseLogging)
+        {
+            std::cout << "verbose logging enabled" << std::endl;
+            engageSetLogLevel(ENGAGE_LOG_LEVEL_DEBUG);
+        }
+        else
+        {
+            std::cout << "verbose logging disabled" << std::endl;
+            engageSetLogLevel(ENGAGE_LOG_LEVEL_INFORMATIONAL);
+        }
+    }));
+}
+
+// --------------- MAIN ---------------
 int main(int argc, char *argv[])
 {
     char *policyJson = readFile(POLICY_FILE_NAME); 
@@ -417,6 +581,9 @@ int main(int argc, char *argv[])
     
     loadMission();
     
+    // We will start out at informatiob logging
+    engageSetLogLevel(ENGAGE_LOG_LEVEL_INFORMATIONAL);
+
     engageInitialize(policyJson, identityJson, "");
     engageStart();
     
@@ -437,82 +604,47 @@ int main(int argc, char *argv[])
         }
         else if( buff[0] == 'h' || buff[0] == '?' )
         {
-            std::cout << "****************** HELP ************************" << std::endl;
-            std::cout << "quit/q    ......................... quit" << std::endl;
-            std::cout << "status/s  ......................... show status" << std::endl;
-            std::cout << "next/n    ......................... next channel" << std::endl;
-            std::cout << "txon/t    ......................... transmit on" << std::endl;
-            std::cout << "txoff/x   ......................... transmit off" << std::endl;
-            std::cout << "rp/r      ......................... switch to rallypoint connection" << std::endl;
-            std::cout << "mc/m      ......................... switch to multicast connection" << std::endl;
-            std::cout << "************************************************" << std::endl;
+            showHelp();
+        }
+        else if( buff[0] == 'l' )
+        {
+            toggleVerboseLogging();
         }
         else if( buff[0] == 's' )
         {
-            g_wq.submit(([]()
-            {
-                std::string id = g_groups[g_currentState.currentChannel].at("id");
-                std::string nm = g_groups[g_currentState.currentChannel].at("name");
-                std::cout << std::endl
-                          << "****************** STATUS ************************" << std::endl
-                          << "Mode : " << (g_useRp ? "unicast (rallypoint)" : "multicast") << std::endl
-                          << "Group: " << nm << " (" << id << ")" << std::endl
-                          << "**************************************************" << std::endl
-                          << std::endl;
-            }));
+            showStatus();
         }
         else if( buff[0] == 'n' )
         {
-            g_wq.submit(([]()
-            {
-                std::string group = g_groups[g_currentState.currentChannel].at("id");
-                std::string name = g_groups[g_currentState.currentChannel].at("name");    
-                engageLeaveGroup(group.c_str());
-
-                g_currentState.currentChannel++;
-
-                if((size_t)g_currentState.currentChannel >= g_groups.size())
-                {
-                    g_currentState.currentChannel = 1;
-                }
-
-                group = g_groups[g_currentState.currentChannel].at("id");
-                engageJoinGroup(group.c_str());
-            }));
+            goToNextGroup();
+        }
+        else if( buff[0] == 'p' )
+        {
+            goToPreviousGroup();
         }
         else if( buff[0] == 't' )
         {
-            g_wq.submit(([]()
-            {
-                std::string groupID = g_groups[g_currentState.currentChannel].at("id");
-                engageBeginGroupTx(groupID.c_str(),0,0);
-            }));
+            beginTransmitOnActiveGroup();
         }
         else if( buff[0] == 'x' )
         {
-            g_wq.submit(([]()
-            {
-                std::string groupID = g_groups[g_currentState.currentChannel].at("id");
-                engageEndGroupTx(groupID.c_str());
-            }));
+            endTransmitOnActiveGroup();
         }
         else if( buff[0] == 'r' )
         {
-            g_wq.submit(([]()
-            {
-                g_useRp = true;
-                g_reload = true;
-                deleteAllGroups();
-            }));
+            switchToRpMode();
         }
         else if( buff[0] == 'm' )
         {
-            g_wq.submit(([]()
-            {
-                g_useRp = false;
-                g_reload = true;
-                deleteAllGroups();
-            }));
+            switchToMcMode();
+        }
+        else if( buff[0] == 'g' )
+        {
+            showGroups();
+        }
+        else if( buff[0] != '\n' )
+        {
+            showUnrecognizedCommand();
         }
     }
 
