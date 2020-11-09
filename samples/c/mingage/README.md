@@ -177,3 +177,22 @@ For example to set in the environment to errors and fatals only:
 ```shell
 $ export ENGAGE_LOG_LEVEL=1
 ```
+
+## Some Notes About Security
+
+Engage and Engage-based applications take security very seriously - using X.509 certificates extensively to make things work smoothly and securely.  We tell Engage to use certificates in the *engine policy* file which, in the case of mingage, is `cfg/active_engine_policy.json`.  There, you'll see a section name `security` with directives to use X.509 files from the `certificates` directory in this repository (this includes the certificate itself as well as the private key associated with the certificate).
+```javascript
+    "security":{
+        "certificate":{
+            "certificate":"@../../../certificates/rtsFactoryDefaultEngage.pem",
+            "key":"@../../../certificates/rtsFactoryDefaultEngage.key"
+        }
+    },
+```
+
+>Both of these files are **NOT** protected by passwords!
+
+For those of you security-minded folks who are freaking out right now about the fact that these two files - especially the private key file - are not protected by passwords; breathe!  We've purposelly provided these files in unprotected format because they're *factory default*, *sample* X.509 files.  And we very specifically do NOT want folks to use these in production.  Rather, we encourage our partners to obtain the own certificates either from commercial certificate authorities such as Network Solutions, GoDaddy, Let's Encrypt, and so on.  Alterntatively, you can use self-certificates that you generate yourself.  Or you can even go so far as to be your own certificate authority and issue certificates from that CA's prime signing certificate.  Whichever of the alternatives you choose, you should be good.  Just don't use the certificates we've provided for production purposes.  (But feel free to have at it for development and testing.)
+
+Now, the best way to do this stuff is to utilize Engage's support for *certificate stores*.  These are encrypted containers (they're just files, really) that house your certificates and private keys, and can only be accessed by the Engage Engine.  You can find out more Engage security and certificate in detail by checking out the [Engage Security](https://github.com/rallytac/pub/wiki/Engage-Security#certificate-storage) wiki page of this repo.  Also, check out the [Using ecstool](https://github.com/rallytac/pub/wiki/Using-ecstool) wiki page on how to manage your certificate stores.
+
