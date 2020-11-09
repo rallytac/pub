@@ -30,7 +30,7 @@ if "%Platform%" == "" (
 	set ERROR_ENCOUNTERED=0
 
 	call :doSafeDelete %TMP_FILE%
-    curl -f -s -o %TMP_FILE% -L https://bintray.com/rallytac/pub/download_file?file_path=%DESIRED_VERSION%/api/c/include/EngageInterface.h"
+    curl -f -s -o %TMP_FILE% -L https://bintray.com/rallytac/pub/download_file?file_path=%DESIRED_VERSION%/api/c/include/EngageInterface.h
 	if errorlevel 1 (
 		set ERROR_ENCOUNTERED=1
 	)
