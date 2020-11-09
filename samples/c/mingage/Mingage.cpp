@@ -642,7 +642,7 @@ int main(int argc, char *argv[])
         {
             showGroups();
         }
-        else if( buff[0] != '\n' )
+        else if( buff[0] != '\0' )
         {
             showUnrecognizedCommand();
         }
