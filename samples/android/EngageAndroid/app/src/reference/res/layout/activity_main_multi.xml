@@ -34,14 +34,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitleBar" />
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvNotificationBar"
-        app:layout_constraintBottom_toTopOf="@+id/ivPtt">
+        app:layout_constraintBottom_toTopOf="@+id/ivPtt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNotificationBar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,21 +59,21 @@
                     android:id="@+id/card1"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card2"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
             <LinearLayout
@@ -83,21 +85,21 @@
                     android:id="@+id/card3"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card4"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
             <LinearLayout
@@ -109,21 +111,21 @@
                     android:id="@+id/card5"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card6"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
 
@@ -136,21 +138,21 @@
                     android:id="@+id/card7"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card8"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
 
@@ -163,21 +165,21 @@
                     android:id="@+id/card9"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card10"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
 
@@ -190,21 +192,21 @@
                     android:id="@+id/card11"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card12"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
 
@@ -217,21 +219,21 @@
                     android:id="@+id/card13"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card14"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
 
@@ -244,21 +246,21 @@
                     android:id="@+id/card15"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
                     android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginEnd="8dp"/>
+                    android:layout_weight="50" />
 
                 <fragment
                     android:id="@+id/card16"
                     android:name="com.rallytac.engageandroid.SmallCardFragment"
                     android:layout_width="wrap_content"
-                    android:layout_weight="50"
                     android:layout_height="140dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="0dp"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_weight="50" />
             </LinearLayout>
 
         </LinearLayout>

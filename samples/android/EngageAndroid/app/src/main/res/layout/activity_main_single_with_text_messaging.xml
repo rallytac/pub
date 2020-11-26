@@ -106,28 +106,30 @@
         android:id="@+id/layCard"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layTopIcons">
 
         <fragment
             android:id="@+id/card1"
             android:name="com.rallytac.engageandroid.SmallCardFragmentForTextMessaging"
-            android:layout_height="60dp"
             android:layout_width="0dp"
-            android:layout_weight="4"/>
+            android:layout_height="60dp"
+            android:layout_weight="4" />
 
         <ImageView
             android:id="@+id/ivPtt"
-            android:layout_height="60dp"
             android:layout_width="0dp"
-            android:scaleType="fitXY"
-            app:srcCompat="@drawable/ic_ptt_idle"
-            android:layout_weight="1"
+            android:layout_height="60dp"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/ic_ptt_idle" />
     </LinearLayout>
 
     <fragment

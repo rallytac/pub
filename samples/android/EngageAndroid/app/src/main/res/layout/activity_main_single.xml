@@ -107,12 +107,12 @@
         android:name="com.rallytac.engageandroid.LargeCardFragment"
         android:layout_width="0dp"
         android:layout_height="200dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/layTopIcons" />
 
     <TextView
         android:id="@+id/tvLicensingBar"
