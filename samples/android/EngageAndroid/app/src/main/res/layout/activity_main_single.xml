@@ -34,6 +34,74 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitleBar" />
 
+    <LinearLayout
+        android:id="@+id/layTopIcons"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/tvNotificationBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/ivTeam"
+            android:onClick="onClickTeamIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_team"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivMap"
+            android:onClick="onClickMapIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_map"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivNetwork"
+            android:onClick="onClickNetworkIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_net_local"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivTimeline"
+            android:onClick="onClickTimelineIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_history"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivGroups"
+            android:onClick="onClickGroupsIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_group_list"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivVoiceOrTextMessaging"
+            android:onClick="onSwitchToTextMessagingView"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:visibility="visible"
+            app:srcCompat="@drawable/ic_text_messaging"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/ivMainScreenMenu"
+            android:onClick="onClickMenuIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:srcCompat="@drawable/ic_main_screen_menu"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
     <fragment
         android:id="@+id/card1"
         android:name="com.rallytac.engageandroid.LargeCardFragment"
@@ -43,42 +111,8 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivTeam"
+        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
         app:layout_constraintVertical_bias="0.0" />
-
-    <!--
-    <fragment
-        android:id="@+id/textMessaging"
-        android:name="com.rallytac.engageandroid.TextMessagingFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card1"
-        app:layout_constraintBottom_toTopOf="@+id/tvLicensingBar"
-        app:layout_constraintVertical_bias="0.0" />
-    -->
-
-    <!--
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/ivPtt"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card1">
-    </fragment>
-    -->
 
     <TextView
         android:id="@+id/tvLicensingBar"
@@ -94,67 +128,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivNetwork"
-        android:onClick="onClickNetworkIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@+id/ivMap"
-        app:layout_constraintTop_toTopOf="@+id/ivMap"
-        app:srcCompat="@drawable/ic_net_local" />
-
-    <ImageView
-        android:id="@+id/ivTimeline"
-        android:onClick="onClickTimelineIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@+id/ivNetwork"
-        app:layout_constraintTop_toTopOf="@+id/ivNetwork"
-        app:srcCompat="@drawable/ic_history" />
-
-    <ImageView
-        android:id="@+id/ivGroups"
-        android:onClick="onClickGroupsIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@+id/ivTimeline"
-        app:layout_constraintTop_toTopOf="@+id/ivTimeline"
-        app:srcCompat="@drawable/ic_group_list" />
-
-    <ImageView
-        android:id="@+id/ivVoiceOrTextMessaging"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        android:onClick="onSwitchToTextMessagingView"
-        android:visibility="visible"
-        app:layout_constraintStart_toEndOf="@+id/ivGroups"
-        app:layout_constraintTop_toTopOf="@+id/ivGroups"
-        app:srcCompat="@drawable/ic_text_messaging" />
-
-    <ImageView
-        android:id="@+id/ivMainScreenMenu"
-        android:onClick="onClickMenuIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivNetwork"
-        app:srcCompat="@drawable/ic_main_screen_menu"/>
-
-    <ImageView
-        android:id="@+id/ivMap"
-        android:onClick="onClickMapIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        app:layout_constraintStart_toEndOf="@+id/ivTeam"
-        app:layout_constraintTop_toTopOf="@+id/ivTeam"
-        app:srcCompat="@drawable/ic_map" />
 
     <ImageView
         android:id="@+id/ivPreviousGroup"
@@ -197,17 +170,5 @@
         app:layout_constraintStart_toEndOf="@+id/ivPtt"
         app:layout_constraintTop_toTopOf="@+id/ivPtt"
         app:srcCompat="@drawable/ic_next_group" />
-
-
-    <ImageView
-        android:id="@+id/ivTeam"
-        android:onClick="onClickTeamIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvNotificationBar"
-        app:srcCompat="@drawable/ic_team" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

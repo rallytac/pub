@@ -11,7 +11,7 @@
 
   "internals":{
     "disableWatchdog":false,
-    "watchdogIntervalMs":1000,
+    "watchdogIntervalMs":5000,
     "watchdogHangDetectionMs":2000,
     "housekeeperIntervalMs":1000,
     "maxTxSecs":86400,
@@ -51,10 +51,27 @@
   "audio":{
     "internalRate":16000,
     "internalChannels":2,
-    "microphoneQueueMs":60,
-    "outputGainPercentage":0,
     "allowOutputOnTransmit": true,
-    "enableAec":true
+    "denoiseInput": false,
+    "denoiseOutput": false,
+
+    "inputAgc": {
+      "enabled":false,
+      "minLevel":0,
+      "maxLevel":255,
+      "compressionGainDb":25,
+      "enableLimiter":false,
+      "targetLevelDb":3
+    },
+
+    "outputAgc": {
+      "enabled":false,
+      "minLevel":0,
+      "maxLevel":255,
+      "compressionGainDb":25,
+      "enableLimiter":false,
+      "targetLevelDb":3
+    }
   },
 
   "security":{

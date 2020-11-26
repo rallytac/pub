@@ -3,6 +3,8 @@
     <string name="certstore_default_fn" translatable="false">engage.certstore</string>
     <string name="certstore_active_fn" translatable="false">active-certstore.certstore</string>
     <string name="certstore_default_certificate_id" translatable="false">rtsFactoryDefaultEngage</string>
+    <string name="certstore_default_certificate_key" translatable="false">rtsFactoryDefaultEngage</string>
+    <string name="certstore_default_ca_id" translatable="false">rtsCA</string>
 
     <string-array name="certstore_passwords"></string-array>
 
@@ -546,6 +548,20 @@
         <item>3</item>
     </integer-array>
 
+    <string-array name="agc_level_names">
+        <item>None</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Very High</item>
+    </string-array>
+    <string-array name="agc_level_values">
+        <item>0</item>
+        <item>15</item>
+        <item>35</item>
+        <item>65</item>
+        <item>100</item>
+    </string-array>
 
     <!-- <item>name,<string/boolean/integer/float>,value</item> -->
     <string-array name="flavor_defaults"></string-array>
@@ -598,7 +614,12 @@
     <string name="set_location_accuracy">Accuracy</string>
     <string name="set_location_share_my_location">Share my location</string>
     <string name="set_location_displacement_trigger">Displacement Trigger</string>
-    <string name="set_audio_sppeaker_boost_factor">Speaker Boost Factor</string>
+
+    <string name="set_audio_microphone_denoise">Enable Noise Reduction</string>
+
+    <string name="set_audio_microphone_agc_level">Microphone Gain</string>
+    <string name="set_audio_speaker_agc_level">Speaker Gain</string>
+
     <string name="set_audio_use_bluetooth_device">Use a bluetooth device</string>
     <string name="set_audio_bluetooth_device">Bluetooth device</string>
     <string name="set_audio_input_device">Input device</string>
@@ -742,9 +763,11 @@
     <string name="no_license_found_title">No license found</string>
     <string name="no_license_found_question_enter_now">Would you like to enter your license now?</string>
     <string name="action_would_create_duplicate_mission">Error: This action would create a duplicate mission.  Try using a different passphrase.</string>
-    <string name="set_hdr_audio_input_output">Input/Output</string>
+    <string name="set_hdr_audio_input">Input</string>
+    <string name="set_hdr_audio_output">Output</string>
     <string name="set_summ_audio">Settings for audio</string>
     <string name="set_hdr_audio_advanced">Advanced</string>
+    <string name="set_hdr_audio_bluetooth">Bluetooth</string>
     <string name="set_summ_connectivity">Configure networking options</string>
     <string name="set_summ_experience">Notifications, tones, and visuals</string>
     <string name="set_summ_location">Configure location sharing</string>

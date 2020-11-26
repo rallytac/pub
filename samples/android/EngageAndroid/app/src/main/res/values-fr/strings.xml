@@ -259,7 +259,6 @@
     <string name="set_aec_enable_cng">Activer la génération de bruit de confort</string>
     <string name="set_aec_speaker_tail_ms">Haut-parleur Tail Milliseconds</string>
     <string name="set_audio_bluetooth_device">Appareil Bluetooth</string>
-    <string name="set_audio_sppeaker_boost_factor">Facteur d\'amplification du haut-parleur</string>
     <string name="set_audio_use_bluetooth_device">Utilisez un appareil Bluetooth</string>
     <string name="set_biometrics_blood_hydro_level">Niveau d\'hydratation du sang</string>
     <string name="set_biometrics_blood_oxy_perc">Pourcentage d\'oxygénation du sang</string>
