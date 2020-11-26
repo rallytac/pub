@@ -2,8 +2,8 @@
     <string name="certstore_cache_dir" translatable="false">certstore_cache</string>
     <string name="certstore_default_fn" translatable="false">engage.certstore</string>
     <string name="certstore_active_fn" translatable="false">active-certstore.certstore</string>
-    <string name="certstore_default_certificate_id" translatable="false">rtsFactoryDefaultEngage</string>
-    <string name="certstore_default_certificate_key" translatable="false">rtsFactoryDefaultEngage</string>
+    <string name="certstore_default_certificate_id" translatable="false"></string>
+    <string name="certstore_default_certificate_key" translatable="false"></string>
     <string name="certstore_default_ca_id" translatable="false">rtsCA</string>
 
     <string-array name="certstore_passwords"></string-array>
@@ -732,7 +732,7 @@
     <string name="invalid_cert_store_cannot_invalid_version">Invalid certificate store - unknown version</string>
     <string name="invalid_cert_store_cannot_no_certificates_found">Invalid certificate store - no certificates found</string>
     <string name="io_error_while_importing">I/O error encountered while importing</string>
-    <string name="cert_store_in_use_proceed_with_delete_will_use_default">This certificate store is currently in use.  If you delete it, the application will use the default certificate store until you select another.\\n\\nProceed?</string>
+    <string name="cert_store_in_use_proceed_with_delete_will_use_default">This certificate store is currently in use.  If you delete it, the application will use the default certificate store until you select another.\n\nProceed?</string>
     <string name="are_you_sure_delete_cert_store">Are you sure you want to delete this certificate store?</string>
     <string name="delete_cert_store">Delete Certificate Store</string>
     <string name="no_mission_name">(no name)</string>
