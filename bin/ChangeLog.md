@@ -1,5 +1,13 @@
 # Change Log
 
+## November 29, 2020 - 1.192.9029
+- Adds microphone input denoising on Android platforms
+- Adds Automatic Gain Control (AGC) for microphone input and speaker output
+- Adds support for defaulting of X.509 certificate elements from certificate stores
+- Adds support for X.509 certificate element tagging in certificate stores
+- Corrects an issue with transmit priority contention 
+- Removes Engine-level process abort if policy security is incorrect
+
 ## October 28, 2020 - 1.189.9026
 - Adds rxFlags and txPriority to talker information notifications
 - Corrects an incorrect duration calculation for audio timeline events
