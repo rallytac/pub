@@ -270,7 +270,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NODE_LEAVE));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NEW_AUDIO_RX));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NETWORK_ERROR));
-            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_SPEAKER_OUTPUT_BOOST_FACTOR));
+
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_DENOISE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_ENABLED));
             //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_MODE));
@@ -286,7 +289,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_LATCHING));
+            /*
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL));
+            */
 
             // NICs
             {

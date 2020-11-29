@@ -59,7 +59,7 @@ public class SonimBroadcastReceiver extends BroadcastReceiver
         if(action.equals(ACTION_PTT_DOWN_SONIM))
         {
             // TODO: set ptt priority based on other Sonim buttons
-            _pttRequestHandler.requestPttOn(0, 0);
+            _pttRequestHandler.requestPttOn(-1, -1);
         }
         else if(action.equals(ACTION_PTT_UP_SONIM))
         {

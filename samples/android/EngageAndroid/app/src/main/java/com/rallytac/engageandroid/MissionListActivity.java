@@ -141,7 +141,7 @@ public class MissionListActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v)
                 {
-                    activateMission(item._id);
+                    attemptToActivateMission(item._id);
                 }
             });
 
@@ -208,7 +208,7 @@ public class MissionListActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void activateMission(String id)
+    private void attemptToActivateMission(String id)
     {
         _resultIntent.putExtra(Constants.MISSION_ACTIVATED_ID, id);
         setResult(RESULT_OK, _resultIntent);

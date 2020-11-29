@@ -5,6 +5,8 @@
 
 package com.rallytac.engageandroid;
 
+import com.rallytac.engage.engine.Engine;
+
 public class Constants
 {
     public static String QR_CODE_HEADER = "&*3$e1@E";//NON-NLS
@@ -29,7 +31,6 @@ public class Constants
     public final static float DEF_NOTIFICATION_TONE_LEVEL = (float)0.015;
     public final static float DEF_ERROR_TONE_LEVEL = (float)0.2;
 
-    public final static int DEF_SPEAKER_OUTPUT_BOOST_FACTOR = 3;
     public final static boolean DEF_AEC_ENABLED = false;
     public final static boolean DEF_AEC_CNG = true;
     public final static int DEF_AEC_MODE = 0;
@@ -37,6 +38,7 @@ public class Constants
     public final static boolean DEF_AEC_STEREO_DISABLED = true;
     public final static int DEF_ANDROID_AUDIO_API = 0;
     public final static int DEF_ENGINE_INTERNAL_AUDIO = 0;
+    public final static boolean DEF_MICROPHONE_NOISE_REDUCTION = false;
 
     public final static boolean DEF_USE_RP = false;
     public final static String DEF_RP_ADDRESS = "";
@@ -107,4 +109,18 @@ public class Constants
     public final static int DEFAULT_NETWORK_QOS_PRIORITY = 4;
 
     public final static long ENGAGE_RXFLAG_EMERGENCY = 0x1L;
+
+    public final static boolean DEF_MICROPHONE_AGC_ENABLED = true;
+    public final static int DEF_MICROPHONE_AGC_MIN_LEVEL = 0;
+    public final static int DEF_MICROPHONE_AGC_MAX_LEVEL = 255;
+    public final static boolean DEF_MICROPHONE_AGC_LIMIT_ENABLED = false;
+    public final static int DEF_MICROPHONE_AGC_TARGET_DB = 3;
+
+    public final static boolean DEF_SPEAKER_AGC_ENABLED = false;
+    public final static int DEF_SPEAKER_AGC_MIN_LEVEL = 0;
+    public final static int DEF_SPEAKER_AGC_MAX_LEVEL = 255;
+    public final static boolean DEF_SPEAKER_AGC_LIMIT_ENABLED = false;
+    public final static int DEF_SPEAKER_AGC_TARGET_DB = 3;
+
+    public final static String INTERNAL_DEFAULT_CERTSTORE_FN = "{7662214c-e79e-436f-8e93-7cf75cbac682}.certstore";//NON-NLS
 }

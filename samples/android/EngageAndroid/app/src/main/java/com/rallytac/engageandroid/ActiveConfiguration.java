@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.rallytac.engage.engine.Engine;
 
@@ -108,7 +110,7 @@ public class ActiveConfiguration
     private String _missionModPin;
     private MulticastFailoverPolicy _missionMcFailoverPolicy;
     private ArrayList<GroupDescriptor>   _missionGroups = new ArrayList<>();
-    private HashMap<String, PresenceDescriptor> _nodes = new HashMap<String, PresenceDescriptor>();
+    private String _missionCertStoreId;
 
     private String _networkInterfaceName;
 
@@ -128,7 +130,8 @@ public class ActiveConfiguration
     private float _notificationToneNotificationLevel;
     private float _errorToneNotificationLevel;
 
-    private int _speakerOutputBoostFactor;
+    private int _microphoneAgcLevel;
+    private int _speakerAgcLevel;
 
     private boolean _notifyOnNodeJoin;
     private boolean _notifyOnNodeLeave;
@@ -330,19 +333,31 @@ public class ActiveConfiguration
         _audioOutputDeviceId = deviceId;
     }
 
-    public int getSpeakerOutputBoostFactor()
+    public int getMicrophoneAgcLevel()
     {
-        return _speakerOutputBoostFactor;
+        return _microphoneAgcLevel;
     }
 
-    public void setSpeakerOutputBoostFactor(int factor)
+    public void setMicrophoneAgcLevel(int level)
     {
-        _speakerOutputBoostFactor = factor;
+        _microphoneAgcLevel = level;
 
-        Globals.getSharedPreferencesEditor().putInt(PreferenceKeys.USER_SPEAKER_OUTPUT_BOOST_FACTOR, _speakerOutputBoostFactor);
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL, Integer.toString(_microphoneAgcLevel));
         Globals.getSharedPreferencesEditor().apply();
     }
 
+    public int getSpeakerAgcLevel()
+    {
+        return _speakerAgcLevel;
+    }
+
+    public void setSpeakerAgcLevel(int level)
+    {
+        _speakerAgcLevel = level;
+
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL, Integer.toString(_speakerAgcLevel));
+        Globals.getSharedPreferencesEditor().apply();
+    }
 
     public float getPttToneNotificationLevel()
     {
@@ -436,11 +451,6 @@ public class ActiveConfiguration
         return _locationConfiguration;
     }
 
-    public boolean isValid()
-    {
-        return (!Utils.isEmptyString(_missionId));
-    }
-
     public String getMissionId()
     {
         return _missionId;
@@ -464,6 +474,11 @@ public class ActiveConfiguration
     public MulticastFailoverPolicy getMissionMulticastFailoverPolicy()
     {
         return _missionMcFailoverPolicy;
+    }
+
+    public String getMissionCertStoreId()
+    {
+        return _missionCertStoreId;
     }
 
     public boolean addDynamicGroup(GroupDescriptor gd)
@@ -501,6 +516,22 @@ public class ActiveConfiguration
         return rc;
     }
 
+    public boolean couldAllGroupsWorkWithoutRallypoint()
+    {
+        if(_missionGroups != null)
+        {
+            for (GroupDescriptor currentDescriptor : _missionGroups)
+            {
+                if(!currentDescriptor.couldWorkWithoutRallypoint())
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public boolean updateDynamicGroup(String id, String json)
     {
         boolean rc = false;
@@ -536,68 +567,6 @@ public class ActiveConfiguration
     public ArrayList<GroupDescriptor> getMissionGroups()
     {
         return _missionGroups;
-    }
-
-    public int getMissionNodeCount(String forGroupId)
-    {
-        int rc = 0;
-
-        synchronized (_nodes)
-        {
-            if(Utils.isEmptyString(forGroupId))
-            {
-                rc = _nodes.size();
-            }
-            else
-            {
-                for (PresenceDescriptor pd : _nodes.values())
-                {
-                    if(pd.groupAliases.keySet().contains(forGroupId))
-                    {
-                        rc++;
-                    }
-                }
-            }
-        }
-
-        return rc;
-    }
-
-    public ArrayList<PresenceDescriptor> getMissionNodes(String forGroupId)
-    {
-        ArrayList<PresenceDescriptor> rc = new ArrayList<>();
-
-        synchronized(_nodes)
-        {
-            for (PresenceDescriptor pd : _nodes.values())
-            {
-                if(Utils.isEmptyString(forGroupId))
-                {
-                    rc.add(pd);
-                }
-                else
-                {
-                    if(pd.groupAliases.keySet().contains(forGroupId))
-                    {
-                        rc.add(pd);
-                    }
-                }
-            }
-        }
-
-        return rc;
-    }
-
-    public PresenceDescriptor getPresenceDescriptor(String nodeId)
-    {
-        PresenceDescriptor rc = null;
-
-        synchronized(_nodes)
-        {
-            rc = _nodes.get(nodeId);
-        }
-
-        return rc;
     }
 
     public GroupDescriptor getGroupDescriptor(String id)
@@ -702,6 +671,45 @@ public class ActiveConfiguration
         _userAlias = userAlias;
     }
 
+    public HashSet<String> getIdsOfSelectedGroups()
+    {
+        HashSet<String> rc = new HashSet<>();
+
+        for(GroupDescriptor gd : _missionGroups)
+        {
+            if(gd.type == GroupDescriptor.Type.gtPresence)
+            {
+                rc.add(gd.id);
+            }
+            else if(gd.type == GroupDescriptor.Type.gtRaw)
+            {
+                rc.add(gd.id);
+            }
+            else if(gd.type == GroupDescriptor.Type.gtAudio)
+            {
+                // Maybe just the one that's the single view
+                if(getUiMode() == Constants.UiMode.vSingle)
+                {
+                    if(gd.selectedForSingleView)
+                    {
+                        rc.add(gd.id);
+                    }
+                }
+                // ... or the multi-view group(s)?
+                else if(getUiMode() == Constants.UiMode.vMulti)
+                {
+                    if(gd.selectedForMultiView)
+                    {
+                        rc.add(gd.id);
+                    }
+                }
+            }
+        }
+
+        return rc;
+    }
+
+
     public void clear()
     {
         _missionId = "";
@@ -709,8 +717,8 @@ public class ActiveConfiguration
         _missionDescription = "";
         _missionModPin = "";
         _missionMcFailoverPolicy = MulticastFailoverPolicy.followAppSetting;
+        _missionCertStoreId = "";
         _missionGroups.clear();
-        _nodes.clear();
 
         _useRP = false;
         _rpAddress = "";
@@ -725,7 +733,8 @@ public class ActiveConfiguration
         _errorToneNotificationLevel = Constants.DEF_ERROR_TONE_LEVEL;
         _notificationToneNotificationLevel = Constants.DEF_NOTIFICATION_TONE_LEVEL;
 
-        _speakerOutputBoostFactor = Constants.DEF_SPEAKER_OUTPUT_BOOST_FACTOR;
+        _microphoneAgcLevel = 0;
+        _speakerAgcLevel = 0;
     }
 
     public JSONObject makeTemplate()
@@ -749,6 +758,11 @@ public class ActiveConfiguration
             if(!Utils.isEmptyString(_missionModPin))
             {
                 rc.put(Engine.JsonFields.Mission.modPin, _missionModPin);
+            }
+
+            if(!Utils.isEmptyString(_missionCertStoreId))
+            {
+                rc.put(Engine.JsonFields.Mission.certStoreId, _missionCertStoreId);
             }
 
             rc.put("multicastFailoverPolicy", _multicastFailoverPolicy);
@@ -805,6 +819,7 @@ public class ActiveConfiguration
             _missionName = root.optString(Engine.JsonFields.Mission.name);
             _missionDescription = root.optString(Engine.JsonFields.Mission.description);
             _missionModPin = root.optString(Engine.JsonFields.Mission.modPin);
+            _missionCertStoreId = root.optString(Engine.JsonFields.Mission.certStoreId);
 
             _missionMcFailoverPolicy = MulticastFailoverPolicyFromInt(root.optInt("multicastFailoverPolicy", IntFromMulticastFailoverPolicy(MulticastFailoverPolicy.followAppSetting)));
 
@@ -813,8 +828,31 @@ public class ActiveConfiguration
                 JSONObject rallypoint = root.optJSONObject(Engine.JsonFields.Rallypoint.objectName);
                 if(rallypoint != null)
                 {
-                    _rpAddress = rallypoint.getString(Engine.JsonFields.Rallypoint.Host.address);
-                    _rpPort = rallypoint.getInt(Engine.JsonFields.Rallypoint.Host.port);
+                    // Try for the address at the root
+                    try
+                    {
+                        _rpAddress = rallypoint.getString(Engine.JsonFields.Rallypoint.Host.address);
+                        _rpPort = rallypoint.getInt(Engine.JsonFields.Rallypoint.Host.port);
+                    }
+                    catch (Exception outerE)
+                    {
+                        outerE.printStackTrace();
+
+                        try
+                        {
+                            // Try for the address in the "host" object
+                            JSONObject host = rallypoint.optJSONObject(Engine.JsonFields.Rallypoint.Host.objectName);
+                            if(host != null)
+                            {
+                                _rpAddress = host.getString(Engine.JsonFields.Rallypoint.Host.address);
+                                _rpPort = host.getInt(Engine.JsonFields.Rallypoint.Host.port);
+                            }
+                        }
+                        catch (Exception innerE)
+                        {
+                            innerE.printStackTrace();
+                        }
+                    }
 
                     if(rallypoint.has(JSON_FIELD_FOR_RP_USE))
                     {
@@ -932,7 +970,6 @@ public class ActiveConfiguration
     {
         JSONObject rc = null;
 
-
         try
         {
             if(!Utils.isEmptyString(template))
@@ -970,16 +1007,16 @@ public class ActiveConfiguration
                     security = new JSONObject();
                 }
 
-                JSONObject certificate = security.optJSONObject(Engine.JsonFields.EnginePolicy.Certificate.objectName);
+                JSONObject certificate = security.optJSONObject(Engine.JsonFields.EnginePolicy.Security.Certificate.objectName);
                 if(certificate == null)
                 {
                     certificate = new JSONObject();
                 }
 
-                certificate.put(Engine.JsonFields.EnginePolicy.Certificate.certificate, "@certstore://" + Globals.getContext().getString(R.string.certstore_default_certificate_id));//NON-NLS
-                certificate.put(Engine.JsonFields.EnginePolicy.Certificate.key, "@certstore://" + Globals.getContext().getString(R.string.certstore_default_certificate_id));//NON-NLS
+                certificate.put(Engine.JsonFields.EnginePolicy.Security.Certificate.certificate, Globals.getEngageApplication().getDefaultCertificateIdUri());//NON-NLS
+                certificate.put(Engine.JsonFields.EnginePolicy.Security.Certificate.key, Globals.getEngageApplication().getDefaultCertificateKeyUri());//NON-NLS
 
-                security.put(Engine.JsonFields.EnginePolicy.Certificate.objectName, certificate);
+                security.put(Engine.JsonFields.EnginePolicy.Security.Certificate.objectName, certificate);
                 rc.put(Engine.JsonFields.EnginePolicy.Security.objectName, security);
             }
 
@@ -1041,48 +1078,115 @@ public class ActiveConfiguration
                         break;
                 }
 
-
-                JSONObject aec = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.Aec.objectName);
-                if(aec == null)
+                // AEC
                 {
-                    aec = new JSONObject();
-                }
-
-                boolean aecEnabled = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_ENABLED, Constants.DEF_AEC_ENABLED);
-                aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.enabled, aecEnabled);
-                aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.cng, Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_CNG, Constants.DEF_AEC_CNG));
-
-                //aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_MODE, Integer.toString(Constants.DEF_AEC_MODE))));
-                aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Integer.toString(Constants.DEF_AEC_MODE)));
-
-                aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.speakerTailMs, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_SPEAKER_TAIL_MS, Integer.toString(Constants.DEF_AEC_SPEAKER_TAIL_MS))));
-
-                audio.put(Engine.JsonFields.EnginePolicy.Audio.Aec.objectName, aec);
-
-                // Maybe change to mono output if desired
-                if(aecEnabled)
-                {
-                    boolean disableStereo = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_DISABLE_STEREO, Constants.DEF_AEC_STEREO_DISABLED);
-                    if(disableStereo)
+                    JSONObject aec = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.Aec.objectName);
+                    if (aec == null)
                     {
-                        audio.put(Engine.JsonFields.EnginePolicy.Audio.internalChannels, 1);
+                        aec = new JSONObject();
+                    }
+
+                    boolean aecEnabled = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_ENABLED, Constants.DEF_AEC_ENABLED);
+                    aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.enabled, aecEnabled);
+                    aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.cng, Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_CNG, Constants.DEF_AEC_CNG));
+
+                    //aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_MODE, Integer.toString(Constants.DEF_AEC_MODE))));
+                    aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Integer.toString(Constants.DEF_AEC_MODE)));
+
+                    aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.speakerTailMs, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_SPEAKER_TAIL_MS, Integer.toString(Constants.DEF_AEC_SPEAKER_TAIL_MS))));
+
+                    audio.put(Engine.JsonFields.EnginePolicy.Audio.Aec.objectName, aec);
+
+                    // Maybe change to mono output if desired
+                    if (aecEnabled)
+                    {
+                        boolean disableStereo = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_DISABLE_STEREO, Constants.DEF_AEC_STEREO_DISABLED);
+                        if (disableStereo)
+                        {
+                            audio.put(Engine.JsonFields.EnginePolicy.Audio.internalChannels, 1);
+                        }
                     }
                 }
 
-                JSONObject androidAudio = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.Android.objectName);
-                if(androidAudio == null)
+                // Android
                 {
-                    androidAudio = new JSONObject();
+                    JSONObject androidAudio = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.Android.objectName);
+                    if (androidAudio == null)
+                    {
+                        androidAudio = new JSONObject();
+                    }
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.api, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API, Integer.toString(Constants.DEF_ANDROID_AUDIO_API))));
+
+                    audio.put(Engine.JsonFields.EnginePolicy.Audio.Android.objectName, androidAudio);
                 }
 
-                androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.api, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API, Integer.toString(Constants.DEF_ANDROID_AUDIO_API))));
+                // Noise reduction
+                {
+                    audio.put(Engine.JsonFields.EnginePolicy.Audio.denoiseInput, Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_MICROPHONE_DENOISE, Constants.DEF_MICROPHONE_NOISE_REDUCTION));
+                    // TODO: do we want speaker noise reduction?
+                    //audio.put(Engine.JsonFields.EnginePolicy.Audio.denoiseOutput, Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_SPEAKER_DENOISE, Constants.DEF_SPEAKER_NOISE_REDUCTION));
+                }
 
-                audio.put(Engine.JsonFields.EnginePolicy.Audio.Android.objectName, androidAudio);
+                // AGC
+                {
+                    // Microphone
+                    {
+                        JSONObject agc = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.InputAgc.objectName);
+                        if (agc == null)
+                        {
+                            agc = new JSONObject();
+                        }
+
+                        int level = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL, "0"));
+                        if (level > 0)
+                        {
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.enabled, true);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.minLevel, Constants.DEF_MICROPHONE_AGC_MIN_LEVEL);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.maxLevel, Constants.DEF_MICROPHONE_AGC_MAX_LEVEL);
+
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.compressionGainDb, level);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.enableLimiter, Constants.DEF_MICROPHONE_AGC_LIMIT_ENABLED);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.targetLevelDb, Constants.DEF_MICROPHONE_AGC_TARGET_DB);
+                        }
+                        else
+                        {
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.enabled, false);
+                        }
+
+                        audio.put(Engine.JsonFields.EnginePolicy.Audio.InputAgc.objectName, agc);
+                    }
+
+                    // Speaker
+                    {
+                        JSONObject agc = audio.optJSONObject(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.objectName);
+                        if (agc == null)
+                        {
+                            agc = new JSONObject();
+                        }
+
+                        int level = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL, "0"));
+                        if(level > 0)
+                        {
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.enabled, true);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.minLevel, Constants.DEF_SPEAKER_AGC_MIN_LEVEL);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.maxLevel, Constants.DEF_SPEAKER_AGC_MAX_LEVEL);
+
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.compressionGainDb, level);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.enableLimiter, Constants.DEF_SPEAKER_AGC_LIMIT_ENABLED);
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.targetLevelDb, Constants.DEF_SPEAKER_AGC_TARGET_DB);
+                        }
+                        else
+                        {
+                            agc.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.enabled, false);
+                        }
+
+                        audio.put(Engine.JsonFields.EnginePolicy.Audio.OutputAgc.objectName, agc);
+                    }
+                }
 
                 rc.put(Engine.JsonFields.EnginePolicy.Audio.objectName, audio);
             }
-
-
         }
         catch (Exception e)
         {
@@ -1226,80 +1330,6 @@ public class ActiveConfiguration
         }
 
         return rc;
-    }
-
-    public PresenceDescriptor processNodeDiscovered(String nodeJson)
-    {
-        Log.d(TAG, "processNodeDiscovered > nodeJson=" + nodeJson);//NON-NLS
-
-        PresenceDescriptor pd;
-
-        try
-        {
-            PresenceDescriptor discoveredPd = new PresenceDescriptor();
-            if(discoveredPd.deserialize(nodeJson))
-            {
-                synchronized (_nodes)
-                {
-                    pd = _nodes.get(discoveredPd.nodeId);
-
-                    if(pd != null)
-                    {
-                        pd.updateFromPresenceDescriptor(discoveredPd);
-                    }
-                    else
-                    {
-                        _nodes.put(discoveredPd.nodeId, discoveredPd);
-                        pd = discoveredPd;
-                    }
-
-                    Log.d(TAG, "processNodeDiscovered > nid=" + discoveredPd.nodeId + ", u=" + discoveredPd.userId + ", d=" + discoveredPd.displayName);//NON-NLS
-                }
-            }
-            else
-            {
-                Log.w(TAG, "failed to parse node information");//NON-NLS
-                pd = null;
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            pd = null;
-        }
-
-        return pd;
-    }
-
-    public PresenceDescriptor processNodeUndiscovered(String nodeJson)
-    {
-        PresenceDescriptor pd;
-
-        try
-        {
-            pd = new PresenceDescriptor();
-            if(pd.deserialize(nodeJson))
-            {
-                synchronized (_nodes)
-                {
-                    _nodes.remove(pd.nodeId);
-
-                    Log.d(TAG, "processNodeUndiscovered < nid=" + pd.nodeId + ", u=" + pd.userId + ", d=" + pd.displayName);//NON-NLS
-                }
-            }
-            else
-            {
-                Log.w(TAG, "failed to parse node information");//NON-NLS
-                pd = null;
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            pd = null;
-        }
-
-        return pd;
     }
 
     public ArrayList<GroupDescriptor> getSelectedGroups()
@@ -1575,6 +1605,7 @@ public class ActiveConfiguration
             rc._missionModPin = mission._modPin;
             rc._missionName = mission._name;
             rc._missionDescription = mission._description;
+            rc._missionCertStoreId = mission._certStoreId;
 
             rc._useRP = mission._useRp;
             rc._rpAddress = mission._rpAddress;

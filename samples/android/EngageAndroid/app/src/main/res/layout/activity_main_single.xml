@@ -145,6 +145,18 @@
         app:srcCompat="@drawable/ic_previous_group" />
 
     <ImageView
+        android:id="@+id/ivEmergency"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/app_emergency_toggle"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPtt"
+        app:layout_constraintEnd_toStartOf="@+id/ivPtt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
+        app:srcCompat="@drawable/ic_emergency_off" />
+
+    <ImageView
         android:id="@+id/ivPtt"
         android:layout_width="160dp"
         android:layout_height="100dp"
@@ -155,6 +167,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_ptt_idle" />
+
+    <ImageView
+        android:id="@+id/ivPriority"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/app_priority_toggle"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPtt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivPtt"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
+        app:srcCompat="@drawable/ic_no_priority" />
 
     <ImageView
         android:id="@+id/ivNextGroup"

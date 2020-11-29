@@ -54,9 +54,12 @@ public class CertStoreListActivity extends AppCompatActivity
     private CertStoreListAdapter _adapter;
     private Intent _resultIntent = new Intent();
     private String _activeCertStoreFileName;
+    private String _activeMissionCertStoreId = null;
+    private CertStore _importedStore = null;
 
     private class CertStore
     {
+        public String _id;
         public String _fileName;
         public JSONObject _descriptor;
 
@@ -83,26 +86,56 @@ public class CertStoreListActivity extends AppCompatActivity
             return _cachedDisplayName;
         }
 
+        public boolean idMatches(String s)
+        {
+            if(Utils.isEmptyString(s) && Utils.isEmptyString(_id))
+            {
+                return true;
+            }
+            else
+            {
+                if(!Utils.isEmptyString(s) && !Utils.isEmptyString(_id))
+                {
+                    return (s.compareToIgnoreCase(_id) == 0);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public String getDescription()
         {
             if(Utils.isEmptyString(_cachedDescription))
             {
                 StringBuilder sb = new StringBuilder();
 
+                String id = _id;
+                if(!Utils.isEmptyString(id))
+                {
+                    sb.append(id);
+                    sb.append(", ");//NON-NLS
+                }
+
+                /*
                 sb.append("V");//NON-NLS
                 sb.append(_descriptor.optInt(Engine.JsonFields.CertStoreDescriptor.version, 0));
                 sb.append(", ");//NON-NLS
+                */
 
                 JSONArray certificates = _descriptor.optJSONArray(Engine.JsonFields.CertStoreDescriptor.certificates);
                 sb.append(certificates.length());
                 sb.append(" certificates");//NON-NLS
 
+                /*
                 sb.append("\nhash [");//NON-NLS
                 StringBuilder hashInput = new StringBuilder();
                 hashInput.append(_descriptor.optInt(Engine.JsonFields.CertStoreDescriptor.version, 0));
                 hashInput.append(certificates.toString());
                 sb.append(Utils.md5HashOfString(hashInput.toString()));
                 sb.append("]");//NON-NLS
+                */
 
                 _cachedDescription = sb.toString();
             }
@@ -153,7 +186,7 @@ public class CertStoreListActivity extends AppCompatActivity
                 }
             });
 
-            if (_activeCertStoreFileName.compareTo(item._fileName) == 0)
+            if (_activeCertStoreFileName.compareTo(item._fileName) == 0 || item.idMatches(_activeMissionCertStoreId) )
             {
                 ((ImageView) convertView.findViewById(R.id.ivActiveCertStoreIndicator))
                         .setImageDrawable(ContextCompat.getDrawable(CertStoreListActivity.this,
@@ -171,7 +204,7 @@ public class CertStoreListActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v)
                 {
-                    activateCertStore(item);
+                    activateCertStoreAndFinish(item);
                 }
             });
 
@@ -196,6 +229,11 @@ public class CertStoreListActivity extends AppCompatActivity
         });
 
         _activeCertStoreFileName = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, "");
+        ActiveConfiguration ac = Globals.getEngageApplication().getActiveConfiguration();
+        if(ac != null)
+        {
+            _activeMissionCertStoreId = ac.getMissionCertStoreId();
+        }
 
         loadStores(Globals.getEngageApplication().getCertStoreCacheDir());
 
@@ -333,6 +371,9 @@ public class CertStoreListActivity extends AppCompatActivity
             return;
         }
 
+        _importedStore = null;
+        boolean autoActivate = false;
+
         try
         {
             String descriptorText = Globals.getEngageApplication().getEngine().engageQueryCertStoreContents(fn, "");
@@ -404,11 +445,16 @@ public class CertStoreListActivity extends AppCompatActivity
                 bos.close();
 
                 // Add the certstore to our list of stores
-                CertStore cs = loadStoreFrom(fo.getAbsolutePath());
-                if(cs != null)
+                _importedStore = loadStoreFrom(fo.getAbsolutePath());
+                if(_importedStore != null)
                 {
-                    _stores.add(cs);
+                    _stores.add(_importedStore);
                     _adapter.notifyDataSetChanged();
+
+                    if(_importedStore.idMatches(_activeMissionCertStoreId))
+                    {
+                        autoActivate = true;
+                    }
                 }
             }
             catch (Exception e)
@@ -420,6 +466,24 @@ public class CertStoreListActivity extends AppCompatActivity
         catch(Exception e)
         {
             e.printStackTrace();
+        }
+
+        if(autoActivate)
+        {
+            AlertDialog dlg = new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.auto_activate_cert_store_title))
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i)
+                        {
+                            activateCertStoreAndFinish(_importedStore);
+                        }
+                    }).setMessage(getString(R.string.auto_activate_cert_store))
+                    .create();
+
+            dlg.show();
         }
     }
 
@@ -435,6 +499,8 @@ public class CertStoreListActivity extends AppCompatActivity
             {
                 throw new Exception("Cannot get certificate store descriptor");//NON-NLS
             }
+
+            rc._id = rc._descriptor.optString(Engine.JsonFields.CertStoreDescriptor.id, "");
         }
         catch (Exception e)
         {
@@ -445,7 +511,7 @@ public class CertStoreListActivity extends AppCompatActivity
         return rc;
     }
 
-    private void activateCertStore(final CertStore cs)
+    private void activateCertStoreAndFinish(final CertStore cs)
     {
         _activeCertStoreFileName = (cs == null ? "" : cs._fileName);
 
@@ -465,7 +531,7 @@ public class CertStoreListActivity extends AppCompatActivity
 
     private void confirmDeleteCertStore(final CertStore cs)
     {
-        final boolean isActive = (cs._fileName.compareTo(_activeCertStoreFileName) == 0);
+        final boolean isActive = (cs._fileName.compareTo(_activeCertStoreFileName) == 0 || cs.idMatches(_activeMissionCertStoreId));
         String s;
 
         if(isActive)
@@ -505,7 +571,7 @@ public class CertStoreListActivity extends AppCompatActivity
 
                                     if(isActive)
                                     {
-                                        activateCertStore(null);
+                                        activateCertStoreAndFinish(null);
                                     }
                                 }
                                 catch (Exception e)

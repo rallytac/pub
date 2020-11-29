@@ -16,6 +16,7 @@ public class DatabaseMission
     public String _modPin;
     public String _name;
     public String _description;
+    public String _certStoreId;
 
     public boolean _useRp;
     public String _rpAddress;
@@ -97,6 +98,7 @@ public class DatabaseMission
             root.put("_useRp", _useRp);//NON-NLS
             root.put("_rpAddress", Utils.trimString(_rpAddress));//NON-NLS
             root.put("_rpPort", _rpPort);//NON-NLS
+            root.put("_certStoreId", Utils.trimString(_certStoreId));//NON-NLS
 
             root.put("multicastFailoverPolicy", _multicastFailoverPolicy);//NON-NLS
 
@@ -140,6 +142,7 @@ public class DatabaseMission
             mission._mcAddress = Utils.trimString(root.getString("_mcAddress"));//NON-NLS
             mission._mcPort = root.getInt("_mcPort");//NON-NLS
             mission._mcCryptoPassword = Utils.trimString(root.getString("_mcCryptoPassword"));//NON-NLS
+            mission._certStoreId = Utils.trimString(root.getString("_certStoreId"));//NON-NLS
 
             JSONArray groups = root.optJSONArray("groups");//NON-NLS
             if(groups != null)

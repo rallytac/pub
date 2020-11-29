@@ -544,7 +544,8 @@ public class Utils
                 rc.setErrorToneNotificationLevel(Float.parseFloat(Globals.getSharedPreferences().getString(PreferenceKeys.USER_TONE_LEVEL_ERROR, Float.toString(Constants.DEF_ERROR_TONE_LEVEL))));
                 rc.setNotificationToneNotificationLevel(Float.parseFloat(Globals.getSharedPreferences().getString(PreferenceKeys.USER_TONE_LEVEL_NOTIFICATION, Float.toString(Constants.DEF_PTT_TONE_LEVEL))));
 
-                rc.setSpeakerOutputBoostFactor(Globals.getSharedPreferences().getInt(PreferenceKeys.USER_SPEAKER_OUTPUT_BOOST_FACTOR, Constants.DEF_SPEAKER_OUTPUT_BOOST_FACTOR));
+                rc.setMicrophoneAgcLevel(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL, "0")));
+                rc.setSpeakerAgcLevel(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL, "0")));
 
                 rc.setNetworkInterfaceName(Globals.getSharedPreferences().getString(PreferenceKeys.NETWORK_BINDING_NIC_NAME, Constants.DEF_BINDING_NIC_NAME));
 

@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 import com.rallytac.engageandroid.Biometrics.DataSeries;
 import com.rallytac.engageandroid.Biometrics.RandomHumanBiometricGenerator;
@@ -203,6 +204,9 @@ public class EngageApplication
 
     private int[] _audioDeviceIds = null;
     private String[] _audioDeviceNames = null;
+    private HashMap<String, PresenceDescriptor> _nodes = new HashMap<String, PresenceDescriptor>();
+
+    //private ArrayList<JSONObject> _certificateStoreCache = new ArrayList<JSONObject>();
 
     public int getMaxGroupsAllowed()
     {
@@ -390,7 +394,7 @@ public class EngageApplication
 
             if(action.compareTo(getString(R.string.app_intent_ptt_on)) == 0)
             {
-                startTx(0, 0);
+                startTx();
             }
             else if(action.compareTo(getString(R.string.app_intent_ptt_off)) == 0)
             {
@@ -737,6 +741,7 @@ public class EngageApplication
     public void onActivityCreated(Activity activity, Bundle bundle)
     {
         Log.d(TAG, "onActivityCreated: " + activity.toString());
+        /*
         if(!_hasEngineBeenInitialized)
         {
             if(activity.getClass().getSimpleName().compareTo(LauncherActivity.class.getSimpleName()) != 0)
@@ -748,6 +753,7 @@ public class EngageApplication
                 startActivity(intent);
             }
         }
+        */
     }
 
     @Override
@@ -1397,7 +1403,7 @@ public class EngageApplication
         return null;
     }
 
-    private String buildAdvancedTxJson(int flags, int priority, int subchannelTag, boolean includeNodeId, String alias)
+    private String buildAdvancedTxJson(int priority, int flags, int subchannelTag, boolean includeNodeId, String alias)
     {
         String rc;
 
@@ -1439,12 +1445,12 @@ public class EngageApplication
 
             if(!Utils.isEmptyString(_activeConfiguration.getNetworkInterfaceName()))
             {
-                group.put("interfaceName", _activeConfiguration.getNetworkInterfaceName());
+                group.put(Engine.JsonFields.Group.interfaceName, _activeConfiguration.getNetworkInterfaceName());
             }
 
             if(!Utils.isEmptyString(_activeConfiguration.getUserAlias()))
             {
-                group.put("alias", _activeConfiguration.getUserAlias());
+                group.put(Engine.JsonFields.Group.alias, _activeConfiguration.getUserAlias());
             }
 
             if(group.optInt(Engine.JsonFields.Group.type, 0) == 1)
@@ -1456,18 +1462,16 @@ public class EngageApplication
                 deviceId = _activeConfiguration.getAudioInputDeviceId();
                 if(deviceId != Constants.INVALID_AUDIO_DEVICE_ID)
                 {
-                    audio.put("inputId", deviceId);
+                    audio.put(Engine.JsonFields.Group.Audio.inputId, deviceId);
                 }
 
                 deviceId = _activeConfiguration.getAudioOutputDeviceId();
                 if(deviceId != Constants.INVALID_AUDIO_DEVICE_ID)
                 {
-                    audio.put("outputId", deviceId);
+                    audio.put(Engine.JsonFields.Group.Audio.outputId, deviceId);
                 }
 
-                audio.put("outputGain", (_activeConfiguration.getSpeakerOutputBoostFactor() * 100));
-
-                group.put("audio", audio);
+                group.put(Engine.JsonFields.Group.Audio.objectName, audio);
             }
 
             if(_activeConfiguration.getUseRp())
@@ -1475,37 +1479,38 @@ public class EngageApplication
                 JSONObject rallypoint = new JSONObject();
 
                 JSONObject host = new JSONObject();
-                host.put("address", _activeConfiguration.getRpAddress());
-                host.put("port", _activeConfiguration.getRpPort());
+                host.put(Engine.JsonFields.Rallypoint.Host.address, _activeConfiguration.getRpAddress());
+                host.put(Engine.JsonFields.Rallypoint.Host.port, _activeConfiguration.getRpPort());
 
-                rallypoint.put("host", host);
-                rallypoint.put("certificate", "@certstore://" + Globals.getContext().getString(R.string.certstore_default_certificate_id));
-                rallypoint.put("certificateKey", "@certstore://" + Globals.getContext().getString(R.string.certstore_default_certificate_id));
+                rallypoint.put(Engine.JsonFields.Rallypoint.Host.objectName, host);
+
+                rallypoint.put(Engine.JsonFields.Rallypoint.certificate, getDefaultCertificateIdUri());
+                rallypoint.put(Engine.JsonFields.Rallypoint.certificateKey, getDefaultCertificateKeyUri());
 
                 JSONArray rallypoints = new JSONArray();
                 rallypoints.put(rallypoint);
 
-                group.put("rallypoints", rallypoints);
+                group.put(Engine.JsonFields.Rallypoint.arrayName, rallypoints);
 
                 // Multicast failover only applies when rallypoints are present
-                group.put("enableMulticastFailover", _activeConfiguration.getMulticastFailoverConfiguration().enabled);
-                group.put("multicastFailoverSecs", _activeConfiguration.getMulticastFailoverConfiguration().thresholdSecs);
+                group.put(Engine.JsonFields.Group.enableMulticastFailover, _activeConfiguration.getMulticastFailoverConfiguration().enabled);
+                group.put(Engine.JsonFields.Group.multicastFailoverSecs, _activeConfiguration.getMulticastFailoverConfiguration().thresholdSecs);
             }
             else
             {
                 JSONObject txOptions = new JSONObject();
 
-                txOptions.put("ttl", Constants.DEFAULT_NETWORK_TX_TTL);
-                txOptions.put("priority", Constants.DEFAULT_NETWORK_QOS_PRIORITY);
+                txOptions.put(Engine.JsonFields.NetworkTxOptions.ttl, Constants.DEFAULT_NETWORK_TX_TTL);
+                txOptions.put(Engine.JsonFields.NetworkTxOptions.priority, Constants.DEFAULT_NETWORK_QOS_PRIORITY);
 
-                group.put("txOptions", txOptions);
+                group.put(Engine.JsonFields.NetworkTxOptions.objectName, txOptions);
             }
 
             {
                 JSONObject timeline = new JSONObject();
 
-                timeline.put("enabled", true);
-                group.put("timeline", timeline);
+                timeline.put(Engine.JsonFields.Group.Timeline.enabled, true);
+                group.put(Engine.JsonFields.Group.Timeline.objectName, timeline);
             }
 
             rc = group.toString();
@@ -1517,6 +1522,54 @@ public class EngageApplication
         }
 
         return rc;
+    }
+
+    public String getDefaultCertificateIdUri()
+    {
+        // Return whatever has been set in preferences, default to resource-provided info
+        String id = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_DEFAULT_ID,
+                Globals.getContext().getString(R.string.certstore_default_certificate_id));
+
+        if(!Utils.isEmptyString(id))
+        {
+            return "@certstore://" + id;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public String getDefaultCertificateKeyUri()
+    {
+        // Return whatever has been set in preferences, default to resource-provided info
+        String id = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_DEFAULT_KEY,
+                Globals.getContext().getString(R.string.certstore_default_certificate_key));
+
+        if(!Utils.isEmptyString(id))
+        {
+            return "@certstore://" + id;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public String getDefaultCaIdUri()
+    {
+        // Return whatever has been set in preferences, default to resource-provided info
+        String id = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_DEFAULT_CA,
+                Globals.getContext().getString(R.string.certstore_default_ca_id));
+
+        if(!Utils.isEmptyString(id))
+        {
+            return "@certstore://" + id;
+        }
+        else
+        {
+            return "";
+        }
     }
 
     public void createAllGroupObjects()
@@ -1545,60 +1598,55 @@ public class EngageApplication
     {
         Log.d(TAG, "joinSelectedGroups");
 
-        // TODO: leaving everything before joining is terrible - needs to be optimized!
-        leaveAllGroups();
+        try
+        {
+            HashSet<String> groupsToJoin = _activeConfiguration.getIdsOfSelectedGroups();
+            for(String id : groupsToJoin)
+            {
+                joinGroup(id);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void joinGroup(String id)
+    {
+        Log.d(TAG, "joinGroup " + id);
 
         try
         {
-            for(GroupDescriptor gd : _activeConfiguration.getMissionGroups())
-            {
-                boolean joinIt = false;
+            getEngine().engageJoinGroup(id);
+            getEngine().engageUnmuteGroupRx(id);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 
+    public void leaveGroup(String id)
+    {
+        Log.d(TAG, "leaveGroup " + id);
+
+        try
+        {
+            getEngine().engageLeaveGroup(id);
+
+            // If we're leaving a presence group then clear our nodes
+            GroupDescriptor gd = getGroup(id);
+            if(gd != null)
+            {
                 if(gd.type == GroupDescriptor.Type.gtPresence)
                 {
-                    // All presence groups get joined
-                    joinIt = true;
-
-                }
-                else if(gd.type == GroupDescriptor.Type.gtRaw)
-                {
-                    // All raw groups get joined
-                    joinIt = true;
-                }
-                else if(gd.type == GroupDescriptor.Type.gtAudio)
-                {
-                    // Maybe just the one that's the single view
-                    if(_activeConfiguration.getUiMode() == Constants.UiMode.vSingle)
+                    synchronized (_nodes)
                     {
-                        if(gd.selectedForSingleView)
-                        {
-                            joinIt = true;
-                        }
+                        _nodes.clear();
                     }
-                    // ... or the multi-view group(s)?
-                    else if(_activeConfiguration.getUiMode() == Constants.UiMode.vMulti)
-                    {
-                        if(gd.selectedForMultiView)
-                        {
-                            joinIt = true;
-                        }
-                    }
-                }
-
-                if(joinIt)
-                {
-                    if(gd.joined)
-                    {
-                        Log.w(TAG, "joining a group which is already joined");
-                    }
-
-                    getEngine().engageJoinGroup(gd.id);
-                    getEngine().engageUnmuteGroupRx(gd.id);
                 }
             }
-
-            stopGroupHealthCheckTimer();
-            startGroupHealthCheckerTimer();
         }
         catch (Exception e)
         {
@@ -1614,7 +1662,7 @@ public class EngageApplication
             stopGroupHealthCheckTimer();
             for(GroupDescriptor gd : _activeConfiguration.getMissionGroups())
             {
-                getEngine().engageLeaveGroup(gd.id);
+                leaveGroup(gd.id);
             }
         }
         catch (Exception e)
@@ -1841,9 +1889,48 @@ public class EngageApplication
         return Globals.getContext().getFilesDir().getAbsolutePath() + "/" + Globals.getContext().getString(R.string.certstore_cache_dir);
     }
 
-    private String getCustomCertStoreFn()
+    public boolean isAvailableCertStore(String id)
     {
-        String fn = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, "");
+        return !(Utils.isEmptyString(getCustomCertStoreFn(id)));
+    }
+
+    private String getCustomCertStoreFn(String id)
+    {
+        String fn = null;
+
+        if(Utils.isEmptyString(id))
+        {
+            fn = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, "");
+        }
+        else
+        {
+            try
+            {
+                File dir = new File(getCertStoreCacheDir());
+                File[] allContents = dir.listFiles();
+                if (allContents != null)
+                {
+                    for (File file : allContents)
+                    {
+                        JSONObject descriptor = Globals.getEngageApplication().getCertificateStoreDescriptorForFile(file.getAbsolutePath());
+                        if (descriptor != null)
+                        {
+                            String testId = descriptor.optString("id", "");
+                            if(testId.compareToIgnoreCase(id) == 0)
+                            {
+                                fn = file.getAbsolutePath();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
         if(!Utils.isEmptyString(fn))
         {
             if(!Utils.doesFileExist(fn))
@@ -1852,54 +1939,17 @@ public class EngageApplication
             }
         }
 
-        /*
-        try
-        {
-            String tmp;
-
-            // See if our preferences tell us what file to use
-            tmp = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, "");
-            if(Utils.doesFileExist(tmp))
-            {
-               fn = tmp;
-            }
-            else
-            {
-                ArrayList<String> dirs = new ArrayList<>();
-
-                dirs.add(Globals.getContext().getFilesDir().getAbsolutePath());
-                dirs.add(Environment.getExternalStorageDirectory().getAbsolutePath());
-                dirs.add(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
-
-                for (String dirName : dirs)
-                {
-                    tmp = dirName + "/" + Globals.getContext().getString(R.string.certstore_default_fn);
-                    if (Utils.doesFileExist(tmp))
-                    {
-                        fn = tmp;
-                        break;
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            fn = null;
-        }
-        */
-
         return fn;
 
     }
 
-    private byte[] getCustomCertStoreContent()
+    private byte[] getCustomCertStoreContent(String id)
     {
         byte[] rc = null;
 
         try
         {
-            String fn = getCustomCertStoreFn();
+            String fn = getCustomCertStoreFn(id);
             if(!Utils.isEmptyString(fn))
             {
                 RandomAccessFile raf = new RandomAccessFile(fn, "r");
@@ -1919,18 +1969,90 @@ public class EngageApplication
         return rc;
     }
 
-    private boolean openCertificateStore()
+    /*
+    public void saveInternalCertificateStoreToCache()
+    {
+        try
+        {
+            byte[] certStoreContent;
+
+            certStoreContent = Utils.getBinaryResource(Globals.getContext(), R.raw.android_engage_default_certstore);
+            if(certStoreContent == null)
+            {
+                throw new Exception("cannot load binary resource");
+            }
+
+            String fn = getCertStoreCacheDir() + "/" + Constants.INTERNAL_DEFAULT_CERTSTORE_FN;
+
+            File fd = new File(fn);
+            fd.deleteOnExit();
+
+            FileOutputStream fos = new FileOutputStream(fd);
+            fos.write(certStoreContent);
+            fos.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void refreshCertificateStoreCache()
+    {
+        synchronized(_certificateStoreCache)
+        {
+            _certificateStoreCache.clear();
+
+            try
+            {
+                File dir = new File(getCertStoreCacheDir());
+                File[] allContents = dir.listFiles();
+                if (allContents != null)
+                {
+                    for (File file : allContents)
+                    {
+                        JSONObject descriptor = Globals.getEngageApplication().getCertificateStoreDescriptorForFile(file.getAbsolutePath());
+                        if (descriptor != null)
+                        {
+                            JSONObject cacheEntry = new JSONObject();
+
+                            cacheEntry.put("id", descriptor.optString("id", ""));
+                            cacheEntry.put("fn", file.getAbsolutePath());
+                            cacheEntry.put("descriptor", descriptor);
+
+                            _certificateStoreCache.add(cacheEntry);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    */
+
+    private boolean openCertificateStore(String id)
     {
         boolean rc = false;
+
+        // Get rid of any actively cached files
+        deleteActiveCertStore();
 
         try
         {
             byte[] certStoreContent;
 
-            certStoreContent = getCustomCertStoreContent();
+            certStoreContent = getCustomCertStoreContent(id);
 
             if(certStoreContent == null)
             {
+                if(!Utils.isEmptyString(id))
+                {
+                    throw new Exception("cannot find certificate store for id " + id);
+                }
+
                 certStoreContent = Utils.getBinaryResource(Globals.getContext(), R.raw.android_engage_default_certstore);
                 if(certStoreContent == null)
                 {
@@ -1938,8 +2060,7 @@ public class EngageApplication
                 }
             }
 
-            String dir = Globals.getContext().getFilesDir().toString();
-            String fn = dir + "/" + Globals.getContext().getString(R.string.certstore_active_fn);
+            String fn = getActiveCertStoreFileName();
 
             File fd = new File(fn);
             fd.deleteOnExit();
@@ -1965,6 +2086,25 @@ public class EngageApplication
         }
 
         return rc;
+    }
+
+    private String getActiveCertStoreFileName()
+    {
+        return Globals.getContext().getFilesDir().toString() +
+                "/" +
+                Globals.getContext().getString(R.string.certstore_active_fn);
+    }
+
+    private void deleteActiveCertStore()
+    {
+        try
+        {
+            File fd = new File(getActiveCertStoreFileName());
+            fd.delete();
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     public String applyFlavorSpecificGeneratedMissionModifications(String json)
@@ -2025,6 +2165,28 @@ public class EngageApplication
         String enginePolicyJson = ActiveConfiguration.makeBaselineEnginePolicyObject(getEnginePolicy()).toString();
         String identityJson = "{}";
         String tempDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        try
+        {
+            JSONObject dummyPolicy = new JSONObject(enginePolicyJson);
+            JSONObject dummyCertificate = new JSONObject();
+            JSONObject dummySecurity = new JSONObject();
+
+            dummyCertificate.put(Engine.JsonFields.EnginePolicy.Security.Certificate.certificate, "");
+            dummyCertificate.put(Engine.JsonFields.EnginePolicy.Security.Certificate.key, "");
+
+            dummySecurity.put(Engine.JsonFields.EnginePolicy.Security.Certificate.objectName, dummyCertificate);
+
+            dummyPolicy.put(Engine.JsonFields.EnginePolicy.Security.objectName, dummySecurity);
+
+            enginePolicyJson = dummyPolicy.toString();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        openCertificateStore("");
 
         getEngine().engageInitialize(enginePolicyJson,
                 identityJson,
@@ -2095,24 +2257,33 @@ public class EngageApplication
         getEngine().deinitialize();
     }
 
-    public void startEngine()
+    public void onEngineServiceOnline()
+    {
+        //saveInternalCertificateStoreToCache();
+        //refreshCertificateStoreCache();
+        startEngine();
+    }
+
+    public boolean startEngine()
     {
         Log.d(TAG, "startEngine");
+        boolean rc = false;
 
         try
         {
-            if(!openCertificateStore())
+            synchronized (_nodes)
             {
-                throw new Exception("Throw cannot open certificate store");
+                _nodes.clear();
             }
 
             updateActiveConfiguration();
-
-            if(_activeConfiguration == null)
+            if (_activeConfiguration == null)
             {
                 createSampleConfiguration();
                 updateActiveConfiguration();
             }
+
+            openCertificateStore(_activeConfiguration.getMissionCertStoreId());
 
             setMissionChangedStatus(false);
             JSONObject policyBaseline = ActiveConfiguration.makeBaselineEnginePolicyObject(getEnginePolicy());
@@ -2121,19 +2292,25 @@ public class EngageApplication
             String identityJson = getActiveConfiguration().makeIdentityObject().toString();
             String tempDirectory = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-            getEngine().engageInitialize(enginePolicyJson,
+            int initRc = getEngine().engageInitialize(enginePolicyJson,
                     identityJson,
                     tempDirectory);
 
-            getEngine().engageStart();
+            //if(initRc  == 0)
+            {
+                getEngine().engageStart();
 
-            _hasEngineBeenInitialized = true;
+                _hasEngineBeenInitialized = true;
+                rc = true;
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
             stop();
         }
+
+        return rc;
     }
 
     public void stopEngine()
@@ -2145,11 +2322,152 @@ public class EngageApplication
             _engineRunning = false;
             getEngine().engageStop();
             getEngine().engageShutdown();
+
+            synchronized (_nodes)
+            {
+                _nodes.clear();
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    public int getMissionNodeCount(String forGroupId)
+    {
+        int rc = 0;
+
+        synchronized (_nodes)
+        {
+            if(Utils.isEmptyString(forGroupId))
+            {
+                rc = _nodes.size();
+            }
+            else
+            {
+                for (PresenceDescriptor pd : _nodes.values())
+                {
+                    if(pd.groupAliases.keySet().contains(forGroupId))
+                    {
+                        rc++;
+                    }
+                }
+            }
+        }
+
+        return rc;
+    }
+
+    public ArrayList<PresenceDescriptor> getMissionNodes(String forGroupId)
+    {
+        ArrayList<PresenceDescriptor> rc = new ArrayList<>();
+
+        synchronized(_nodes)
+        {
+            for (PresenceDescriptor pd : _nodes.values())
+            {
+                if(Utils.isEmptyString(forGroupId))
+                {
+                    rc.add(pd);
+                }
+                else
+                {
+                    if(pd.groupAliases.keySet().contains(forGroupId))
+                    {
+                        rc.add(pd);
+                    }
+                }
+            }
+        }
+
+        return rc;
+    }
+
+    public PresenceDescriptor getPresenceDescriptor(String nodeId)
+    {
+        PresenceDescriptor rc = null;
+
+        synchronized(_nodes)
+        {
+            rc = _nodes.get(nodeId);
+        }
+
+        return rc;
+    }
+
+    public PresenceDescriptor processNodeDiscovered(String nodeJson)
+    {
+        Log.d(TAG, "processNodeDiscovered > nodeJson=" + nodeJson);//NON-NLS
+
+        PresenceDescriptor pd;
+
+        try
+        {
+            PresenceDescriptor discoveredPd = new PresenceDescriptor();
+            if(discoveredPd.deserialize(nodeJson))
+            {
+                synchronized (_nodes)
+                {
+                    pd = _nodes.get(discoveredPd.nodeId);
+
+                    if(pd != null)
+                    {
+                        pd.updateFromPresenceDescriptor(discoveredPd);
+                    }
+                    else
+                    {
+                        _nodes.put(discoveredPd.nodeId, discoveredPd);
+                        pd = discoveredPd;
+                    }
+
+                    Log.d(TAG, "processNodeDiscovered > nid=" + discoveredPd.nodeId + ", u=" + discoveredPd.userId + ", d=" + discoveredPd.displayName);//NON-NLS
+                }
+            }
+            else
+            {
+                Log.w(TAG, "failed to parse node information");//NON-NLS
+                pd = null;
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            pd = null;
+        }
+
+        return pd;
+    }
+
+    public PresenceDescriptor processNodeUndiscovered(String nodeJson)
+    {
+        PresenceDescriptor pd;
+
+        try
+        {
+            pd = new PresenceDescriptor();
+            if(pd.deserialize(nodeJson))
+            {
+                synchronized (_nodes)
+                {
+                    _nodes.remove(pd.nodeId);
+
+                    Log.d(TAG, "processNodeUndiscovered < nid=" + pd.nodeId + ", u=" + pd.userId + ", d=" + pd.displayName);//NON-NLS
+                }
+            }
+            else
+            {
+                Log.w(TAG, "failed to parse node information");//NON-NLS
+                pd = null;
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            pd = null;
+        }
+
+        return pd;
     }
 
     public ActiveConfiguration updateActiveConfiguration()
@@ -2350,7 +2668,42 @@ public class EngageApplication
 
     private HashSet<GroupDescriptor> _groupsSelectedForTx = new HashSet<>();
 
-    public void startTx(final int priority, final int flags)
+    private class GroupTxInfo
+    {
+        public int priority;
+        public int flags;
+    }
+
+    private HashMap<String, GroupTxInfo> _groupTxInfoMap = new HashMap<>();
+
+    public void setGroupTxInfo(String id, int priority, int flags)
+    {
+        if(priority == -1 || flags == -1)
+        {
+            clearGroupTxInfo(id);
+        }
+        else
+        {
+            synchronized (_groupTxInfoMap)
+            {
+                GroupTxInfo ti = new GroupTxInfo();
+                ti.priority = priority;
+                ti.flags = flags;
+
+                _groupTxInfoMap.put(id, ti);
+            }
+        }
+    }
+
+    public void clearGroupTxInfo(String id)
+    {
+        synchronized (_groupTxInfoMap)
+        {
+            _groupTxInfoMap.remove(id);
+        }
+    }
+
+    public void startTx()
     {
         runOnUiThread(new Runnable()
         {
@@ -2418,7 +2771,22 @@ public class EngageApplication
                                     if(getActiveConfiguration().getUiMode() == Constants.UiMode.vSingle ||
                                             (getActiveConfiguration().getUiMode() == Constants.UiMode.vMulti) && (!g.txMuted) )
                                     {
-                                        getEngine().engageBeginGroupTxAdvanced(g.id, buildAdvancedTxJson(flags, priority, 0, true, _activeConfiguration.getUserAlias()));
+                                        int priority;
+                                        int flags;
+                                        GroupTxInfo ti = _groupTxInfoMap.get(g.id);
+
+                                        if(ti != null)
+                                        {
+                                            priority = ti.priority;
+                                            flags = ti.flags;
+                                        }
+                                        else
+                                        {
+                                            flags = 0;
+                                            priority = 0;
+                                        }
+
+                                        getEngine().engageBeginGroupTxAdvanced(g.id, buildAdvancedTxJson(priority, flags, 0, true, _activeConfiguration.getUserAlias()));
                                     }
                                 }
                             }
@@ -2680,7 +3048,7 @@ public class EngageApplication
                 }
                 catch (Exception e)
                 {
-                    Toast.makeText(EngageApplication.this, "Exception: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(EngageApplication.this, e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -2691,7 +3059,16 @@ public class EngageApplication
         ActiveConfiguration ac = new ActiveConfiguration();
         if (!ac.parseTemplate(missionData))
         {
-            throw new Exception("Invalid mission data");
+            throw new Exception(getString(R.string.invalid_mission_data));
+        }
+
+        String certStoreId = ac.getMissionCertStoreId();
+        if(!Utils.isEmptyString(certStoreId))
+        {
+            if(!isAvailableCertStore(certStoreId))
+            {
+                throw new Exception(getString(R.string.certstore_not_available_for_mission));
+            }
         }
 
         saveAndActivateConfiguration(ac);
@@ -2840,9 +3217,18 @@ public class EngageApplication
         return processScannedQrCode(scannedString, pwd);
     }
 
+    private String _lastSwitchToMissionErrorMsg = null;
+
+    public String getLastSwitchToMissionErrorMsg()
+    {
+        return _lastSwitchToMissionErrorMsg;
+    }
+
     public boolean switchToMission(String id)
     {
         boolean rc;
+
+        _lastSwitchToMissionErrorMsg = null;
 
         try
         {
@@ -2850,14 +3236,23 @@ public class EngageApplication
             DatabaseMission mission = database.getMissionById(id);
             if(mission == null)
             {
-                throw new Exception("WTF, no mission by this ID");
+                throw new Exception(getString(R.string.no_mission_found_with_this_id));
             }
 
             ActiveConfiguration ac = ActiveConfiguration.loadFromDatabaseMission(mission);
 
             if(ac == null)
             {
-                throw new Exception("boom!");
+                throw new Exception(getString(R.string.failed_to_load_the_mission_from_internal_database));
+            }
+
+            String certStoreId = ac.getMissionCertStoreId();
+            if(!Utils.isEmptyString(certStoreId))
+            {
+                if(!isAvailableCertStore(certStoreId))
+                {
+                    throw new Exception(getString(R.string.the_cert_store_required_cannot_be_found));
+                }
             }
 
             String serializedAc = ac.makeTemplate().toString();
@@ -2869,6 +3264,7 @@ public class EngageApplication
         }
         catch (Exception e)
         {
+            _lastSwitchToMissionErrorMsg = e.getMessage();
             rc = false;
         }
 
@@ -2891,7 +3287,8 @@ public class EngageApplication
     @Override
     public void requestPttOn(int priority, int flags)
     {
-        startTx(priority, flags);
+        // TODO: requestPttOn needs to determine what group for priority and flags
+        startTx();
     }
 
     @Override
@@ -2916,6 +3313,8 @@ public class EngageApplication
                 joinSelectedGroups();
                 startLocationUpdates();
                 startHardwareButtonManager();
+
+                startGroupHealthCheckerTimer();
             }
         });
     }
@@ -3945,6 +4344,30 @@ public class EngageApplication
     }
 
     @Override
+    public void onGroupRxDtmf(final String id, final String dtmfJson, final String eventExtraJson)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                //logEvent(Analytics.GROUP_RX_DTMF);
+
+                GroupDescriptor gd = getGroup(id);
+                if (gd == null)
+                {
+                    Log.e(TAG, "onGroupRxDtmf: cannot find group id='" + id + "'");
+                    return;
+                }
+
+                Log.d(TAG, "onGroupRxDtmf: id='" + id + "', n='" + gd.name + "'");
+
+                notifyGroupUiListeners(gd);
+            }
+        });
+    }
+
+    @Override
     public void onGroupNodeDiscovered(final String id, final String nodeJson, final String eventExtraJson)
     {
         runOnUiThread(new Runnable()
@@ -3963,7 +4386,7 @@ public class EngageApplication
 
                 Log.d(TAG, "onGroupNodeDiscovered: id='" + id + "', n='" + gd.name + "'");
 
-                PresenceDescriptor pd = getActiveConfiguration().processNodeDiscovered(nodeJson);
+                PresenceDescriptor pd = processNodeDiscovered(nodeJson);
                 if (pd != null)
                 {
                     if (!pd.self && _activeConfiguration.getNotifyOnNodeJoin())
@@ -4014,7 +4437,7 @@ public class EngageApplication
 
                 Log.d(TAG, "onGroupNodeRediscovered: id='" + id + "', n='" + gd.name + "'");
 
-                PresenceDescriptor pd = getActiveConfiguration().processNodeDiscovered(nodeJson);
+                PresenceDescriptor pd = processNodeDiscovered(nodeJson);
                 if (pd != null)
                 {
                     synchronized (_presenceChangeListeners)
@@ -4050,7 +4473,7 @@ public class EngageApplication
 
                 Log.d(TAG, "onGroupNodeUndiscovered: id='" + id + "', n='" + gd.name + "'");
 
-                PresenceDescriptor pd = getActiveConfiguration().processNodeUndiscovered(nodeJson);
+                PresenceDescriptor pd = processNodeUndiscovered(nodeJson);
                 if (pd != null)
                 {
                     if (!pd.self && _activeConfiguration.getNotifyOnNodeLeave())
@@ -4633,7 +5056,7 @@ public class EngageApplication
                     String source = blobInfo.getString(Engine.JsonFields.BlobInfo.source);
                     String target = blobInfo.getString(Engine.JsonFields.BlobInfo.target);
 
-                    PresenceDescriptor pd = _activeConfiguration.getPresenceDescriptor(source);
+                    PresenceDescriptor pd = getPresenceDescriptor(source);
 
                     // Make a super basic PD if we couldn't find one for some reason
                     if (pd == null)

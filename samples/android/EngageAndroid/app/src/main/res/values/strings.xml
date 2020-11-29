@@ -219,6 +219,7 @@
     <string name="tx_status_reason_invalid_group_id">Invalid group ID</string>
     <string name="tx_status_reason_unknown">Unknown error</string>
     <string name="share_json">Share JSON</string>
+    <string name="certstore_not_available_for_mission">The selected mission requires a certificate store which is not currently installed.</string>
 
     <string-array name="lp_tx_encoder_names">
         <item>G.711 ulaw (64 kbps)</item>
@@ -565,6 +566,8 @@
 
     <!-- <item>name,<string/boolean/integer/float>,value</item> -->
     <string-array name="flavor_defaults"></string-array>
+    <string name="app_emergency_toggle">toggle emergency</string>
+    <string name="app_priority_toggle">toggle priority</string>
     <string name="app_ptt_voice_control_off">disengage</string>
     <string name="app_ptt_voice_control_on">engage</string>
     <string name="synchronize_left_and_right">Synchronize left and right</string>
@@ -735,6 +738,8 @@
     <string name="cert_store_in_use_proceed_with_delete_will_use_default">This certificate store is currently in use.  If you delete it, the application will use the default certificate store until you select another.\n\nProceed?</string>
     <string name="are_you_sure_delete_cert_store">Are you sure you want to delete this certificate store?</string>
     <string name="delete_cert_store">Delete Certificate Store</string>
+    <string name="auto_activate_cert_store_title">Auto-Activate Required</string>
+    <string name="auto_activate_cert_store">The certificate store imported is needed by the current mission.  You will be returned to it right away.</string>
     <string name="no_mission_name">(no name)</string>
     <string name="no_mission_description">(no description)</string>
     <string name="active_mission_cannot_be_deleted">The active mission cannot be deleted</string>
@@ -772,4 +777,8 @@
     <string name="set_summ_experience">Notifications, tones, and visuals</string>
     <string name="set_summ_location">Configure location sharing</string>
     <string name="err_cannot_play_event_audio">Cannot play the event\'s audio</string>
+    <string name="invalid_mission_data">Invalid mission data</string>
+    <string name="no_mission_found_with_this_id">No mission found with this ID</string>
+    <string name="failed_to_load_the_mission_from_internal_database">Failed to load the mission from internal database</string>
+    <string name="the_cert_store_required_cannot_be_found">The certificate store required by this mission cannot be found</string>
 </resources>

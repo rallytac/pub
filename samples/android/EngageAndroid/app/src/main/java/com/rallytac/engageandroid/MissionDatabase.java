@@ -127,6 +127,7 @@ public class MissionDatabase
             mission._name = ac.getMissionName();
             mission._description = ac.getMissionDescription();
             mission._modPin = ac.getMissionModPin();
+            mission._certStoreId = ac.getMissionCertStoreId();
 
             mission._useRp = ac.getUseRp();
             mission._rpAddress = ac.getRpAddress();
@@ -139,8 +140,17 @@ public class MissionDatabase
                 {
                     JSONObject jo = new JSONObject(gd.jsonConfiguration);
                     mission._mcId = gd.id;
-                    mission._mcAddress = jo.getJSONObject(Engine.JsonFields.Rx.objectName).optString(Engine.JsonFields.Rx.address, "");
-                    mission._mcPort = jo.getJSONObject(Engine.JsonFields.Rx.objectName).optInt(Engine.JsonFields.Rx.port, 0);
+
+                    JSONObject opt = jo.optJSONObject(Engine.JsonFields.Rx.objectName);
+                    {
+                        if (opt == null)
+                        {
+                            opt = new JSONObject();
+                        }
+                    }
+
+                    mission._mcAddress = opt.optString(Engine.JsonFields.Rx.address, "");
+                    mission._mcPort = opt.optInt(Engine.JsonFields.Rx.port, 0);
                     mission._mcCryptoPassword = jo.optString(Engine.JsonFields.Group.cryptoPassword, "");
                     break;
                 }

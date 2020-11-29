@@ -406,7 +406,7 @@ public class BluetoothManager
 
                                 if(s.compareTo(_pttOnString) == 0)
                                 {
-                                    _pttRequestHandler.requestPttOn(0, 0);
+                                    _pttRequestHandler.requestPttOn(-1, -1);
                                 }
                                 else if(s.compareTo(_pttOffString) == 0)
                                 {

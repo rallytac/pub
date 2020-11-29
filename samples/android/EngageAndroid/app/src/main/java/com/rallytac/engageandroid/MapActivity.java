@@ -258,7 +258,7 @@ public class MapActivity extends
             return;
         }
 
-        ArrayList<PresenceDescriptor> nodes = _app.getActiveConfiguration().getMissionNodes(null);
+        ArrayList<PresenceDescriptor> nodes = Globals.getEngageApplication().getMissionNodes(null);
 
         if(nodes != null)
         {

@@ -132,7 +132,7 @@ public class UserNodeViewActivity extends
 
     private void forceRebuild()
     {
-        PresenceDescriptor pd = _app.getActiveConfiguration().getPresenceDescriptor(_nodeId);
+        PresenceDescriptor pd = Globals.getEngageApplication().getPresenceDescriptor(_nodeId);
         if(pd == null)
         {
             Toast.makeText(this, "Could not find the node!", Toast.LENGTH_LONG).show();//NON-NLS

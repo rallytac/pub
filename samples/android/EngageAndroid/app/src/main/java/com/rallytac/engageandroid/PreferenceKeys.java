@@ -34,7 +34,6 @@ public class PreferenceKeys
     public static String USER_TONE_LEVEL_PTT = "user_toneLevel.ptt";//NON-NLS
     public static String USER_TONE_LEVEL_ERROR = "user_toneLevel.error";//NON-NLS
     public static String USER_TONE_LEVEL_NOTIFICATION = "user_toneLevel.notification";//NON-NLS
-    public static String USER_SPEAKER_OUTPUT_BOOST_FACTOR = "user_audio.output.boostFactor";//NON-NLS
 
     public static String USER_AUDIO_AEC_ENABLED = "user_audio.aec.enabled";//NON-NLS
     public static String USER_AUDIO_AEC_MODE = "user_audio.aec.mode";//NON-NLS
@@ -45,6 +44,9 @@ public class PreferenceKeys
     public static String USER_AUDIO_ANDROID_AUDIO_API = "user_audio.android.api";//NON-NLS
     public static String USER_AUDIO_ENGINE_INTERNAL_AUDIO = "user_audio.engine.internal.audio";//NON-NLS
 
+    public static String USER_AUDIO_MICROPHONE_DENOISE = "user_audio.microphone.denoise";//NON-NLS
+    public static String USER_AUDIO_MICROPHONE_AGC_LEVEL = "user_audio.microphone.agc.level";//NON-NLS
+    public static String USER_AUDIO_SPEAKER_AGC_LEVEL = "user_audio.speaker.agc.level";//NON-NLS
 
     public static String USER_UI_PTT_LATCHING = "user_ui.pttLatching";//NON-NLS
     public static String USER_UI_PTT_VOICE_CONTROL = "user_ui.pttButtonVoiceControl";//NON-NLS
@@ -116,6 +118,9 @@ public class PreferenceKeys
 
     public static String USER_CERT_STORE_FILE_NAME = "user_activeCertStoreFileName";//NON-NLS
     public static String USER_CERT_STORE_PASSWORD_SET = "user_certStore.passwordSet";//NON-NLS
+    public static String USER_CERT_DEFAULT_ID = "user_cert.default.id";//NON-NLS
+    public static String USER_CERT_DEFAULT_KEY = "user_cert.default.key";//NON-NLS
+    public static String USER_CERT_DEFAULT_CA = "user_cert.default.ca";//NON-NLS
 
     public static String ENGINE_POLICY_JSON = "engine_policy_json";//NON-NLS
 }

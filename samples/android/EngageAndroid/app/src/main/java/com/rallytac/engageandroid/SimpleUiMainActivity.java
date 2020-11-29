@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -138,6 +139,10 @@ public class SimpleUiMainActivity
     private int _keycodePtt = 0;
 
     private String _missionFileLoadPassword = null;
+
+    private HashSet<String> _currentlySelectedGroups = null;
+    private boolean _isEmergencyTxOn = false;
+    private boolean _isPriorityOn = false;
 
     private class TimelineEventPlayerTracker
     {
@@ -375,7 +380,7 @@ public class SimpleUiMainActivity
                     return;
                 }
 
-                ArrayList<PresenceDescriptor> nodes = Globals.getEngageApplication().getActiveConfiguration().getMissionNodes(null);
+                ArrayList<PresenceDescriptor> nodes = Globals.getEngageApplication().getMissionNodes(null);
 
                 if(nodes != null)
                 {
@@ -592,6 +597,9 @@ public class SimpleUiMainActivity
             //setContentView(R.layout.activity_main_single_multi);
         }
 
+        // Remember what groups we're showing in this view
+        _currentlySelectedGroups = _ac.getIdsOfSelectedGroups();
+
         // Hide things we don't necessarily need right now
         hideNotificationBar();
         hideLicensingBar();
@@ -651,6 +659,8 @@ public class SimpleUiMainActivity
             _groupSelectorView.setAdapter(_groupSelectorAdapter);
         }
         */
+
+        updateSingleGroupTxInfo();
 
         redrawCardFragments();
 
@@ -761,6 +771,10 @@ public class SimpleUiMainActivity
                     Toast.makeText(this, String.format(getString(R.string.activated_mission_fmt), ac.getMissionName()), Toast.LENGTH_SHORT).show();
                     onMissionChanged();
                 }
+                else
+                {
+                    Toast.makeText(this, Globals.getEngageApplication().getLastSwitchToMissionErrorMsg(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
         else if(requestCode == PICK_MISSION_FILE_REQUEST_CODE)
@@ -841,7 +855,7 @@ public class SimpleUiMainActivity
                     {
                         Log.d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
                         _pttRequestIsLatched = true;
-                        Globals.getEngageApplication().startTx(0, 0);
+                        Globals.getEngageApplication().startTx();
                     }
                     else
                     {
@@ -870,7 +884,7 @@ public class SimpleUiMainActivity
                     _pttRequested = true;
                     _pttRequestIsLatched = false;
                     Log.d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
-                    Globals.getEngageApplication().startTx(0, 0);
+                    Globals.getEngageApplication().startTx();
                 }
             }
         }
@@ -894,7 +908,7 @@ public class SimpleUiMainActivity
                         if (_pttRequested)
                         {
                             Log.d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
-                            Globals.getEngageApplication().startTx(0, 0);
+                            Globals.getEngageApplication().startTx();
                         }
                         else
                         {
@@ -2062,7 +2076,7 @@ public class SimpleUiMainActivity
             idToUse = Globals.getSharedPreferences().getString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_SELECTED_GROUPS_SINGLE, "");
         }
 
-        if(_ac == null || _ac.getMissionNodeCount(idToUse) == 0)
+        if(_ac == null || Globals.getEngageApplication().getMissionNodeCount(idToUse) == 0)
         {
             Utils.showPopupMsg(this, getString(R.string.no_team_members_present));
             return;
@@ -2070,7 +2084,7 @@ public class SimpleUiMainActivity
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        final ArrayList<PresenceDescriptor> theList = _ac.getMissionNodes(idToUse);
+        final ArrayList<PresenceDescriptor> theList = Globals.getEngageApplication().getMissionNodes(idToUse);
 
         final TeamListAdapter arrayAdapter = new TeamListAdapter(this, R.layout.team_list_row_item, theList);
 
@@ -2123,7 +2137,6 @@ public class SimpleUiMainActivity
 
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
-
     }
 
     private void startJsonPolicyEditorActivity()
@@ -2260,9 +2273,62 @@ public class SimpleUiMainActivity
     private void doRecreate()
     {
         removeAllFragments();
-        Globals.getEngageApplication().leaveAllGroups();
+
         Globals.getEngageApplication().updateActiveConfiguration();
-        Globals.getEngageApplication().joinSelectedGroups();
+        HashSet<String> newlySelectedGroups = Globals.getEngageApplication().getActiveConfiguration().getIdsOfSelectedGroups();
+
+        // Figure out which groups to leave
+        HashSet<String> groupsToLeave = new HashSet<>();
+        for(String p : _currentlySelectedGroups)
+        {
+            boolean foundInNewlySelected = false;
+
+            for(String n : newlySelectedGroups)
+            {
+                if(p.compareToIgnoreCase(n) == 0)
+                {
+                    foundInNewlySelected = true;
+                    break;
+                }
+            }
+
+            if(!foundInNewlySelected)
+            {
+                groupsToLeave.add(p);
+            }
+        }
+
+        // Figure out which groups to join
+        HashSet<String> groupsToJoin = new HashSet<>();
+        for(String n : newlySelectedGroups)
+        {
+            boolean foundInPreviouslySelected = false;
+
+            for(String p : _currentlySelectedGroups)
+            {
+                if(n.compareToIgnoreCase(p) == 0)
+                {
+                    foundInPreviouslySelected = true;
+                    break;
+                }
+            }
+
+            if(!foundInPreviouslySelected)
+            {
+                groupsToJoin.add(n);
+            }
+        }
+
+        for(String id : groupsToLeave)
+        {
+            Globals.getEngageApplication().leaveGroup(id);
+        }
+
+        for(String id : groupsToJoin)
+        {
+            Globals.getEngageApplication().joinGroup(id);
+        }
+
         recreate();
     }
 
@@ -2485,48 +2551,57 @@ public class SimpleUiMainActivity
 
             String msg;
 
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-            alertDialogBuilder.setTitle(getString(R.string.networking));
-
-            if(_ac.getUseRp())
+            // TODO: Disable switching to multicast is active configuration doesn't allow for it
+            if(!_ac.couldAllGroupsWorkWithoutRallypoint())
             {
-                msg = String.format(getString(R.string.currently_connected_globally_fmt),_ac.getRpAddress(), _ac.getRpPort());
-                alertDialogBuilder.setPositiveButton(getString(R.string.go_local), new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        switchNetworking(false);
-                    }
-                });
+                msg = String.format(getString(R.string.currently_connected_globally_fmt), _ac.getRpAddress(), _ac.getRpPort());
+                Utils.showLongPopupMsg(SimpleUiMainActivity.this, msg);
             }
             else
             {
-                msg = getString(R.string.currently_connected_via_ip_multicast);
-                alertDialogBuilder.setPositiveButton(getString(R.string.go_global), new DialogInterface.OnClickListener()
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+                alertDialogBuilder.setTitle(getString(R.string.networking));
+
+                if (_ac.getUseRp())
+                {
+                    msg = String.format(getString(R.string.currently_connected_globally_fmt), _ac.getRpAddress(), _ac.getRpPort());
+                    alertDialogBuilder.setPositiveButton(getString(R.string.go_local), new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            switchNetworking(false);
+                        }
+                    });
+                }
+                else
+                {
+                    msg = getString(R.string.currently_connected_via_ip_multicast);
+                    alertDialogBuilder.setPositiveButton(getString(R.string.go_global), new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            switchNetworking(true);
+                        }
+                    });
+                }
+
+                alertDialogBuilder.setMessage(msg);
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setNegativeButton(getString(R.string.button_cancel), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
-                        switchNetworking(true);
+                        dialog.cancel();
                     }
                 });
+
+                AlertDialog dlg = alertDialogBuilder.create();
+                dlg.show();
             }
-
-            alertDialogBuilder.setMessage(msg);
-            alertDialogBuilder.setCancelable(true);
-            alertDialogBuilder.setNegativeButton(getString(R.string.button_cancel), new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    dialog.cancel();
-                }
-            });
-
-            AlertDialog dlg = alertDialogBuilder.create();
-            dlg.show();
         }
         else
         {
@@ -2708,7 +2783,7 @@ public class SimpleUiMainActivity
 
                     if(_pttRequested)
                     {
-                        Globals.getEngageApplication().startTx(0, 0);
+                        Globals.getEngageApplication().startTx();
                     }
                     else
                     {
@@ -2727,7 +2802,7 @@ public class SimpleUiMainActivity
                     if (event.getAction() == MotionEvent.ACTION_DOWN)
                     {
                         _pttRequested = true;
-                        Globals.getEngageApplication().startTx(0, 0);
+                        Globals.getEngageApplication().startTx();
                     }
                     else if (event.getAction() == MotionEvent.ACTION_UP)
                     {
@@ -2738,6 +2813,73 @@ public class SimpleUiMainActivity
                     return true;
                 }
             });
+        }
+
+        // Emergency TX
+        final ImageView ivEmergency = findViewById(R.id.ivEmergency);
+        if(ivEmergency != null)
+        {
+            ivEmergency.setLongClickable(true);
+            ivEmergency.setOnLongClickListener(new View.OnLongClickListener()
+            {
+                @Override
+                public boolean onLongClick(View v)
+                {
+                    _isEmergencyTxOn = !_isEmergencyTxOn;
+
+                    if(_isEmergencyTxOn)
+                    {
+                        ivEmergency.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_emergency_on));
+                    }
+                    else
+                    {
+                        ivEmergency.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_emergency_off));
+                    }
+
+                    updateSingleGroupTxInfo();
+
+                    return true;
+                }
+            });
+        }
+
+        // Priority TX
+        final ImageView ivPriority = findViewById(R.id.ivPriority);
+        if(ivPriority != null)
+        {
+            ivPriority.setLongClickable(true);
+            ivPriority.setOnLongClickListener(new View.OnLongClickListener()
+            {
+                @Override
+                public boolean onLongClick(View v)
+                {
+                    _isPriorityOn = !_isPriorityOn;
+
+                    if(_isPriorityOn)
+                    {
+                        ivPriority.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_high_priority));
+                    }
+                    else
+                    {
+                        ivPriority.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_no_priority));
+                    }
+
+                    updateSingleGroupTxInfo();
+
+                    return true;
+                }
+            });
+        }
+    }
+
+    private void updateSingleGroupTxInfo()
+    {
+        String gid = Globals.getSharedPreferences().getString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_SELECTED_GROUPS_SINGLE, "");
+        if(!Utils.isEmptyString(gid))
+        {
+            int priority = (_isPriorityOn ? 100 : 0);
+            int flags = (_isEmergencyTxOn ? 1 : 0);
+            Globals.getEngageApplication().setGroupTxInfo(gid, priority, flags);
         }
     }
 

@@ -594,7 +594,8 @@ public class LauncherActivity extends AppCompatActivity
                 if(Globals.getEngageApplication().isServiceOnline())
                 {
                     _waitForEngageOnlineTimer.cancel();
-                    Globals.getEngageApplication().startEngine();
+
+                    Globals.getEngageApplication().onEngineServiceOnline();
                     launchUiActivity();
                 }
                 else

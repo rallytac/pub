@@ -9,6 +9,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONObject;
@@ -278,6 +279,44 @@ public class GroupDescriptor implements Parcelable
 
     public int getMemberCount()
     {
-        return Globals.getEngageApplication().getActiveConfiguration().getMissionNodeCount(this.id);
+        return Globals.getEngageApplication().getMissionNodeCount(this.id);
+    }
+
+    public boolean couldWorkWithoutRallypoint()
+    {
+        boolean rc = false;
+
+        try
+        {
+            JSONObject j = new JSONObject(jsonConfiguration);
+            String rxAddr = null;
+            int rxPort = 0;
+            String txAddr = null;
+            int txPort = 0;
+
+            if(j.has("rx"))
+            {
+                rxAddr = j.getJSONObject("rx").getString(Engine.JsonFields.Address.address);
+                rxPort = j.getJSONObject("rx").getInt(Engine.JsonFields.Address.port);
+            }
+
+            if(j.has("tx"))
+            {
+                txAddr = j.getJSONObject("tx").getString(Engine.JsonFields.Address.address);
+                txPort = j.getJSONObject("tx").getInt(Engine.JsonFields.Address.port);
+            }
+
+            if(!Utils.isEmptyString(rxAddr) && rxPort > 0 &&
+               !Utils.isEmptyString(txAddr) && txPort > 0)
+            {
+                rc = true;
+            }
+        }
+        catch (Exception e)
+        {
+            rc = false;
+        }
+
+        return rc;
     }
 }
