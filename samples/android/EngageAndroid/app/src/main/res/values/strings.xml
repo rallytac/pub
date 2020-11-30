@@ -155,7 +155,7 @@
     <string name="about_version_placeholder">version placeholder</string>
     <string name="about_device_id">Device ID</string>
     <string name="about_license_key">License Key</string>
-    <string name="about_enter_license_key">Enter your license key below or click the camera to scan a QR code.</string>
+    <string name="about_enter_license_key">Enter your license key below. Tap the camera to scan a QR code. Or tap the file to load from a file.</string>
     <string name="about_activation_code">Activation Code</string>
     <string name="about_enter_activation_code">Enter or scan your activation code below or click the cloud icon to obtain it from the Internet licensing server.</string>
     <string name="about_click_for_offline_activation">If you don\'t have Internet connectivity, click the double-arrow icon to perform a two-step activation using a secondary, Internet-connected, device.</string>

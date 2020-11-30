@@ -45,6 +45,7 @@ public class AboutActivity extends
     private static String TAG = AboutActivity.class.getSimpleName();
 
     private int OFFLINE_ACTIVATION_REQUEST_CODE = 771;
+    private static int PICK_LICENSE_FILE_REQUEST_CODE = 772;
 
 
     //private enum KeyType {ktUnknown, ktPerpetual, ktExpires};
@@ -64,6 +65,7 @@ public class AboutActivity extends
     private InternalDescriptor _activeLd = null;
     private InternalDescriptor _newLd = null;
     private ImageView _ivScanLicenseKey = null;
+    private ImageView _ivLoadLicenseKey = null;
     private ImageView _ivScanActivationCode = null;
     private ImageView _ivWebFetchActivationCode = null;
 
@@ -228,6 +230,7 @@ public class AboutActivity extends
         });
 
         _ivScanLicenseKey = findViewById(R.id.ivScanLicenseKey);
+        _ivLoadLicenseKey = findViewById(R.id.ivLoadLicenseKey);
         _ivScanActivationCode = findViewById(R.id.ivScanActivationCode);
         _ivWebFetchActivationCode = findViewById(R.id.ivWebFetchActivationCode);
 
@@ -428,11 +431,13 @@ public class AboutActivity extends
         {
             _etLicenseKey.setEnabled(true);
             _ivScanLicenseKey.setVisibility(View.VISIBLE);
+            _ivLoadLicenseKey.setVisibility(View.VISIBLE);
         }
         else
         {
             _etLicenseKey.setEnabled(false);
             _ivScanLicenseKey.setVisibility(View.GONE);
+            _ivLoadLicenseKey.setVisibility(View.GONE);
         }
 
         if(Utils.isEmptyString(key))
@@ -505,6 +510,43 @@ public class AboutActivity extends
                 {
                     _etActivationCode.setText(activationCode);
                     updateUi();
+                }
+            }
+        }
+        else if(requestCode == PICK_LICENSE_FILE_REQUEST_CODE)
+        {
+            if(intent != null)
+            {
+                if (resultCode == RESULT_OK)
+                {
+                    boolean ok = false;
+
+                    try
+                    {
+                        String license = Utils.readTextFile(AboutActivity.this, intent.getData());
+
+                        if(!Utils.isEmptyString(license))
+                        {
+                            Utils.trimString(license);
+                            if(license.length() == 24)
+                            {
+                                license = license.toUpperCase();
+                                _etLicenseKey.setText(license);
+                                updateUi();
+                                ok = true;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        ok = false;
+                    }
+
+                    if(!ok)
+                    {
+                        Utils.showErrorMsg(AboutActivity.this, "Failed to load the license data");
+                    }
                 }
             }
         }
@@ -613,6 +655,20 @@ public class AboutActivity extends
         alert.show();
     }
 
+    public void onClickLoadLicenseKey(View view)
+    {
+        try
+        {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_LICENSE_FILE_REQUEST_CODE);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     public void onClickScanLicenseKey(View view)
     {

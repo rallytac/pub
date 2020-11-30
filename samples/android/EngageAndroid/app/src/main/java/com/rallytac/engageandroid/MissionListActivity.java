@@ -9,10 +9,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +25,7 @@ import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +37,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class MissionListActivity extends AppCompatActivity
@@ -39,12 +46,14 @@ public class MissionListActivity extends AppCompatActivity
     private static String TAG = MissionListActivity.class.getSimpleName();
 
     private static int EDIT_ACTION_REQUEST_CODE = 42;
+    private static int PICK_MISSION_FILE_REQUEST_CODE = 43;
 
     private MissionDatabase _database;
     private MissionListAdapter _adapter;
     private Intent _resultIntent = new Intent();
     private String _activeMissionId;
     private String _activeMissionJson;
+    private String _missionFileLoadPassword = null;
 
     private class MissionListAdapter extends ArrayAdapter<DatabaseMission>
     {
@@ -275,6 +284,202 @@ public class MissionListActivity extends AppCompatActivity
 
     private void promptToAddMission()
     {
+        PopupMenu popup = new PopupMenu(this, findViewById(R.id.fabAdd));
+
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.mission_list_activity_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                int id = item.getItemId();
+
+                if (id == R.id.action_mission_add_manual)
+                {
+                    Intent intent = new Intent(MissionListActivity.this, MissionEditActivity.class);
+                    startActivityForResult(intent, EDIT_ACTION_REQUEST_CODE);
+                    return true;
+                }
+                else if (id == R.id.action_mission_add_generate)
+                {
+                    promptToGenerateMission();
+                    return true;
+                }
+                else if (id == R.id.action_mission_add_scan)
+                {
+                    Globals.getEngageApplication().initiateMissionQrCodeScan(MissionListActivity.this);
+                    return true;
+                }
+                else if (id == R.id.action_mission_add_load_file)
+                {
+                    _missionFileLoadPassword = null;
+
+                    LayoutInflater layoutInflater = LayoutInflater.from(MissionListActivity.this);
+                    View promptView = layoutInflater.inflate(R.layout.file_load_mission_password_dialog, null);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MissionListActivity.this);
+                    alertDialogBuilder.setView(promptView);
+
+                    final EditText etPassword = promptView.findViewById(R.id.etPassword);
+
+                    alertDialogBuilder.setCancelable(false)
+                            .setPositiveButton(R.string.mission_file_load_button, new DialogInterface.OnClickListener()
+                            {
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    try
+                                    {
+                                        // Save this for later
+                                        _missionFileLoadPassword = etPassword.getText().toString();
+
+                                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                        intent.setType("*/*");
+                                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_MISSION_FILE_REQUEST_CODE);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel,
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+
+                    return true;
+                }
+                else if (id == R.id.action_mission_add_download)
+                {
+                    LayoutInflater layoutInflater = LayoutInflater.from(MissionListActivity.this);
+                    View promptView = layoutInflater.inflate(R.layout.download_mission_url_dialog, null);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MissionListActivity.this);
+                    alertDialogBuilder.setView(promptView);
+
+                    final EditText etPassword = promptView.findViewById(R.id.etPassword);
+                    final EditText etUrl = promptView.findViewById(R.id.etUrl);
+
+                    //etUrl.setText("https://s3.us-east-2.amazonaws.com/rts-missions/{a50f4cfb-f200-4cf0-8f88-0401585ba034}.json");
+
+                    alertDialogBuilder.setCancelable(false)
+                            .setPositiveButton(R.string.mission_download_button, new DialogInterface.OnClickListener()
+                            {
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    downloadAndSaveMission(etUrl.getText().toString(), etPassword.getText().toString());
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel,
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        popup.show();
+    }
+
+    private void downloadAndSaveMission(final String url, final String password)
+    {
+        Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg)
+            {
+                try
+                {
+                    String resultMsg = msg.getData().getString(DownloadMissionTask.BUNDLE_RESULT_MSG);
+                    int responseCode = msg.arg1;
+
+                    if(responseCode >= 200 && responseCode <= 299)
+                    {
+                        byte[] missionData = msg.getData().getString(DownloadMissionTask.BUNDLE_RESULT_DATA).getBytes(Utils.getEngageCharSet());
+                        String json;
+
+                        if (!Utils.isEmptyString(password))
+                        {
+                            String pwdHexString = Utils.toHexString(_missionFileLoadPassword.getBytes(Utils.getEngageCharSet()));
+                            byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(missionData, pwdHexString);
+                            json = new String(decryptedBytes, Utils.getEngageCharSet());
+                        }
+                        else
+                        {
+                            json = new String(missionData, Utils.getEngageCharSet());
+                        }
+
+                        try
+                        {
+                            JSONObject verifier = null;
+
+                            try
+                            {
+                                verifier = new JSONObject(json);
+                            }
+                            catch(Exception eInner)
+                            {
+                                verifier = null;
+                            }
+
+                            if(verifier != null)
+                            {
+                                if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
+                                {
+                                    // Force a recreate to reload the database
+                                    recreate();
+                                }
+                                else
+                                {
+                                    throw new Exception(getString(R.string.invalid_mission_data));
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception(getString(R.string.invalid_mission_data));
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Toast.makeText(MissionListActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    else
+                    {
+                        Toast.makeText(MissionListActivity.this, "Mission download failed - " + resultMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Toast.makeText(MissionListActivity.this, "Mission download failed with exception " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+
+        DownloadMissionTask dmt = new DownloadMissionTask(handler);
+        dmt.execute(url);
+    }
+
+    private void promptToAddMission_original()
+    {
         final TextView message = new TextView(this);
 
         message.setText(R.string.you_can_add_a_mission_manually_or_generate);
@@ -332,14 +537,128 @@ public class MissionListActivity extends AppCompatActivity
                     installMissionJson(intent.getStringExtra(Constants.MISSION_EDIT_EXTRA_JSON));
                 }
             }
+            else if(requestCode == PICK_MISSION_FILE_REQUEST_CODE)
+            {
+                if(intent != null)
+                {
+                    byte[] missionData = Utils.readBinaryFile(MissionListActivity.this, intent.getData());
+                    String json;
+
+                    if (!Utils.isEmptyString(_missionFileLoadPassword))
+                    {
+                        String pwdHexString = Utils.toHexString(_missionFileLoadPassword.getBytes(Utils.getEngageCharSet()));
+                        byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(missionData, pwdHexString);
+                        json = new String(decryptedBytes, Utils.getEngageCharSet());
+                    }
+                    else
+                    {
+                        json = new String(missionData, Utils.getEngageCharSet());
+                    }
+
+                    try
+                    {
+                        JSONObject verifier = null;
+
+                        try
+                        {
+                            verifier = new JSONObject(json);
+                        }
+                        catch(Exception eInner)
+                        {
+                            verifier = null;
+                        }
+
+                        if(verifier != null)
+                        {
+                            if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
+                            {
+                                // Force a recreate to reload the database
+                                recreate();
+                            }
+                            else
+                            {
+                                throw new Exception(getString(R.string.invalid_mission_data));
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception(getString(R.string.invalid_mission_data));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Toast.makeText(MissionListActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+            else if (requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
+            {
+                try
+                {
+                    ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCodeResultIntent(requestCode, resultCode, intent, false);
+                    if(ac != null)
+                    {
+                        String json = ac.getInputJson();
+                        if(Utils.isEmptyString(json))
+                        {
+                            throw new Exception(getString(R.string.invalid_mission_data));
+                        }
+
+                        if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
+                        {
+                            // See if what was changed was the active mission, if so, we need to
+                            // make sure our resultIntent is set correctly
+                            if(ac.getMissionId().compareTo(_activeMissionId) == 0)
+                            {
+                                if(json.compareTo(_activeMissionJson) != 0)
+                                {
+                                    _resultIntent.putExtra(Constants.MISSION_ACTIVATED_ID, _activeMissionId);
+                                    setResult(RESULT_OK, _resultIntent);
+                                }
+                            }
+
+                            // Force a recreate to reload the database
+                            recreate();
+                        }
+                        else
+                        {
+                            throw new Exception(getString(R.string.invalid_mission_data));
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(getString(R.string.invalid_mission_data));
+                    }
+                }
+                catch(SimpleMessageException sme)
+                {
+                    Utils.showPopupMsg(MissionListActivity.this, sme.getMessage());
+                    sme.printStackTrace();
+                }
+                catch(Exception e)
+                {
+                    Utils.showPopupMsg(MissionListActivity.this, e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
-    private void installMissionJson(String json)
+    private boolean installMissionJson(String json)
     {
+        boolean rc = false;
+
         if (!Utils.isEmptyString(json))
         {
             DatabaseMission mission = DatabaseMission.parse(json);
+
+            // Early return if we have nothing useful
+            if( Utils.isEmptyString(mission._name) &&
+                Utils.isEmptyString(mission._description) &&
+                (mission._groups == null || mission._groups.isEmpty()) )
+            {
+                return false;
+            }
 
             if(!_database.updateMissionById(mission._id, mission))
             {
@@ -361,7 +680,11 @@ public class MissionListActivity extends AppCompatActivity
                     setResult(RESULT_OK, _resultIntent);
                 }
             }
+
+            rc = true;
         }
+
+        return rc;
     }
 
     private void confirmDeleteMission(final String id)

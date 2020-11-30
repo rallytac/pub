@@ -51,7 +51,7 @@ public class AndroidIntentActionListenerActivity extends AppCompatActivity
                     finish();
                 }
 
-                ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCode(scannedString, null);
+                ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCode(scannedString, null, true);
 
                 Toast.makeText(this, String.format(getString(R.string.loaded_mission_fmt), ac.getMissionName()), Toast.LENGTH_LONG).show();
                 finish();

@@ -159,6 +159,17 @@
             app:layout_constraintTop_toTopOf="@+id/tvLicenseHeader"
             app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
 
+        <ImageView
+            android:id="@+id/ivLoadLicenseKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="8dp"
+            android:onClick="onClickLoadLicenseKey"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ivScanLicenseKey"
+            app:srcCompat="@drawable/ic_file" />
 
         <ImageView
             android:id="@+id/ivShareLicenseKey"
@@ -171,6 +182,7 @@
             app:layout_constraintTop_toTopOf="@+id/etLicenseKey"
             app:srcCompat="@drawable/ic_visibility"
             android:visibility="gone"/>
+
         <TextView
             android:id="@+id/tvActivationHeader"
             android:layout_width="wrap_content"

@@ -807,7 +807,7 @@ public class SimpleUiMainActivity
         {
             try
             {
-                ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCodeResultIntent(requestCode, resultCode, intent);
+                ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCodeResultIntent(requestCode, resultCode, intent, true);
                 if(ac != null)
                 {
                     Utils.showLongPopupMsg(SimpleUiMainActivity.this, String.format(getString(R.string.loaded_mission_fmt), ac.getMissionName()));

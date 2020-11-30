@@ -2961,8 +2961,6 @@ public class EngageApplication
         final EditText etPassword = promptView.findViewById(R.id.etPassword);
         final EditText etUrl = promptView.findViewById(R.id.etUrl);
 
-        //etUrl.setText("https://s3.us-east-2.amazonaws.com/rts-missions/{a50f4cfb-f200-4cf0-8f88-0401585ba034}.json");
-
         alertDialogBuilder.setCancelable(false)
                 .setPositiveButton(R.string.mission_download_button, new DialogInterface.OnClickListener()
                 {
@@ -2999,7 +2997,7 @@ public class EngageApplication
                     {
                         if(Utils.isEmptyString(password))
                         {
-                            byte[] resultByteArray = msg.getData().getByteArray(DownloadMissionTask.BUNDLE_RESULT_DATA);
+                            byte[] resultByteArray = msg.getData().getString(DownloadMissionTask.BUNDLE_RESULT_DATA).getBytes(Utils.getEngageCharSet());
                             processDownloadedMissionAndSwitchIfOk(resultByteArray, password);
                         }
                         else
@@ -3182,16 +3180,19 @@ public class EngageApplication
         }
     }
 
-    public ActiveConfiguration processScannedQrCode(String scannedString, String pwd) throws Exception
+    public ActiveConfiguration processScannedQrCode(String scannedString, String pwd, boolean saveAndActivate) throws Exception
     {
         ActiveConfiguration ac = ActiveConfiguration.parseEncryptedQrCodeString(scannedString, pwd);
 
-        saveAndActivateConfiguration(ac);
+        if(saveAndActivate)
+        {
+            saveAndActivateConfiguration(ac);
+        }
 
         return ac;
     }
 
-    public ActiveConfiguration processScannedQrCodeResultIntent(int requestCode, int resultCode, Intent intent) throws Exception
+    public ActiveConfiguration processScannedQrCodeResultIntent(int requestCode, int resultCode, Intent intent, boolean saveAndActivate) throws Exception
     {
         // Grab any password that may have been stored for our purposes
         String pwd = Globals.getSharedPreferences().getString(PreferenceKeys.QR_CODE_SCAN_PASSWORD, "");
@@ -3214,7 +3215,7 @@ public class EngageApplication
             throw new SimpleMessageException(getString(R.string.qr_scan_cancelled));
         }
 
-        return processScannedQrCode(scannedString, pwd);
+        return processScannedQrCode(scannedString, pwd, saveAndActivate);
     }
 
     private String _lastSwitchToMissionErrorMsg = null;

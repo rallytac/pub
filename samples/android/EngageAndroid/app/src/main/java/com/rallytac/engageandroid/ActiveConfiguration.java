@@ -1379,9 +1379,11 @@ public class ActiveConfiguration
         return rc;
     }
 
-    public static void installMissionJson(Context ctx, String json, boolean allowOverwrite)
+    public static boolean installMissionJson(Context ctx, String json, boolean allowOverwrite)
     {
+        boolean rc = false;
         ActiveConfiguration ac = new ActiveConfiguration();
+
         if(ac.parseTemplate(json))
         {
             // Open the mission database
@@ -1395,6 +1397,7 @@ public class ActiveConfiguration
                     if( database.addOrUpdateMissionFromActiveConfiguration(ac) )
                     {
                         database.save(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+                        rc = true;
                         if(ctx != null)
                         {
                             Toast.makeText(ctx, R.string.installed_the_mission, Toast.LENGTH_SHORT).show();
@@ -1416,7 +1419,6 @@ public class ActiveConfiguration
                     Toast.makeText(ctx, R.string.cannot_open_mission_database, Toast.LENGTH_SHORT).show();
                 }
             }
-
         }
         else
         {
@@ -1425,6 +1427,8 @@ public class ActiveConfiguration
                 Toast.makeText(ctx, R.string.cannot_parse_mission_template, Toast.LENGTH_SHORT).show();
             }
         }
+
+        return rc;
     }
 
     private static ActiveConfiguration parseLegacyQrCode(String str, String pwd) throws Exception

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_mission_add_generate"
+        android:title="Generate using passphrase" />
+
+    <item
+        android:id="@+id/action_mission_add_scan"
+        android:title="Scan QR code" />
+
+    <item
+        android:id="@+id/action_mission_add_load_file"
+        android:title="Load from file" />
+
+    <item
+        android:id="@+id/action_mission_add_download"
+        android:title="Download" />
+
+    <item
+        android:id="@+id/action_mission_add_manual"
+        android:title="Manual add (advanced)" />
+</menu>

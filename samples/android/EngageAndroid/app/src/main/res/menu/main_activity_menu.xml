@@ -12,15 +12,18 @@
 
             <item
                 android:id="@+id/action_scan"
-                android:title="@string/menu_scan" />
+                android:title="@string/menu_scan"
+                android:visible="false"/>
 
             <item
                 android:id="@+id/action_load"
-                android:title="@string/menu_load" />
+                android:title="@string/menu_load"
+                android:visible="false"/>
 
             <item
                 android:id="@+id/action_download"
-                android:title="@string/menu_download" />
+                android:title="@string/menu_download"
+                android:visible="false"/>
         </menu>
     </item>
 
