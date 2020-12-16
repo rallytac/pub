@@ -9,7 +9,7 @@ So, for fun, we built a simple archival application that offers up an API via a 
 >To be completely open here: this is the first real Node.js web service we've built and so professional Javascript/Node.js folks will likely look at this code and not have kind things to say.  Nonetheless, here it is - use it as you please.
 
 Here's a few things that `earwax` is and does:
-- Open-sourse Javascript using Node.js
+- Open-source Javascript using Node.js
 - Uses SQlite for its database
 - Uses the local file system for file storage
 - Supports HTTPS with mutual authentication
