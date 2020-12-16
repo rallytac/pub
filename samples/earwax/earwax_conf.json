@@ -1,0 +1,84 @@
+{
+	"id":"idOfThisService",
+	"localStorageRoot": "./.data",
+
+	"uris":{
+		"apiVersion": "v1",
+		"postSingle": "/${apiVersion}/archive/recording/",
+		"getSingle": "/${apiVersion}/archive/recording/",
+		"getSingleRaw": "/${apiVersion}/archive/raw/",
+		"getMultiple": "/${apiVersion}/archive/recordings"
+	},
+
+	"https":{
+		"host":"",
+		"port":4343,
+		"certPem":"./EarRestServer.cert",
+		"keyPem":"./EarRestServer.key",
+		"ca":[
+			"./EarCA.cert"
+		]
+	},
+
+	"timers":{
+		"cleanupIntervalSecs":600
+	},
+
+	"logging":{
+		"level":4
+	},
+
+	"tenants":[
+		{
+			"id":"29FF17400ACA45128158DC451507B550",
+			"maxEventAgeHours":27,
+			"apiKeys":[
+				{
+					"key":"83535939aabd4b50a1a6ff6215099dce521a8fd7dd8e4dd9ace7b59478627600",
+					"permissions": [
+						"POST",
+						"GET"
+					]
+				},
+				{
+					"key":"029ea4a0ef1046e9b7b33ee4d1a0537f3b506f76df2645088a46c9c2e37ca4ed",
+					"permissions": [
+						"POST"
+					]
+				},
+				{
+					"key":"7548b736f26545108d32bd1174887f18e33c815709464bc4a5a29c5c9a4a2b2c",
+					"permissions": [
+						"GET"
+					]
+				}
+			]
+		},
+		{
+			"id":"E3665FA8745B4D92AD1BEDD37197E59B",
+			"maxEventAgeHours":168,
+			"apiKeys":[
+				{
+					"key":"9d486e2d2cf44d14ad3571fd763fa1d168aab9fee3b74037b9fa8b24718fcdab",
+					"permissions": [
+						"POST",
+						"GET"
+					]
+				}				
+			]
+		},
+		{
+			"id":"DFD2F5D61AD04700A5F2705911A2ADD7",
+			"maxEventAgeHours":168,
+			"apiKeys":[
+				{
+					"key":"db891fc6999143a396d12fa78d2432ace9973e1aed76418394aa06d5545a09b1",
+					"permissions": [
+						"POST",
+						"GET"
+					]
+				}				
+			]
+		}
+	]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "earwax",
+  "version": "1.0.0",
+  "description": "Engage Activity Recorder REST Service (earwax)",
+  "main": "earwax.js",
+  "scripts": {
+    "start": "node earwax.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rally Tactical Systems, Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "dateformat": "^4.3.1",
+    "formidable": "^1.2.2",
+    "fs-extra": "^9.0.1",
+    "sqlite3": "^5.0.0"
+  }
+}
