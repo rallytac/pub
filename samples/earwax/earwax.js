@@ -311,7 +311,8 @@ function setupDatabase(fn)
                     alias CHAR(16) NULL,
                     rxtx_flags INT NULL,
                     metadata TEXT NULL,
-                    content_uri TEXT NULL
+                    content_uri TEXT NULL,
+                    transmission_id INT NULL
                  );`);
 
         db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_recordings_event_id
@@ -342,6 +343,9 @@ function setupDatabase(fn)
 
         db.run(`CREATE INDEX IF NOT EXISTS idx_recordings_gts
                         ON recordings(group_id, type, ts_started);`);
+
+        db.run(`CREATE INDEX IF NOT EXISTS idx_recordings_transmission_id
+                        ON recordings(group_id, transmission_id);`);
     });
     
     return db;
@@ -722,6 +726,7 @@ function handleGet(request, response)
                                 recordings.node_id,
                                 recordings.alias,
                                 recordings.rxtx_flags,
+                                recordings.transmission_id,
                                 (recordings.ts_ended - recordings.ts_started) AS duration_ms,
                                 (groups.group_name)
                             FROM 
@@ -765,6 +770,7 @@ function handleGet(request, response)
             q.addCriteria("recordings.node_id", paramsJson.nodeId);
             q.addCriteria("recordings.alias", paramsJson.alias);
             q.addCriteria("recordings.rxtx_flags", paramsJson.flags);
+            q.addCriteria("recordings.transmission_id", paramsJson.transmission_id);
             
             q.addCriteria("duration_ms", paramsJson.durationMs);
     
@@ -844,7 +850,8 @@ function handleGet(request, response)
                                 "nodeId": row.node_id,
                                 "alias": row.alias,
                                 "flags": row.rxtx_flags,
-                                "durationMs": row.duration_ms
+                                "durationMs": row.duration_ms,
+                                "transmission_id": row.transmission_id,
                             };
                     
                             resultJson.recordings.push(rowJson);
