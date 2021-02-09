@@ -1,5 +1,19 @@
 # Change Log
 
+## February 9, 2021 - 1.196.9033
+- Adds optional transmission ID to RTP streams
+- Adds an application-defined hook to capture Engine log output
+- Adds the ability to configure the minimum presence descriptor transmit interval
+- Adds initial support for translation for transmission priority based on group address/port
+- Adds support for featureSets based on license key flags
+- Adds support for OpenSSL 1.1.1i
+- Changes device identification logic on Android to use the OS-provided machine identifier
+- Enhances support for Apple iOS platforms
+- Enhances the content of group membership information in presence descriptors
+- Corrects an issue with an uninitlized member variable in the licensing subsystem
+- Corrects a UDP socket resource leak on *nix platforms
+- Corrects a static library initialization issue on Windows platforms
+
 ## November 29, 2020 - 1.192.9029
 - Adds microphone input denoising on Android platforms
 - Adds Automatic Gain Control (AGC) for microphone input and speaker output
