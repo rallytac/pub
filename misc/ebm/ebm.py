@@ -5,16 +5,24 @@
 
 import json
 import time
-import colorama
 import datetime
 import sys
+import os
+
+try:
+    import colorama
+    haveColorama = True
+except ImportError as e:
+    haveColorama = False
+    pass
 
 appVersion = '0.1'
 statusFile = ''
 interval = 5
 
-colorama.init()
-pos = lambda y, x: colorama.Cursor.POS(x, y)
+if haveColorama:
+    colorama.init()
+    pos = lambda y, x: colorama.Cursor.POS(x, y)
 
 # --------------------------------------------------------------------------
 def loadInput():
@@ -50,25 +58,32 @@ def groupState(s):
 
 # --------------------------------------------------------------------------
 def setCursor(r, c):
-    print('%s' % pos(r, c))
+    if haveColorama:
+        print('%s' % pos(r, c))
 
 # --------------------------------------------------------------------------
 def clearScreen():
-    print(colorama.ansi.clear_screen())
-    setCursor(0, 0)
+    if haveColorama:
+        print(colorama.ansi.clear_screen())
+        setCursor(0, 0)
+    else:
+	if os.name == 'nt':
+           os.system('cls')
+        else:
+           os.system('clear')
 
 # --------------------------------------------------------------------------
 def printHeadline(db):
     now = datetime.datetime.now()
-    print('---------------------------------------------------------------------------------------------------')
+    print('-------------------------------------------------------------------------------------------------------------------------')
     print('Engage Bridge Service Monitor v%s' % (appVersion))
     print('Copyright (c) 2020 Rally Tactical Systems, Inc.')
     print('')
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
     print('Last check at %s, uptime %d seconds' % (now.strftime("%Y/%m/%d %H:%M:%S"), db['uptime']))
-    print('---------------------------------------------------------------------------------------------------')
-    print('%38s %10s %38s %10s' % ('Bridge ID', 'State', 'Group ID', 'State'))
-    print('-------------------------------------- ---------- -------------------------------------- ----------')
+    print('-------------------------------------------------------------------------------------------------------------------------')
+    print('%38s %10s %38s %10s%10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', "RX", "TX"))
+    print('-------------------------------------- ---------- -------------------------------------- ---------- ---------- ----------')
 
 # --------------------------------------------------------------------------
 def getGroup(db, id):
@@ -88,9 +103,9 @@ def printBridges(db):
         for groupId in bridgeDetail['groups']:
             groupInfo = getGroup(db, groupId)
             if firstLine:
-                print('%38s %10s %38s %10s' % (bridgeDetail['id'], bridgeState(bridgeDetail['state']), groupInfo['id'], groupState(groupInfo['state'])))
+                print('%38s %10s %38s %10s %10s %10s' % (bridgeDetail['id'], bridgeState(bridgeDetail['state']), groupInfo['name'], groupState(groupInfo['state']), groupInfo["rxTraffic"]["packets"], groupInfo["txTraffic"]["packets"]))
             else:
-                print('%49s %38s %10s' % (' ', groupInfo['id'], groupState(groupInfo['state'])))
+                print('%49s %38s %10s %10s %10s' % (' ', groupInfo['name'], groupState(groupInfo['state']), groupInfo["rxTraffic"]["packets"], groupInfo["txTraffic"]["packets"]))
 
             firstLine = 0
         
@@ -110,7 +125,7 @@ def main():
 
         time.sleep(interval)
 
-    colorama.deinit()
+    #colorama.deinit()
 
 # --------------------------------------------------------------------------
 if __name__ == '__main__':
