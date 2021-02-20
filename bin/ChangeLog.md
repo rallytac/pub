@@ -1,5 +1,14 @@
 # Change Log
 
+## February 20, 2021 - 1.198.9035
+- Adds app-level enablement of event notifications
+- Adds automatic silencing of low-priority audio streams in the presence of high-priority stream
+- Adds an optional Engine-assigned alias for anonymous RTP streams
+- Enhances timeline processing by moving database insertions & updates to a dedicated I/O thread
+- Optimizes the internal high-resolution timer to be less CPU-intensive
+- Optimizes the core task dispatcher with ~65% performance increase for queue insert/removal operations
+- Corrects an issue related to dropping of the audio contents of a stream's first packet due to audio resampling shortfalls
+
 ## February 9, 2021 - 1.196.9033
 - Adds optional transmission ID to RTP streams
 - Adds an application-defined hook to capture Engine log output
@@ -158,4 +167,3 @@
 ## November 7, 2019 - 1.95.8851
 - Corrects blocked socket issues
 - Corrects a crash on channel leave during RX
-
