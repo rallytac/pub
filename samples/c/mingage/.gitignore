@@ -3,3 +3,4 @@ mingage
 *.o
 *.obj
 engage/
+.engage/

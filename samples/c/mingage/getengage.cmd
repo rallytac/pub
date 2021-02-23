@@ -30,7 +30,7 @@ if "%Platform%" == "" (
 	set ERROR_ENCOUNTERED=0
 
 	call :doSafeDelete %TMP_FILE%
-    curl -f -s -o %TMP_FILE% -L https://bintray.com/rallytac/pub/download_file?file_path=%DESIRED_VERSION%/api/c/include/EngageInterface.h
+        curl -f -s -o %TMP_FILE% -L https://bintray.com/rallytac/pub/download_file?file_path=%DESIRED_VERSION%/api/c/include/EngageInterface.h
 	if errorlevel 1 (
 		set ERROR_ENCOUNTERED=1
 	)
@@ -56,10 +56,11 @@ if "%Platform%" == "" (
     cd engage
 
     call :fetchBintrayFile %DESIRED_VERSION% api/c/include EngageInterface.h
-	call :fetchBintrayFile %DESIRED_VERSION% api/c/include EngageIntegralDataTypes.h
-	call :fetchBintrayFile %DESIRED_VERSION% api/c/include ConfigurationObjects.h
-	call :fetchBintrayFile %DESIRED_VERSION% api/c/include Constants.h
-	call :fetchBintrayFile %DESIRED_VERSION% api/c/include Platform.h
+    call :fetchBintrayFile %DESIRED_VERSION% api/c/include EngageConstants.h
+    call :fetchBintrayFile %DESIRED_VERSION% api/c/include EngageIntegralDataTypes.h
+    call :fetchBintrayFile %DESIRED_VERSION% api/c/include ConfigurationObjects.h
+    call :fetchBintrayFile %DESIRED_VERSION% api/c/include Constants.h
+    call :fetchBintrayFile %DESIRED_VERSION% api/c/include Platform.h
     call :fetchBintrayFile %DESIRED_VERSION% %BIN_PLATFORM% engage-shared.lib
     call :fetchBintrayFile %DESIRED_VERSION% %BIN_PLATFORM% engage-shared.dll
 

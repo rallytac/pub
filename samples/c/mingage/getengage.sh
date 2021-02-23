@@ -81,6 +81,7 @@ function fetchVersionFiles()
 	}
 
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "EngageInterface.h"
+	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "EngageConstants.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "EngageIntegralDataTypes.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "ConfigurationObjects.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "Constants.h"
