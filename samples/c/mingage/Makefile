@@ -6,7 +6,7 @@ CC := gcc
 CXX := g++
 CFLAGS := -Wall -std=c++11 -fPIC 
 #CFLGAS += -Wno-psabi
-VER := 1.189.9026
+VER := 
 
 ifeq ($(DEBUG), 1)
     CFLAGS += -DDEBUG -O0 -ggdb
