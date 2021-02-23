@@ -7,7 +7,7 @@ MAIN = mingage.exe
 INCPATH = .\engage
 LIBPATH = .\engage
 LIBNAME = engaged-shared.dll
-VER = 1.189.9026
+VER = 
 
 $(MAIN): $(SRCS)
 	cl /EHsc /Fe"$(MAIN)" /DWIN32 /I. /I"$(INCPATH)" $(SRCS) engage-shared.lib /link /LIBPATH:"$(LIBPATH)"
@@ -24,4 +24,4 @@ clean:
 
 depend: depends
 depends:
-	@getengage.cmd $(VER)
+	@..\..\..\misc\getengage.cmd $(VER)

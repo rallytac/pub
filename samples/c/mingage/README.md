@@ -10,10 +10,10 @@ Mingage is built using a simple make file so all you should need to do it to use
 #### Dependencies
 Now, because mingage uses the Engage Engine, it's going to have a dependency on the Engine and its API header files.  While these can all be found on Bintray and pretty easy to download, we though we'd make life a little bit easier and provide a simple way to get them onto your machine - and do it based on the version of Engage that you want.
 
-We've done this by providing the `getengage.sh` which takes a single paramater - being the Engage version number.  If you want to use `getengage.sh` directly, simply invoke it as follows (for the mythical version ``1.2.3.4``):
+We've done this by providing the `getengage.sh` in the `misc` folder of this repository which takes an optional single paramater - being the Engage version number.  If you want to use `getengage.sh` directly, simply invoke it as follows (for the mythical version ``1.2.3.4``):
 
 ```shell
-$ ./getengage.sh 1.2.3.4
+$ ../../../misc/getengage.sh 1.2.3.4
 ```
 
 Better yet, you can have `make` invoke `getengage.sh`, passing in a version number from inside the `Makefile` or the version overridden in a parameter to `make`.  
@@ -37,6 +37,8 @@ $ make depends VER=1.2.3.4
 Error encountered while checking for Engage version 1.2.3.4.  This may be an invalid version or a connection could not be established to the file publication system.
 make: *** [depends] Error 1
 ```
+
+>If you invoke `getengage` without a version, the script will check Bintray for the latest version and the proceed to download the files for that version.  Even easier!
 
 #### Building
 Once your dependencies are in place you don't need to update them unless you've invoked `make clean` or don't have the in place anymore (maybe you deleted all the files?).
