@@ -87,6 +87,7 @@ function fetchVersionFiles()
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "Constants.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "api/c/include" "Platform.h"
 	fetchBintrayFile "${DESIRED_VERSION}" "${BIN_PLATFORM}" "libengage-shared.${BIN_OS_LIB_EXT}"
+	fetchBintrayFile "${DESIRED_VERSION}" "${BIN_PLATFORM}" "libengage-static.a"
 }
 
 function checkIfVersionExistsAndExitIfNot()
@@ -112,16 +113,33 @@ function checkIfVersionExistsAndExitIfNot()
 	fi
 }
 
-function showHelp()
+function determineLatestEngageVersion()
 {
-	echo "usage: 'getengage.sh <version_number>' or 'make depends VER=<version_number>' if called from make"
+	TMP_FILE="./engageVersion.tmp"
+	ERROR_ENCOUNTERED=0
+
+	rm -rf "${TMP_FILE}"
+	getFileFromUrl "${TMP_FILE}" "https://api.bintray.com/packages/rallytac/pub/all"
+	if [[ $? != "0" ]]; then
+                ERROR_ENCOUNTERED=1
+        fi
+
+        if [[ ! -f "${TMP_FILE}" ]]; then
+                ERROR_ENCOUNTERED=1
+        fi
+
+	DESIRED_VERSION=`(cat "${TMP_FILE}" | grep -o '"latest_version":"[^"]*' | cut -d'"' -f4)`
+
+	rm -rf "${TMP_FILE}"
 }
+
+if [[ "${DESIRED_VERSION}" == "" ]]; then
+	determineLatestEngageVersion
+fi
 
 if [[ "${DESIRED_VERSION}" != "" ]]; then
 	checkIfVersionExistsAndExitIfNot
 	fetchVersionFiles
-else
-	echo "No version provided"
-	showHelp
-	exit 1
+	exit 0
 fi
+
