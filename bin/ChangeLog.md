@@ -1,5 +1,15 @@
 # Change Log
 
+## February 26, 2021 - 1.202.9039
+- Corrects a backward incompatibility issue introduced in 1.196.9033
+  
+## February 25, 2021 - 1.200.9037
+- Adds non-blocking DNS lookups for enhanced response times when switching link profiles
+- Adds the ability to disable Engine audio processing headless systems
+- Reduces Rallypoint link establishment times to multi-homed RP hosts
+- Corrects an issue encountered during failback to Rallypoint links from temporary multicast links
+- Corrects an issue with the Linux installation package for the Engage Bridge Service
+
 ## February 20, 2021 - 1.198.9035
 - Adds app-level enablement of event notifications
 - Adds automatic silencing of low-priority audio streams in the presence of high-priority stream
