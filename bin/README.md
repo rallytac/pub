@@ -1,11 +1,4 @@
 <details>
-<summary>1.200.9037</summary>
-*DEPRECATED*
-</details>
-
----
-
-<details>
 <summary>1.202.9039</summary>
 
 ### android
@@ -119,20 +112,21 @@
 </details>
 
 ---
+<details>
+<summary>1.200.9037 (DEPRECATED)</summary>
+</details>
 
-
+---
 
 <details>
-<summary>1.198.9035</summary>
-*DEPRECATED*
+<summary>1.198.9035 (DEPRECATED)</summary>
 </details>
 
 ---
 
 
 <details>
-<summary>1.196.9033</summary>
-*DEPRECATED*
+<summary>1.196.9033 (DEPRECATED)</summary>
 </details>
 
 ---

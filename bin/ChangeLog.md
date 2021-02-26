@@ -3,14 +3,14 @@
 ## February 26, 2021 - 1.202.9039
 - Corrects a backward incompatibility issue introduced in 1.196.9033
   
-## February 25, 2021 - 1.200.9037
+## February 25, 2021 - 1.200.9037 (SUPERCEDED BY 1.202.9039)
 - Adds non-blocking DNS lookups for enhanced response times when switching link profiles
 - Adds the ability to disable Engine audio processing headless systems
 - Reduces Rallypoint link establishment times to multi-homed RP hosts
 - Corrects an issue encountered during failback to Rallypoint links from temporary multicast links
 - Corrects an issue with the Linux installation package for the Engage Bridge Service
 
-## February 20, 2021 - 1.198.9035
+## February 20, 2021 - 1.198.9035 (SUPERCEDED BY 1.202.9039)
 - Adds app-level enablement of event notifications
 - Adds automatic silencing of low-priority audio streams in the presence of high-priority stream
 - Adds an optional Engine-assigned alias for anonymous RTP streams
@@ -19,7 +19,7 @@
 - Optimizes the core task dispatcher with ~65% performance increase for queue insert/removal operations
 - Corrects an issue related to dropping of the audio contents of a stream's first packet due to audio resampling shortfalls
 
-## February 9, 2021 - 1.196.9033
+## February 9, 2021 - 1.196.9033 (SUPERCEDED BY 1.202.9039)
 - Adds optional transmission ID to RTP streams
 - Adds an application-defined hook to capture Engine log output
 - Adds the ability to configure the minimum presence descriptor transmit interval
