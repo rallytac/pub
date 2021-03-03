@@ -352,7 +352,7 @@ started={"gte":1585776158000}&durationMs={"gt":2500}&limit=10
 
 All put together, our querying URL looks something like this:
 ```javascript
-https://server:port/archive/recordings?started={"gte":1585776158000}&durationMs={"gt":2500}&limit=10
+https://server:port/v1/archive/recordings?started={"gte":1585776158000}&durationMs={"gt":2500}&limit=10
 ```
 
 Fields available for query are:
@@ -376,13 +376,13 @@ You can run pretty simple `GET` tests using cURL.  Some things to remember:
 2. If the server is using a self-signed certificate you likely need to specify `--insecure` 
 3. If the server is using a a certificate issued by a CA not already trusted by cURL, you'll need to provide cURL with the server's CA certificate with the `--cacert` parameter:
 
-The 
+ 
 ```shell
 curl --insecure \
      -H "apikey: 7548b736f26545108d32bd1174887f18e33c815709464bc4a5a29c5c9a4a2b2c" \
      --cert ./EarRestClient.cert \
      --key ./EarRestClient.key \
      --cacert ./EarCA.cert \
-     https://localhost:4343/archive/recordings
+     https://localhost:4343/v1/archive/recordings
 ```
 
