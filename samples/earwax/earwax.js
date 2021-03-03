@@ -475,7 +475,7 @@ function handlePost(request, response)
 
                         // Plug it into our database
                         tenant.db.serialize(() => {
-                            tenant.db.run(`INSERT INTO recordings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+                            tenant.db.run(`INSERT INTO recordings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
                                     [
                                         itemKey,
                                         recordingNodeId, 
@@ -490,13 +490,14 @@ function handlePost(request, response)
                                         metadataJson.engageEvent.alias,
                                         metadataJson.engageEvent.rxTxFlags,
                                         fields.meta,
-                                        contentUri
+                                        contentUri,
+                                        metadataJson.engageEvent.txId
                                     ], function(err) {
                                             if(err)
                                             {
                                                 // TODO: rollback the moveFilesToArchive() operation from above
 
-                                                logE("database error");
+                                                logE("database error (1) :" + err);
                                                 response.writeHead(500);
                                                 response.end();
                                             }
@@ -511,7 +512,7 @@ function handlePost(request, response)
                                                         {
                                                             // TODO: rollback the moveFilesToArchive() operation from above
                 
-                                                            logW("database error");
+                                                            logE("database error (2) :" + err);
                                                             response.writeHead(500);
                                                             response.end();
                                                         }
