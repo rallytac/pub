@@ -1,11 +1,21 @@
 # Change Log
 
+## March 3, 2021 - 1.204.9041
+- Adds preliminary support for CUBIC/Vocality radio gateways
+- Adds additional transmit encoder parameter validation
+- Optimizes parsing of HTTP response headers
+- Optimizes X.509 certificate validation
+- Corrects a problem encountered when processing transmit parameters for UDP transports
+- Corrects an invalid return code when attempting to start an already-started Engine
+- Corrects an incorrecly named timeline event JSON field
+- Corrects an issue in parsing SSDP packets
+
 ## February 26, 2021 - 1.202.9039
 - Corrects a backward incompatibility issue introduced in 1.196.9033
   
 ## February 25, 2021 - 1.200.9037 (SUPERCEDED BY 1.202.9039)
 - Adds non-blocking DNS lookups for enhanced response times when switching link profiles
-- Adds the ability to disable Engine audio processing headless systems
+- Adds the ability to disable Engine audio processing on headless systems
 - Reduces Rallypoint link establishment times to multi-homed RP hosts
 - Corrects an issue encountered during failback to Rallypoint links from temporary multicast links
 - Corrects an issue with the Linux installation package for the Engage Bridge Service
