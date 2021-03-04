@@ -8,13 +8,16 @@ package com.rallytac.engageandroid;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
@@ -37,23 +40,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
+import java.io.File;
 import java.util.ArrayList;
 
 public class MissionListActivity extends AppCompatActivity
 {
-    private static String TAG = MissionListActivity.class.getSimpleName();
-
-    private static int EDIT_ACTION_REQUEST_CODE = 42;
-    private static int PICK_MISSION_FILE_REQUEST_CODE = 43;
+    private static final String TAG = MissionListActivity.class.getSimpleName();
 
     private MissionDatabase _database;
     private MissionListAdapter _adapter;
     private Intent _resultIntent = new Intent();
     private String _activeMissionId;
     private String _activeMissionJson;
-    private String _missionFileLoadPassword = null;
+    //private String _missionFileLoadPassword = null;
+
+    private String _generatePassphrase = null;
+    private int _generateGroupCount = 0;
+    private String _generateRp = null;
+    private String _generateName = null;
 
     private class MissionListAdapter extends ArrayAdapter<DatabaseMission>
     {
@@ -145,6 +149,15 @@ public class MissionListActivity extends AppCompatActivity
                 }
             }
 
+            convertView.findViewById(R.id.ivShareMission).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    shareMission(item._id);
+                }
+            });
+
             convertView.findViewById(R.id.ivActiveMissionIndicator).setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -224,6 +237,129 @@ public class MissionListActivity extends AppCompatActivity
         finish();
     }
 
+    private void doMissionGeneration(String certStoreFn, String passwordHexString)
+    {
+        String json = null;
+
+        if(Utils.isEmptyString(certStoreFn))
+        {
+            json = Globals.getEngageApplication()
+                    .applyFlavorSpecificGeneratedMissionModifications(Globals.getEngageApplication()
+                            .getEngine().engageGenerateMission(_generatePassphrase,
+                                                               _generateGroupCount,
+                                                               _generateRp,
+                                                               _generateName), false);
+
+            if(Utils.isEmptyString(json))
+            {
+                Utils.showErrorMsg(this, getString(R.string.failed_to_generate_the_mission));
+                return;
+            }
+        }
+        else
+        {
+            json = Globals.getEngageApplication()
+                    .applyFlavorSpecificGeneratedMissionModifications(Globals.getEngageApplication()
+                            .getEngine().engageGenerateMissionUsingCertStore(_generatePassphrase,
+                                                                             _generateGroupCount,
+                                                                             _generateRp,
+                                                                             _generateName,
+                                                                             certStoreFn,
+                                                                             passwordHexString,
+                                                                             ""), false);//NON-NLS
+
+            if(Utils.isEmptyString(json))
+            {
+                Utils.showErrorMsg(this, getString(R.string.failed_to_generate_the_mission_using_the_selected_certstore));
+                return;
+            }
+        }
+
+        if(!ActiveConfiguration.doesMissionExistInDatabase(json))
+        {
+            if(!ActiveConfiguration.installMissionJson(MissionListActivity.this, json, false))
+            {
+                Utils.showErrorMsg(this, getString(R.string.failed_to_install_the_generated_mission));
+                return;
+            }
+
+            // Force a recreate to reload the database
+            recreate();
+        }
+        else
+        {
+            Toast.makeText(MissionListActivity.this, R.string.action_would_create_duplicate_mission, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private AlertDialog _activeCertStoreListDialog = null;
+    private class CertStoreListAdapter extends ArrayAdapter<EngageCertStore>
+    {
+        private Context _ctx;
+        private int _resId;
+
+        public CertStoreListAdapter(Context ctx, int resId, ArrayList<EngageCertStore> list)
+        {
+            super(ctx, resId, list);
+            _ctx = ctx;
+            _resId = resId;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent)
+        {
+            LayoutInflater inflator = LayoutInflater.from(_ctx);
+            convertView = inflator.inflate(_resId, parent, false);
+
+            final EngageCertStore item = getItem(position);
+
+            ((TextView)convertView.findViewById(R.id.tvCertStoreName)).setText(item.getDisplayName());
+            ((TextView)convertView.findViewById(R.id.tvDescription)).setText(item.getDescription());
+
+            convertView.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    _activeCertStoreListDialog.dismiss();
+                    doMissionGeneration(item.getFileName(), item.getPasswordhexString());
+                }
+            });
+
+            return convertView;
+        }
+    }
+
+    private void promptForCertStoreToUseForMissionGeneration(ArrayList<EngageCertStore> certStoresList)
+    {
+        if(!certStoresList.isEmpty())
+        {
+            final CertStoreListAdapter arrayAdapter = new CertStoreListAdapter(this, R.layout.certstore_list_row_item, certStoresList);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            View content = getLayoutInflater().inflate(R.layout.list_dialog_with_message, null);
+
+            TextView tvMessage = content.findViewById(R.id.tvMessage);
+            tvMessage.setText("Please select a certificate store to use to generate the mission");
+
+            final ListView lvItems = content.findViewById(R.id.lvItems);
+            lvItems.setAdapter(arrayAdapter);
+            lvItems.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            builder.setView(content);
+            builder.setCancelable(false);
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    dialog.cancel();
+                }
+            });
+            _activeCertStoreListDialog = builder.show();
+        }
+    }
+
     private void promptToGenerateMission()
     {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -241,26 +377,21 @@ public class MissionListActivity extends AppCompatActivity
                 {
                     public void onClick(DialogInterface dialog, int id)
                     {
-                        String passphrase = etPassphrase.getText().toString();
-                        int groupCount = Integer.parseInt(spnGroupCount.getSelectedItem().toString());
-                        String rp = etRallypoint.getText().toString();
-                        String name = etName.getText().toString();
-
-                        if(!Utils.isEmptyString(passphrase))
+                        _generatePassphrase = etPassphrase.getText().toString();
+                        _generateGroupCount = Integer.parseInt(spnGroupCount.getSelectedItem().toString());
+                        _generateRp = etRallypoint.getText().toString();
+                        _generateName = etName.getText().toString();
+                        
+                        if(!Utils.isEmptyString(_generatePassphrase))
                         {
-                            String json;
-                            json = Globals.getEngageApplication().applyFlavorSpecificGeneratedMissionModifications(Globals.getEngageApplication().getEngine().engageGenerateMission(passphrase, groupCount, rp, name));
-
-                            if(!ActiveConfiguration.doesMissionExistInDatabase(json))
+                            ArrayList<EngageCertStore> certStores = getCertStoreList();
+                            if(certStores == null || certStores.isEmpty())
                             {
-                                ActiveConfiguration.installMissionJson(MissionListActivity.this, json, false);
-
-                                // Force a recreate to reload the database
-                                recreate();
+                                doMissionGeneration(null, null);
                             }
                             else
                             {
-                                Toast.makeText(MissionListActivity.this, R.string.action_would_create_duplicate_mission, Toast.LENGTH_LONG).show();
+                                promptForCertStoreToUseForMissionGeneration(certStores);
                             }
                         }
                         else
@@ -294,24 +425,72 @@ public class MissionListActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemClick(MenuItem item)
             {
-                int id = item.getItemId();
+                final int menuId = item.getItemId();
 
-                if (id == R.id.action_mission_add_manual)
+                if ( (menuId == R.id.action_mission_add_scan) ||
+                     (menuId == R.id.action_mission_add_load_file) )
                 {
-                    Intent intent = new Intent(MissionListActivity.this, MissionEditActivity.class);
-                    startActivityForResult(intent, EDIT_ACTION_REQUEST_CODE);
+                    // Clear any left-over password
+                    Utils.setInboundMissionPassword(null);
+
+                    LayoutInflater layoutInflater = LayoutInflater.from(MissionListActivity.this);
+                    View promptView = layoutInflater.inflate(R.layout.mission_load_password_dialog, null);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MissionListActivity.this);
+                    alertDialogBuilder.setView(promptView);
+
+                    final EditText editText = promptView.findViewById(R.id.etPassword);
+
+                    alertDialogBuilder.setCancelable(false)
+                            .setPositiveButton(R.string.mission_load_continue_button, new DialogInterface.OnClickListener()
+                            {
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    // Save the password for later
+                                    Utils.setInboundMissionPassword(editText.getText().toString());
+
+                                    if(menuId == R.id.action_mission_add_scan)
+                                    {
+                                        Globals.getEngageApplication().initiateScanOfAQrCode(MissionListActivity.this, getString(R.string.scan_qr_code));
+                                    }
+                                    else
+                                    {
+                                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                        intent.setType("*/*");
+                                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_MISSION_FILE_REQUEST_CODE);
+                                    }
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel,
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+
                     return true;
                 }
-                else if (id == R.id.action_mission_add_generate)
+                else
                 {
-                    promptToGenerateMission();
-                    return true;
+                    if (menuId == R.id.action_mission_add_manual)
+                    {
+                        Intent intent = new Intent(MissionListActivity.this, MissionEditActivity.class);
+                        startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
+                        return true;
+                    }
+                    else if (menuId == R.id.action_mission_add_generate)
+                    {
+                        promptToGenerateMission();
+                        return true;
+                    }
                 }
-                else if (id == R.id.action_mission_add_scan)
-                {
-                    Globals.getEngageApplication().initiateMissionQrCodeScan(MissionListActivity.this);
-                    return true;
-                }
+
+                /*
                 else if (id == R.id.action_mission_add_load_file)
                 {
                     _missionFileLoadPassword = null;
@@ -333,10 +512,6 @@ public class MissionListActivity extends AppCompatActivity
                                         // Save this for later
                                         _missionFileLoadPassword = etPassword.getText().toString();
 
-                                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                                        intent.setType("*/*");
-                                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                                        startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_MISSION_FILE_REQUEST_CODE);
                                     }
                                     catch (Exception e)
                                     {
@@ -358,6 +533,8 @@ public class MissionListActivity extends AppCompatActivity
 
                     return true;
                 }
+                */
+                /*
                 else if (id == R.id.action_mission_add_download)
                 {
                     LayoutInflater layoutInflater = LayoutInflater.from(MissionListActivity.this);
@@ -392,6 +569,15 @@ public class MissionListActivity extends AppCompatActivity
 
                     return true;
                 }
+                */
+                /*
+                else if (id == R.id.action_mission_add_oem)
+                {
+                    Intent intent = new Intent(MissionListActivity.this, OemMissionEditActivity.class);
+                    startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
+                    return true;
+                }
+                */
 
                 return false;
             }
@@ -400,6 +586,7 @@ public class MissionListActivity extends AppCompatActivity
         popup.show();
     }
 
+    /*
     private void downloadAndSaveMission(final String url, final String password)
     {
         Handler handler = new Handler() {
@@ -477,6 +664,7 @@ public class MissionListActivity extends AppCompatActivity
         DownloadMissionTask dmt = new DownloadMissionTask(handler);
         dmt.execute(url);
     }
+    */
 
     private void promptToAddMission_original()
     {
@@ -495,7 +683,7 @@ public class MissionListActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
                         Intent intent = new Intent(MissionListActivity.this, MissionEditActivity.class);
-                        startActivityForResult(intent, EDIT_ACTION_REQUEST_CODE);
+                        startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
                     }
                 }).setNegativeButton(getString(R.string.button_generate), new DialogInterface.OnClickListener()
                 {
@@ -520,7 +708,163 @@ public class MissionListActivity extends AppCompatActivity
         DatabaseMission mission = _database.getMissionById(id);
         Intent intent = new Intent(this, MissionEditActivity.class);
         intent.putExtra(Constants.MISSION_EDIT_EXTRA_JSON, mission.toJson().toString());
-        startActivityForResult(intent, EDIT_ACTION_REQUEST_CODE);
+        startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
+    }
+
+    private void processIncomingMissionData(byte[] data, String pwd)
+    {
+        ActiveConfiguration ac = null;
+        Exception errorException = null;
+
+        try
+        {
+            Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
+            if(bm != null)
+            {
+                byte[] missionData = null;
+
+                missionData = Utils.qrCodeBitmapToString(bm).getBytes(Utils.getEngageCharSet());
+                if(missionData == null || missionData.length < 1)
+                {
+                    throw new Exception(getString(R.string.image_is_not_a_qr_code));
+                }
+
+                String stringData = new String(missionData, Utils.getEngageCharSet());
+
+                // Look for the "/??" to see if there's a deflection URL
+                int endOfDeflection = stringData.indexOf(Constants.QR_DEFLECTION_URL_SEP);
+
+                // If it's there, strip it off
+                if (endOfDeflection > 0)
+                {
+                    stringData = stringData.substring(endOfDeflection + Constants.QR_DEFLECTION_URL_SEP.length());
+                }
+
+                // Now we have a string with is Base91 encoded, we need to decode that
+                byte[] base91DecodedBytes = Base91.decode(stringData.getBytes(Utils.getEngageCharSet()));
+                if (base91DecodedBytes == null || base91DecodedBytes.length < 1)
+                {
+                    throw new Exception(getString(R.string.image_is_not_base91_encoded));
+                }
+
+                // It may be encrypted, so decrypt if we have a password
+                if (!Utils.isEmptyString(pwd))
+                {
+                    String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
+
+                    base91DecodedBytes = Globals.getEngageApplication().getEngine().decryptSimple(base91DecodedBytes, pwdHexString);
+                    if (base91DecodedBytes == null)
+                    {
+                        throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
+                    }
+                }
+
+                // Next, we decompress the data
+                byte[] decompressed = Utils.inflate(base91DecodedBytes);
+                if (decompressed == null || decompressed.length < 1)
+                {
+                    throw new Exception(getString(R.string.image_compression_not_supported));
+                }
+
+                String qrCodeDataString = new String(decompressed, Utils.getEngageCharSet());
+                qrCodeDataString = qrCodeDataString.substring(Constants.QR_CODE_HEADER.length());
+
+                // Now, check the version - its "nnn"
+                int checkVersion = Integer.parseInt(Constants.QR_VERSION);
+                int qrVersion = Integer.parseInt(qrCodeDataString.substring(0, 3));
+                if (qrVersion == checkVersion)
+                {
+                    // Strip the version
+                    qrCodeDataString = qrCodeDataString.substring(3);
+
+                    ac = new ActiveConfiguration();
+                    if (!ac.parseTemplate(qrCodeDataString))
+                    {
+                        throw new Exception(getString(R.string.cannot_parse_mission_data));
+                    }
+                }
+                else
+                {
+                    throw new Exception(getString(R.string.image_version_is_not_supported));
+                }
+            }
+            else
+            {
+                String stringData;
+
+                // It may be encrypted, so decrypt if we have a password
+                if (!Utils.isEmptyString(pwd))
+                {
+                    String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
+
+                    byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(data, pwdHexString);
+                    if (decryptedBytes == null)
+                    {
+                        throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
+                    }
+
+                    stringData = new String(decryptedBytes, Utils.getEngageCharSet());
+                }
+                else
+                {
+                    stringData = new String(data, Utils.getEngageCharSet());
+                }
+
+                ac = new ActiveConfiguration();
+                if (!ac.parseTemplate(stringData))
+                {
+                    throw new Exception(getString(R.string.cannot_parse_mission_data));
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            ac = null;
+            errorException = e;
+        }
+
+        if(ac != null)
+        {
+            try
+            {
+                String json = ac.getInputJson();
+                if(Utils.isEmptyString(json))
+                {
+                    throw new Exception(getString(R.string.invalid_mission_data));
+                }
+
+                if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
+                {
+                    // See if what was changed was the active mission, if so, we need to
+                    // make sure our resultIntent is set correctly
+                    if(ac.getMissionId().compareTo(_activeMissionId) == 0)
+                    {
+                        if(json.compareTo(_activeMissionJson) != 0)
+                        {
+                            _resultIntent.putExtra(Constants.MISSION_ACTIVATED_ID, _activeMissionId);
+                            setResult(RESULT_OK, _resultIntent);
+                        }
+                    }
+
+                    // Force a recreate to reload the database
+                    recreate();
+                }
+                else
+                {
+                    throw new Exception(getString(R.string.invalid_mission_data));
+                }
+            }
+            catch (Exception e)
+            {
+                errorException = e;
+            }
+        }
+
+        if(errorException != null)
+        {
+            Utils.showShortPopupMsg(MissionListActivity.this, errorException.getMessage());
+            errorException.printStackTrace();
+        }
     }
 
     @Override
@@ -530,118 +874,48 @@ public class MissionListActivity extends AppCompatActivity
 
         if(resultCode == RESULT_OK)
         {
-            if (requestCode == EDIT_ACTION_REQUEST_CODE )
+            if (requestCode == Constants.EDIT_ACTION_REQUEST_CODE )
             {
                 if(intent != null)
                 {
                     installMissionJson(intent.getStringExtra(Constants.MISSION_EDIT_EXTRA_JSON));
                 }
             }
-            else if(requestCode == PICK_MISSION_FILE_REQUEST_CODE)
+            else if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode() ||
+                    requestCode == Constants.PICK_MISSION_FILE_REQUEST_CODE ||
+                    requestCode == Constants.PICK_QR_MISSION_FILE_REQUEST_CODE)
             {
                 if(intent != null)
                 {
-                    byte[] missionData = Utils.readBinaryFile(MissionListActivity.this, intent.getData());
-                    String json;
-
-                    if (!Utils.isEmptyString(_missionFileLoadPassword))
-                    {
-                        String pwdHexString = Utils.toHexString(_missionFileLoadPassword.getBytes(Utils.getEngageCharSet()));
-                        byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(missionData, pwdHexString);
-                        json = new String(decryptedBytes, Utils.getEngageCharSet());
-                    }
-                    else
-                    {
-                        json = new String(missionData, Utils.getEngageCharSet());
-                    }
-
                     try
                     {
-                        JSONObject verifier = null;
+                        // Get whatever password may be waiting
+                        String pwd = Utils.getInboundMissionPassword();
 
-                        try
+                        Uri uri = intent.getData();
+                        if(uri != null)
                         {
-                            verifier = new JSONObject(json);
-                        }
-                        catch(Exception eInner)
-                        {
-                            verifier = null;
-                        }
-
-                        if(verifier != null)
-                        {
-                            if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
-                            {
-                                // Force a recreate to reload the database
-                                recreate();
-                            }
-                            else
-                            {
-                                throw new Exception(getString(R.string.invalid_mission_data));
-                            }
+                            processIncomingMissionData(Utils.readBinaryFile(MissionListActivity.this, uri), pwd);
                         }
                         else
                         {
-                            throw new Exception(getString(R.string.invalid_mission_data));
+                            IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+                            if(intentResult != null)
+                            {
+                                processIncomingMissionData(intentResult.getRawBytes(), pwd);
+                            }
                         }
                     }
                     catch (Exception e)
                     {
-                        Toast.makeText(MissionListActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }
-                }
-            }
-            else if (requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
-            {
-                try
-                {
-                    ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCodeResultIntent(requestCode, resultCode, intent, false);
-                    if(ac != null)
-                    {
-                        String json = ac.getInputJson();
-                        if(Utils.isEmptyString(json))
-                        {
-                            throw new Exception(getString(R.string.invalid_mission_data));
-                        }
-
-                        if(ActiveConfiguration.installMissionJson(MissionListActivity.this, json, true))
-                        {
-                            // See if what was changed was the active mission, if so, we need to
-                            // make sure our resultIntent is set correctly
-                            if(ac.getMissionId().compareTo(_activeMissionId) == 0)
-                            {
-                                if(json.compareTo(_activeMissionJson) != 0)
-                                {
-                                    _resultIntent.putExtra(Constants.MISSION_ACTIVATED_ID, _activeMissionId);
-                                    setResult(RESULT_OK, _resultIntent);
-                                }
-                            }
-
-                            // Force a recreate to reload the database
-                            recreate();
-                        }
-                        else
-                        {
-                            throw new Exception(getString(R.string.invalid_mission_data));
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception(getString(R.string.invalid_mission_data));
-                    }
-                }
-                catch(SimpleMessageException sme)
-                {
-                    Utils.showPopupMsg(MissionListActivity.this, sme.getMessage());
-                    sme.printStackTrace();
-                }
-                catch(Exception e)
-                {
-                    Utils.showPopupMsg(MissionListActivity.this, e.getMessage());
-                    e.printStackTrace();
                 }
             }
         }
+
+        // Clear any waiting password
+        Utils.setInboundMissionPassword(null);
     }
 
     private boolean installMissionJson(String json)
@@ -687,6 +961,14 @@ public class MissionListActivity extends AppCompatActivity
         return rc;
     }
 
+    private void shareMission(String id)
+    {
+        Globals.getEngageApplication().logEvent(Analytics.VIEW_SHARE_MISSION);
+        Intent intent = new Intent(this, ShareMissionActivity.class);
+        intent.putExtra(ShareMissionActivity.KEY_MISSION_ID, id);
+        startActivity(intent);
+    }
+
     private void confirmDeleteMission(final String id)
     {
         if(id.compareTo(_activeMissionId) == 0)
@@ -715,7 +997,7 @@ public class MissionListActivity extends AppCompatActivity
                         {
                             deleteMission(id);
                         }
-                    }).setNegativeButton(getString(R.string.button_cancel), new DialogInterface.OnClickListener()
+                    }).setNegativeButton(getString(R.string.button_no), new DialogInterface.OnClickListener()
                     {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
@@ -735,5 +1017,33 @@ public class MissionListActivity extends AppCompatActivity
         }
 
         _database.save(PreferenceManager.getDefaultSharedPreferences(this), Constants.MISSION_DATABASE_NAME);
+    }
+
+    private ArrayList<EngageCertStore> getCertStoreList()
+    {
+        ArrayList<EngageCertStore> rc = new ArrayList<>();
+
+        try
+        {
+            File dir = new File(Globals.getEngageApplication().getCertStoreCacheDir());
+            File[] allContents = dir.listFiles();
+            if (allContents != null)
+            {
+                for (File file : allContents)
+                {
+                    EngageCertStore cs = EngageCertStore.loadStoreFrom(file.getAbsolutePath());
+                    if(cs != null)
+                    {
+                        rc.add(cs);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return rc;
     }
 }

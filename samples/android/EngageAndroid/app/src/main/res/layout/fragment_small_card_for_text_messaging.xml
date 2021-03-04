@@ -30,7 +30,7 @@
         app:srcCompat="@drawable/ic_speaker_on" />
 
     <ImageView
-        android:id="@+id/ivPttEnable"
+        android:id="@+id/ivSelectedForPtt"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="16dp"
@@ -91,9 +91,9 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivPttEnable"
-        app:layout_constraintEnd_toStartOf="@+id/ivPttEnable"
-        app:layout_constraintTop_toTopOf="@+id/ivPttEnable"
+        app:layout_constraintBottom_toBottomOf="@+id/ivSelectedForPtt"
+        app:layout_constraintEnd_toStartOf="@+id/ivSelectedForPtt"
+        app:layout_constraintTop_toTopOf="@+id/ivSelectedForPtt"
         app:srcCompat="@drawable/ic_net_error"
         android:visibility="invisible"/>
 
@@ -102,9 +102,9 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivPttEnable"
+        app:layout_constraintBottom_toBottomOf="@+id/ivSelectedForPtt"
         app:layout_constraintEnd_toStartOf="@+id/ivNetError"
-        app:layout_constraintTop_toTopOf="@+id/ivPttEnable"
+        app:layout_constraintTop_toTopOf="@+id/ivSelectedForPtt"
         app:srcCompat="@drawable/ic_net_failover"
         android:visibility="invisible"/>
 

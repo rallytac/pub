@@ -228,9 +228,11 @@ public class BluetoothManager
 
         if(audioManager != null)
         {
-            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setBluetoothScoOn(true);
             audioManager.startBluetoothSco();
+
+            Log.d(TAG, "enableBluetoothRecording: bluetooth sco enabled for audio capture");//NON-NLS
         }
         else
         {
@@ -244,9 +246,11 @@ public class BluetoothManager
 
         if(audioManager != null)
         {
-            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.stopBluetoothSco();
             audioManager.setBluetoothScoOn(false);
-            audioManager.startBluetoothSco();
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+
+            Log.d(TAG, "disableBluetoothRecording: bluetooth sco disabled for audio capture");//NON-NLS
         }
         else
         {
@@ -300,6 +304,7 @@ public class BluetoothManager
 
     private void connectToBluetoothDevice(BluetoothDevice device)
     {
+        /*
         if(device != null)
         {
             if(_readerThread == null)
@@ -308,10 +313,12 @@ public class BluetoothManager
                 _readerThread.start();
             }
         }
+         */
     }
 
     private void disconnectFromBluetoothDevice()
     {
+        /*
         try
         {
             if(_readerThread != null)
@@ -326,17 +333,19 @@ public class BluetoothManager
         }
 
         _readerThread = null;
+         */
     }
 
     private class ReaderThread extends Thread
     {
-        private BluetoothSocket mmSocket;
-        private BluetoothDevice mmDevice;
-        private boolean running = true;
+        private BluetoothSocket _socket;
+        private BluetoothDevice _device;
+        private boolean _running = true;
+        private Object _wakeup = new Object();
 
         public ReaderThread(BluetoothDevice device)
         {
-            mmDevice = device;
+            _device = device;
         }
 
         public void run()
@@ -344,17 +353,18 @@ public class BluetoothManager
             InputStream is;
             byte[] buffer = new byte[1024];
             int bytesRead;
+            long timeToWait = 0;
 
             //_bluetoothAdapter.cancelDiscovery();
 
-            while(running)
+            while(_running)
             {
                 try
                 {
-                    Log.d(TAG, "connecting to " + mmDevice.toString());//NON-NLS
-                    mmSocket = mmDevice.createRfcommSocketToServiceRecord(BT_UUID_SECURE);
-                    mmSocket.connect();
-                    is = mmSocket.getInputStream();
+                    Log.d(TAG, "connecting to " + _device.toString());//NON-NLS
+                    _socket = _device.createRfcommSocketToServiceRecord(BT_UUID_SECURE);
+                    _socket.connect();
+                    is = _socket.getInputStream();
                 }
                 catch (IOException connectException)
                 {
@@ -363,7 +373,7 @@ public class BluetoothManager
                     // Unable to connect; close the socket and return.
                     try
                     {
-                        mmSocket.close();
+                        _socket.close();
                     }
                     catch (IOException closeException)
                     {
@@ -373,32 +383,43 @@ public class BluetoothManager
 
                     try
                     {
-                        Thread.sleep(500);
+                        timeToWait += 500;
+                        if(timeToWait > 5000)
+                        {
+                            timeToWait = 5000;
+                        }
+
+                        synchronized (_wakeup)
+                        {
+                            _wakeup.wait(timeToWait);
+                        }
                     }
                     catch (Exception e)
                     {
+                        e.printStackTrace();
                     }
 
                     continue;
                 }
 
-                if(!running)
+                if(!_running)
                 {
                     break;
                 }
 
-                Log.d(TAG, "connected to " + mmDevice.toString());//NON-NLS
-                enableBluetoothRecording(_ctx);
+                timeToWait = 0;
+
+                Log.d(TAG, "connected to " + _device.toString());//NON-NLS
                 _notificationSink.onBluetoothDeviceConnected();
 
-                while( running )
+                while(_running)
                 {
                     try
                     {
                         bytesRead = is.read(buffer);
                         if(bytesRead > 0)
                         {
-                            if(running)
+                            if(_running)
                             {
                                 buffer[bytesRead] = 0;
                                 String s = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
@@ -422,19 +443,22 @@ public class BluetoothManager
                     }
                 }
 
-                Log.d(TAG, "disconnected from " + mmDevice.toString());//NON-NLS
+                Log.d(TAG, "disconnected from " + _device.toString());//NON-NLS
                 _notificationSink.onBluetoothDeviceDisconnected();
-                disableBluetoothRecording(_ctx);
             }
         }
 
         public void cancel()
         {
-            running = false;
+            _running = false;
+            synchronized (_wakeup)
+            {
+                _wakeup.notifyAll();
+            }
 
             try
             {
-                mmSocket.close();
+                _socket.close();
             }
             catch (IOException e)
             {

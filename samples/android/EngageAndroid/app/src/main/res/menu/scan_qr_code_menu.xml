@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_scan_qr_from_camera"
+        android:title="Scan using the camera"/>
+
+    <item
+        android:id="@+id/action_scan_qr_from_file"
+        android:title="Scan from a file" />
+</menu>

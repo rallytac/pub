@@ -48,108 +48,19 @@ public class CertStoreListActivity extends AppCompatActivity
 {
     private static String TAG = CertStoreListActivity.class.getSimpleName();
 
-    private static int PICK_CERTSTORE_FILE_REQUEST_CODE = 42;
-
-    private ArrayList<CertStore> _stores;
+    private ArrayList<EngageCertStore> _stores;
     private CertStoreListAdapter _adapter;
     private Intent _resultIntent = new Intent();
     private String _activeCertStoreFileName;
     private String _activeMissionCertStoreId = null;
-    private CertStore _importedStore = null;
+    private EngageCertStore _importedStore = null;
 
-    private class CertStore
-    {
-        public String _id;
-        public String _fileName;
-        public JSONObject _descriptor;
-
-        private String _cachedDisplayName = null;
-        private String _cachedDescription = null;
-
-        public String getDisplayName()
-        {
-            if(Utils.isEmptyString(_cachedDisplayName))
-            {
-                _cachedDisplayName = _fileName;
-
-                if (!Utils.isEmptyString(_cachedDisplayName))
-                {
-                    int pos = _cachedDisplayName.indexOf("}-");
-                    _cachedDisplayName = _cachedDisplayName.substring(pos + 2);
-                }
-                else
-                {
-                    _cachedDisplayName = Globals.getEngageApplication().getString(R.string.no_certstore_name);
-                }
-            }
-
-            return _cachedDisplayName;
-        }
-
-        public boolean idMatches(String s)
-        {
-            if(Utils.isEmptyString(s) && Utils.isEmptyString(_id))
-            {
-                return true;
-            }
-            else
-            {
-                if(!Utils.isEmptyString(s) && !Utils.isEmptyString(_id))
-                {
-                    return (s.compareToIgnoreCase(_id) == 0);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        public String getDescription()
-        {
-            if(Utils.isEmptyString(_cachedDescription))
-            {
-                StringBuilder sb = new StringBuilder();
-
-                String id = _id;
-                if(!Utils.isEmptyString(id))
-                {
-                    sb.append(id);
-                    sb.append(", ");//NON-NLS
-                }
-
-                /*
-                sb.append("V");//NON-NLS
-                sb.append(_descriptor.optInt(Engine.JsonFields.CertStoreDescriptor.version, 0));
-                sb.append(", ");//NON-NLS
-                */
-
-                JSONArray certificates = _descriptor.optJSONArray(Engine.JsonFields.CertStoreDescriptor.certificates);
-                sb.append(certificates.length());
-                sb.append(" certificates");//NON-NLS
-
-                /*
-                sb.append("\nhash [");//NON-NLS
-                StringBuilder hashInput = new StringBuilder();
-                hashInput.append(_descriptor.optInt(Engine.JsonFields.CertStoreDescriptor.version, 0));
-                hashInput.append(certificates.toString());
-                sb.append(Utils.md5HashOfString(hashInput.toString()));
-                sb.append("]");//NON-NLS
-                */
-
-                _cachedDescription = sb.toString();
-            }
-
-            return _cachedDescription;
-        }
-    }
-
-    private class CertStoreListAdapter extends ArrayAdapter<CertStore>
+    private class CertStoreListAdapter extends ArrayAdapter<EngageCertStore>
     {
         private Context _ctx;
         private int _resId;
 
-        public CertStoreListAdapter(Context ctx, int resId, ArrayList<CertStore> list)
+        public CertStoreListAdapter(Context ctx, int resId, ArrayList<EngageCertStore> list)
         {
             super(ctx, resId, list);
             _ctx = ctx;
@@ -163,7 +74,7 @@ public class CertStoreListActivity extends AppCompatActivity
             LayoutInflater inflator = LayoutInflater.from(_ctx);
             convertView = inflator.inflate(_resId, parent, false);
 
-            final CertStore item = getItem(position);
+            final EngageCertStore item = getItem(position);
 
             ((TextView)convertView.findViewById(R.id.tvCertStoreName)).setText(item.getDisplayName());
             ((TextView)convertView.findViewById(R.id.tvDescription)).setText(item.getDescription());
@@ -186,7 +97,7 @@ public class CertStoreListActivity extends AppCompatActivity
                 }
             });
 
-            if (_activeCertStoreFileName.compareTo(item._fileName) == 0 || item.idMatches(_activeMissionCertStoreId) )
+            if (_activeCertStoreFileName.compareTo(item.getFileName()) == 0 || item.idMatches(_activeMissionCertStoreId) )
             {
                 ((ImageView) convertView.findViewById(R.id.ivActiveCertStoreIndicator))
                         .setImageDrawable(ContextCompat.getDrawable(CertStoreListActivity.this,
@@ -235,7 +146,7 @@ public class CertStoreListActivity extends AppCompatActivity
             _activeMissionCertStoreId = ac.getMissionCertStoreId();
         }
 
-        loadStores(Globals.getEngageApplication().getCertStoreCacheDir());
+        loadStores(Globals.getEngageApplication().getCertStoreCacheDir(), false);
 
         _adapter = new CertStoreListAdapter(this, R.layout.certstore_list_entry, _stores);
         ListView lv = findViewById(R.id.lvCertStores);
@@ -272,14 +183,14 @@ public class CertStoreListActivity extends AppCompatActivity
 
         if(resultCode == RESULT_OK)
         {
-            if(requestCode == PICK_CERTSTORE_FILE_REQUEST_CODE)
+            if(requestCode == Constants.PICK_CERTSTORE_FILE_REQUEST_CODE)
             {
                 importCertStoreFromUri(intent.getData());
             }
         }
     }
 
-    private void loadStores(String sourceDirectory)
+    private void loadStores(String sourceDirectory, boolean includeDefault)
     {
         _stores = new ArrayList<>();
 
@@ -291,10 +202,13 @@ public class CertStoreListActivity extends AppCompatActivity
             {
                 for (File file : allContents)
                 {
-                    CertStore cs = loadStoreFrom(file.getAbsolutePath());
-                    if(cs != null)
+                    EngageCertStore cs = EngageCertStore.loadStoreFrom(file.getAbsolutePath());
+                    if (cs != null)
                     {
-                        _stores.add(cs);
+                        if( (!cs.isAppDefault()) || (cs.isAppDefault() && includeDefault) )
+                        {
+                            _stores.add(cs);
+                        }
                     }
                 }
             }
@@ -312,7 +226,7 @@ public class CertStoreListActivity extends AppCompatActivity
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_CERTSTORE_FILE_REQUEST_CODE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_CERTSTORE_FILE_REQUEST_CODE);
         }
         catch (Exception e)
         {
@@ -445,7 +359,7 @@ public class CertStoreListActivity extends AppCompatActivity
                 bos.close();
 
                 // Add the certstore to our list of stores
-                _importedStore = loadStoreFrom(fo.getAbsolutePath());
+                _importedStore = EngageCertStore.loadStoreFrom(fo.getAbsolutePath());
                 if(_importedStore != null)
                 {
                     _stores.add(_importedStore);
@@ -487,33 +401,9 @@ public class CertStoreListActivity extends AppCompatActivity
         }
     }
 
-    private CertStore loadStoreFrom(String fn)
+    private void activateCertStoreAndFinish(final EngageCertStore cs)
     {
-        CertStore rc = new CertStore();
-
-        try
-        {
-            rc._fileName = fn;
-            rc._descriptor = Globals.getEngageApplication().getCertificateStoreDescriptorForFile(fn);
-            if(rc._descriptor == null)
-            {
-                throw new Exception("Cannot get certificate store descriptor");//NON-NLS
-            }
-
-            rc._id = rc._descriptor.optString(Engine.JsonFields.CertStoreDescriptor.id, "");
-        }
-        catch (Exception e)
-        {
-            rc = null;
-            e.printStackTrace();
-        }
-
-        return rc;
-    }
-
-    private void activateCertStoreAndFinish(final CertStore cs)
-    {
-        _activeCertStoreFileName = (cs == null ? "" : cs._fileName);
+        _activeCertStoreFileName = (cs == null ? "" : cs.getFileName());
 
         SharedPreferences.Editor ed = Globals.getSharedPreferencesEditor();
         ed.putString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, _activeCertStoreFileName);
@@ -524,14 +414,14 @@ public class CertStoreListActivity extends AppCompatActivity
         finish();
     }
 
-    private void viewCertStore(final CertStore cs)
+    private void viewCertStore(final EngageCertStore cs)
     {
         // TODO
     }
 
-    private void confirmDeleteCertStore(final CertStore cs)
+    private void confirmDeleteCertStore(final EngageCertStore cs)
     {
-        final boolean isActive = (cs._fileName.compareTo(_activeCertStoreFileName) == 0 || cs.idMatches(_activeMissionCertStoreId));
+        final boolean isActive = (cs.getFileName().compareTo(_activeCertStoreFileName) == 0 || cs.idMatches(_activeMissionCertStoreId));
         String s;
 
         if(isActive)
@@ -558,13 +448,13 @@ public class CertStoreListActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        for(CertStore c : _stores)
+                        for(EngageCertStore c : _stores)
                         {
-                            if(c._fileName.compareTo(cs._fileName) == 0)
+                            if(c.getFileName().compareTo(cs.getFileName()) == 0)
                             {
                                 try
                                 {
-                                    File f = new File(cs._fileName);
+                                    File f = new File(cs.getFileName());
                                     f.delete();
                                     _stores.remove(c);
                                     _adapter.notifyDataSetChanged();

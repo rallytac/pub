@@ -5,6 +5,7 @@
 
 package com.rallytac.engageandroid;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,13 @@ import java.io.FileOutputStream;
 
 public class ShareMissionActivity extends AppCompatActivity
 {
+    public static String KEY_PWD = "PWD";//NON-NLS
+    public static String KEY_DEFLECTION_URL = "DEFLECTION_URL";//NON-NLS
+    public static String KEY_DATASTRING = "DATASTRING";//NON-NLS
+    public static String KEY_ZOOMED = "ZOOMED";//NON-NLS
+    public static String KEY_COMPRESSED_DATA_BYTES = "COMPRESSED_DATA_BYTES";//NON-NLS
+    public static String KEY_MISSION_ID = "MISSION_ID";//NON-NLS
+
     private static String TAG = SettingsActivity.class.getSimpleName();
 
     private EngageApplication _app = null;
@@ -42,6 +50,7 @@ public class ShareMissionActivity extends AppCompatActivity
     private String _base91DataString = null;
     private JSONObject _jsonConfiguration = null;
     private byte[] _compressedDataBytes = null;
+    private String _missionIdToShare = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -71,6 +80,19 @@ public class ShareMissionActivity extends AppCompatActivity
         setTitle(R.string.share_title);
 
         restoreSavedState(savedInstanceState);
+
+        Intent intent = getIntent();
+        if(intent != null)
+        {
+            String idFromIntent = intent.getStringExtra(KEY_MISSION_ID);
+            if(!Utils.isEmptyString(idFromIntent))
+            {
+                _missionIdToShare = idFromIntent;
+            }
+        }
+
+        buildBitmap();
+
         setElements();
         setBitmap();
         updateZoomView();
@@ -100,11 +122,12 @@ public class ShareMissionActivity extends AppCompatActivity
     {
         getElements();
 
-        bundle.putString("PWD", _pwd);//NON-NLS
-        bundle.putString("DEFLECTION_URL", _deflectionUrl);//NON-NLS
-        bundle.putString("DATASTRING", _base91DataString);//NON-NLS
-        bundle.putBoolean("ZOOMED", _qrCodeZoomed);//NON-NLS
-        bundle.putByteArray("COMPRESSED_DATA_BYTES", _compressedDataBytes);//NON-NLS
+        bundle.putString(KEY_PWD, _pwd);
+        bundle.putString(KEY_DEFLECTION_URL, _deflectionUrl);
+        bundle.putString(KEY_DATASTRING, _base91DataString);
+        bundle.putBoolean(KEY_ZOOMED, _qrCodeZoomed);
+        bundle.putByteArray(KEY_COMPRESSED_DATA_BYTES, _compressedDataBytes);
+        bundle.putString(KEY_MISSION_ID, _missionIdToShare);
     }
 
     private void restoreSavedState(Bundle bundle)
@@ -114,13 +137,12 @@ public class ShareMissionActivity extends AppCompatActivity
             return;
         }
 
-        _pwd = bundle.getString("PWD");//NON-NLS
-        _deflectionUrl = bundle.getString("DEFLECTION_URL", null);//NON-NLS
-        _base91DataString = bundle.getString("DATASTRING", null);//NON-NLS
-        _qrCodeZoomed = bundle.getBoolean("ZOOMED", false);//NON-NLS
-        _compressedDataBytes = bundle.getByteArray("COMPRESSED_DATA_BYTES");//NON-NLS
-
-        buildBitmap();
+        _pwd = bundle.getString(KEY_PWD);
+        _deflectionUrl = bundle.getString(KEY_DEFLECTION_URL, null);
+        _base91DataString = bundle.getString(KEY_DATASTRING, null);
+        _qrCodeZoomed = bundle.getBoolean(KEY_ZOOMED, false);
+        _compressedDataBytes = bundle.getByteArray(KEY_COMPRESSED_DATA_BYTES);
+        _missionIdToShare = bundle.getString(KEY_MISSION_ID, null);
     }
 
     public void onClickQrCode(View view)
@@ -202,14 +224,57 @@ public class ShareMissionActivity extends AppCompatActivity
         }
     }
 
+    private ActiveConfiguration getConfigurationToShare()
+    {
+        ActiveConfiguration ac = null;
+
+        try
+        {
+            if (Utils.isEmptyString(_missionIdToShare))
+            {
+                ac = _app.getActiveConfiguration();
+            }
+            else
+            {
+                MissionDatabase database = MissionDatabase.load(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+                DatabaseMission mission = database.getMissionById(_missionIdToShare);
+                if (mission == null)
+                {
+                    throw new Exception(getString(R.string.no_mission_found_with_this_id));
+                }
+
+                ac = ActiveConfiguration.loadFromDatabaseMission(mission);
+
+                if (ac == null)
+                {
+                    throw new Exception(getString(R.string.failed_to_load_the_mission_from_internal_database));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            ac = null;
+            Utils.showErrorMsg(ShareMissionActivity.this, e.getMessage());
+        }
+
+        return ac;
+    }
+
     public void onClickGenerateQrCode(View view)
     {
+        ActiveConfiguration ac = getConfigurationToShare();
+        if(ac == null)
+        {
+            return;
+        }
+
         Utils.hideKeyboardFrom(this, view);
 
-        _jsonConfiguration = _app.getActiveConfiguration().makeTemplate();
+        _jsonConfiguration = ac.makeTemplate();
+
         if(_jsonConfiguration == null)
         {
-            Utils.showPopupMsg(ShareMissionActivity.this, getString(R.string.share_failed_to_create_configuration_package));
+            Utils.showShortPopupMsg(ShareMissionActivity.this, getString(R.string.share_failed_to_create_configuration_package));
             finish();
             return;
         }
@@ -234,7 +299,7 @@ public class ShareMissionActivity extends AppCompatActivity
                 _compressedDataBytes = Globals.getEngageApplication().getEngine().encryptSimple(_compressedDataBytes, pwdHexString);
                 if(_compressedDataBytes == null)
                 {
-                    Utils.showPopupMsg(ShareMissionActivity.this,getString(R.string.share_failed_to_encrypt_configuration_package));
+                    Utils.showShortPopupMsg(ShareMissionActivity.this,getString(R.string.share_failed_to_encrypt_configuration_package));
                     finish();
                     return;
                 }
@@ -262,14 +327,19 @@ public class ShareMissionActivity extends AppCompatActivity
         else
         {
             Globals.getEngageApplication().logEvent(Analytics.MISSION_QR_CODE_FAILED_CREATE);
-            Utils.showPopupMsg(ShareMissionActivity.this,getString(R.string.share_failed_to_create_shareable_configuration_package));
+            Utils.showShortPopupMsg(ShareMissionActivity.this,getString(R.string.share_failed_to_create_shareable_configuration_package));
             finish();
         }
     }
 
     public void onClickShare(View view)
     {
-        ActiveConfiguration ac = _app.getActiveConfiguration();
+        ActiveConfiguration ac = getConfigurationToShare();
+        if(ac == null)
+        {
+            return;
+        }
+
         String downloadUrl = null;
 
         if(((Switch) findViewById(R.id.swUpload)).isChecked())
@@ -324,8 +394,7 @@ public class ShareMissionActivity extends AppCompatActivity
                     extraText = String.format(getString(R.string.fmt_load_this_json_file_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
                 }
 
-                File fd = File.createTempFile("mission-" + ac.getMissionName().replace(" ", "-"), ".json", Environment.getExternalStorageDirectory());//NON-NLS
-
+                File fd = File.createTempFile("mission-" + ac.getMissionName().replace(" ", "-"), ".json", Globals.getEngageApplication().getTempDir());
                 FileOutputStream fos = new FileOutputStream(fd);
 
                 if(!Utils.isEmptyString(_pwd))
@@ -361,7 +430,7 @@ public class ShareMissionActivity extends AppCompatActivity
                     extraText = String.format(getString(R.string.fmt_scan_this_qr_code_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
                 }
 
-                File fd = File.createTempFile("qr-" + ac.getMissionName().replace(" ", "-"), ".jpg", Environment.getExternalStorageDirectory());//NON-NLS
+                File fd = File.createTempFile("qr-" + ac.getMissionName().replace(" ", "-"), ".jpg", Globals.getEngageApplication().getTempDir());//NON-NLS
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 _bm.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                 byte[] bitmapdata = bos.toByteArray();

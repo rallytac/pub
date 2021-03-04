@@ -167,6 +167,8 @@ public class MissionDatabase
                     dbg._name = gd.name;
                     dbg._cryptoPassword = jo.optString(Engine.JsonFields.Group.cryptoPassword);
                     dbg._useCrypto = !Utils.isEmptyString(dbg._cryptoPassword);
+                    dbg._ept = gd.ept;
+                    dbg._anonymousAlias = gd.anonymousAlias;
 
                     JSONObject opt;
 

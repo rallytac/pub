@@ -14,16 +14,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+
 import androidx.appcompat.app.ActionBar;
 
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
-
 
 import com.rallytac.engage.engine.Engine;
 
@@ -240,6 +241,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             }
         }
 
+        private void hidePreferenceInCategory(String nm, String cat)
+        {
+            PreferenceCategory pc = (PreferenceCategory) this.findPreference(cat);
+            if(pc != null)
+            {
+                Preference p = this.findPreference(PreferenceKeys.USER_UI_PTT_LATCHING);
+                if(p != null)
+                {
+                    pc.removePreference(p);
+                }
+            }
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState)
         {
@@ -288,7 +302,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_VIBRATIONS));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME));
 
-            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_LATCHING));
+            if(Utils.boolOpt(getString(R.string.opt_ptt_latching), false))
+            {
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_LATCHING));
+            }
+            else
+            {
+                hidePreferenceInCategory(PreferenceKeys.USER_UI_PTT_LATCHING, "prefcat_user_interface");
+            }
+
             /*
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL));
             */

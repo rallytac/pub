@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android enums -->
+    <string name="visibility_visible" translatable="false">0</string>
+    <string name="visibility_invisible" translatable="false">1</string>
+    <string name="visibility_gone" translatable="false">2</string>
+
+    <!-- Icon sizes -->
+    <dimen name="large_finger_touch_icon">48dp</dimen>
+    <dimen name="small_finger_touch_icon">24dp</dimen>
+
+    <!-- Gaps -->
+    <dimen name="tiny_gap">4dp</dimen>
+    <dimen name="small_gap">8dp</dimen>
+    <dimen name="large_gap">16dp</dimen>
+
+    <!-- General -->
+    <dimen name="bar_height">24dp</dimen>
+    <dimen name="topicons_container_height">42dp</dimen>
+    <dimen name="topicons_hw">32dp</dimen>
+    <dimen name="ptt_height_standard">100dp</dimen>
+    <dimen name="ptt_width_standard">160dp</dimen>
+    <dimen name="ptt_height_large">140dp</dimen>
+    <dimen name="ptt_width_large">260dp</dimen>
+    <dimen name="ptt_bottom">8dp</dimen>
+    <dimen name="ptt_end">8dp</dimen>
+
+    <!-- Information -->
+    <string name="ui_sizing_type" translatable="false">default</string>
+
+    <!-- Single view container -->
+    <dimen name="single_view_fragment_height">200dp</dimen>
+    <dimen name="single_view_fragment_margin_start">16dp</dimen>
+    <dimen name="single_view_fragment_margin_end">16dp</dimen>
+    <dimen name="single_view_fragment_margin_top">16dp</dimen>
+    <dimen name="single_view_fragment_margin_bottom">16dp</dimen>
+
+    <!-- Multi view container -->
+    <dimen name="multi_view_fragment_height">90dp</dimen>
+
+    <!-- Large card -->
+    <dimen name="large_card_anchor_start">24dp</dimen>
+    <dimen name="large_card_anchor_end">24dp</dimen>
+    <dimen name="large_card_anchor_top">18dp</dimen>
+    <dimen name="large_card_anchor_bottom">18dp</dimen>
+    <dimen name="large_card_primary_text_size">30sp</dimen>
+    <dimen name="large_card_secondary_text_size">18sp</dimen>
+
+    <!-- Small card -->
+    <dimen name="small_card_anchor_start">18dp</dimen>
+    <dimen name="small_card_anchor_end">8dp</dimen>
+    <dimen name="small_card_anchor_top">16dp</dimen>
+    <dimen name="small_card_anchor_bottom">8dp</dimen>
+    <dimen name="small_card_primary_text_size">14sp</dimen>
+    <dimen name="small_card_secondary_text_size">10sp</dimen>
+
+    <string name="show_priority_icon_on_large_card" translatable="false">@string/visibility_visible</string>
+    <string name="show_priority_icon_on_small_card" translatable="false">@string/visibility_gone</string>
+    <string name="show_priority_icon_on_app_single_view" translatable="false">@string/visibility_gone</string>
+    <string name="show_priority_icon_on_app_multi_view" translatable="false">@string/visibility_gone</string>
+
+    <string name="show_member_count_on_large_card" translatable="false">@string/visibility_gone</string>
+    <string name="show_member_count_on_small_card" translatable="false">@string/visibility_gone</string>
+
+    <string name="show_top_icons_in_single_view" translatable="false">@string/visibility_visible</string>
+    <string name="show_top_icons_in_multi_view" translatable="false">@string/visibility_gone</string>
+
+    <bool name="opt_supports_ept">false</bool>
+    <bool name="opt_supports_anonymous_alias">false</bool>
+</resources>

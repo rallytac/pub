@@ -22,13 +22,7 @@ public class LicenseDescriptor
 
     LicenseDescriptor()
     {
-        _theType = Engine.LicenseType.unknown;
-        _deviceId = null;
-        _key = null;
-        _activationCode = null;
-        _expires = null;
-        _expiresFormatted = null;
-        _status = Engine.LicensingStatusCode.generalFailure;
+        clear();
     }
 
     LicenseDescriptor(LicenseDescriptor ld)
@@ -40,6 +34,17 @@ public class LicenseDescriptor
         this._expires = ld._expires;
         this._expiresFormatted = ld._expiresFormatted;
         this._status = ld._status;
+    }
+
+    public void clear()
+    {
+        _theType = Engine.LicenseType.unknown;
+        _deviceId = null;
+        _key = null;
+        _activationCode = null;
+        _expires = null;
+        _expiresFormatted = null;
+        _status = Engine.LicensingStatusCode.generalFailure;
     }
 
     public boolean isValid()

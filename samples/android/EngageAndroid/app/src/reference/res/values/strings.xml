@@ -40,4 +40,6 @@
     <string name="sample_mission_gen_group_count" translatable="false">4</string>
     <string name="sample_mission_gen_audio_group_name_fmt">Sample Group %1$d</string>
     <string name="sample_mission_gen_use_default_rallypoint">0</string>
+
+    <string name="application_internal_certificate_store_display_name">Engage Default Certificate Store</string>
 </resources>

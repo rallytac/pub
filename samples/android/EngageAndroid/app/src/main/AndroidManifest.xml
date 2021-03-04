@@ -97,6 +97,9 @@
             android:name=".MissionEditActivity"
             android:label="@string/title_activity_edit_mission" />
         <activity
+            android:name=".OemMissionEditActivity"
+            android:label="@string/title_activity_edit_mission" />
+        <activity
             android:name=".MissionListActivity"
             android:label="@string/title_activity_missions" />
         <activity

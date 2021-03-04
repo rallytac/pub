@@ -8,6 +8,7 @@ package com.rallytac.engageandroid;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,10 +30,11 @@ public class EngageService extends Service
 {
     private final static String TAG = EngageService.class.toString();
 
+    private final static String INTENT_ACTION_WAKEUP = "{26f5802d-cc33-4ee6-b074-c3d5044377a8}";
+
     private static final int NOTIFICATION_ID = 1;
 
     private boolean _initialized = false;
-    private Engine _engine = null;
 
     private final IBinder _binder = new EngageServiceBinder();
     private NotificationManager _notificationManager = null;
@@ -51,6 +53,7 @@ public class EngageService extends Service
         private String[] _requestActions =
                 {
                         // Intent actions we want to receive in this service
+                        INTENT_ACTION_WAKEUP
                 };
 
         @Override
@@ -70,19 +73,18 @@ public class EngageService extends Service
                 return;
             }
 
-            Log.d(TAG, "received intent [" + action + "]");//NON-NLS
+            Log.i(TAG, "received intent [" + action + "]");//NON-NLS
 
             // TODO: handle intent actions
 
-            /*
-            if (action.compareTo(<action_name>) == 0)
+            if (action.compareTo(INTENT_ACTION_WAKEUP) == 0)
             {
+                Globals.getEngageApplication().wakeup();
             }
             else
             {
                 Log.e(TAG, "unhandled request action '" + action + "'");
             }
-            */
         }
 
         public void start()
@@ -126,7 +128,10 @@ public class EngageService extends Service
         Log.i(TAG, "=====================onStartCommand: intent=" + ((intent != null) ? intent.toString() : "null") + ", flags=" + flags + ", startId=" + startId);//NON-NLS
         super.onStartCommand(intent, flags, startId);
 
-        showOsNotification(getString(R.string.app_name), String.format(getString(R.string.android_notification_service_is_running),getString(R.string.app_name)), R.drawable.ic_app_logo);
+        if(startId == 1)
+        {
+            showOsNotification(getString(R.string.app_name), String.format(getString(R.string.android_notification_service_is_running), getString(R.string.app_name)), R.drawable.ic_app_logo);
+        }
 
         return START_STICKY;
     }
@@ -162,9 +167,6 @@ public class EngageService extends Service
         try
         {
             _initialized = true;
-
-            _engine = new Engine();
-            _engine.initialize();
 
             _wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
@@ -327,6 +329,10 @@ public class EngageService extends Service
 
                 notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
 
+                Intent i = new Intent(INTENT_ACTION_WAKEUP);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+                notification.contentIntent = pendingIntent;
+
                 if(_notificationManager != null)
                 {
                     _notificationManager.notify(NOTIFICATION_ID, notification);
@@ -336,17 +342,32 @@ public class EngageService extends Service
             }
             else
             {
-                startForeground(NOTIFICATION_ID, null);
+                //startForeground(NOTIFICATION_ID, null);
+
+                Notification notification = new NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID + getString(R.string.android_notification_channel_id))
+                        .setContentTitle(title)
+                        .setContentText(msg)
+                        .setSmallIcon(iconId)
+                        .build();
+
+                notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
+
+                Intent i = new Intent(INTENT_ACTION_WAKEUP);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+                notification.contentIntent = pendingIntent;
+
+                if(_notificationManager != null)
+                {
+                    _notificationManager.notify(NOTIFICATION_ID, notification);
+                }
+
+                startForeground(NOTIFICATION_ID, notification);
+
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-    }
-
-    public Engine getEngine()
-    {
-        return _engine;
     }
 }

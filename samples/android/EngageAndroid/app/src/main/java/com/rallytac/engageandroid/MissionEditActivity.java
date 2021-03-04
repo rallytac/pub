@@ -143,7 +143,7 @@ public class MissionEditActivity extends AppCompatActivity
         }
         else
         {
-            Toast.makeText(this, R.string.max_num_groups_reached, Toast.LENGTH_SHORT).show();
+            Utils.showLongPopupMsg(this, R.string.max_num_groups_reached);
         }
     }
 
@@ -182,6 +182,18 @@ public class MissionEditActivity extends AppCompatActivity
         final Switch swDisableHeaderExtensions = view.findViewById(R.id.swDisableHeaderExtensions);
         final Switch swFullDuplex = view.findViewById(R.id.swFullDuplex);
         final Switch swUnlimitedTx = view.findViewById(R.id.swUnlimitedTx);
+        final Switch swEpt = view.findViewById(R.id.swEpt);
+        final Switch swAnonymousAlias = view.findViewById(R.id.swAnonymousAlias);
+
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_ept))
+        {
+            swEpt.setVisibility(View.INVISIBLE);
+        }
+
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_anonymous_alias))
+        {
+            swAnonymousAlias.setVisibility(View.INVISIBLE);
+        }
 
         dialogBuilder.setCancelable(true)
                 .setTitle(getString(R.string.title_group))
@@ -210,7 +222,9 @@ public class MissionEditActivity extends AppCompatActivity
                     group._txFramingMs = Utils.parseIntSafe(getResources().getStringArray(R.array.lp_tx_encoder_framing_values)[spnFraming.getSelectedItemPosition()]);
                     group._noHdrExt = swDisableHeaderExtensions.isChecked();
                     group._fdx = swFullDuplex.isChecked();
+                    group._ept = (swEpt.isChecked() ? Constants.EPT_STATIC_VALUE : 0);
                     group._maxTxSecs = (swUnlimitedTx.isChecked() ? Constants.UNLIMITED_TX_SECS : Constants.DEFAULT_TX_SECS);
+                    group._anonymousAlias = (swAnonymousAlias.isChecked());
 
                     if(Utils.isEmptyString(group._txAddress))
                     {
@@ -312,6 +326,8 @@ public class MissionEditActivity extends AppCompatActivity
 
         swDisableHeaderExtensions.setChecked(group._noHdrExt);
         swFullDuplex.setChecked(group._fdx);
+        swEpt.setChecked(group._ept > 0);
+        swAnonymousAlias.setChecked(group._anonymousAlias);
         swUnlimitedTx.setChecked(group._maxTxSecs == Constants.UNLIMITED_TX_SECS);
 
         etGroupName.setEnabled(_allowEdit);
@@ -325,6 +341,8 @@ public class MissionEditActivity extends AppCompatActivity
         btnRegen.setEnabled(_allowEdit && group._useCrypto);
         swDisableHeaderExtensions.setEnabled(_allowEdit);
         swFullDuplex.setEnabled(_allowEdit);
+        swEpt.setEnabled(_allowEdit);
+        swAnonymousAlias.setEnabled(_allowEdit);
         swUnlimitedTx.setEnabled(_allowEdit);
 
         alertDialog.show();

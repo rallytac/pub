@@ -5,6 +5,8 @@
 
 package com.rallytac.engageandroid;
 
+import android.Manifest;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,11 +17,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.media.SoundPool;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -29,11 +32,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Environment;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -44,6 +49,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -72,7 +78,9 @@ import com.rallytac.engage.engine.Engine;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileDescriptor;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -98,12 +106,6 @@ public class SimpleUiMainActivity
                                 GroupSelectorAdapter.SelectionClickListener
 {
     private static String TAG = SimpleUiMainActivity.class.getSimpleName();
-
-    private static int SETTINGS_REQUEST_CODE = 42;
-    private static int MISSION_LISTING_REQUEST_CODE = 43;
-    private static int PICK_MISSION_FILE_REQUEST_CODE = 44;
-    private static int CERTIFICATE_MANAGER_REQUEST_CODE = 45;
-    private static int ENGINE_POLICY_EDIT_REQUEST_CODE = 46;
 
     private ActiveConfiguration _ac = null;
     private Timer _waitForEngineStartedTimer = null;
@@ -138,11 +140,7 @@ public class SimpleUiMainActivity
 
     private int _keycodePtt = 0;
 
-    private String _missionFileLoadPassword = null;
-
     private HashSet<String> _currentlySelectedGroups = null;
-    private boolean _isEmergencyTxOn = false;
-    private boolean _isPriorityOn = false;
 
     private class TimelineEventPlayerTracker
     {
@@ -569,7 +567,7 @@ public class SimpleUiMainActivity
         _ac = Globals.getEngageApplication().getActiveConfiguration();
 
         _optAllowMultipleChannelView = Utils.boolOpt(getString(R.string.opt_allow_multiple_channel_view), true);
-        setRequestedOrientation(Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+        //setRequestedOrientation(Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
 
         _keycodePtt = Utils.intOpt(getString(R.string.app_keycode_ptt), 0);
 
@@ -660,8 +658,6 @@ public class SimpleUiMainActivity
         }
         */
 
-        updateSingleGroupTxInfo();
-
         redrawCardFragments();
 
         checkForLicenseInstallation();
@@ -687,9 +683,12 @@ public class SimpleUiMainActivity
     {
         Log.d(TAG, "onResume");//NON-NLS
         super.onResume();
+        Globals.getEngageApplication().ensureAllIsGood();
+        setLockScreenSettings();
         registerWithApp();
         updateLicensingBar();
         updateBiometricsIconDisplay();
+        fixPttSize();
     }
 
     @Override
@@ -737,7 +736,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if (requestCode == SETTINGS_REQUEST_CODE)
+        if (requestCode == Constants.SETTINGS_REQUEST_CODE)
         {
             if(resultCode == SettingsActivity.MISSION_CHANGED_RESULT || Globals.getEngageApplication().getMissionChangedStatus())
             {
@@ -745,7 +744,7 @@ public class SimpleUiMainActivity
                 onMissionChanged();
             }
         }
-        else if(requestCode == ENGINE_POLICY_EDIT_REQUEST_CODE)
+        else if(requestCode == Constants.ENGINE_POLICY_EDIT_REQUEST_CODE)
         {
             if(resultCode == RESULT_OK)
             {
@@ -760,7 +759,7 @@ public class SimpleUiMainActivity
                 }
             }
         }
-        else if(requestCode == MISSION_LISTING_REQUEST_CODE)
+        else if(requestCode == Constants.MISSION_LISTING_REQUEST_CODE)
         {
             if(intent != null && intent.hasExtra(Constants.MISSION_ACTIVATED_ID))
             {
@@ -777,22 +776,7 @@ public class SimpleUiMainActivity
                 }
             }
         }
-        else if(requestCode == PICK_MISSION_FILE_REQUEST_CODE)
-        {
-            if(resultCode == RESULT_OK)
-            {
-                try
-                {
-                    Globals.getEngageApplication().processDownloadedMissionAndSwitchIfOk(Utils.readBinaryFile(SimpleUiMainActivity.this, intent.getData()), _missionFileLoadPassword);
-                    onMissionChanged();
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-        else if(requestCode == CERTIFICATE_MANAGER_REQUEST_CODE)
+        else if(requestCode == Constants.CERTIFICATE_MANAGER_REQUEST_CODE)
         {
             if(intent != null && intent.hasExtra(Constants.CERTSTORE_CHANGED_TO_FN))
             {
@@ -803,26 +787,44 @@ public class SimpleUiMainActivity
                 onMissionChanged();
             }
         }
-        else if (requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
+    }
+
+    private void setLockScreenSettings()
+    {
+        boolean showIt = Globals.getSharedPreferences().getBoolean(PreferenceKeys.UI_SHOW_ON_LOCK_SCREEN, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
         {
-            try
+            setShowWhenLocked(showIt);
+            setTurnScreenOn(showIt);
+
+            if(showIt)
             {
-                ActiveConfiguration ac = Globals.getEngageApplication().processScannedQrCodeResultIntent(requestCode, resultCode, intent, true);
-                if(ac != null)
+                KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                if(keyguardManager != null)
                 {
-                    Utils.showLongPopupMsg(SimpleUiMainActivity.this, String.format(getString(R.string.loaded_mission_fmt), ac.getMissionName()));
-                    onMissionChanged();
+                    keyguardManager.requestDismissKeyguard(this, null);
                 }
             }
-            catch(SimpleMessageException sme)
+        }
+        else
+        {
+            int flags = WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+
+            Window window = getWindow();
+
+            if(window != null)
             {
-                Utils.showPopupMsg(SimpleUiMainActivity.this, sme.getMessage());
-                sme.printStackTrace();
-            }
-            catch(Exception e)
-            {
-                Utils.showPopupMsg(SimpleUiMainActivity.this, e.getMessage());
-                e.printStackTrace();
+                if(showIt)
+                {
+                    getWindow().addFlags(flags);
+                }
+                else
+                {
+                    getWindow().clearFlags(flags);
+                }
             }
         }
     }
@@ -830,7 +832,7 @@ public class SimpleUiMainActivity
     @Override
     public void onAttachedToWindow()
     {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        setLockScreenSettings();
     }
 
     private long _lastKeydown = 0;
@@ -1294,6 +1296,9 @@ public class SimpleUiMainActivity
         _pttRequested = false;
         _pttHardwareButtonDown = false;
         _lastHeadsetKeyhookDown = 0;
+
+        _ac.setPriorityTxLevel(0);
+
         redrawPttButton();
         redrawCardFragments();
         updateMap();
@@ -1403,6 +1408,24 @@ public class SimpleUiMainActivity
                 showLicensingBar(getString(R.string.license_has_expired));
             }
         }
+    }
+
+    private void fixPttSize()
+    {
+        ImageView iv = findViewById(R.id.ivPtt);
+
+        if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.UI_LARGE_PTT_BUTTON, false))
+        {
+            iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_large);
+            iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_large);
+        }
+        else
+        {
+            iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_standard);
+            iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_standard);
+        }
+
+        iv.requestLayout();
     }
 
     private void updateBiometricsIconDisplay()
@@ -1936,12 +1959,12 @@ public class SimpleUiMainActivity
         // TODO: Nothing to do for now in the UI when we're notified that a stats report failed
     }
 
-    private class TeamListAdapter extends ArrayAdapter<PresenceDescriptor>
+    private class TeamListAdapter extends ArrayAdapter<EngageEntity>
     {
         private Context _ctx;
         private int _resId;
 
-        public TeamListAdapter(Context ctx, int resId, ArrayList<PresenceDescriptor> list)
+        public TeamListAdapter(Context ctx, int resId, ArrayList<EngageEntity> list)
         {
             super(ctx, resId, list);
             _ctx = ctx;
@@ -1955,22 +1978,12 @@ public class SimpleUiMainActivity
             LayoutInflater inflator = LayoutInflater.from(_ctx);
             convertView = inflator.inflate(_resId, parent, false);
 
-            final PresenceDescriptor item = getItem(position);
+            final EngageEntity item = getItem(position);
 
             ImageView iv = convertView.findViewById(R.id.ivType);
             iv.setImageDrawable(ContextCompat.getDrawable(_ctx, R.drawable.ic_app_logo));
 
-            String displayName = item.displayName;
-            if(Utils.isEmptyString(displayName))
-            {
-                displayName = item.userId;
-                if(Utils.isEmptyString(displayName))
-                {
-                    displayName = item.nodeId;
-                }
-            }
-
-            ((TextView)convertView.findViewById(R.id.tvDisplayName)).setText(displayName);
+            ((TextView)convertView.findViewById(R.id.tvDisplayName)).setText(item.friendlyName);
 
             convertView.setOnClickListener(new View.OnClickListener()
             {
@@ -1987,6 +2000,7 @@ public class SimpleUiMainActivity
         }
     }
 
+    private AlertDialog _activeGroupListDialog = null;
     private class GroupListAdapter extends ArrayAdapter<GroupDescriptor>
     {
         private Context _ctx;
@@ -2027,6 +2041,7 @@ public class SimpleUiMainActivity
                 @Override
                 public void onClick(View v)
                 {
+                    _activeGroupListDialog.dismiss();
                     showSingleView(item.id);
                 }
             });
@@ -2060,83 +2075,52 @@ public class SimpleUiMainActivity
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setAdapter(arrayAdapter, null);
-            builder.setPositiveButton(R.string.button_close, null);
-            builder.show();
+            builder.setPositiveButton(R.string.button_cancel, null);
+            _activeGroupListDialog = builder.show();
         }
     }
 
-    public void showTeamList()
+    public void showTeamList(String forGroupId)
     {
         Globals.getEngageApplication().logEvent(Analytics.VIEW_TEAM);
 
-        String idToUse = null;
+        String title = null;
 
-        if(_ac.getUiMode() == Constants.UiMode.vSingle)
+        if(_ac == null || Globals.getEngageApplication().getMissionNodeCount(forGroupId) == 0)
         {
-            idToUse = Globals.getSharedPreferences().getString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_SELECTED_GROUPS_SINGLE, "");
+            Utils.showShortPopupMsg(this, R.string.no_team_members_present);
+            return;
         }
 
-        if(_ac == null || Globals.getEngageApplication().getMissionNodeCount(idToUse) == 0)
+        if(!Utils.isEmptyString(forGroupId))
         {
-            Utils.showPopupMsg(this, getString(R.string.no_team_members_present));
-            return;
+            GroupDescriptor gd = Globals.getEngageApplication().getActiveConfiguration().getGroupDescriptor(forGroupId);
+            if(gd != null)
+            {
+                title = gd.name;
+            }
+            else
+            {
+                title = getString(R.string.unknown_group);
+            }
+        }
+        else
+        {
+            title = getString(R.string.all_groups);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        final ArrayList<PresenceDescriptor> theList = Globals.getEngageApplication().getMissionNodes(idToUse);
+        int[] flags = {Constants.GMT_STATUS_FLAG_CONNECTED};
+        final ArrayList<EngageEntity> theList = Globals.getEngageApplication().getEntities(forGroupId, flags);
 
         final TeamListAdapter arrayAdapter = new TeamListAdapter(this, R.layout.team_list_row_item, theList);
 
+        builder.setTitle(title);
         builder.setAdapter(arrayAdapter, null);
         builder.setPositiveButton(R.string.button_close, null);
 
         builder.show();
-    }
-
-    private void startLoadMissionFromLocalFile()
-    {
-        _missionFileLoadPassword = null;
-
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        View promptView = layoutInflater.inflate(R.layout.file_load_mission_password_dialog, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setView(promptView);
-
-        final EditText etPassword = promptView.findViewById(R.id.etPassword);
-
-        alertDialogBuilder.setCancelable(false)
-                .setPositiveButton(R.string.mission_file_load_button, new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        try
-                        {
-                            // Save this for later
-                            _missionFileLoadPassword = etPassword.getText().toString();
-
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                            intent.setType("*/*");
-                            intent.addCategory(Intent.CATEGORY_OPENABLE);
-                            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_MISSION_FILE_REQUEST_CODE);
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.cancel,
-                        new DialogInterface.OnClickListener()
-                        {
-                            public void onClick(DialogInterface dialog, int id)
-                            {
-                                dialog.cancel();
-                            }
-                        });
-
-        AlertDialog alert = alertDialogBuilder.create();
-        alert.show();
     }
 
     private void startJsonPolicyEditorActivity()
@@ -2149,19 +2133,12 @@ public class SimpleUiMainActivity
 
         Intent intent = new Intent(this, JsonEditorActivity.class);
         intent.putExtra(JsonEditorActivity.JSON_DATA, json);
-        startActivityForResult(intent, ENGINE_POLICY_EDIT_REQUEST_CODE);
+        startActivityForResult(intent, Constants.ENGINE_POLICY_EDIT_REQUEST_CODE);
     }
 
     private void startDevTestActivity()
     {
         Intent intent = new Intent(this, DeveloperTestActivity.class);
-        startActivity(intent);
-    }
-
-    private void startContactActivity()
-    {
-        Globals.getEngageApplication().logEvent(Analytics.VIEW_CONTACT);
-        Intent intent = new Intent(this, ContactActivity.class);
         startActivity(intent);
     }
 
@@ -2176,21 +2153,14 @@ public class SimpleUiMainActivity
     {
         Globals.getEngageApplication().logEvent(Analytics.VIEW_MISSION_LIST);
         Intent intent = new Intent(this, MissionListActivity.class);
-        startActivityForResult(intent, MISSION_LISTING_REQUEST_CODE);
+        startActivityForResult(intent, Constants.MISSION_LISTING_REQUEST_CODE);
     }
 
     private void startSettingsActivity()
     {
         Globals.getEngageApplication().logEvent(Analytics.VIEW_SETTINGS);
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivityForResult(intent, SETTINGS_REQUEST_CODE);
-    }
-
-    private void startShareMissionActivity()
-    {
-        Globals.getEngageApplication().logEvent(Analytics.VIEW_SHARE_MISSION);
-        Intent intent = new Intent(this, ShareMissionActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, Constants.SETTINGS_REQUEST_CODE);
     }
 
     private void startMapActivity()
@@ -2204,7 +2174,7 @@ public class SimpleUiMainActivity
     {
         Globals.getEngageApplication().logEvent(Analytics.VIEW_CERTIFICATES);
         Intent intent = new Intent(this, CertStoreListActivity.class);
-        startActivityForResult(intent, CERTIFICATE_MANAGER_REQUEST_CODE);
+        startActivityForResult(intent, Constants.CERTIFICATE_MANAGER_REQUEST_CODE);
     }
 
     private void requestGroupTimeline(String groupId)
@@ -2406,7 +2376,7 @@ public class SimpleUiMainActivity
     {
         for(GroupDescriptor gd : _ac.getMissionGroups())
         {
-            gd.txMuted = false;
+            gd.txSelected = true;
         }
     }
 
@@ -2414,7 +2384,7 @@ public class SimpleUiMainActivity
     {
         for(GroupDescriptor gd : _ac.getMissionGroups())
         {
-            gd.txMuted = true;
+            gd.txSelected = false;
         }
     }
 
@@ -2461,8 +2431,8 @@ public class SimpleUiMainActivity
                     {
                         if(f instanceof CardFragment)
                         {
-                            // Allow TX on this group
-                            gd.txMuted = false;
+                            // Select TX on this group
+                            gd.txSelected = true;
 
                             ((CardFragment)f).setGroupDescriptor(gd);
 
@@ -2551,13 +2521,14 @@ public class SimpleUiMainActivity
 
             String msg;
 
-            // TODO: Disable switching to multicast is active configuration doesn't allow for it
+            /*
             if(!_ac.couldAllGroupsWorkWithoutRallypoint())
             {
                 msg = String.format(getString(R.string.currently_connected_globally_fmt), _ac.getRpAddress(), _ac.getRpPort());
                 Utils.showLongPopupMsg(SimpleUiMainActivity.this, msg);
             }
             else
+            */
             {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
@@ -2628,7 +2599,7 @@ public class SimpleUiMainActivity
 
     public void onClickTeamIcon(View view)
     {
-        showTeamList();
+        showTeamList(null);
     }
 
     public void onClickGroupsIcon(View view)
@@ -2674,16 +2645,6 @@ public class SimpleUiMainActivity
         {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void onClickImportIcon(View view)
-    {
-        Globals.getEngageApplication().initiateSimpleQrCodeScan(this);
-    }
-
-    public void onClickShowMenu(View view)
-    {
-        showPopupMenu();
     }
 
     public void onClickMenuIcon(View view)
@@ -2815,7 +2776,36 @@ public class SimpleUiMainActivity
             });
         }
 
+        // Priority TX
+        final ImageView ivAppPriority = findViewById(R.id.ivAppPriority);
+        if(ivAppPriority != null)
+        {
+            ivAppPriority.setLongClickable(true);
+            ivAppPriority.setOnLongClickListener(new View.OnLongClickListener()
+            {
+                @Override
+                public boolean onLongClick(View v)
+                {
+                    int currentLevel = _ac.getPriorityTxLevel();
+                    if(currentLevel == 0)
+                    {
+                        _ac.setPriorityTxLevel(Utils.intOpt(getString(R.string.opt_app_tx_priority_level), 0));
+                    }
+                    else
+                    {
+                        _ac.setPriorityTxLevel(0);
+                    }
+
+                    redrawPttButton();
+
+                    return true;
+                }
+            });
+        }
+
+
         // Emergency TX
+        /*
         final ImageView ivEmergency = findViewById(R.id.ivEmergency);
         if(ivEmergency != null)
         {
@@ -2842,48 +2832,10 @@ public class SimpleUiMainActivity
                 }
             });
         }
-
-        // Priority TX
-        final ImageView ivPriority = findViewById(R.id.ivPriority);
-        if(ivPriority != null)
-        {
-            ivPriority.setLongClickable(true);
-            ivPriority.setOnLongClickListener(new View.OnLongClickListener()
-            {
-                @Override
-                public boolean onLongClick(View v)
-                {
-                    _isPriorityOn = !_isPriorityOn;
-
-                    if(_isPriorityOn)
-                    {
-                        ivPriority.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_high_priority));
-                    }
-                    else
-                    {
-                        ivPriority.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_no_priority));
-                    }
-
-                    updateSingleGroupTxInfo();
-
-                    return true;
-                }
-            });
-        }
+        */
     }
 
-    private void updateSingleGroupTxInfo()
-    {
-        String gid = Globals.getSharedPreferences().getString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_SELECTED_GROUPS_SINGLE, "");
-        if(!Utils.isEmptyString(gid))
-        {
-            int priority = (_isPriorityOn ? 100 : 0);
-            int flags = (_isEmergencyTxOn ? 1 : 0);
-            Globals.getEngageApplication().setGroupTxInfo(gid, priority, flags);
-        }
-    }
-
-    private void redrawPttButton()
+    public void redrawPttButton()
     {
         runOnUiThread(new Runnable()
         {
@@ -2891,6 +2843,7 @@ public class SimpleUiMainActivity
             public void run()
             {
                 ImageView ivPtt = findViewById(R.id.ivPtt);
+                ImageView ivAppPriority = findViewById(R.id.ivAppPriority);
 
                 if(_anyTxActive)
                 {
@@ -2930,7 +2883,66 @@ public class SimpleUiMainActivity
                         ivPtt.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_ptt_idle));
                         ivPtt.setContentDescription(null);
                     }
+
+                    // See whether app priority icon should be touched at all
+                    boolean changeAppPriorityIconVisibility;
+                    String visVal = Globals.getContext().getResources().getString(R.string.visibility_visible);
+                    String setVal;
+
+                    if(_ac.getUiMode() == Constants.UiMode.vSingle)
+                    {
+                        setVal = Globals.getContext().getResources().getString(R.string.show_priority_icon_on_app_single_view);
+                    }
+                    else
+                    {
+                        setVal = Globals.getContext().getResources().getString(R.string.show_priority_icon_on_app_multi_view);
+                    }
+
+                    changeAppPriorityIconVisibility = (setVal == visVal);
+
+                    // If we're idle and in multi-group view, then show/hide the PTT button based on whether any groups have been selected for TX
+                    if(Globals.getEngageApplication().getActiveConfiguration().anyGroupsSelectedForTx())
+                    {
+                        if(Globals.getEngageApplication().hasPermissionToRecordAudio())
+                        {
+                            ivPtt.setVisibility(View.VISIBLE);
+
+                            if(changeAppPriorityIconVisibility)
+                            {
+                                ivAppPriority.setVisibility(View.VISIBLE);
+                            }
+                        }
+                        else
+                        {
+                            ivPtt.setVisibility(View.GONE);
+                            if(changeAppPriorityIconVisibility)
+                            {
+                                ivAppPriority.setVisibility(View.GONE);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ivPtt.setVisibility(View.GONE);
+                        if(changeAppPriorityIconVisibility)
+                        {
+                            ivAppPriority.setVisibility(View.GONE);
+                        }
+                    }
                 }
+
+                Drawable dw;
+
+                if(_ac.getPriorityTxLevel() == 0)
+                {
+                    dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_no_priority);
+                }
+                else
+                {
+                    dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_high_priority);
+                }
+
+                ivAppPriority.setImageDrawable(dw);
             }
         });
     }
@@ -2995,7 +3007,6 @@ public class SimpleUiMainActivity
         CardFragment card = getCardForGroup(id);
         if(card == null)
         {
-            // TODO: assert?
             return;
         }
 
@@ -3034,35 +3045,10 @@ public class SimpleUiMainActivity
                     startMissionListActivity();
                     return true;
                 }
-                else if (id == R.id.action_share)
-                {
-                    startShareMissionActivity();
-                    return true;
-                }
-                else if (id == R.id.action_scan)
-                {
-                    Globals.getEngageApplication().initiateMissionQrCodeScan(SimpleUiMainActivity.this);
-                    return true;
-                }
-                else if (id == R.id.action_load)
-                {
-                    startLoadMissionFromLocalFile();
-                    return true;
-                }
-                else if (id == R.id.action_download)
-                {
-                    Globals.getEngageApplication().initiateMissionDownload(SimpleUiMainActivity.this);
-                    return true;
-                }
                 else if (id == R.id.action_about)
                 {
                     startAboutActivity();
                     //performDevSimulation();
-                    return true;
-                }
-                else if (id == R.id.action_contact)
-                {
-                    startContactActivity();
                     return true;
                 }
                 else if (id == R.id.action_dev_test)
@@ -3075,9 +3061,9 @@ public class SimpleUiMainActivity
                     startJsonPolicyEditorActivity();
                     return true;
                 }
-                else if (id == R.id.action_shutdown)
+                else if (id == R.id.action_disconnect)
                 {
-                    verifyShutdown();
+                    verifyDisconnect();
                     return true;
                 }
                 else if (id == R.id.action_security)
@@ -3093,11 +3079,11 @@ public class SimpleUiMainActivity
         popup.show();
     }
 
-    private void verifyShutdown()
+    private void verifyDisconnect()
     {
         String s;
 
-        s = String.format(getString(R.string.confirm_shutdown), getString(R.string.app_name));
+        s = String.format(getString(R.string.confirm_disconnect), getString(R.string.app_name));
 
         final TextView message = new TextView(this);
         final SpannableString ss = new SpannableString(s);
@@ -3107,7 +3093,7 @@ public class SimpleUiMainActivity
         message.setPadding(32, 32, 32, 32);
 
         AlertDialog dlg = new AlertDialog.Builder(this)
-                .setTitle(R.string.title_shutdown)
+                .setTitle(R.string.title_disconnect)
                 .setCancelable(false)
                 .setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener()
                 {
@@ -3115,6 +3101,9 @@ public class SimpleUiMainActivity
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
                         Globals.getEngageApplication().terminateApplicationAndReturnToAndroid(SimpleUiMainActivity.this);
+                        //Globals.getEngageApplication().stopEngine();
+                        //moveTaskToBack(true);
+                        //finishAndRemoveTask();
                     }
                 }).setNegativeButton(R.string.button_no, new DialogInterface.OnClickListener()
                 {
@@ -3534,6 +3523,5 @@ public class SimpleUiMainActivity
 
         AlertDialog dlg = alertDialogBuilder.create();
         dlg.show();
-
     }
 }

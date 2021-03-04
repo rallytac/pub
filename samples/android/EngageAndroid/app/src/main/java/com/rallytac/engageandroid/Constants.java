@@ -9,9 +9,13 @@ import com.rallytac.engage.engine.Engine;
 
 public class Constants
 {
+    public static String KEY_LAUNCH_ACTIVITY = "Launcher.LAUNCH_ACTIVITY";//NON-NLS
+
     public static String QR_CODE_HEADER = "&*3$e1@E";//NON-NLS
     public static String QR_VERSION = "001";//NON-NLS
     public static String QR_DEFLECTION_URL_SEP = "/??";//NON-NLS
+
+    public static String CERTSTORE_JSON_INTERNAL_PASSWORD_HEX_STRING = "__app__internal__pwd_hexstring";//NON-NLS
 
     public enum UiMode {vSingle, vMulti}
 
@@ -79,12 +83,12 @@ public class Constants
     public final static int GROUP_HEALTH_CHECK_TIMER_INTERVAL_MS = 2000;
     public final static int GROUP_HEALTH_CHECK_NETWORK_ERROR_NOTIFICATION_MIN_INTERVAL_MS = 10000;
 
-    public static final String MISSION_DATABASE_NAME = "MissionDatabase";//NON-NLS
-    public static final String MISSION_EDIT_EXTRA_JSON = "MissionJson";//NON-NLS
-    public static final String MISSION_ACTIVATED_ID = "ActivatedMissionId";//NON-NLS
+    public final static String MISSION_DATABASE_NAME = "MissionDatabase";//NON-NLS
+    public final static String MISSION_EDIT_EXTRA_JSON = "MissionJson";//NON-NLS
+    public final static String MISSION_ACTIVATED_ID = "ActivatedMissionId";//NON-NLS
 
-    public static final long MIN_LICENSE_ACTIVATION_DELAY_MS = 60000;
-    public static final long MAX_LICENSE_ACTIVATION_DELAY_MS = (86400 * 1000);
+    public final static long MIN_LICENSE_ACTIVATION_DELAY_MS = 60000;
+    public final static long MAX_LICENSE_ACTIVATION_DELAY_MS = (86400 * 1000);
 
     public final static boolean DEF_USER_UI_PTT_LATCHING = false;
     public final static boolean DEF_USER_UI_PTT_VOICE_CONTROL = false;
@@ -96,7 +100,7 @@ public class Constants
 
     public final static int DEFAULT_ENCODER = 25;
     public final static int DEFAULT_TX_FRAMING_MS = 60;
-    public static final String CERTSTORE_CHANGED_TO_FN = "CertStoreChangedToFn";//NON-NLS
+    public final static String CERTSTORE_CHANGED_TO_FN = "CertStoreChangedToFn";//NON-NLS
 
     public final static int MAX_TEXT_MESSAGE_INPUT_SIZE = 256;
     public final static int TEXT_MESSAGE_BLOB_RTP_PAYLOAD_TYPE = 66;
@@ -123,4 +127,30 @@ public class Constants
     public final static int DEF_SPEAKER_AGC_TARGET_DB = 3;
 
     public final static String INTERNAL_DEFAULT_CERTSTORE_FN = "{7662214c-e79e-436f-8e93-7cf75cbac682}.certstore";//NON-NLS
+
+    public final static String EPT_ELEMENT_NAME = "ept";//NON-NLS
+    public final static int EPT_STATIC_VALUE = 100;
+
+    public final static String ANONYMOUS_ALIAS_ELEMENT_NAME = "anonymousAlias";//NON-NLS
+
+    public final static int GMT_STATUS_FLAG_JOINED = 0x01;
+    public final static int GMT_STATUS_FLAG_CONNECTED = 0x02;
+
+    // Activity request
+    public final static int SETTINGS_REQUEST_CODE = 42;
+    public final static int MISSION_LISTING_REQUEST_CODE = 43;
+    public final static int CERTIFICATE_MANAGER_REQUEST_CODE = 45;
+    public final static int ENGINE_POLICY_EDIT_REQUEST_CODE = 46;
+    public final static int MISSION_QR_CODE_SCAN = 47;
+    public final static int OFFLINE_ACTIVATION_CODE_REQUEST_CODE = 48;
+    public final static int EDIT_ACTION_REQUEST_CODE = 49;
+    public final static int PICK_MISSION_FILE_REQUEST_CODE = 50;
+    public final static int OFFLINE_ACTIVATION_REQUEST_CODE = 51;
+
+    public final static int PICK_LICENSE_FILE_REQUEST_CODE = 52;
+    public final static int PICK_QR_LICENSE_FILE_REQUEST_CODE = 53;
+    public final static int PICK_QR_ACTIVATION_FILE_REQUEST_CODE = 54;
+    public final static int PICK_CERTSTORE_FILE_REQUEST_CODE = 55;
+    public final static int PICK_QR_MISSION_FILE_REQUEST_CODE = 56;
+
 }

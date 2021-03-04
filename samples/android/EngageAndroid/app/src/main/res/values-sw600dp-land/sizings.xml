@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_sizing_type" translatable="false">sw600dp-land</string>
+
+    <!-- Multi view container -->
+    <dimen name="multi_view_fragment_height">90dp</dimen>
+
+    <!-- Large card -->
+    <dimen name="large_card_anchor_start">42dp</dimen>
+    <dimen name="large_card_anchor_end">42dp</dimen>
+    <dimen name="large_card_anchor_top">42dp</dimen>
+
+    <!-- Small card -->
+    <dimen name="small_card_anchor_start">24dp</dimen>
+    <dimen name="small_card_anchor_end">16dp</dimen>
+</resources>

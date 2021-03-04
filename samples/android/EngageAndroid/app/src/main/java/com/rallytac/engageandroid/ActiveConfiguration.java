@@ -13,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -109,7 +108,7 @@ public class ActiveConfiguration
     private String _missionDescription;
     private String _missionModPin;
     private MulticastFailoverPolicy _missionMcFailoverPolicy;
-    private ArrayList<GroupDescriptor>   _missionGroups = new ArrayList<>();
+    private ArrayList<GroupDescriptor> _missionGroups = new ArrayList<>();
     private String _missionCertStoreId;
 
     private String _networkInterfaceName;
@@ -152,11 +151,64 @@ public class ActiveConfiguration
 
     private int _audioInputDeviceId;
     private int _audioOutputDeviceId;
+    private int _priorityTxLevel = 0;
 
     private String _inputJson;
 
     private LocationConfiguration _locationConfiguration = new LocationConfiguration();
     private MulticastFailoverConfiguration _multicastFailoverConfiguration = new MulticastFailoverConfiguration();
+
+    public ArrayList<GroupDescriptor> updateGroupMemberPresenceForNode(PresenceDescriptor pd)
+    {
+        ArrayList<GroupDescriptor> rc = new ArrayList<>();
+
+        if(pd != null)
+        {
+            if(pd.groupMembership == null || pd.groupMembership.isEmpty())
+            {
+                for(GroupDescriptor gd : _missionGroups)
+                {
+                    if(gd.removeMember(pd.nodeId))
+                    {
+                        rc.add(gd);
+                    }
+                }
+            }
+            else
+            {
+                for (GroupDescriptor gd : _missionGroups)
+                {
+                    GroupMembershipTracker gmt = pd.groupMembership.get(gd.id);
+                    if(gmt != null)
+                    {
+                        if(gd.addOrUpdateMember(gmt))
+                        {
+                            rc.add(gd);
+                        }
+                    }
+                    else
+                    {
+                        if (gd.removeMember(pd.nodeId))
+                        {
+                            rc.add(gd);
+                        }
+                    }
+                }
+            }
+        }
+
+        return rc;
+    }
+
+    public int getPriorityTxLevel()
+    {
+        return _priorityTxLevel;
+    }
+
+    public void setPriorityTxLevel(int level)
+    {
+        _priorityTxLevel = level;
+    }
 
     public boolean getPttLatching()
     {
@@ -785,6 +837,8 @@ public class ActiveConfiguration
                     if(!gd.isDynamic())
                     {
                         JSONObject group = new JSONObject(gd.jsonConfiguration);
+                        group.put(Constants.EPT_ELEMENT_NAME, gd.ept);
+                        group.put(Constants.ANONYMOUS_ALIAS_ELEMENT_NAME, gd.anonymousAlias);
                         groups.put(group);
                     }
                 }
@@ -895,6 +949,8 @@ public class ActiveConfiguration
                             g.type = GroupDescriptor.Type.values()[group.optInt(Engine.JsonFields.Group.type, 0)];
                             g.name = group.optString(Engine.JsonFields.Group.name, "");
                             g.isEncrypted = (!group.optString(Engine.JsonFields.Group.cryptoPassword, "").isEmpty());
+                            g.ept = group.optInt(Constants.EPT_ELEMENT_NAME, 0);
+                            g.anonymousAlias = group.optBoolean(Constants.ANONYMOUS_ALIAS_ELEMENT_NAME, false);
                             g.jsonConfiguration = group.toString();
 
                             JSONObject txAudio = group.optJSONObject(Engine.JsonFields.TxAudio.objectName);
@@ -1332,6 +1388,35 @@ public class ActiveConfiguration
         return rc;
     }
 
+    public boolean anyGroupsSelectedForTx()
+    {
+        if(_missionGroups != null)
+        {
+            for (GroupDescriptor gd : _missionGroups)
+            {
+                if(_uiMode == Constants.UiMode.vSingle)
+                {
+                    if(gd.selectedForSingleView)
+                    {
+                        return true;
+                    }
+                }
+                else if(_uiMode == Constants.UiMode.vMulti)
+                {
+                    if(gd.selectedForMultiView)
+                    {
+                        if(gd.txSelected)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public ArrayList<GroupDescriptor> getSelectedGroups()
     {
         ArrayList<GroupDescriptor> rc = new ArrayList<>();
@@ -1659,6 +1744,8 @@ public class ActiveConfiguration
                         gd.id = dbg._id;
                         gd.type = GroupDescriptor.Type.gtAudio;
                         gd.name = dbg._name;
+                        gd.ept = dbg._ept;
+                        gd.anonymousAlias = dbg._anonymousAlias;
 
                         groupObject = new JSONObject();
                         groupObject.put(Engine.JsonFields.Group.id, gd.id);

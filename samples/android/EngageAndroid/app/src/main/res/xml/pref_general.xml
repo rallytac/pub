@@ -238,11 +238,21 @@
                 android:title="@string/set_tone_levels_errors" />
         </PreferenceCategory>
 
-        <PreferenceCategory android:title="@string/set_hdr_user_interface">
+        <PreferenceCategory android:title="@string/set_hdr_user_interface"  android:key="prefcat_user_interface">
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="ui.showOnLockScreen"
+                android:title="@string/set_user_interface_show_on_lock_screen"/>
+
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="ui.largePttButton"
+                android:title="@string/set_user_interface_large_ptt_button"/>
+
             <SwitchPreference
                 android:defaultValue="false"
                 android:key="user_ui.pttLatching"
-                android:title="@string/set_user_interface_latch_unlatch_ptt"/>
+                android:title="@string/set_user_interface_latch_unlatch_ptt" />
             <!--
             <SwitchPreference
                 android:defaultValue="false"

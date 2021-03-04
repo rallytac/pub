@@ -13,6 +13,8 @@ public class PreferenceKeys
     public static String UI_MODE = "ui.mode";//NON-NLS
 
     public static String UI_SHOW_TEXT_MESSAGING = "ui.showTextMessaging";//NON-NLS
+    public static String UI_LARGE_PTT_BUTTON = "ui.largePttButton";//NON-NLS
+    public static String UI_SHOW_ON_LOCK_SCREEN = "ui.showOnLockScreen";//NON-NLS
 
     public static String NETWORK_BINDING_NIC_NAME = "network_bindingNic";//NON-NLS
     public static String NETWORK_MULTICAST_FAILOVER_ENABLED = "network_multicastFailover.enabled";//NON-NLS
@@ -52,7 +54,7 @@ public class PreferenceKeys
     public static String USER_UI_PTT_VOICE_CONTROL = "user_ui.pttButtonVoiceControl";//NON-NLS
 
     public static String LAST_QRCODE_DEFLECTION_URL = "lastQrCodeDeflectionUrl";//NON-NLS
-    public static String QR_CODE_SCAN_PASSWORD = "qrCodeScanPassword";//NON-NLS
+    public static String INCOMING_MISSION_PASSWORD = "incomingMissionPassword";//NON-NLS
 
     public static String MAP_OPTION_BASE = "map.option.";//NON-NLS
     public static String MAP_OPTION_VIEW_INDEX = MAP_OPTION_BASE + "viewIndex";//NON-NLS
