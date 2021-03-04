@@ -15,6 +15,9 @@ import com.rallytac.engage.engine.Engine;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GroupDescriptor implements Parcelable
 {
@@ -29,8 +32,12 @@ public class GroupDescriptor implements Parcelable
     public boolean isEncrypted;
     public boolean fdx;
     public String jsonConfiguration;
+    public int ept;
+    public boolean anonymousAlias;
 
     private boolean _isDynamic;
+
+    private HashMap<String, GroupMembershipTracker> memberNodes = new HashMap<>();
 
     // State
     public boolean selectedForSingleView;
@@ -45,7 +52,7 @@ public class GroupDescriptor implements Parcelable
     public boolean txError;
     public boolean txUsurped;
     public boolean rxMuted;
-    public boolean txMuted;
+    public boolean txSelected;
     public ArrayList<TalkerDescriptor> talkerList = new ArrayList<>();
     public long lastTxStartTime;
 
@@ -87,13 +94,14 @@ public class GroupDescriptor implements Parcelable
         _isDynamic = false;
         lastTxStartTime = 0;
 
-
         this.jsonConfiguration = in.readString();
         this.type = Type.values()[in.readInt()];
         this.id = in.readString();
         this.name = in.readString();
         this.isEncrypted = (in.readInt() == 1);
         this.fdx = (in.readInt() == 1);
+        this.ept = in.readInt();
+        this.anonymousAlias = (in.readInt() == 1);
 
         this.selectedForSingleView = (in.readInt() == 1);
         this.selectedForMultiView = (in.readInt() == 1);
@@ -107,7 +115,7 @@ public class GroupDescriptor implements Parcelable
         this.txError = (in.readInt() == 1);
         this.txUsurped = (in.readInt() == 1);
         this.rxMuted = (in.readInt() == 1);
-        this.txMuted = (in.readInt() == 1);
+        this.txSelected = (in.readInt() == 1);
 
         this._isDynamic = (in.readInt() == 1);
         this.lastTxStartTime = in.readLong();
@@ -136,8 +144,9 @@ public class GroupDescriptor implements Parcelable
         txError = false;
         txUsurped = false;
         rxMuted = false;
-        txMuted = false;
+        txSelected = false;
         talkerList.clear();
+        memberNodes.clear();
         lastTxStartTime = 0;
     }
 
@@ -156,6 +165,8 @@ public class GroupDescriptor implements Parcelable
         dest.writeString(this.name);
         dest.writeInt(this.isEncrypted ? 1 : 0);
         dest.writeInt(this.fdx ? 1 : 0);
+        dest.writeInt(this.ept);
+        dest.writeInt(this.anonymousAlias ? 1 : 0);
 
         dest.writeInt(this.selectedForSingleView ? 1 : 0);
         dest.writeInt(this.selectedForMultiView ? 1 : 0);
@@ -169,7 +180,7 @@ public class GroupDescriptor implements Parcelable
         dest.writeInt(this.txError ? 1 : 0);
         dest.writeInt(this.txUsurped ? 1 : 0);
         dest.writeInt(this.rxMuted ? 1 : 0);
-        dest.writeInt(this.txMuted ? 1 : 0);
+        dest.writeInt(this.txSelected ? 1 : 0);
 
         dest.writeInt(this._isDynamic ? 1 : 0);
         dest.writeLong(this.lastTxStartTime);
@@ -190,31 +201,28 @@ public class GroupDescriptor implements Parcelable
         }
     }
 
-    public String getTalkers()
+    public ArrayList<TalkerDescriptor> getTalkers()
     {
-        StringBuilder sb = new StringBuilder();
+        ArrayList<TalkerDescriptor> rc = new ArrayList<>();
 
         synchronized (this)
         {
             for(TalkerDescriptor td : talkerList)
             {
-                if(sb.length() > 0)
-                {
-                    sb.append(", ");
-                }
+                rc.add(td);
 
-                sb.append(td.alias);
-
+                /*
                 // TODO: Make this nicer
                 // Mark talker in emergency TX with an asterisk
                 if((td.rxFlags & Constants.ENGAGE_RXFLAG_EMERGENCY) == Constants.ENGAGE_RXFLAG_EMERGENCY)
                 {
                     sb.append("*");
                 }
+                */
             }
         }
 
-        return sb.toString();
+        return rc;
     }
 
     public boolean loadFromJson(String json)
@@ -229,7 +237,9 @@ public class GroupDescriptor implements Parcelable
             type = Type.values()[obj.getInt(Engine.JsonFields.Group.type)];
             name = obj.getString(Engine.JsonFields.Group.name);
             isEncrypted = !Utils.isEmptyString(obj.optString(Engine.JsonFields.Group.cryptoPassword, null));
-            fdx = obj.optBoolean(Engine.JsonFields.Group.fdx);
+            fdx = obj.optBoolean(Engine.JsonFields.TxAudio.fdx);
+            ept = obj.optInt(Constants.EPT_ELEMENT_NAME, 0);
+            anonymousAlias = obj.optBoolean(Constants.ANONYMOUS_ALIAS_ELEMENT_NAME, false);
 
             jsonConfiguration = json;
 
@@ -259,7 +269,7 @@ public class GroupDescriptor implements Parcelable
             this.txError = gd.txError;
             this.txUsurped = gd.txUsurped;
             this.rxMuted = gd.rxMuted;
-            this.txMuted = gd.txMuted;
+            this.txSelected = gd.txSelected;
 
             if (gd.talkerList != null && gd.talkerList.size() > 0)
             {
@@ -273,13 +283,79 @@ public class GroupDescriptor implements Parcelable
                 this.talkerList.clear();
             }
 
+            if (gd.memberNodes != null && gd.memberNodes.size() > 0)
+            {
+                for (GroupMembershipTracker gmt : gd.memberNodes.values())
+                {
+                    this.memberNodes.put(gmt._nodeId, gmt);
+                }
+            }
+            else
+            {
+                this.memberNodes.clear();
+            }
+
             this.lastTxStartTime = gd.lastTxStartTime;
         }
     }
 
-    public int getMemberCount()
+    public int getMemberCountForStatus(int status)
     {
-        return Globals.getEngageApplication().getMissionNodeCount(this.id);
+        int rc = 0;
+
+        if(memberNodes != null && memberNodes.size() > 0)
+        {
+            for(GroupMembershipTracker gmt: memberNodes.values())
+            {
+                //Log.i(TAG, "#DBG#: getMemberCountForStatus: " + gmt._nodeId + ", status=" + gmt._statusFlags);
+                if((gmt._statusFlags & status) == status)
+                {
+                    rc++;
+                }
+            }
+        }
+
+        return rc;
+    }
+
+    public HashMap<String, GroupMembershipTracker> getMemberNodes()
+    {
+        return memberNodes;
+    }
+
+    public boolean addOrUpdateMember(GroupMembershipTracker gmt)
+    {
+        boolean rc = false;
+
+        GroupMembershipTracker existing = memberNodes.get(gmt._nodeId);
+        if(existing == null)
+        {
+            memberNodes.put(gmt._nodeId, gmt);
+            rc = true;
+        }
+        else
+        {
+            if(existing._statusFlags != gmt._statusFlags)
+            {
+                existing._statusFlags = gmt._statusFlags;
+                rc = true;
+            }
+        }
+
+        return rc;
+    }
+
+    public boolean removeMember(String nodeId)
+    {
+        if(memberNodes.containsKey(nodeId))
+        {
+            memberNodes.remove(nodeId);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public boolean couldWorkWithoutRallypoint()

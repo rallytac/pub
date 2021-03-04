@@ -149,17 +149,6 @@ public class LauncherActivity extends AppCompatActivity
             e.printStackTrace();
             System.exit(-1);
         }
-
-        /*
-
-
-        ed.putString(PreferenceKeys.USER_TONE_LEVEL_PTT, "1.0");
-        ed.putBoolean(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME, true);
-        ed.putBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, true);
-        ed.putBoolean(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL, true);
-
-        ed.apply();
-        */
     }
 
     private void showIssueAndFinish(final String title, final String message)
@@ -381,9 +370,9 @@ public class LauncherActivity extends AppCompatActivity
         return true;
     }
 
-
     private void checkForPermissions()
     {
+        /*
         String[] required = new String[] {
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -400,9 +389,30 @@ public class LauncherActivity extends AppCompatActivity
                 Manifest.permission.CAMERA,
                 android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
         };
+        */
 
         List<String> askFor = null;
 
+        EngageAppPermission[] appPermissions = Globals.getEngageApplication().getAllAppPermissions();
+
+        for(EngageAppPermission e: appPermissions)
+        {
+            int permission = ActivityCompat.checkSelfPermission(this, e.getPermission());
+            if(permission != PackageManager.PERMISSION_GRANTED)
+            {
+                if(askFor == null)
+                {
+                    askFor = new ArrayList<>();
+                }
+                askFor.add(e.getPermission());
+            }
+            else
+            {
+                e.setGranted(true);
+            }
+        }
+
+        /*
         for(String s : required)
         {
             int permission = ActivityCompat.checkSelfPermission(this, s);
@@ -415,6 +425,7 @@ public class LauncherActivity extends AppCompatActivity
                 askFor.add(s);
             }
         }
+        */
 
         if(askFor != null)
         {
@@ -438,6 +449,43 @@ public class LauncherActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
+        // Fill out our permissions
+        for(int x = 0; x < permissions.length; x++)
+        {
+            EngageAppPermission appPermission = Globals.getEngageApplication().getAppPermission(permissions[x]);
+            if(appPermission != null)
+            {
+                appPermission.setGranted(grantResults[x] == PackageManager.PERMISSION_GRANTED);
+            }
+            else
+            {
+                Log.w(TAG, "permission " + permissions[x] + " provided but not requested");
+            }
+        }
+
+        // Now see if we have what we need, assume we're good
+        boolean allRequiredAllowed = true;
+        EngageAppPermission[] appPermissions = Globals.getEngageApplication().getAllAppPermissions();
+
+        for(EngageAppPermission e: appPermissions)
+        {
+            if(e.getRequired() && !e.getGranted())
+            {
+                allRequiredAllowed = false;
+                Log.w(TAG, "permission " + e.getPermission() + " has not been granted");
+            }
+        }
+
+        if(allRequiredAllowed)
+        {
+            doLaunchStateTransition();
+        }
+        else
+        {
+            showIssueAndFinish(getString(R.string.title_permissions_required), getString(R.string.startup_one_or_more_permissions_denied));
+        }
+
+        /*
         boolean allAllowed = true;
 
         for (int grantResult : grantResults)
@@ -457,6 +505,7 @@ public class LauncherActivity extends AppCompatActivity
         {
             showIssueAndFinish(getString(R.string.title_permissions_required), getString(R.string.startup_one_or_more_permissions_denied));
         }
+        */
     }
 
     private void checkIdentity()
@@ -539,7 +588,7 @@ public class LauncherActivity extends AppCompatActivity
 
     private void launchUiActivity()
     {
-        String launchActivityName = Utils.getMetaData("Launcher.LAUNCH_ACTIVITY");//NON-NLS
+        String launchActivityName = Utils.getMetaData(Constants.KEY_LAUNCH_ACTIVITY);
         if(!Utils.isEmptyString(launchActivityName))
         {
             try
@@ -561,6 +610,20 @@ public class LauncherActivity extends AppCompatActivity
 
     private void startEngineWhenServiceIsOnline()
     {
+        _waitForEngageOnlineTimer = new Timer();
+        _waitForEngageOnlineTimer.scheduleAtFixedRate(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                _waitForEngageOnlineTimer.cancel();
+                Globals.getEngageApplication().onEngineServiceOnline();
+                launchUiActivity();
+            }
+        }, 500, 500);
+
+        //-------------------------------------------------------------------------------------------
+        /*
         if(Globals.getEngageApplication().isEngineRunning())
         {
             Log.i(TAG, "engine is already running - ui was likely relaunched");//NON-NLS
@@ -610,5 +673,6 @@ public class LauncherActivity extends AppCompatActivity
                 }
             }
         }, tmrDelay, tmrPeriod);
+        */
     }
 }

@@ -5,6 +5,7 @@
 
 package com.rallytac.engageandroid;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
@@ -27,6 +28,8 @@ public abstract class CardFragment extends Fragment
     private Animation _networkErrorAnimation = null;
     private Animation _networkFailoverAnimation = null;
     private Animation _speakerAnimation = null;
+    private boolean _isEmergencyTxOn = false;
+    private boolean _isPriorityOn = false;
 
     public String getGroupId()
     {
@@ -48,12 +51,6 @@ public abstract class CardFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         View view = inflater.inflate(getLayoutId(), container, false);
-
-        TextView tv = view.findViewById(R.id.tvMemberCount);
-        if(tv != null)
-        {
-            tv.setVisibility(View.GONE);
-        }
 
         ImageView iv;
 
@@ -90,21 +87,25 @@ public abstract class CardFragment extends Fragment
         });
 
         // PTT enable (maybe...?)
-        iv = view.findViewById(R.id.ivPttEnable);
+        iv = view.findViewById(R.id.ivSelectedForPtt);
         if(iv != null)
         {
-            iv.setOnClickListener(new View.OnClickListener()
+            if(Globals.getEngageApplication().hasPermissionToRecordAudio())
             {
-                @Override
-                public void onClick(View v)
-                {
-                    if(_gd != null)
-                    {
-                        _gd.txMuted = !_gd.txMuted;
-                        updateTxEnabledStatus();
+                iv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (_gd != null) {
+                            _gd.txSelected = !_gd.txSelected;
+                            updateTxEnabledStatus();
+                        }
                     }
-                }
-            });
+                });
+            }
+            else
+            {
+                iv.setVisibility(View.GONE);
+            }
         }
 
         // Network error (maybe...?)
@@ -131,6 +132,40 @@ public abstract class CardFragment extends Fragment
                 public void onClick(View v)
                 {
                     Utils.showLongPopupMsg(getActivity(), getString(R.string.currently_operating_in_mc_failover_mode));
+                }
+            });
+        }
+
+        // Priority TX
+        final ImageView ivPriority = view.findViewById(R.id.ivPriority);
+        if(ivPriority != null)
+        {
+            ivPriority.setLongClickable(true);
+            ivPriority.setOnLongClickListener(new View.OnLongClickListener()
+            {
+                @Override
+                public boolean onLongClick(View v)
+                {
+                    _isPriorityOn = !_isPriorityOn;
+
+                    int priority = (_isPriorityOn ? Utils.intOpt(getString(R.string.opt_group_tx_priority_level), 0) : 0);
+                    int flags = (_isEmergencyTxOn ? 1 : 0);
+                    Globals.getEngageApplication().setGroupTxInfo(_gd.id, priority, flags);
+
+                    updatePriorityTxIndicator();
+
+                    return true;
+                }
+            });
+        }
+
+        final TextView tvMemberCount = view.findViewById(R.id.tvMemberCount);
+        if(tvMemberCount != null)
+        {
+            tvMemberCount.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((SimpleUiMainActivity) getActivity()).showTeamList(_gd.id);
                 }
             });
         }
@@ -173,6 +208,7 @@ public abstract class CardFragment extends Fragment
                         updateTxEnabledStatus();
                         updateRxTxUi();
                         updateMembers();
+                        updatePriorityTxIndicator();
                     }
                }
             }
@@ -289,7 +325,8 @@ public abstract class CardFragment extends Fragment
             {
                 if(_gd != null)
                 {
-                    ((TextView) getView().findViewById(R.id.tvTalkerList)).setText(_gd.getTalkers());
+                    TalkerFragment tf = (TalkerFragment)getChildFragmentManager().findFragmentById(R.id.fragTalkers);
+                    tf.setTalkers(_gd.getTalkers());
                 }
             }
         });
@@ -332,8 +369,6 @@ public abstract class CardFragment extends Fragment
 
     private void updateMembers()
     {
-        // TODO: updateMembers
-        /*
         getActivity().runOnUiThread(new Runnable()
         {
             @Override
@@ -341,12 +376,12 @@ public abstract class CardFragment extends Fragment
             {
                 if(_gd != null)
                 {
-                    int count = _gd.getMemberCount();
+                    int count = _gd.getMemberCountForStatus(Constants.GMT_STATUS_FLAG_CONNECTED);
+                    //Log.e("CardFragment", "#DBG#: updateMembers, count = " + count);//NON-NLS
                     ((TextView) getView().findViewById(R.id.tvMemberCount)).setText(Integer.toString(count));
                 }
             }
         });
-        */
     }
 
     private void updateSpeakerStatus()
@@ -380,18 +415,54 @@ public abstract class CardFragment extends Fragment
             {
                 if(_gd != null)
                 {
-                    ImageView iv = getView().findViewById(R.id.ivPttEnable);
+                    ImageView iv = getView().findViewById(R.id.ivSelectedForPtt);
 
                     if(iv != null)
                     {
-                        if(_gd.txMuted)
+                        if(_gd.txSelected)
                         {
-                            iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ptt_muted));
+                            iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_check_box_checked));
                         }
                         else
                         {
-                            iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_ptt_unmuted));
+                            iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_check_box_unchecked));
                         }
+
+                        ((SimpleUiMainActivity) getActivity()).redrawPttButton();
+                    }
+                }
+            }
+        });
+    }
+
+    private void updatePriorityTxIndicator()
+    {
+        getActivity().runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if(_gd != null)
+                {
+                    ImageView iv = getView().findViewById(R.id.ivPriority);
+
+                    if(iv != null)
+                    {
+                        Drawable dw;
+                        if(_isPriorityOn)
+                        {
+                            dw = ContextCompat.getDrawable(getActivity(), R.drawable.ic_high_priority);
+                            //iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_high_priority));
+                        }
+                        else
+                        {
+                            dw = ContextCompat.getDrawable(getActivity(), R.drawable.ic_no_priority);
+                            //iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_no_priority));
+                        }
+
+                        iv.setImageDrawable(dw);
+
+                        ((SimpleUiMainActivity) getActivity()).redrawPttButton();
                     }
                 }
             }

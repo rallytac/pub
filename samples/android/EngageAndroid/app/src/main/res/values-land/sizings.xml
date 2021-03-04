@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Information -->
+    <string name="ui_sizing_type" translatable="false">default-land</string>
+
+    <!-- Single view container -->
+    <dimen name="single_view_fragment_height">0dp</dimen>
+    <dimen name="single_view_fragment_margin_start">16dp</dimen>
+    <dimen name="single_view_fragment_margin_end">16dp</dimen>
+    <dimen name="single_view_fragment_margin_top">16dp</dimen>
+    <dimen name="single_view_fragment_margin_bottom">16dp</dimen>
+
+    <!-- Multi view container -->
+    <dimen name="multi_view_fragment_height">90dp</dimen>
+
+    <!-- Large card -->
+    <dimen name="large_card_anchor_start">32dp</dimen>
+    <dimen name="large_card_anchor_end">32dp</dimen>
+    <dimen name="large_card_anchor_top">24dp</dimen>
+    <dimen name="large_card_anchor_bottom">18dp</dimen>
+    <dimen name="large_card_primary_text_size">30sp</dimen>
+    <dimen name="large_card_secondary_text_size">18sp</dimen>
+
+    <!-- Small card -->
+    <dimen name="small_card_anchor_start">16dp</dimen>
+    <dimen name="small_card_anchor_end">8dp</dimen>
+    <dimen name="small_card_anchor_top">16dp</dimen>
+    <dimen name="small_card_anchor_bottom">8dp</dimen>
+    <dimen name="small_card_primary_text_size">18sp</dimen>
+    <dimen name="small_card_secondary_text_size">12sp</dimen>
+</resources>

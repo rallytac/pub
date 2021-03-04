@@ -568,7 +568,7 @@ public class MapActivity extends
     {
         if(_trackers.size() == 0)
         {
-            Utils.showPopupMsg(this, getString(R.string.map_no_team_members_found));
+            Utils.showShortPopupMsg(this, getString(R.string.map_no_team_members_found));
             return;
         }
 

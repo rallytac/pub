@@ -46,11 +46,10 @@
 
     <ImageView
         android:id="@+id/ivActiveMissionIndicator"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tvDescription"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvMissionName"
         app:srcCompat="@drawable/ic_radio_button_selected" />
@@ -59,11 +58,17 @@
         android:id="@+id/ivDeleteMission"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tvDescription"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tvMissionName"
+        app:layout_constraintTop_toTopOf="@+id/ivActiveMissionIndicator"
         app:srcCompat="@drawable/ic_delete_forever" />
+
+    <ImageView
+        android:id="@+id/ivShareMission"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ivActiveMissionIndicator"
+        app:srcCompat="@drawable/ic_share" />
 </androidx.constraintlayout.widget.ConstraintLayout>

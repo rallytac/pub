@@ -103,7 +103,7 @@ public class UserNodeViewActivity extends
             return;
         }
 
-        rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
+        //rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class UserNodeViewActivity extends
             return;
         }
 
-        rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
+        //rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class UserNodeViewActivity extends
             return;
         }
 
-        rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
+        //rebuildTheUiWhichIsVeryExpensiveAndShouldBeFixed(pd);
     }
 
     private void forceRebuild()

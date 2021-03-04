@@ -23,6 +23,8 @@ public class DatabaseGroup
     public boolean _noHdrExt;
     public boolean _fdx;
     public int _maxTxSecs;
+    public int _ept;
+    public boolean _anonymousAlias;
 
     @Override
     public String toString()
@@ -51,6 +53,8 @@ public class DatabaseGroup
             root.put("_txFramingMs", _txFramingMs);//NON-NLS
             root.put("_noHdrExt", _noHdrExt);//NON-NLS
             root.put("_fdx", _fdx);//NON-NLS
+            root.put("_ept", _ept);//NON-NLS
+            root.put("_anonymousAlias", _anonymousAlias);//NON-NLS
             root.put("_maxTxSecs", _maxTxSecs);//NON-NLS
         }
         catch (Exception e)
@@ -81,6 +85,8 @@ public class DatabaseGroup
             group._txFramingMs = root.optInt("_txFramingMs");//NON-NLS
             group._noHdrExt = root.optBoolean("_noHdrExt");//NON-NLS
             group._fdx = root.optBoolean("_fdx");//NON-NLS
+            group._ept = root.optInt("_ept");//NON-NLS
+            group._anonymousAlias = root.optBoolean("_anonymousAlias");//NON-NLS
             group._maxTxSecs = root.optInt("_maxTxSecs");//NON-NLS
         }
         catch (Exception e)

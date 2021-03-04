@@ -70,7 +70,6 @@
     <string name="fmt_load_this_json_file_to_join_the_mission">Chargez ce fichier JSON pour rejoindre \'%1$s\'.</string>
     <string name="fmt_load_this_json_file_to_join_the_mission_or_download_from">&lt;html&gt;&lt;body&gt;Load this JSON file to join \'%1$s\' or click &lt;a href=\'%2$s\'&gt;%2$s&lt;/a&gt; to download.&lt;/body&gt;&lt;/html&gt;</string>
 
-    <string name="confirm_shutdown">Cette action arrêtera complètement %1$s. Si vous souhaitez passer à une autre application à la place, faites-le simplement - l\'application continuera de fonctionner en arrière-plan. Voulez-vous vraiment arrêter?</string>
     <string name="license_has_expired">Aucune licence ou licence expirée</string>
     <string name="title_activity_single_user_biometrics_view">SingleUserBiometricsView</string>
     <string name="about_device_id">Reference de l\'appareil</string>
@@ -217,7 +216,6 @@
     <string name="tap_the_qr_code_to_toggle_zoom">Appuyez sur le code QR pour basculer le zoom</string>
     <string name="text_message_hint_enter_text_message">saisir un message texte</string>
     <string name="text_message_send_message">Envoyer le message</string>
-    <string name="title_shutdown">Fermer</string>
     <string name="tx_status_reason_akready_tx">Transmettant déjà sur ce groupe</string>
     <string name="tx_status_reason_another_already_tx">Un autre utilisateur transmet déjà</string>
     <string name="tx_status_reason_another_already_tx_higher_priority">Un autre utilisateur transmet à une priorité plus élevée</string>

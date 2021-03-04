@@ -23,6 +23,9 @@
     <string name="opt_firebase_analytics_enabled" translatable="false">0</string>
     <string name="opt_max_groups_allowed" translatable="false">4</string>
 
+    <string name="opt_group_tx_priority_level" translatable="false">0</string>
+    <string name="opt_app_tx_priority_level" translatable="false">0</string>
+
     <string name="app_keycode_ptt" translatable="false">0</string>
 
     <string name="default_rallypoint" translatable="false"></string>
@@ -48,6 +51,8 @@
     <string name="generated_mission_description"></string>
     <string name="replacement_main_screen_title_bar">${appName} : ${missionName}</string>
 
+    <string name="application_internal_certificate_store_display_name">Default Certificate Store</string>
+
     <string name="online_licensing_activation_url_prod" translatable="false">https://licensing.rallytac.com/api/v1/activations</string>
     <string name="offline_licensing_activation_url_prod" translatable="false">https://licensing.rallytac.com/api/v1/getactivationqrcode</string>
 
@@ -61,7 +66,7 @@
     <string name="offline_licensing_deactivation_url_dev" translatable="false">https://licensing.rallytac.com/api/dev/deactivatedevice</string>
 
     <string name="title_activity_settings">Settings</string>
-    <string name="title_activity_missions">Available Mission</string>
+    <string name="title_activity_missions">Available Missions</string>
     <string name="title_activity_edit_mission">Mission</string>
     <string name="title_activity_certstores">Certificate Stores</string>
     <string name="title_activity_map">Map</string>
@@ -76,7 +81,7 @@
     <string name="title_licensing">Licensing</string>
     <string name="qr_code_scan_button">Scan</string>
     <string name="mission_download_button">Download</string>
-    <string name="mission_file_load_button">Continue</string>
+    <string name="mission_load_continue_button">Continue</string>
     <string name="cancel">Cancel</string>
     <string name="qr_scan_prompt">Scan Mission QR Code</string>
     <string name="qr_scan_cancelled">Scan cancelled</string>
@@ -147,9 +152,9 @@
     <string name="scan_license_key">Scan license key</string>
     <string name="scan_activation_code">Scan activation code</string>
 
-    <string name="confirm_shutdown">This action will shutdown %1$s completely.  If you want to switch to another application instead, simply do so - the application will keep running in the background.  Do you really want to shutdown?</string>
+    <string name="confirm_disconnect">This action will disconnect from the mission and close this screen.\n\nIf you want to switch to another application instead, simply do so - %1$s will keep running in the background.\n\nDo you really want to disconnect?</string>
     <string name="button_no">No</string>
-    <string name="title_shutdown">Shutdown</string>
+    <string name="title_disconnect">Disconnect</string>
     <string name="license_has_expired">No license or license expired</string>
     <string name="title_activity_single_user_biometrics_view">SingleUserBiometricsView</string>
     <string name="about_version_placeholder">version placeholder</string>
@@ -582,6 +587,7 @@
     <string name="address">address</string>
     <string name="menu_list">List</string>
     <string name="menu_mission">Mission</string>
+    <string name="menu_missions">Missions</string>
     <string name="menu_share">Share</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_load">Load</string>
@@ -591,7 +597,7 @@
     <string name="menu_about">About</string>
     <string name="menu_contact">Contact</string>
     <string name="menu_developer_testing">Developer Testing</string>
-    <string name="menu_shutdown">Shutdown</string>
+    <string name="menu_disconnect">Disconnect</string>
     <string name="developer_mode_activated">Developer mode activated</string>
     <string name="developer_mode_deactivated">Developer mode deactivated</string>
     <string name="advanced_mode_activated">Advanced mode activated</string>
@@ -620,8 +626,8 @@
 
     <string name="set_audio_microphone_denoise">Enable Noise Reduction</string>
 
-    <string name="set_audio_microphone_agc_level">Microphone Gain</string>
-    <string name="set_audio_speaker_agc_level">Speaker Gain</string>
+    <string name="set_audio_microphone_agc_level">Automatic Gain Control</string>
+    <string name="set_audio_speaker_agc_level">Automatic Gain Control</string>
 
     <string name="set_audio_use_bluetooth_device">Use a bluetooth device</string>
     <string name="set_audio_bluetooth_device">Bluetooth device</string>
@@ -645,7 +651,9 @@
     <string name="set_tone_levels_errors">Errors</string>
     <string name="set_hdr_user_interface">User Interface</string>
     <string name="set_user_interface_latch_unlatch_ptt">Latch/unlatch the PTT button</string>
+    <string name="set_user_interface_large_ptt_button">Display an extra-large PTT button</string>
     <string name="set_user_interface_ptt_using_voice_control">PTT using voice control</string>
+    <string name="set_user_interface_show_on_lock_screen">Show on the Android lock screen</string>
     <string name="set_experimental_discover_ssdp_assets">Discover SSDP Assets</string>
     <string name="set_experimental_discover_cistech_gv1_assets">Discover CISTECH GV1 LMR Assets</string>
     <string name="set_experimental_cistech_gv1_address">Address</string>
@@ -695,20 +703,21 @@
     <string name="system_information">System Information</string>
     <string name="mi_hdr_system">SYSTEM:\n</string>
     <string name="mi_hdr_device">\n\nDEVICE:</string>
-    <string name="mi_sys_id">ID:%1$s\n</string>
-    <string name="mi_device_manufacturer">Manufacturer:%1$s\n</string>
-    <string name="mi_device_id">ID:%1$s\n</string>
-    <string name="mi_device_brand">Brand:%1$s\n</string>
-    <string name="mi_device_model">Model:%1$s\n</string>
-    <string name="mi_device_board">Board:%1$s\n</string>
-    <string name="mi_device_hardware">Hardware:%1$s\n</string>
-    <string name="mi_device_serial">Serial:%1$s\n</string>
-    <string name="mi_device_bootloader">Bootloader:%1$s\n</string>
-    <string name="mi_device_user">User:%1$s\n</string>
-    <string name="mi_device_host">Host:%1$s\n</string>
-    <string name="mi_device_build_time">Build time:%1$s\n</string>
-    <string name="mi_device_version_release">Version release:%1$s\n</string>
-    <string name="mi_device_sdk_int">Version SDK:%1$d\n</string>
+    <string name="mi_sys_id">ID: %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
+    <string name="mi_device_manufacturer">Manufacturer: %1$s\n</string>
+    <string name="mi_device_id">ID: %1$s\n</string>
+    <string name="mi_device_brand">Brand: %1$s\n</string>
+    <string name="mi_device_model">Model: %1$s\n</string>
+    <string name="mi_device_board">Board: %1$s\n</string>
+    <string name="mi_device_hardware">Hardware: %1$s\n</string>
+    <string name="mi_device_serial">Serial: %1$s\n</string>
+    <string name="mi_device_bootloader">Bootloader: %1$s\n</string>
+    <string name="mi_device_user">User: %1$s\n</string>
+    <string name="mi_device_host">Host: %1$s\n</string>
+    <string name="mi_device_build_time">Build time: %1$s\n</string>
+    <string name="mi_device_version_release">Version release: %1$s\n</string>
+    <string name="mi_device_sdk_int">Version SDK: %1$d\n</string>
     <string name="hint_rx_address">rx address</string>
     <string name="hint_tx_address">tx address</string>
     <string name="hint_rx_port">rx port</string>
@@ -722,6 +731,9 @@
     <string name="disable_header_extensions">Disable header extensions</string>
     <string name="enable_full_duplex">Enable full duplex</string>
     <string name="enable_unlimited_tx">Enable unlimited TX</string>
+    <string name="enable_ept">Enable EPT</string>
+    <string name="enable_anonymous_alias">Enable Anonymous Alias</string>
+    <string name="anonymous_alias"></string>
     <string name="unknown_device_id">unknown</string>
     <string name="installed_the_mission">Installed the mission</string>
     <string name="failed_to_install_the_mission">Failed to install the mission</string>
@@ -781,4 +793,22 @@
     <string name="no_mission_found_with_this_id">No mission found with this ID</string>
     <string name="failed_to_load_the_mission_from_internal_database">Failed to load the mission from internal database</string>
     <string name="the_cert_store_required_cannot_be_found">The certificate store required by this mission cannot be found</string>
+    <string name="failed_to_generate_the_mission">Failed to generate the mission</string>
+    <string name="failed_to_generate_the_mission_using_the_selected_certstore">Failed to generate the mission using selected the certificate store.</string>
+    <string name="failed_to_install_the_generated_mission">Failed to install the generated mission</string>
+    <string name="generate_using_passphrase">Generate using a passphrase</string>
+    <string name="scan_qr_code">Scan a QR code</string>
+    <string name="load_from_file">Load from a file</string>
+    <string name="download">Download from a server</string>
+    <string name="manual_add_advanced">Add manually (advanced)</string>
+    <string name="unknown_group">Unknown Group</string>
+    <string name="all_groups">(All Groups)</string>
+    <string name="select_qr_code_file">Select QR code file</string>
+    <string name="image_is_not_a_qr_code">The image is not a recognized QR code</string>
+    <string name="image_is_not_base91_encoded">The image encoding is not supported</string>
+    <string name="encrypted_data_cannot_be_decrypted">The data cannot be decrypted</string>
+    <string name="image_compression_not_supported">The image data compression is not supported</string>
+    <string name="image_version_is_not_supported">The image version is not supported</string>
+    <string name="cannot_parse_mission_data">The mission data cannot be processed</string>
+    <string name="if_the_mission_you_re_loading_is_protected_with_a_password_or_passphrase_please_enter_it_now">If the mission you\'re loading is protected with a password or passphrase, please enter it now.</string>
 </resources>

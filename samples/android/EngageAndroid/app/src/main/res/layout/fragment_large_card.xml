@@ -22,76 +22,84 @@
         android:id="@+id/tvGroupName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/large_card_anchor_start"
+        android:layout_marginTop="@dimen/large_card_anchor_top"
+        android:layout_marginEnd="@dimen/small_gap"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"
-        android:textSize="30sp"
+        android:textSize="@dimen/large_card_primary_text_size"
         android:textStyle="bold"
-
-        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        app:layout_constraintEnd_toStartOf="@+id/tvMemberCount"
         app:layout_constraintStart_toStartOf="@+id/ivCard"
         app:layout_constraintTop_toTopOf="@+id/ivCard" />
 
-    <TextView
-        android:id="@+id/tvTalkerList"
-        android:layout_width="0dp"
-        android:layout_height="23dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/placeholder"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/ivCard"
-        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
-        app:layout_constraintTop_toBottomOf="@+id/tvGroupName" />
 
     <TextView
         android:id="@+id/tvMemberCount"
         android:layout_width="0dp"
-        android:layout_height="23dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/small_gap"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="@dimen/large_card_primary_text_size"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/ivCard"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tvGroupName"
+        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        app:layout_constraintTop_toTopOf="@+id/tvGroupName"
+        android:visibility="@string/show_member_count_on_large_card"/>
+
+    <fragment
+        android:id="@+id/fragTalkers"
+        android:name="com.rallytac.engageandroid.LargeCardTalkerFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/small_gap"
+        app:layout_constraintBottom_toTopOf="@+id/ivPriority"
+        app:layout_constraintEnd_toEndOf="@+id/ivSpeaker"
         app:layout_constraintStart_toStartOf="@+id/tvGroupName"
-        app:layout_constraintTop_toBottomOf="@+id/tvTalkerList" />
+        app:layout_constraintTop_toBottomOf="@+id/tvGroupName" />
 
     <ImageView
         android:id="@+id/ivSpeaker"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="42dp"
+        android:layout_width="@dimen/large_finger_touch_icon"
+        android:layout_height="@dimen/large_finger_touch_icon"
+        android:layout_marginEnd="@dimen/large_card_anchor_end"
+        app:layout_constraintBottom_toBottomOf="@+id/tvGroupName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivCard"
+        app:layout_constraintTop_toTopOf="@+id/tvGroupName"
         app:srcCompat="@drawable/ic_speaker_on" />
 
     <ImageView
         android:id="@+id/ivNetError"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="42dp"
-        android:layout_marginBottom="24dp"
-        android:visibility="invisible"
+        android:layout_width="@dimen/large_finger_touch_icon"
+        android:layout_height="@dimen/large_finger_touch_icon"
+        android:layout_marginBottom="@dimen/large_card_anchor_bottom"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/ivCard"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ivSpeaker"
         app:srcCompat="@drawable/ic_net_error" />
 
     <ImageView
         android:id="@+id/ivNetFailover"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="42dp"
-        android:layout_marginBottom="24dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
+        android:layout_width="@dimen/large_finger_touch_icon"
+        android:layout_height="@dimen/large_finger_touch_icon"
+        android:layout_marginEnd="@dimen/large_card_anchor_end"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/ivNetError"
         app:layout_constraintEnd_toStartOf="@+id/ivNetError"
         app:srcCompat="@drawable/ic_net_failover" />
+
+    <ImageView
+        android:id="@+id/ivPriority"
+        android:layout_width="@dimen/large_finger_touch_icon"
+        android:layout_height="@dimen/large_finger_touch_icon"
+        android:layout_marginBottom="@dimen/large_card_anchor_bottom"
+        android:contentDescription="@string/app_priority_toggle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
+        app:srcCompat="@drawable/ic_no_priority"
+        android:visibility="@string/show_priority_icon_on_large_card"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

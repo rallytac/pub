@@ -81,9 +81,20 @@ public class AudioPlayerManager
         playResource(id, (float)1.0, (float)1.0, null, null, onPlayComplete);
     }
 
+    int _currentPlayResourceId = -1;
+
     private void playResource(final int id, float leftVolume, float rightVolume, final IPlayCompleteListener pcl, final Object tag, final Runnable onPlayComplete) throws Exception
     {
-        Log.d(TAG, "play starting id=" + id + ", left=" + leftVolume + ", right=" + rightVolume);//NON-NLS
+        // TODO: update playResource to be smart about playing the same tone as it's already playing - requires some rework for PTT tone and driving txUnmute
+        /*
+        if(id == _currentPlayResourceId)
+        {
+            Log.i(TAG, "playResource: play requested for already-playing resource - ignoring");//NON-NLS
+            return;
+        }
+        */
+
+        Log.d(TAG, "playResource: play starting id=" + id + ", left=" + leftVolume + ", right=" + rightVolume);//NON-NLS
 
         final MediaPlayer p = getPlayer(id);
         if(p != null)
@@ -95,7 +106,12 @@ public class AudioPlayerManager
                 @Override
                 public void onCompletion(MediaPlayer mp)
                 {
-                    Log.d(TAG, "play complete id=" + id);//NON-NLS
+                    Log.d(TAG, "playResource: play complete id=" + id);//NON-NLS
+                    if(id == _currentPlayResourceId)
+                    {
+                        _currentPlayResourceId = -1;
+                    }
+
                     p.reset();
                     p.release();
 
@@ -111,11 +127,12 @@ public class AudioPlayerManager
                 }
             });
 
+            _currentPlayResourceId = id;
             p.start();
         }
         else
         {
-            Log.e(TAG, "cannot obtain a media player for resource " + id);//NON-NLS
+            Log.e(TAG, "playResource: cannot obtain a media player for resource " + id);//NON-NLS
             throw new Exception("cannot obtain a media player for resource " + id);
         }
     }

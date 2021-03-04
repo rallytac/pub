@@ -82,7 +82,7 @@ public class OfflineActivationActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if(requestCode == IntentIntegrator.REQUEST_CODE)
+        if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
         {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
             if(result != null)
@@ -148,15 +148,6 @@ public class OfflineActivationActivity extends AppCompatActivity
 
     public void onClickScanOfflineActivationQrCode(View view)
     {
-        IntentIntegrator ii = new IntentIntegrator(this);
-
-        ii.setCaptureActivity(OrientationIndependentQrCodeScanActivity.class);
-        ii.setPrompt(getString(R.string.scan_the_activation_qr_code));
-        ii.setBeepEnabled(true);
-        ii.setOrientationLocked(false);
-        ii.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
-        ii.setBarcodeImageEnabled(true);
-        ii.setTimeout(10000);
-        ii.initiateScan();
+        Globals.getEngageApplication().scanQrCode(this, getString(R.string.scan_the_activation_qr_code), view, getString(R.string.select_qr_code_file), Constants.OFFLINE_ACTIVATION_CODE_REQUEST_CODE);
     }
 }

@@ -41,7 +41,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,7 +51,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,6 +73,78 @@ import java.util.zip.GZIPOutputStream;
 public class Utils
 {
     private static String TAG = Utils.class.getSimpleName();
+
+    public FileContentDescriptor getContentDescriptor(byte[] data)
+    {
+        // Maybe clear-text JSON?
+        try
+        {
+            String plainText = new String(data, StandardCharsets.UTF_8);
+            if(!Utils.isEmptyString(plainText))
+            {
+                JSONObject jo = new JSONObject(plainText);
+                return new FileContentDescriptor(FileContentDescriptor.Type.fctJson, jo);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        // TODO: .....
+
+        return null;
+    }
+
+    public FileContentDescriptor getContentDescriptor(Uri uri)
+    {
+        return getContentDescriptor(Utils.readBinaryFile(Globals.getContext(), uri));
+
+        /*
+        FileContentDescriptor rc = null;
+
+        // First, let's see if this a JSON text file
+        try
+        {
+            String plainText = Utils.readTextFile(Globals.getEngageApplication().getApplicationContext(), uri);
+            if(!Utils.isEmptyString(plainText))
+            {
+                JSONObject jo = new JSONObject(plainText);
+                rc = new FileContentDescriptor(FileContentDescriptor.Type.fctJson, jo);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
+            BufferedInputStream is = new BufferedInputStream(getContentResolver().openInputStream(uri));
+            Bitmap bm = BitmapFactory.decodeStream(is);
+            String dataString = Utils.qrCodeBitmapToString(bm);
+            Log.e(TAG, "dataString=" + dataString);
+
+            //if(dataString.startsWith(Constants.QR_CODE_HEADER))
+            {
+                byte[] base91DecodedBytes = Base91.decode(dataString.getBytes(Utils.getEngageCharSet()));
+                byte[] decompressed = Utils.inflate(base91DecodedBytes);
+                dataString = new String(decompressed, Utils.getEngageCharSet());
+                Log.e(TAG, "dataString=" + dataString);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //byte[] base91DecodedBytes = Base91.decode(encryptedString.getBytes(Utils.getEngageCharSet()));
+
+        //qrCodeBitmapToString
+
+        return rc;
+        */
+    }
 
     public static boolean deleteDirectory(String dirName)
     {
@@ -597,6 +668,8 @@ public class Utils
                 mc.thresholdSecs = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_SECS, Integer.toString(Constants.DEF_MULTICAST_FAILOVER_THRESHOLD_SECS)));
                 rc.setMulticastFailoverConfiguration(mc);
 
+                rc.setPriorityTxLevel(0);
+
                 // Update states from the previous configuration
                 rc.updateGroupStates(previousConfiguration);
 
@@ -845,27 +918,32 @@ public class Utils
         dlg.show();
         */
 
-        showPopupMsg(ctx, msg);
+        showShortPopupMsg(ctx, msg);
     }
 
-    public static void showPopupMsg(Context ctx, String msg, int len)
+    private static void showPopupMsg(Context ctx, String msg, int len)
     {
         Toast.makeText(ctx, msg, len).show();
     }
 
-    public static void showPopupMsg(Context ctx, String msg)
-    {
-        showPopupMsg(ctx, msg, Toast.LENGTH_SHORT);
-    }
-
     public static void showShortPopupMsg(Context ctx, String msg)
     {
-        showPopupMsg(ctx, msg);
+        showPopupMsg(ctx, msg, Toast.LENGTH_SHORT);
     }
 
     public static void showLongPopupMsg(Context ctx, String msg)
     {
         showPopupMsg(ctx, msg, Toast.LENGTH_LONG);
+    }
+
+    public static void showShortPopupMsg(Context ctx, int msgId)
+    {
+        showPopupMsg(ctx, ctx.getString(msgId), Toast.LENGTH_SHORT);
+    }
+
+    public static void showLongPopupMsg(Context ctx, int msgId)
+    {
+        showPopupMsg(ctx, ctx.getString(msgId), Toast.LENGTH_LONG);
     }
 
     public static Intent intentToIgnoreBatteryOptimization(Context ctx)
@@ -1252,5 +1330,16 @@ public class Utils
         }
 
         return rc;
+    }
+
+    public static void setInboundMissionPassword(String pwd)
+    {
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.INCOMING_MISSION_PASSWORD, pwd);
+        Globals.getSharedPreferencesEditor().apply();
+    }
+
+    public static String getInboundMissionPassword()
+    {
+        return Globals.getSharedPreferences().getString(PreferenceKeys.INCOMING_MISSION_PASSWORD, null);
     }
 }

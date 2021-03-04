@@ -45,7 +45,16 @@
     "logRtpJitterBufferStats":true,
     "rtpJtterLatencyMode": 0,
     "rtpJitterUnderrunReductionAger": 100,
-    "rtpJitterForceTrimAtMs": 0
+    "rtpJitterForceTrimAtMs": 0,
+    "rpUdpStreaming": {
+      "enabled": true,
+      "allowClear": true,
+      "nic": "",
+      "port": 0,
+      "keepAliveIntervalSecs": 10,
+      "priority": 1,
+      "ttl": 64
+    }
   },
 
   "audio":{

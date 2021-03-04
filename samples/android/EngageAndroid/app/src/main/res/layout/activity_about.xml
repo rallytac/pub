@@ -109,79 +109,94 @@
             app:layout_constraintStart_toStartOf="@+id/tvDeviceHeader"
             app:layout_constraintTop_toBottomOf="@+id/tvDeviceHeader" />
 
-        <TextView
-            android:id="@+id/tvLicenseHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/about_license_key"
-            android:textColor="@color/colorAccent"
-            android:textStyle="bold"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layLicenseSection"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etDeviceId" />
+            app:layout_constraintTop_toBottomOf="@+id/etDeviceId">
 
-        <TextView
-            android:id="@+id/tvLicenseKeyStaticText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/about_enter_license_key"
-            app:layout_constraintEnd_toEndOf="@+id/etLicenseKey"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
-            app:layout_constraintTop_toBottomOf="@+id/tvLicenseHeader" />
+            <TextView
+                android:id="@+id/tvLicenseHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:text="@string/about_license_key"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/etLicenseKey"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:ems="10"
-            android:hint="@string/about_license_key"
-            android:inputType="textCapCharacters"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toStartOf="@+id/ivScanLicenseKey"
-            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
-            app:layout_constraintTop_toBottomOf="@+id/tvLicenseKeyStaticText" />
+            <TextView
+                android:id="@+id/tvLicenseKeyStaticText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/about_enter_license_key"
+                app:layout_constraintEnd_toEndOf="@+id/etLicenseKey"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+                app:layout_constraintTop_toBottomOf="@+id/tvLicenseHeader" />
 
-        <ImageView
-            android:id="@+id/ivScanLicenseKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="8dp"
-            android:onClick="onClickScanLicenseKey"
-            app:layout_constraintBottom_toBottomOf="@+id/tvLicenseHeader"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvLicenseHeader"
-            app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
+            <EditText
+                android:id="@+id/etLicenseKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:ems="10"
+                android:hint="@string/about_license_key"
+                android:inputType="textCapCharacters"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toStartOf="@+id/ivScanLicenseKey"
+                app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+                app:layout_constraintTop_toBottomOf="@+id/tvLicenseKeyStaticText" />
 
-        <ImageView
-            android:id="@+id/ivLoadLicenseKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="8dp"
-            android:onClick="onClickLoadLicenseKey"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivScanLicenseKey"
-            app:srcCompat="@drawable/ic_file" />
+            <ImageView
+                android:id="@+id/ivScanLicenseKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="8dp"
+                android:onClick="onClickScanLicenseKey"
+                app:layout_constraintBottom_toBottomOf="@+id/tvLicenseHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvLicenseHeader"
+                app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
 
-        <ImageView
-            android:id="@+id/ivShareLicenseKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:onClick="onClickShareLicenseKey"
-            app:layout_constraintBottom_toBottomOf="@+id/etLicenseKey"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/etLicenseKey"
-            app:srcCompat="@drawable/ic_visibility"
-            android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/ivLoadLicenseKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="8dp"
+                android:onClick="onClickLoadLicenseKey"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivScanLicenseKey"
+                app:srcCompat="@drawable/ic_file" />
+
+            <ImageView
+                android:id="@+id/ivShareLicenseKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:onClick="onClickShareLicenseKey"
+                app:layout_constraintBottom_toBottomOf="@+id/etLicenseKey"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/etLicenseKey"
+                app:srcCompat="@drawable/ic_visibility"
+                android:visibility="gone"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layActivationSection"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layLicenseSection">
 
         <TextView
             android:id="@+id/tvActivationHeader"
@@ -193,7 +208,7 @@
             android:textColor="@color/colorAccent"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etLicenseKey" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvActivationCodeStaticText"
@@ -228,7 +243,7 @@
             android:inputType="textCapCharacters"
             android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@+id/ivScanActivationCode"
-            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
+            app:layout_constraintStart_toStartOf="@+id/tvActivationHeader"
             app:layout_constraintTop_toBottomOf="@+id/tvActivationCodeStaticText" />
 
         <ImageView
@@ -241,33 +256,33 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/etActivationCode"
             app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <TextView
-            android:id="@+id/tvLicensingMessage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvLicenseHeader"
-            app:layout_constraintTop_toBottomOf="@+id/etActivationCode" />
+    <TextView
+        android:id="@+id/tvLicensingMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layActivationSection" />
 
-
-        <Button
-            android:id="@+id/btnDeactivate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="#E91E63"
-            android:backgroundTintMode="src_atop"
-            android:onClick="onClickDeactivate"
-            android:text="@string/about_btn_deactivate"
-            android:textColor="#FFFFFF"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvLicensingMessage" />
-
+    <Button
+        android:id="@+id/btnDeactivate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#E91E63"
+        android:backgroundTintMode="src_atop"
+        android:onClick="onClickDeactivate"
+        android:text="@string/about_btn_deactivate"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLicensingMessage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

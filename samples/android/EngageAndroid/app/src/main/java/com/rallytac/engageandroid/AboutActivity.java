@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 
 import java.util.Date;
@@ -44,11 +45,6 @@ public class AboutActivity extends
 {
     private static String TAG = AboutActivity.class.getSimpleName();
 
-    private int OFFLINE_ACTIVATION_REQUEST_CODE = 771;
-    private static int PICK_LICENSE_FILE_REQUEST_CODE = 772;
-
-
-    //private enum KeyType {ktUnknown, ktPerpetual, ktExpires};
     private enum ScanType {stUnknown, stLicenseKey, stActivationCode}
 
     private ImageView _ivAppLogo;
@@ -282,12 +278,17 @@ public class AboutActivity extends
 
     private void saveLicenseData()
     {
-        if(_newLd.isValid() && _newLd._needsSaving)
+        if(Utils.isEmptyString(_newLd._ld._key) || (_newLd.isValid() && _newLd._needsSaving))
         {
             _newLd._needsSaving = false;
 
             String key = Utils.emptyAs(_newLd._ld._key, "");
             String ac = Utils.emptyAs(_newLd._ld._activationCode, "");
+
+            if(Utils.isEmptyString(key))
+            {
+                ac = "";
+            }
 
             Log.i(TAG, "saving licensing [" + getString(R.string.licensing_entitlement) + "] [" + key + "] [" + ac + "]"); //NON-NLS
 
@@ -315,6 +316,7 @@ public class AboutActivity extends
     {
         InternalDescriptor rc = new InternalDescriptor();
         rc._ld = LicenseDescriptor.fromJson(jsonData);
+
         return rc;
     }
 
@@ -400,7 +402,14 @@ public class AboutActivity extends
             }
             else
             {
-                msg = getString(R.string.not_a_valid_license);
+                if(Utils.isEmptyString(_newLd._ld._key))
+                {
+                    msg = getString(R.string.you_dont_yet_have_a_valid_license);
+                }
+                else
+                {
+                    msg = getString(R.string.not_a_valid_license);
+                }
             }
         }
 
@@ -452,6 +461,16 @@ public class AboutActivity extends
             _ivScanActivationCode.setVisibility(View.VISIBLE);
             _ivWebFetchActivationCode.setVisibility(View.VISIBLE);
         }
+
+        if( (_activeLd._ld._status == Engine.LicensingStatusCode.requiresActivation) ||
+            (_newLd._ld._status == Engine.LicensingStatusCode.requiresActivation) )
+        {
+            findViewById(R.id.layActivationSection).setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            findViewById(R.id.layActivationSection).setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -477,7 +496,7 @@ public class AboutActivity extends
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        if(requestCode == IntentIntegrator.REQUEST_CODE)
+        if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
         {
             _scanning = false;
 
@@ -501,7 +520,7 @@ public class AboutActivity extends
                 }
             }
         }
-        else if(requestCode == OFFLINE_ACTIVATION_REQUEST_CODE)
+        else if(requestCode == Constants.OFFLINE_ACTIVATION_REQUEST_CODE)
         {
             if(intent != null)
             {
@@ -513,7 +532,7 @@ public class AboutActivity extends
                 }
             }
         }
-        else if(requestCode == PICK_LICENSE_FILE_REQUEST_CODE)
+        else if(requestCode == Constants.PICK_LICENSE_FILE_REQUEST_CODE)
         {
             if(intent != null)
             {
@@ -567,6 +586,7 @@ public class AboutActivity extends
 
         sb.append(getString(R.string.mi_hdr_system));
         sb.append(String.format(getString(R.string.mi_sys_id), Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID)));
+        sb.append(String.format(getString(R.string.mi_sys_sizing_type), getString(R.string.ui_sizing_type)));
 
         sb.append(getString(R.string.mi_hdr_device));
         sb.append(String.format(getString(R.string.mi_device_manufacturer), Build.MANUFACTURER));
@@ -586,23 +606,13 @@ public class AboutActivity extends
         return sb.toString();
     }
 
-    private void scanData(String prompt, ScanType st)
+    private void scanData(String prompt, ScanType st, View sourceMenuAnchor, String fileChooserPrompt, int fileChooserRequestCode)
     {
         _scanType = st;
         _scanning = true;
 
-        IntentIntegrator ii = new IntentIntegrator(this);
-
-        ii.setCaptureActivity(OrientationIndependentQrCodeScanActivity.class);
-        ii.setPrompt(prompt);
-        ii.setBeepEnabled(true);
-        ii.setOrientationLocked(false);
-        ii.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
-        ii.setBarcodeImageEnabled(true);
-        ii.setTimeout(10000);
-        ii.initiateScan();
+        Globals.getEngageApplication().scanQrCode(this, prompt, sourceMenuAnchor, fileChooserPrompt, fileChooserRequestCode);
     }
-
 
     public void onClickContact(View view)
     {
@@ -662,7 +672,7 @@ public class AboutActivity extends
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), PICK_LICENSE_FILE_REQUEST_CODE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_LICENSE_FILE_REQUEST_CODE);
         }
         catch (Exception e)
         {
@@ -672,12 +682,12 @@ public class AboutActivity extends
 
     public void onClickScanLicenseKey(View view)
     {
-        scanData(getString(R.string.scan_license_key), ScanType.stLicenseKey);
+        scanData(getString(R.string.scan_license_key), ScanType.stLicenseKey, view, getString(R.string.select_qr_code_file), Constants.PICK_QR_LICENSE_FILE_REQUEST_CODE);
     }
 
     public void onClickScanActivationCode(View view)
     {
-        scanData(getString(R.string.scan_activation_code), ScanType.stActivationCode);
+        scanData(getString(R.string.scan_activation_code), ScanType.stActivationCode, view, getString(R.string.select_qr_code_file), Constants.PICK_QR_ACTIVATION_FILE_REQUEST_CODE);
     }
 
     public void onClickGetActivationCodeOnline(View view)
@@ -929,7 +939,7 @@ public class AboutActivity extends
                         Intent intent = new Intent(AboutActivity.this, OfflineActivationActivity.class);
                         intent.putExtra(OfflineActivationActivity.EXTRA_DEVICE_ID, _activeLd._ld._deviceId);
                         intent.putExtra(OfflineActivationActivity.EXTRA_LICENSE_KEY, _etLicenseKey.getText().toString());
-                        startActivityForResult(intent, OFFLINE_ACTIVATION_REQUEST_CODE);
+                        startActivityForResult(intent, Constants.OFFLINE_ACTIVATION_REQUEST_CODE);
                     }
                 });
 

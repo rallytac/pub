@@ -11,4 +11,17 @@ public class TalkerDescriptor
     public String nodeId;
     public long rxFlags;
     public int txPriority;
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("alias=" + alias);
+        sb.append(", nodeId=" + nodeId);
+        sb.append(", rxFlags=" + rxFlags);
+        sb.append(", txPriority=" + txPriority);
+
+        return sb.toString();
+    }
 }

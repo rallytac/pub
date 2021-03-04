@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_sizing_type" translatable="false">sw600dp</string>
+
+    <!-- Multi view container -->
+    <dimen name="multi_view_fragment_height">110dp</dimen>
+
+    <!-- Large card -->
+    <dimen name="large_card_anchor_start">32dp</dimen>
+    <dimen name="large_card_anchor_end">32dp</dimen>
+    <dimen name="large_card_anchor_top">24dp</dimen>
+
+    <!-- Small card -->
+    <dimen name="small_card_anchor_start">18dp</dimen>
+    <dimen name="small_card_anchor_end">8dp</dimen>
+    <dimen name="small_card_primary_text_size">20sp</dimen>
+    <dimen name="small_card_secondary_text_size">16sp</dimen>
+</resources>

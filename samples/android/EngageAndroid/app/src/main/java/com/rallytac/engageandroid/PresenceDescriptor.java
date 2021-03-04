@@ -46,11 +46,28 @@ public class PresenceDescriptor
     public String custom;
     public Location location;
     public Calendar lastUpdate;
-    public HashMap<String, String> groupAliases;
+    public HashMap<String, GroupMembershipTracker> groupMembership;
 
     public NodeUserBiometrics userBiometrics = null;
     public Connectivity connectivity = null;
     public Power power = null;
+
+    public String getFriendlyName()
+    {
+        if(!Utils.isEmptyString(displayName))
+        {
+            return displayName;
+        }
+        else if(!Utils.isEmptyString(userId))
+        {
+            return userId;
+        }
+        else
+        {
+            return nodeId;
+        }
+    }
+
 
     public void clear()
     {
@@ -63,9 +80,15 @@ public class PresenceDescriptor
         custom = null;
         location = null;
         lastUpdate = null;
-        groupAliases = null;
+        groupMembership = null;
 
         // NOTE !! userBiometrics is not cleared!!
+    }
+
+    public void clearMemberships()
+    {
+        groupMembership.clear();
+        groupMembership = null;
     }
 
     public boolean deserialize(String json)
@@ -96,6 +119,11 @@ public class PresenceDescriptor
                     type = identity.optString(Engine.JsonFields.Identity.type);
                     format = identity.optString(Engine.JsonFields.Identity.format);
                 }
+            }
+
+            if(Utils.isEmptyString(nodeId))
+            {
+                throw new Exception("No nodeId for PD");
             }
 
             // Location is optional
@@ -160,19 +188,25 @@ public class PresenceDescriptor
                 }
             }
 
-            // Group aliases
+            // Group membership
             {
-                JSONArray ga = root.getJSONArray(Engine.JsonFields.PresenceDescriptor.GroupAlias.arrayName);
+                JSONArray ga = root.optJSONArray(Engine.JsonFields.PresenceDescriptor.GroupItem.arrayName);
                 if (ga != null && ga.length() > 0)
                 {
-                    groupAliases = new HashMap<>();
+                    groupMembership = new HashMap<>();
                     for (int x = 0; x < ga.length(); x++)
                     {
                         JSONObject g = ga.getJSONObject(x);
                         if (g != null)
                         {
-                            groupAliases.put(g.getString(Engine.JsonFields.PresenceDescriptor.GroupAlias.groupId),
-                                    g.getString(Engine.JsonFields.PresenceDescriptor.GroupAlias.alias));
+                            String gid = g.optString(Engine.JsonFields.PresenceDescriptor.GroupItem.id, null);
+                            if(!Utils.isEmptyString(gid))
+                            {
+                                groupMembership.put(gid,
+                                        new GroupMembershipTracker(nodeId,
+                                                                   gid,
+                                                                   g.optInt(Engine.JsonFields.PresenceDescriptor.GroupItem.status, 0)));
+                            }
                         }
                     }
                 }
@@ -195,16 +229,29 @@ public class PresenceDescriptor
         }
 
         self = pd.self;
-        if(!Utils.isEmptyString(pd.type)) type = pd.type;
-        if(!Utils.isEmptyString(pd.format)) format = pd.format;
-        if(!Utils.isEmptyString(pd.userId)) userId = pd.userId;
-        if(!Utils.isEmptyString(pd.displayName)) displayName = pd.displayName;
-        if(!Utils.isEmptyString(pd.comment)) comment = pd.comment;
-        if(!Utils.isEmptyString(pd.custom)) custom = pd.custom;
-        if(pd.location != null) location = pd.location;
-        if(pd.groupAliases != null) groupAliases = pd.groupAliases;
-        if(pd.power != null) power = pd.power;
-        if(pd.connectivity != null) connectivity = pd.connectivity;
+        type = pd.type;
+        format = pd.format;
+        userId = pd.userId;
+        displayName = pd.displayName;
+        comment = pd.comment;
+        custom = pd.custom;
+        location = pd.location;
+        groupMembership = new HashMap<>();
+
+        if(pd.groupMembership != null && !pd.groupMembership.isEmpty())
+        {
+            for(GroupMembershipTracker gmt: pd.groupMembership.values())
+            {
+                groupMembership.put(gmt._groupId, gmt);
+            }
+        }
+        else
+        {
+            groupMembership = null;
+        }
+
+        power = pd.power;
+        connectivity = pd.connectivity;
 
         return true;
     }
