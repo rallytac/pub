@@ -23,8 +23,8 @@
     <string name="opt_firebase_analytics_enabled" translatable="false">0</string>
     <string name="opt_max_groups_allowed" translatable="false">4</string>
 
-    <string name="opt_group_tx_priority_level" translatable="false">0</string>
-    <string name="opt_app_tx_priority_level" translatable="false">0</string>
+    <string name="opt_group_tx_priority_level" translatable="false">100</string>
+    <string name="opt_app_tx_priority_level" translatable="false">100</string>
 
     <string name="app_keycode_ptt" translatable="false">0</string>
 
