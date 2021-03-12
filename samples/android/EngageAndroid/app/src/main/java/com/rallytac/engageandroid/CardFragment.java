@@ -29,7 +29,6 @@ public abstract class CardFragment extends Fragment
     private Animation _networkFailoverAnimation = null;
     private Animation _speakerAnimation = null;
     private boolean _isEmergencyTxOn = false;
-    private boolean _isPriorityOn = false;
 
     public String getGroupId()
     {
@@ -136,29 +135,6 @@ public abstract class CardFragment extends Fragment
             });
         }
 
-        // Priority TX
-        final ImageView ivPriority = view.findViewById(R.id.ivPriority);
-        if(ivPriority != null)
-        {
-            ivPriority.setLongClickable(true);
-            ivPriority.setOnLongClickListener(new View.OnLongClickListener()
-            {
-                @Override
-                public boolean onLongClick(View v)
-                {
-                    _isPriorityOn = !_isPriorityOn;
-
-                    int priority = (_isPriorityOn ? Utils.intOpt(getString(R.string.opt_group_tx_priority_level), 0) : 0);
-                    int flags = (_isEmergencyTxOn ? 1 : 0);
-                    Globals.getEngageApplication().setGroupTxInfo(_gd.id, priority, flags);
-
-                    updatePriorityTxIndicator();
-
-                    return true;
-                }
-            });
-        }
-
         final TextView tvMemberCount = view.findViewById(R.id.tvMemberCount);
         if(tvMemberCount != null)
         {
@@ -208,7 +184,6 @@ public abstract class CardFragment extends Fragment
                         updateTxEnabledStatus();
                         updateRxTxUi();
                         updateMembers();
-                        updatePriorityTxIndicator();
                     }
                }
             }
@@ -427,40 +402,6 @@ public abstract class CardFragment extends Fragment
                         {
                             iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_check_box_unchecked));
                         }
-
-                        ((SimpleUiMainActivity) getActivity()).redrawPttButton();
-                    }
-                }
-            }
-        });
-    }
-
-    private void updatePriorityTxIndicator()
-    {
-        getActivity().runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if(_gd != null)
-                {
-                    ImageView iv = getView().findViewById(R.id.ivPriority);
-
-                    if(iv != null)
-                    {
-                        Drawable dw;
-                        if(_isPriorityOn)
-                        {
-                            dw = ContextCompat.getDrawable(getActivity(), R.drawable.ic_high_priority);
-                            //iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_high_priority));
-                        }
-                        else
-                        {
-                            dw = ContextCompat.getDrawable(getActivity(), R.drawable.ic_no_priority);
-                            //iv.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.ic_no_priority));
-                        }
-
-                        iv.setImageDrawable(dw);
 
                         ((SimpleUiMainActivity) getActivity()).redrawPttButton();
                     }

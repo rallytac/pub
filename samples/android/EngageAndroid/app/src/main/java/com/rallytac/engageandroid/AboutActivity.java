@@ -877,12 +877,17 @@ public class AboutActivity extends
                         dialog.cancel();
                     }
                 });
-                alertDialogBuilder.setPositiveButton(R.string.button_no, new DialogInterface.OnClickListener()
+                alertDialogBuilder.setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
                     {
                         Globals.getEngageApplication().logEvent(Analytics.LICENSE_DEACTIVATED);
+
+                        Intent intent = new Intent(AboutActivity.this, OfflineDeactivationActivity.class);
+                        intent.putExtra(OfflineActivationActivity.EXTRA_DEVICE_ID, _activeLd._ld._deviceId);
+                        intent.putExtra(OfflineActivationActivity.EXTRA_LICENSE_KEY, _etLicenseKey.getText().toString());
+
                         _etLicenseKey.setText(null);
                         _etActivationCode.setText(null);
                         clearStoredLicensing();
@@ -890,9 +895,6 @@ public class AboutActivity extends
                         updateUi();
                         Toast.makeText(AboutActivity.this, R.string.deactivated, Toast.LENGTH_LONG).show();
 
-                        Intent intent = new Intent(AboutActivity.this, OfflineDeactivationActivity.class);
-                        intent.putExtra(OfflineActivationActivity.EXTRA_DEVICE_ID, _activeLd._ld._deviceId);
-                        intent.putExtra(OfflineActivationActivity.EXTRA_LICENSE_KEY, _etLicenseKey.getText().toString());
                         startActivity(intent);
                     }
                 });

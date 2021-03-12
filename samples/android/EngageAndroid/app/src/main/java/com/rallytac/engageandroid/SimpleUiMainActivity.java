@@ -2803,7 +2803,6 @@ public class SimpleUiMainActivity
             });
         }
 
-
         // Emergency TX
         /*
         final ImageView ivEmergency = findViewById(R.id.ivEmergency);

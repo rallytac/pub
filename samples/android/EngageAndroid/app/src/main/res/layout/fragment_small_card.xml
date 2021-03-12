@@ -100,16 +100,4 @@
         app:layout_constraintBottom_toBottomOf="@+id/ivNetError"
         app:layout_constraintEnd_toStartOf="@+id/ivNetError"
         app:srcCompat="@drawable/ic_net_failover" />
-
-    <ImageView
-        android:id="@+id/ivPriority"
-        android:layout_width="@dimen/small_finger_touch_icon"
-        android:layout_height="@dimen/small_finger_touch_icon"
-        android:layout_marginEnd="@dimen/large_gap"
-        android:contentDescription="@string/app_priority_toggle"
-        app:layout_constraintBottom_toBottomOf="@+id/ivNetFailover"
-        app:layout_constraintEnd_toStartOf="@+id/ivNetFailover"
-        app:srcCompat="@drawable/ic_no_priority"
-        android:visibility="@string/show_priority_icon_on_small_card"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

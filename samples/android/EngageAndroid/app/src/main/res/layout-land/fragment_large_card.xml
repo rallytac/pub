@@ -40,7 +40,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/small_gap"
-        app:layout_constraintBottom_toTopOf="@+id/ivPriority"
+        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
         app:layout_constraintEnd_toEndOf="@+id/ivSpeaker"
         app:layout_constraintStart_toStartOf="@+id/tvGroupName"
         app:layout_constraintTop_toBottomOf="@+id/tvGroupName" />
@@ -88,18 +88,4 @@
         app:layout_constraintBottom_toBottomOf="@+id/ivNetError"
         app:layout_constraintEnd_toStartOf="@+id/ivNetError"
         app:srcCompat="@drawable/ic_net_failover" />
-
-
-    <ImageView
-        android:id="@+id/ivPriority"
-        android:layout_width="@dimen/large_finger_touch_icon"
-        android:layout_height="@dimen/large_finger_touch_icon"
-        android:layout_marginBottom="@dimen/large_card_anchor_bottom"
-        android:contentDescription="@string/app_priority_toggle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tvGroupName"
-        app:layout_constraintTop_toTopOf="@+id/ivPtt"
-        app:srcCompat="@drawable/ic_no_priority"
-        android:visibility="@string/show_priority_icon_on_large_card"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
