@@ -19,8 +19,8 @@ const https = require("https");
 const fileSystem = require("fs-extra");
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require("crypto");
-var dateFormat = require('dateformat');
-const { exit, config } = require('process');
+const dateFormat = require('dateformat');
+const { abort } = require('process');
 
 // Our version number
 const VERSION = "0.1";
@@ -32,8 +32,6 @@ const LOG_WARN = 2;
 const LOG_INFO = 3;
 const LOG_DEBUG = 4;
 
-const POST_SINGLE_RECORDING_PATH = "/archive/recording";
-
 // A request path to ignore (usually requested by browsers)
 const FAVICON_FILE_NAME_URL = "/favicon.ico";
 
@@ -43,7 +41,11 @@ const RESPONSE_ROW_LIMIT = 64;
 // Number of bytes in keys
 const ITEM_KEY_SIZE = 32;
 
-// Load up and valiudate the configuration
+// Operation modes
+const OPMODE_STANDARD = "standard";
+const OPMODE_STORAGE_RELAY = "storageRelay";
+
+// Load up and validate the configuration
 var configuration = fileSystem.readJSONSync("./earwax_conf.json");
 if(!configuration.logging || !configuration.logging.level)
 {
@@ -122,35 +124,38 @@ server.listen(configuration.https.port, configuration.https.host, () =>
 
 // Setup the archive cleanup
 setInterval(archiveCleanup, configuration.timers.cleanupIntervalSecs * 1000);
-
 function archiveCleanup()
 {
-    tenantMap.forEach((tenant) => {        
-        tenant.db.all(`SELECT
-                            item_key,
-                            content_uri,
-                            ((strftime('%s', 'now') * 1000) - ts_ended) AS age_ms
-                        FROM 
-                            RECORDINGS
-                        WHERE
-                            age_ms > (${tenant.maxEventAgeHours} * 3600 * 1000);`,
-        function(err, rows) {
-            if(err)
-            {
-                logE(err);
-            }
-            else
-            {
-                rows.forEach((row) => {
-                    logD("removing stale item " + row.item_key + ", uri=" + row.content_uri );
+    tenantMap.forEach((tenant) => {
+        // Do nothing if this guy does not have a database
+        if(tenant.db)
+        {
+            tenant.db.all(`SELECT
+                                item_key,
+                                content_uri,
+                                ((strftime('%s', 'now') * 1000) - ts_ended) AS age_ms
+                            FROM 
+                                RECORDINGS
+                            WHERE
+                                age_ms > (${tenant.maxEventAgeHours} * 3600 * 1000);`,
+            function(err, rows) {
+                if(err)
+                {
+                    logE(err);
+                }
+                else
+                {
+                    rows.forEach((row) => {
+                        logD("removing stale item " + row.item_key + ", uri=" + row.content_uri );
 
-                    fileSystem.removeSync(row.content_uri);
-                    fileSystem.removeSync(row.content_uri + ".meta");
-                    tenant.db.run("DELETE FROM RECORDINGS WHERE item_key = ?", [row.item_key]);
-                });
+                        fileSystem.removeSync(row.content_uri);
+                        fileSystem.removeSync(row.content_uri + ".meta");
+                        tenant.db.run("DELETE FROM RECORDINGS WHERE item_key = ?", [row.item_key]);
+                    });
+                }
             }
-        }
         );
+        }
     });
 }
 
@@ -249,8 +254,27 @@ function setupAllTenants()
 
     configuration.tenants.forEach((tenant) => {
         fileSystem.ensureDirSync(configuration.localStorageRoot + "/" + tenant.id);
-        var dbFileName = configuration.localStorageRoot + "/" + tenant.id + "/database.sqlite";
-        tenant.db = setupDatabase(dbFileName);
+
+        // Make sure we have a valid operation mode
+        if(!tenant.opMode || tenant.opMode == "")
+        {
+            tenant.opMode = OPMODE_STANDARD;
+        }
+
+        if(!equalsIgnoringCase(tenant.opMode, OPMODE_STANDARD) &&
+           !equalsIgnoringCase(tenant.opMode, OPMODE_STORAGE_RELAY) )
+        {
+            logF("unsupported opMode '" + tenant.opMode + "'");
+            abort();
+        }
+                
+        // Only setup a database if we're operating in standard mode
+        if(equalsIgnoringCase(tenant.opMode, OPMODE_STANDARD))
+        {
+            var dbFileName = configuration.localStorageRoot + "/" + tenant.id + "/database.sqlite";
+            tenant.db = setupDatabase(dbFileName);
+        }
+
         theMap.set(tenant.id, tenant);
     });
 
@@ -470,68 +494,84 @@ function handlePost(request, response)
                         // Move our files into the archive - the return string is the actual storage location of the files
                         archiveDir = moveFilesToArchive(dstPath, srcFnBin, dstFnBin, srcFnMeta, dstFnMeta);
 
-                        // Construct the URI for the content
-                        contentUri = archiveDir + "/" + dstFnBin;
+                        // Only do database work if we have a database
+                        if(tenant.db)
+                        {
+                            // Construct the URI for the content
+                            contentUri = archiveDir + "/" + dstFnBin;
 
-                        // Plug it into our database
-                        tenant.db.serialize(() => {
-                            tenant.db.run(`INSERT INTO recordings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
-                                    [
-                                        itemKey,
-                                        recordingNodeId, 
-                                        metadataJson.engageEvent.id,
-                                        metadataJson.engageEvent.groupId,
-                                        metadataJson.engageEvent.type,
-                                        metadataJson.engageEvent.direction,
-                                        metadataJson.engageEvent.thisNodeId,
-                                        metadataJson.engageEvent.started,
-                                        metadataJson.engageEvent.ended,
-                                        metadataJson.engageEvent.nodeId,
-                                        metadataJson.engageEvent.alias,
-                                        metadataJson.engageEvent.rxTxFlags,
-                                        fields.meta,
-                                        contentUri,
-                                        metadataJson.engageEvent.txId
-                                    ], function(err) {
-                                            if(err)
-                                            {
-                                                // TODO: rollback the moveFilesToArchive() operation from above
+                            // Plug it into our database
+                            tenant.db.serialize(() => {
+                                tenant.db.run(`INSERT INTO recordings VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+                                        [
+                                            itemKey,
+                                            recordingNodeId, 
+                                            metadataJson.engageEvent.id,
+                                            metadataJson.engageEvent.groupId,
+                                            metadataJson.engageEvent.type,
+                                            metadataJson.engageEvent.direction,
+                                            metadataJson.engageEvent.thisNodeId,
+                                            metadataJson.engageEvent.started,
+                                            metadataJson.engageEvent.ended,
+                                            metadataJson.engageEvent.nodeId,
+                                            metadataJson.engageEvent.alias,
+                                            metadataJson.engageEvent.rxTxFlags,
+                                            fields.meta,
+                                            contentUri,
+                                            metadataJson.engageEvent.txId
+                                        ], function(err) {
+                                                if(err)
+                                                {
+                                                    // TODO: rollback the moveFilesToArchive() operation from above
 
-                                                logE("database error (1) :" + err);
-                                                response.writeHead(500);
-                                                response.end();
-                                            }
-                                            else
-                                            {
-                                                tenant.db.run("INSERT OR IGNORE INTO groups VALUES (?,?);",
-                                                [
-                                                    metadataJson.engageEvent.groupId,
-                                                    metadataJson.engageEvent.groupName
-                                                ], function(err) {
-                                                        if(err)
-                                                        {
-                                                            // TODO: rollback the moveFilesToArchive() operation from above
-                
-                                                            logE("database error (2) :" + err);
-                                                            response.writeHead(500);
-                                                            response.end();
-                                                        }
-                                                        else
-                                                        {
-                                                            // Maybe display some info
-                                                            if(configuration.logging.level >= LOG_DEBUG)
+                                                    logE("database error (1) :" + err);
+                                                    response.writeHead(500);
+                                                    response.end();
+                                                }
+                                                else
+                                                {
+                                                    tenant.db.run("INSERT OR IGNORE INTO groups VALUES (?,?);",
+                                                    [
+                                                        metadataJson.engageEvent.groupId,
+                                                        metadataJson.engageEvent.groupName
+                                                    ], function(err) {
+                                                            if(err)
                                                             {
-                                                                var eventId = metadataJson.engageEvent.id;
-                                                                logD("from: " + request.connection.remoteAddress + ", group:" + groupId + " (" + groupName + "), event:" + eventId + " -> " + dstFnBin);
+                                                                // TODO: rollback the moveFilesToArchive() operation from above
+                    
+                                                                logE("database error (2) :" + err);
+                                                                response.writeHead(500);
+                                                                response.end();
                                                             }
-                
-                                                            response.writeHead(200);
-                                                            response.end();                                                            
-                                                        }
-                                                });                                                            
-                                            }
-                                        });
-                        });
+                                                            else
+                                                            {
+                                                                // Maybe display some info
+                                                                if(configuration.logging.level >= LOG_DEBUG)
+                                                                {
+                                                                    var eventId = metadataJson.engageEvent.id;
+                                                                    logD("from: " + request.connection.remoteAddress + ", group:" + groupId + " (" + groupName + "), event:" + eventId + " -> " + dstFnBin);
+                                                                }
+                    
+                                                                response.writeHead(200);
+                                                                response.end();
+                                                            }
+                                                    });                                                            
+                                                }
+                                            });
+                            });
+                        }
+                        else
+                        {
+                            // Maybe display some info
+                            if(configuration.logging.level >= LOG_DEBUG)
+                            {
+                                var eventId = metadataJson.engageEvent.id;
+                                logD("from: " + request.connection.remoteAddress + ", group:" + groupId + " (" + groupName + "), event:" + eventId + " -> " + dstFnBin);
+                            }
+
+                            response.writeHead(200);
+                            response.end();
+                        }
                     }
             );
 }
@@ -698,6 +738,15 @@ function handleGet(request, response)
     {
         logW("tenant not found or operation not allowed for: " + request.headers.apikey);
         response.writeHead(401);            
+        response.end();
+        return;
+    }
+
+    // We can't continue if we don't have a database for the tenant
+    if(!tenant.db)
+    {
+        logW("GET no supported as tenant has no database");
+        response.writeHead(405);
         response.end();
         return;
     }

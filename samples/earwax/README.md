@@ -98,6 +98,18 @@ To configure this thing you'll only need one JSON file: `earwax_conf.json`.  It 
 					]
 				}				
 			]
+		},
+		{
+			"id":"742381505426426590C1DDBBF3790E14",
+			"opMode":"storageRelay",
+			"apiKeys":[
+				{
+					"key":"ecc0173f4015464293b6b43da82ccffb4e75903a71fd4b049e040eb7b6d68ee3",
+					"permissions": [
+						"POST"
+					]
+				}
+			]
 		}
 	]
 }
@@ -122,7 +134,8 @@ To configure this thing you'll only need one JSON file: `earwax_conf.json`.  It 
 * `logging` : Logging configuration.
   * `level` : Logging level: 0 = FATAL, 1 = ERROR, 2 = WARNING, 3 = INFORMATION, 4 = DEBUG.
 * `tenants` : List of tenants on the system where each element is as follows:
-  * `id` : The unique ID for the tenant.  All data for the tenant - including their database - is privately stored relative to a directory named for the `id` under `localStorageRoot`.  For example, the first tenant will have all their data stored in `./.data/29FF17400ACA45128158DC451507B550` while the second tenant's data will go to `./.data/E3665FA8745B4D92AD1BEDD37197E59B`.
+  * `id` : The unique ID for the tenant.  All data for the tenant - including their database where appropriate - is privately stored relative to a directory named for the `id` under `localStorageRoot`.  For example, the first tenant will have all their data stored in `./.data/29FF17400ACA45128158DC451507B550` while the second tenant's data will go to `./.data/E3665FA8745B4D92AD1BEDD37197E59B`.
+  * `opMode` : The operation mode for the tenant.  Valid values are `standard` (which is the default) and `storageRelay` (see [Tenant Operation Modes]() below)
   * `maxEventAgeHours`: Maximum age (hours) of recordings before being purged.
   * `apiKeys` : List of valid API keys for the tenant.  Each entry is as follows:
     * `key` : A unique ID for the key.
@@ -131,6 +144,11 @@ To configure this thing you'll only need one JSON file: `earwax_conf.json`.  It 
 > NOTE: The tenant ID must never be shared outside of the server as it (at least indirectly) is an identifier of the location of data objects stored on behalf of the tenant.  Client applications must always only use the API keys associated with the tenant.
 
 Notice how the configuration above has 3 API keys for the first tenant.  This is a great example of how you can set things up to allow some applications to uploaded and download data (the first API key allowing for `POST` and `GET`) while others can either only upload (the second API key allowing only for `POST`) or download (the third API key which allows only for `GET`).
+
+### Tenant Operation Modes
+In the JSON above, a tenant entry has an optional element named `opMode`.  This value can be either `standard` or `storageRelay`.  In standard mode (which is the default and does not require explicit setting in the JSON), `earwax` allows for all the functionality described in this document - including uploading through POST operations and download through GET operations.  Part of this "standard" operation entails `earwax` setting up a datatabase and automatically aging away old events.
+
+However, you may just want `earwax` to operate as a central storage point for some other system from which to extract files.  In this mode - "storage relay" - `earwax` will simply store the uploaded files and expect a 3rd-party application to process those files - and remove them.  In this mode, no database is maintained, no GET operations are supported, and no automatic cleanup is performed.
 ## Setting things up
 Once you've setup your configuration, you'll actually want to run it.  To do that you're going to need to install some depencies for Node.js (we'll assume you already have Node.js installed).
 
@@ -170,21 +188,29 @@ Copyright (c) 2020 Rally Tactical Systems, Inc.
   tenants: [
     {
       id: '29FF17400ACA45128158DC451507B550',
+	  opMode: 'standard',
       maxEventAgeHours: 27,
       apiKeys: [Array],
       db: Database {}
     },
     {
       id: 'E3665FA8745B4D92AD1BEDD37197E59B',
+	  opMode: 'standard',
       maxEventAgeHours: 168,
       apiKeys: [Array],
       db: Database {}
     },
     {
       id: 'DFD2F5D61AD04700A5F2705911A2ADD7',
+	  opMode: 'standard',
       maxEventAgeHours: 168,
       apiKeys: [Array],
       db: Database {}
+    },
+    {
+      id: '742381505426426590C1DDBBF3790E14',
+      opMode: 'storageRelay',
+      apiKeys: [Array]
     }
   ]
 }
