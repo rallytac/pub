@@ -79,6 +79,18 @@
 					]
 				}				
 			]
+		},
+		{
+			"id":"742381505426426590C1DDBBF3790E14",
+			"opMode":"storageRelay",
+			"apiKeys":[
+				{
+					"key":"ecc0173f4015464293b6b43da82ccffb4e75903a71fd4b049e040eb7b6d68ee3",
+					"permissions": [
+						"POST"
+					]
+				}
+			]
 		}
 	]
 }
