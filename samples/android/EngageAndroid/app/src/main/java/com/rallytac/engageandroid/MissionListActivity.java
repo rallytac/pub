@@ -711,109 +711,121 @@ public class MissionListActivity extends AppCompatActivity
         startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
     }
 
-    private void processIncomingMissionData(byte[] data, String pwd)
+    private void processIncomingMissionData(byte[] data, String pwd, boolean isScannedQrCode)
     {
         ActiveConfiguration ac = null;
         Exception errorException = null;
 
         try
         {
-            Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
-            if(bm != null)
+            if(isScannedQrCode)
             {
-                byte[] missionData = null;
-
-                missionData = Utils.qrCodeBitmapToString(bm).getBytes(Utils.getEngageCharSet());
-                if(missionData == null || missionData.length < 1)
+                String scannedString = new String(data, Utils.getEngageCharSet());
+                ac = ActiveConfiguration.parseEncryptedQrCodeString(scannedString, pwd);
+                if(ac == null)
                 {
-                    throw new Exception(getString(R.string.image_is_not_a_qr_code));
-                }
-
-                String stringData = new String(missionData, Utils.getEngageCharSet());
-
-                // Look for the "/??" to see if there's a deflection URL
-                int endOfDeflection = stringData.indexOf(Constants.QR_DEFLECTION_URL_SEP);
-
-                // If it's there, strip it off
-                if (endOfDeflection > 0)
-                {
-                    stringData = stringData.substring(endOfDeflection + Constants.QR_DEFLECTION_URL_SEP.length());
-                }
-
-                // Now we have a string with is Base91 encoded, we need to decode that
-                byte[] base91DecodedBytes = Base91.decode(stringData.getBytes(Utils.getEngageCharSet()));
-                if (base91DecodedBytes == null || base91DecodedBytes.length < 1)
-                {
-                    throw new Exception(getString(R.string.image_is_not_base91_encoded));
-                }
-
-                // It may be encrypted, so decrypt if we have a password
-                if (!Utils.isEmptyString(pwd))
-                {
-                    String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
-
-                    base91DecodedBytes = Globals.getEngageApplication().getEngine().decryptSimple(base91DecodedBytes, pwdHexString);
-                    if (base91DecodedBytes == null)
-                    {
-                        throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
-                    }
-                }
-
-                // Next, we decompress the data
-                byte[] decompressed = Utils.inflate(base91DecodedBytes);
-                if (decompressed == null || decompressed.length < 1)
-                {
-                    throw new Exception(getString(R.string.image_compression_not_supported));
-                }
-
-                String qrCodeDataString = new String(decompressed, Utils.getEngageCharSet());
-                qrCodeDataString = qrCodeDataString.substring(Constants.QR_CODE_HEADER.length());
-
-                // Now, check the version - its "nnn"
-                int checkVersion = Integer.parseInt(Constants.QR_VERSION);
-                int qrVersion = Integer.parseInt(qrCodeDataString.substring(0, 3));
-                if (qrVersion == checkVersion)
-                {
-                    // Strip the version
-                    qrCodeDataString = qrCodeDataString.substring(3);
-
-                    ac = new ActiveConfiguration();
-                    if (!ac.parseTemplate(qrCodeDataString))
-                    {
-                        throw new Exception(getString(R.string.cannot_parse_mission_data));
-                    }
-                }
-                else
-                {
-                    throw new Exception(getString(R.string.image_version_is_not_supported));
+                    throw new Exception(getString(R.string.cannot_parse_mission_data));
                 }
             }
             else
             {
-                String stringData;
-
-                // It may be encrypted, so decrypt if we have a password
-                if (!Utils.isEmptyString(pwd))
+                Bitmap bm = BitmapFactory.decodeByteArray(data, 0, data.length);
+                if(bm != null)
                 {
-                    String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
+                    byte[] missionData = null;
 
-                    byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(data, pwdHexString);
-                    if (decryptedBytes == null)
+                    missionData = Utils.qrCodeBitmapToString(bm).getBytes(Utils.getEngageCharSet());
+                    if(missionData == null || missionData.length < 1)
                     {
-                        throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
+                        throw new Exception(getString(R.string.image_is_not_a_qr_code));
                     }
 
-                    stringData = new String(decryptedBytes, Utils.getEngageCharSet());
+                    String stringData = new String(missionData, Utils.getEngageCharSet());
+
+                    // Look for the "/??" to see if there's a deflection URL
+                    int endOfDeflection = stringData.indexOf(Constants.QR_DEFLECTION_URL_SEP);
+
+                    // If it's there, strip it off
+                    if (endOfDeflection > 0)
+                    {
+                        stringData = stringData.substring(endOfDeflection + Constants.QR_DEFLECTION_URL_SEP.length());
+                    }
+
+                    // Now we have a string with is Base91 encoded, we need to decode that
+                    byte[] base91DecodedBytes = Base91.decode(stringData.getBytes(Utils.getEngageCharSet()));
+                    if (base91DecodedBytes == null || base91DecodedBytes.length < 1)
+                    {
+                        throw new Exception(getString(R.string.image_is_not_base91_encoded));
+                    }
+
+                    // It may be encrypted, so decrypt if we have a password
+                    if (!Utils.isEmptyString(pwd))
+                    {
+                        String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
+
+                        base91DecodedBytes = Globals.getEngageApplication().getEngine().decryptSimple(base91DecodedBytes, pwdHexString);
+                        if (base91DecodedBytes == null)
+                        {
+                            throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
+                        }
+                    }
+
+                    // Next, we decompress the data
+                    byte[] decompressed = Utils.inflate(base91DecodedBytes);
+                    if (decompressed == null || decompressed.length < 1)
+                    {
+                        throw new Exception(getString(R.string.image_compression_not_supported));
+                    }
+
+                    String qrCodeDataString = new String(decompressed, Utils.getEngageCharSet());
+                    qrCodeDataString = qrCodeDataString.substring(Constants.QR_CODE_HEADER.length());
+
+                    // Now, check the version - its "nnn"
+                    int checkVersion = Integer.parseInt(Constants.QR_VERSION);
+                    int qrVersion = Integer.parseInt(qrCodeDataString.substring(0, 3));
+                    if (qrVersion == checkVersion)
+                    {
+                        // Strip the version
+                        qrCodeDataString = qrCodeDataString.substring(3);
+
+                        ac = new ActiveConfiguration();
+                        if (!ac.parseTemplate(qrCodeDataString))
+                        {
+                            throw new Exception(getString(R.string.cannot_parse_mission_data));
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(getString(R.string.image_version_is_not_supported));
+                    }
                 }
                 else
                 {
-                    stringData = new String(data, Utils.getEngageCharSet());
-                }
+                    String stringData;
 
-                ac = new ActiveConfiguration();
-                if (!ac.parseTemplate(stringData))
-                {
-                    throw new Exception(getString(R.string.cannot_parse_mission_data));
+                    // It may be encrypted, so decrypt if we have a password
+                    if (!Utils.isEmptyString(pwd))
+                    {
+                        String pwdHexString = Utils.toHexString(pwd.getBytes(Utils.getEngageCharSet()));
+
+                        byte[] decryptedBytes = Globals.getEngageApplication().getEngine().decryptSimple(data, pwdHexString);
+                        if (decryptedBytes == null)
+                        {
+                            throw new Exception(getString(R.string.encrypted_data_cannot_be_decrypted));
+                        }
+
+                        stringData = new String(decryptedBytes, Utils.getEngageCharSet());
+                    }
+                    else
+                    {
+                        stringData = new String(data, Utils.getEngageCharSet());
+                    }
+
+                    ac = new ActiveConfiguration();
+                    if (!ac.parseTemplate(stringData))
+                    {
+                        throw new Exception(getString(R.string.cannot_parse_mission_data));
+                    }
                 }
             }
         }
@@ -887,6 +899,7 @@ public class MissionListActivity extends AppCompatActivity
             {
                 if(intent != null)
                 {
+                    boolean isScannedQrCode = (requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode());
                     try
                     {
                         // Get whatever password may be waiting
@@ -895,14 +908,14 @@ public class MissionListActivity extends AppCompatActivity
                         Uri uri = intent.getData();
                         if(uri != null)
                         {
-                            processIncomingMissionData(Utils.readBinaryFile(MissionListActivity.this, uri), pwd);
+                            processIncomingMissionData(Utils.readBinaryFile(MissionListActivity.this, uri), pwd, isScannedQrCode);
                         }
                         else
                         {
                             IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
                             if(intentResult != null)
                             {
-                                processIncomingMissionData(intentResult.getRawBytes(), pwd);
+                                processIncomingMissionData(intentResult.getContents().getBytes(), pwd, isScannedQrCode);
                             }
                         }
                     }
