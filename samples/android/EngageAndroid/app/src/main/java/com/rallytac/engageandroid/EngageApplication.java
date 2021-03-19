@@ -45,8 +45,6 @@ import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 import com.rallytac.engageandroid.Biometrics.DataSeries;
 import com.rallytac.engageandroid.Biometrics.RandomHumanBiometricGenerator;
@@ -60,7 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.NetworkInterface;
-import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -466,7 +463,7 @@ public class EngageApplication
 
             if(action.compareTo(getString(R.string.app_intent_ptt_on)) == 0)
             {
-                startTx();
+                startTx("");
             }
             else if(action.compareTo(getString(R.string.app_intent_ptt_off)) == 0)
             {
@@ -690,20 +687,26 @@ public class EngageApplication
         }
     }
 
-    private void setupDirectories()
+    private void makeThisDirectory(String dirName)
     {
         try
         {
-            File certStoreDir = new File(getCertStoreCacheDir());
-            if(!certStoreDir.exists())
+            File d = new File(dirName);
+            if(!d.exists())
             {
-                certStoreDir.mkdirs();
+                d.mkdirs();
             }
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    private void setupDirectories()
+    {
+        makeThisDirectory(getCertStoreCacheDir());
+        makeThisDirectory(getRawFilesCacheDir());
     }
 
 
@@ -801,6 +804,8 @@ public class EngageApplication
 
         setupDirectories();
         //setupFilesystemLogging();
+
+        exportRawFilesToCache();
 
         startFirebaseAnalytics();
 
@@ -1494,7 +1499,7 @@ public class EngageApplication
         return null;
     }
 
-    private String buildAdvancedTxJson(int priority, int flags, int subchannelTag, boolean includeNodeId, String alias)
+    private String buildAdvancedTxJson(int priority, int flags, int subchannelTag, boolean includeNodeId, String alias, String audioUri)
     {
         String rc;
 
@@ -1507,6 +1512,15 @@ public class EngageApplication
             obj.put(Engine.JsonFields.AdvancedTxParams.subchannelTag, subchannelTag);
             obj.put(Engine.JsonFields.AdvancedTxParams.includeNodeId, includeNodeId);
             obj.put(Engine.JsonFields.AdvancedTxParams.muted, true);
+
+            // TX URI
+            if(!Utils.isEmptyString(audioUri))
+            {
+                JSONObject auo = new JSONObject();
+                auo.put(Engine.JsonFields.AdvancedTxParams.AudioUri.uri, audioUri);
+                auo.put(Engine.JsonFields.AdvancedTxParams.AudioUri.repeatCount, 0);
+                obj.put(Engine.JsonFields.AdvancedTxParams.AudioUri.objectName, auo);
+            }
 
             if(!Utils.isEmptyString(alias))
             {
@@ -2053,6 +2067,11 @@ public class EngageApplication
         return Globals.getContext().getFilesDir().getAbsolutePath() + "/" + Globals.getContext().getString(R.string.certstore_cache_dir);
     }
 
+    public String getRawFilesCacheDir()
+    {
+        return Globals.getContext().getFilesDir().getAbsolutePath() + "/" + Globals.getContext().getString(R.string.raw_cache_dir);
+    }
+
     public boolean isAvailableCertStore(String id)
     {
         return !(Utils.isEmptyString(getCustomCertStoreFn(id)));
@@ -2133,31 +2152,40 @@ public class EngageApplication
         return rc;
     }
 
-    public void saveInternalCertificateStoreToCache()
+    private void exportRawFile(int resId, String fn)
     {
         try
         {
-            byte[] certStoreContent;
+            byte[] fileContent;
 
-            certStoreContent = Utils.getBinaryResource(Globals.getContext(), R.raw.android_engage_default_certstore);
-            if(certStoreContent == null)
+            fileContent = Utils.getBinaryResource(Globals.getContext(), resId);
+            if(fileContent == null)
             {
                 throw new Exception("cannot load binary resource");
             }
-
-            String fn = getCertStoreCacheDir() + "/" + Constants.INTERNAL_DEFAULT_CERTSTORE_FN;
 
             File fd = new File(fn);
             fd.deleteOnExit();
 
             FileOutputStream fos = new FileOutputStream(fd);
-            fos.write(certStoreContent);
+            fos.write(fileContent);
             fos.close();
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
+    }
+
+    public void saveInternalCertificateStoreToCache()
+    {
+        exportRawFile(R.raw.android_engage_default_certstore, getCertStoreCacheDir() + "/" + Constants.INTERNAL_DEFAULT_CERTSTORE_FN);
+    }
+
+    private void exportRawFilesToCache()
+    {
+        exportRawFile(R.raw.engage_hail_1, getRawFilesCacheDir() + "/" + "engage_hail_1.wav");
+        exportRawFile(R.raw.engage_hail_2, getRawFilesCacheDir() + "/" + "engage_hail_2.wav");
     }
 
     /*
@@ -2977,7 +3005,7 @@ public class EngageApplication
         }
     }
 
-    public void startTx()
+    public void startTx(final String audioFileUri)
     {
         runOnUiThread(new Runnable()
         {
@@ -3071,7 +3099,12 @@ public class EngageApplication
                                             flags = 0;
                                         }
 
-                                        getEngine().engageBeginGroupTxAdvanced(g.id, buildAdvancedTxJson(priority, flags, 0, true, _activeConfiguration.getUserAlias()));
+                                        getEngine().engageBeginGroupTxAdvanced(g.id, buildAdvancedTxJson(priority,
+                                                flags,
+                                                0,
+                                                true,
+                                                _activeConfiguration.getUserAlias(),
+                                                audioFileUri));
                                     }
                                 }
                             }
@@ -3634,7 +3667,7 @@ public class EngageApplication
     public void requestPttOn(int priority, int flags)
     {
         // TODO: requestPttOn needs to determine what group for priority and flags
-        startTx();
+        startTx("");
     }
 
     @Override

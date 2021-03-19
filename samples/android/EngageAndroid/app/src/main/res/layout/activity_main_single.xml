@@ -165,4 +165,16 @@
         app:layout_constraintTop_toTopOf="@+id/ivPtt"
         app:srcCompat="@drawable/ic_no_priority" />
 
+    <ImageView
+        android:id="@+id/ivTxAlert"
+        android:layout_width="@dimen/large_finger_touch_icon"
+        android:layout_height="@dimen/large_finger_touch_icon"
+        android:contentDescription="@string/app_play_alert"
+        android:visibility="@string/show_tx_alert_icon_on_app_single_view"
+        app:layout_constraintBottom_toTopOf="@+id/tvLicensingBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivPtt"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
+        app:srcCompat="@drawable/ic_alert_inactive"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

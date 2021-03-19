@@ -35,8 +35,8 @@ android {
         applicationId apkPackageName
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1252
-        versionName "1252"
+        versionCode 1254
+        versionName "1254"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         android.defaultConfig.vectorDrawables.useSupportLibrary = true
@@ -78,7 +78,7 @@ android {
 dependencies {
     // Engage Engine
     def relType = 'release'
-    def engineVersion = '1.204.9041'
+    def engineVersion = '1.206.9044'
 
     implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'
 
