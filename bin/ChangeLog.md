@@ -1,5 +1,13 @@
 # Change Log
 
+## March 12, 2021 - 1.206.9044
+- Adds the ability to source input audio from a file rather than the microphone on a per-transmission basis
+- Adds automatic audio resamlping for audio resources loaded at runtime
+- Adds premliminary support for dynamically-loaded external CODECs
+- Adds more sophisticated support for RTP encoding/decoding mappings in the Engine policy
+- Adds premliminary support in engage-cmd for the Lua scripting language
+- Adds active-lambda tracking in the core task executor to aid in troubleshooting
+
 ## March 3, 2021 - 1.204.9041
 - Adds preliminary support for CUBIC/Vocality radio gateways
 - Adds additional transmit encoder parameter validation
