@@ -398,8 +398,32 @@ function moveFilesToArchive(dstDir, srcFnBin, dstFnBin, srcFnMeta, dstFnMeta)
     // Make sure the directory we're using exists
     fileSystem.ensureDirSync(dstDir);
 
-    fileSystem.renameSync(srcFnBin, dstDir + "/" + dstFnBin);
-    fileSystem.renameSync(srcFnMeta, dstDir + "/" + dstFnMeta);
+    // Rename/move is the faster option but prone to problems on platforms
+    // such as Windows where we may have different drives for the source and
+    // destination - a situation which may not support rename/move
+
+    var renameOk = false;
+
+    try
+    {
+        fileSystem.renameSync(srcFnBin, dstDir + "/" + dstFnBin);
+        fileSystem.renameSync(srcFnMeta, dstDir + "/" + dstFnMeta);
+        renameOk = true;
+    }
+    catch(error)
+    {
+        renameOk = false;
+    }
+
+    // If the rename/move didn't work, then resort to copy and delete
+    if(!renameOk)
+    {
+        fileSystem.copyFileSync(srcFnBin, dstDir + "/" + dstFnBin);
+        fileSystem.copyFileSync(srcFnMeta, dstDir + "/" + dstFnMeta);
+
+        fileSystem.removeSync(srcFnBin);
+        fileSystem.removeSync(srcFnMeta);
+    }
 
     return dstDir;
 }
