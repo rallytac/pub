@@ -6,6 +6,8 @@
     <string name="certstore_default_certificate_key" translatable="false"></string>
     <string name="certstore_default_ca_id" translatable="false">rtsCA</string>
 
+    <string name="raw_cache_dir" translatable="false">raw_cache</string>
+
     <string-array name="certstore_passwords"></string-array>
 
     <string name="app_intent_ptt_on" translatable="false">PTT_ON</string>
@@ -151,6 +153,8 @@
     <string name="deactivating">Deactivating</string>
     <string name="scan_license_key">Scan license key</string>
     <string name="scan_activation_code">Scan activation code</string>
+
+    <string name="transmitting_alert">Transmitting alert</string>
 
     <string name="confirm_disconnect">This action will disconnect from the mission and close this screen.\n\nIf you want to switch to another application instead, simply do so - %1$s will keep running in the background.\n\nDo you really want to disconnect?</string>
     <string name="button_no">No</string>
@@ -573,6 +577,7 @@
     <string-array name="flavor_defaults"></string-array>
     <string name="app_emergency_toggle">toggle emergency</string>
     <string name="app_priority_toggle">toggle priority</string>
+    <string name="app_play_alert">play alert</string>
     <string name="app_ptt_voice_control_off">disengage</string>
     <string name="app_ptt_voice_control_on">engage</string>
     <string name="synchronize_left_and_right">Synchronize left and right</string>

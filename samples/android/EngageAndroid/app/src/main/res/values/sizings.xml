@@ -58,6 +58,7 @@
     <string name="show_priority_icon_on_small_card" translatable="false">@string/visibility_gone</string>
     <string name="show_priority_icon_on_app_single_view" translatable="false">@string/visibility_gone</string>
     <string name="show_priority_icon_on_app_multi_view" translatable="false">@string/visibility_gone</string>
+    <string name="show_tx_alert_icon_on_app_single_view" translatable="false">@string/visibility_visible</string>
 
     <string name="show_member_count_on_large_card" translatable="false">@string/visibility_gone</string>
     <string name="show_member_count_on_small_card" translatable="false">@string/visibility_gone</string>

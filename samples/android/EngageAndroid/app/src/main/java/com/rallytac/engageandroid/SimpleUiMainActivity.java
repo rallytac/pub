@@ -7,6 +7,7 @@ package com.rallytac.engageandroid;
 
 import android.Manifest;
 import android.app.KeyguardManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -141,6 +142,8 @@ public class SimpleUiMainActivity
     private int _keycodePtt = 0;
 
     private HashSet<String> _currentlySelectedGroups = null;
+
+    private ProgressDialog _transmittingAlertProgressDialog = null;
 
     private class TimelineEventPlayerTracker
     {
@@ -857,7 +860,7 @@ public class SimpleUiMainActivity
                     {
                         Log.d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
                         _pttRequestIsLatched = true;
-                        Globals.getEngageApplication().startTx();
+                        Globals.getEngageApplication().startTx("");
                     }
                     else
                     {
@@ -886,7 +889,7 @@ public class SimpleUiMainActivity
                     _pttRequested = true;
                     _pttRequestIsLatched = false;
                     Log.d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
-                    Globals.getEngageApplication().startTx();
+                    Globals.getEngageApplication().startTx("");
                 }
             }
         }
@@ -910,7 +913,7 @@ public class SimpleUiMainActivity
                         if (_pttRequested)
                         {
                             Log.d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
-                            Globals.getEngageApplication().startTx();
+                            Globals.getEngageApplication().startTx("");
                         }
                         else
                         {
@@ -2744,7 +2747,7 @@ public class SimpleUiMainActivity
 
                     if(_pttRequested)
                     {
-                        Globals.getEngageApplication().startTx();
+                        Globals.getEngageApplication().startTx("");
                     }
                     else
                     {
@@ -2763,7 +2766,7 @@ public class SimpleUiMainActivity
                     if (event.getAction() == MotionEvent.ACTION_DOWN)
                     {
                         _pttRequested = true;
-                        Globals.getEngageApplication().startTx();
+                        Globals.getEngageApplication().startTx("");
                     }
                     else if (event.getAction() == MotionEvent.ACTION_UP)
                     {
@@ -2803,35 +2806,24 @@ public class SimpleUiMainActivity
             });
         }
 
-        // Emergency TX
-        /*
-        final ImageView ivEmergency = findViewById(R.id.ivEmergency);
-        if(ivEmergency != null)
+        // Alert TX
+        final ImageView ivTxAlert = findViewById(R.id.ivTxAlert);
+        if(ivTxAlert != null)
         {
-            ivEmergency.setLongClickable(true);
-            ivEmergency.setOnLongClickListener(new View.OnLongClickListener()
+            ivTxAlert.setLongClickable(true);
+            ivTxAlert.setOnLongClickListener(new View.OnLongClickListener()
             {
                 @Override
                 public boolean onLongClick(View v)
                 {
-                    _isEmergencyTxOn = !_isEmergencyTxOn;
+                    _transmittingAlertProgressDialog = Utils.showProgressMessage(SimpleUiMainActivity.this, getString(R.string.transmitting_alert), _transmittingAlertProgressDialog);
 
-                    if(_isEmergencyTxOn)
-                    {
-                        ivEmergency.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_emergency_on));
-                    }
-                    else
-                    {
-                        ivEmergency.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_emergency_off));
-                    }
-
-                    updateSingleGroupTxInfo();
-
+                    // This is kinda nasty - hardcoded audio file.  But this is demonstration only so ok for now.
+                    Globals.getEngageApplication().startTx(Globals.getEngageApplication().getRawFilesCacheDir() + "/" + "engage_hail_1.wav");
                     return true;
                 }
             });
         }
-        */
     }
 
     public void redrawPttButton()
@@ -2843,6 +2835,7 @@ public class SimpleUiMainActivity
             {
                 ImageView ivPtt = findViewById(R.id.ivPtt);
                 ImageView ivAppPriority = findViewById(R.id.ivAppPriority);
+                ImageView ivTxAlert = findViewById(R.id.ivTxAlert);
 
                 if(_anyTxActive)
                 {
@@ -2927,6 +2920,12 @@ public class SimpleUiMainActivity
                         {
                             ivAppPriority.setVisibility(View.GONE);
                         }
+                    }
+
+                    // Close the TX alert progress dialog if its showing
+                    if(_transmittingAlertProgressDialog != null)
+                    {
+                        _transmittingAlertProgressDialog = Utils.hideProgressMessage(_transmittingAlertProgressDialog);
                     }
                 }
 
