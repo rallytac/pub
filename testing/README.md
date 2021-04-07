@@ -1,8 +1,8 @@
 # Quick And Easy Testing And Tooling
 
-A quick and easy way to utilize Engage is to use the "*engage-cnd*" command-line tool.  While not pretty, it is a functional application that will allow you to try out a variety of operations using the Engage Engine.  And, if it doesn't do what you need, you can change the source code - take a look in /samples/c/EngageMain.cpp.  That's the source code for the tool.
+A quick and easy way to utilize Engage is to use the "*engage-cmd*" command-line tool.  While not pretty, it is a functional application that will allow you to try out a variety of operations using the Engage Engine.  And, if it doesn't do what you need, you can change the source code - take a look in /samples/c/EngageMain.cpp.  That's the source code for the tool.
 
-To use it, you're going to need some configuration files, certificates, and, of course, the binarie itself.  This direcrory contains a short script you can modify to get the files you need and get them setup quickly and easily.
+To use it, you're going to need some configuration files, certificates, and, of course, the binare itself.  This direcrory contains a short script you can modify to get the files you need and get them setup quickly and easily.
 
 You can download the script or simply copy and paste the following into a script of your own on your favorite Linux platform.
 
