@@ -9,13 +9,41 @@ import colorama
 import datetime
 import sys
 
+try:
+    import colorama
+    haveColorama = True
+except ImportError as e:
+    haveColorama = False
+    pass
+
 appVersion = '0.1'
 statusFile = ''
 interval = 5
 
-colorama.init()
-pos = lambda y, x: colorama.Cursor.POS(x, y)
+if haveColorama:
+    colorama.init()
+    pos = lambda y, x: colorama.Cursor.POS(x, y)
 
+# --------------------------------------------------------------------------
+def colorNone():
+    if haveColorama:
+        return colorama.Style.RESET_ALL
+    else:
+        return ''
+
+# --------------------------------------------------------------------------
+def colorError():
+    if haveColorama:
+        return colorama.Fore.RED
+    else:
+        return ''
+
+# --------------------------------------------------------------------------
+def colorWarning():
+    if haveColorama:
+        return colorama.Fore.YELLOW
+    else:
+        return ''
 # --------------------------------------------------------------------------
 def loadInput():
     with open(statusFile) as f:
@@ -38,25 +66,73 @@ def groupState(s):
 
 # --------------------------------------------------------------------------
 def setCursor(r, c):
-    print('%s' % pos(r, c))
+    if haveColorama:
+        print('%s' % pos(r, c))
 
 # --------------------------------------------------------------------------
 def clearScreen():
-    print(colorama.ansi.clear_screen())
-    setCursor(0, 0)
+    if haveColorama:
+        print(colorama.ansi.clear_screen())
+        setCursor(0, 0)
+    else:
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+
+# --------------------------------------------------------------------------
+def timeDesc(seconds):
+    d, s = divmod(seconds, 86400)
+    h, s = divmod(s, 3600)
+    m, s = divmod(s, 60)
+
+    rc = ''
+
+    if(d > 0):
+        rc = str(d) + ' days'
+
+    if(h > 0 or len(rc) > 0):
+        if(len(rc) > 0):
+            rc += ', '
+
+        rc += '{0:d} hours'.format(h)
+
+    if(m > 0 or len(rc) > 0):
+        if(len(rc) > 0):
+            rc += ', '
+
+        rc += '{0:d} minutes'.format(m)
+
+    if(len(rc) > 0):
+        rc += ', '
+
+    rc += '{0:d} seconds'.format(s)
+    
+    return rc
 
 # --------------------------------------------------------------------------
 def printHeadline(db):
+    tsdelta = time.time() - db['ts']
+    if tsdelta > (interval * 2):
+        clr = colorError()
+        msg = '(*POSSIBLY OFFLINE*)'
+    else:
+        clr = colorNone()
+        msg = ''
+
     now = datetime.datetime.now()
+
+    print(clr, end = '')
     print('---------------------------------------------------------------------------------------------')
     print('Engage Activity Recorder Service Monitor v%s' % (appVersion))
     print('Copyright (c) 2020 Rally Tactical Systems, Inc.')
     print('')
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
-    print('Last check at %s, uptime %d seconds' % (now.strftime("%Y/%m/%d %H:%M:%S"), db['uptime']))
+    print('Last check at %s | uptime %s | updated %d seconds ago %s' % (now.strftime("%Y/%m/%d %H:%M:%S"), timeDesc(db['uptime']), tsdelta, msg))
     print('---------------------------------------------------------------------------------------------')
     print('%38s %38s %15s' % ('Group ID', 'Name', 'State'))
     print('-------------------------------------- -------------------------------------- ---------------')
+    print(colorNone(), end = '')
 
 # --------------------------------------------------------------------------
 def getGroup(db, id):
@@ -71,7 +147,14 @@ def printGroups(db):
     groups = db['groups']
     
     for groupDetail in db['groups']['detail']:
-        print('%38s %-38s %15s' % (groupDetail['id'], groupDetail['name'], groupState(groupDetail['state'])))        
+        if groupInfo['state'] == 1:
+            clr = colorNone()
+        else:
+            clr = colorWarning()
+
+        print(clr, end = '')
+        print('%38s %-38s %15s' % (groupDetail['id'], groupDetail['name'], groupState(groupDetail['state'])))
+        print(colorNone(), end = '')
         #print(' ')
 
 # --------------------------------------------------------------------------
@@ -88,7 +171,8 @@ def main():
 
         time.sleep(interval)
 
-    colorama.deinit()
+    if haveColorama:
+        colorama.deinit()
 
 # --------------------------------------------------------------------------
 if __name__ == '__main__':
