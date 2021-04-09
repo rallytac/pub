@@ -13,6 +13,7 @@
 #include <atomic>
 
 #include "EngageInterface.h"
+#include "EngagePlatformNotifications.h"
 
 using namespace std;
 using namespace Nan;
@@ -373,6 +374,7 @@ static EngageEvents_t g_eventCallbacks;
 static bool g_wantCallbacks = true;
 static CallbackMap_t g_cbMap;
 static std::mutex g_cbMapLock;
+static std::string g_loggingHookFn;
 
 //--------------------------------------------------------
 // Returns the callback associated with an event name (if any)
@@ -500,6 +502,8 @@ void on_groupRxVolumeChanged(const char *id, int16_t leftLevelPerc, int16_t righ
 
     cbw->RELEASE_OBJECT_REFERENCE();
 }
+
+ENGAGE_CB_ID_PLUS_ONE_STRING_PARAM(groupRxDtmf)
 
 
 //--------------------------------------------------------
@@ -630,7 +634,8 @@ NAN_METHOD(initialize)
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_GROUP_STATS_REPORT, groupStatsReport);
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_GROUP_STATS_REPORT_FAILED, groupStatsReportFailed);
 
-    ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_GROUP_RX_VOLUME_CHANGED, groupRxVolumeChanged);    
+    ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_GROUP_RX_VOLUME_CHANGED, groupRxVolumeChanged);
+    ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_GROUP_RX_DTMF, groupRxDtmf);
 
     engageRegisterEventCallbacks(&g_eventCallbacks);
 
@@ -653,6 +658,12 @@ NAN_METHOD(disableCallbacks)
 NAN_METHOD(setLogLevel)
 {
     engageSetLogLevel(INTVAL(0));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(setLogTagExtension)
+{
+    engageSetLogTagExtension(STRVAL(0));
 }
 
 //--------------------------------------------------------
@@ -896,8 +907,6 @@ NAN_METHOD(queryGroupStats)
     engageQueryGroupStats(STRVAL(0));
 }
 
-// TODO: engageLogMsg
-
 //--------------------------------------------------------
 NAN_METHOD(getNetworkInterfaceDevices)
 {
@@ -938,6 +947,19 @@ NAN_METHOD(generateMission)
 }
 
 //--------------------------------------------------------
+NAN_METHOD(generateMissionUsingCertStore)
+{
+    const char *rc = engageGenerateMissionUsingCertStore(STRVAL(0), INTVAL(1), STRVAL(2), STRVAL(3), STRVAL(4), STRVAL(5), STRVAL(6));
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+}
+
+//--------------------------------------------------------
 NAN_METHOD(setMissionId)
 {
     engageSetMissionId(STRVAL(0));
@@ -962,6 +984,55 @@ NAN_METHOD(closeCertStore)
 // TODO: engageGetCertStoreCertificatePem
 // TODO: engageGetCertificateDescriptorFromPem
 // TODO: engageImportCertStoreElementFromCertStore
+
+//--------------------------------------------------------
+NAN_METHOD(logMsg)
+{
+    engageLogMsg(INTVAL(0), STRVAL(1), STRVAL(2));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(platformNotifyChanges)
+{
+    engagePlatformNotifyChanges(STRVAL(0));
+}
+
+//--------------------------------------------------------
+static void internalEngageLoggingHook(int level, const char *tag, const char *message)
+{
+    if(g_loggingHookFn.empty())
+    {
+        return;
+    }
+
+    CrossThreadCallbackWorker *cbw = getCallback(g_loggingHookFn.c_str());
+    if(!cbw)
+    {
+        return;
+    }
+
+    std::vector<CrossThreadCallbackWorker::Parameter*> *params = new std::vector<CrossThreadCallbackWorker::Parameter*>();
+    params->push_back(new CrossThreadCallbackWorker::IntParameter(level));
+    params->push_back(new CrossThreadCallbackWorker::StringParameter(tag));
+    params->push_back(new CrossThreadCallbackWorker::StringParameter(message));
+    cbw->enqueue(params);
+
+    cbw->RELEASE_OBJECT_REFERENCE();
+}
+
+NAN_METHOD(hookEngineLogging)
+{
+    g_loggingHookFn = STRVAL(0);
+
+    if(!g_loggingHookFn.empty())
+    {
+        engageSetLoggingOutputOverride(internalEngageLoggingHook);
+    }
+    else
+    {
+        engageSetLoggingOutputOverride(nullptr);
+    }
+}
 
 //--------------------------------------------------------
 NAN_MODULE_INIT(Init)
@@ -1017,8 +1088,13 @@ NAN_MODULE_INIT(Init)
     ENGAGE_BINDING(closeCertStore);
 
     ENGAGE_BINDING(generateMission);
+    ENGAGE_BINDING(generateMissionUsingCertStore);    
 
     ENGAGE_BINDING(setMissionId);
+    ENGAGE_BINDING(platformNotifyChanges);
+
+    ENGAGE_BINDING(logMsg);
+    ENGAGE_BINDING(hookEngineLogging);
 }
 
 NODE_MODULE(engage, Init)

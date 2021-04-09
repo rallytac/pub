@@ -13,4 +13,3 @@ typedef unsigned long uint32_t;     ///< Unsigned long (32 bits)
 typedef unsigned int size_t;        ///< Unsigned integer ()
 
 #endif // EngageIntegralDataTypes_h
-
