@@ -1,5 +1,15 @@
 # Change Log
 
+## April 8, 2021 - 1.208.9046
+- Adds support for the [Speex](https://www.speex.org/) CODEC for interoperability with legacy systems
+- Adds experimental support for [Codec2](https://en.wikipedia.org/wiki/Codec_2) for ultr-low bandwidth environments (requires custom Engine build)
+- Adds the engageRefreshAudioDevices() API to request the Engine to update it's internal audio device registry
+- Adds the engageReconfigureGroup() API to, at this time, change a group's audio input and/or output audio devices without restarting the group object
+- Adds experimental 'lbCrypto' group configuration option to reduce bandwidth utilization on encrypted groups
+- Adds payload processing in EBS such as audio payload transcoding and reframing, audio mixing, and alias insertions
+- Adds enhancements to minimize audio drop outs in ultra-high latency network environments (e.g. where one-way packet propagation delay is in excess of 10 seconds)
+- Corrects a problem related to node discovery for the local node not occuring if presence groups were created *after* non-presence groups
+
 ## March 12, 2021 - 1.206.9044
 - Adds the ability to source input audio from a file rather than the microphone on a per-transmission basis
 - Adds automatic audio resamlping for audio resources loaded at runtime
