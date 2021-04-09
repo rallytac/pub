@@ -12,7 +12,8 @@ namespace engage_sample_cs_console
     class Program : Engage.IEngineNotifications, 
                     Engage.IRallypointNotifications, 
                     Engage.IGroupNotifications,
-                    Engage.ILicenseNotifications
+                    Engage.ILicenseNotifications,
+                    Engage.ILoggingNotifications
     {
         private class GroupDescriptor
         {
@@ -235,6 +236,7 @@ namespace engage_sample_cs_console
             }
 
             // Subscribe for all notifications
+            //_engage.subscribe((Engage.ILoggingNotifications)this);
             _engage.subscribe((Engage.IEngineNotifications)this);
             _engage.subscribe((Engage.IRallypointNotifications)this);
             _engage.subscribe((Engage.IGroupNotifications)this);
@@ -535,6 +537,7 @@ namespace engage_sample_cs_console
             _engage.unsubscribe((Engage.IRallypointNotifications)this);
             _engage.unsubscribe((Engage.IGroupNotifications)this);
             _engage.unsubscribe((Engage.ILicenseNotifications)this);
+            _engage.unsubscribe((Engage.ILoggingNotifications)this);
 
             rc = _engage.shutdown();
             if (rc != Engage.ENGAGE_RESULT_OK)
@@ -838,6 +841,21 @@ namespace engage_sample_cs_console
         public void onGroupStatsReportFailed(string id, string eventExtraJson)
         {
             Console.WriteLine("C#: onGroupStatsReportFailed: " + id);
+        }
+
+        public void onGroupRxVolumeChanged(string id, int leftLevelPerc, int rightLevelPerc, string eventExtraJson)
+        {
+            Console.WriteLine("C#: onGroupRxVolumeChanged: " + id);
+        }
+
+        public void onGroupRxDtmf(string id, string dtmfJson, string eventExtraJson)
+        {
+            Console.WriteLine("C#: onGroupRxDtmf: " + id);
+        }
+
+        public void onEngageLogMessage(int level, string tag, string message)
+        {
+            Console.WriteLine("C#: onEngageLogMessage: " + level + ", " + tag + ", " + message);
         }
         #endregion
     }

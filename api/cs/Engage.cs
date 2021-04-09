@@ -28,6 +28,7 @@ public class Engage
     {
         void onEngineStarted(string eventExtraJson);
         void onEngineStopped(string eventExtraJson);
+        void onEngineAudioDevicesRefreshed(string eventExtraJson);
     }
 
     public interface ILicenseNotifications
@@ -35,6 +36,11 @@ public class Engage
         void onLicenseChanged(string eventExtraJson);
         void onLicenseExpired(string eventExtraJson);
         void onLicenseExpiring(double secondsLeft, string eventExtraJson);
+    }
+
+    public interface ILoggingNotifications
+    {
+        void onEngageLogMessage(int level, string tag, string message);
     }
 
     public interface IRallypointNotifications
@@ -100,6 +106,10 @@ public class Engage
         void onGroupStatsReportFailed(string id, string eventExtraJson);
 
         void onGroupRxVolumeChanged(string id, int leftLevelPerc, int rightLevelPerc, string eventExtraJson);
+        void onGroupRxDtmf(string id, string dtmfJson, string eventExtraJson);
+
+        void onGroupReconfigured(const char *pszId, const char *pEventExtraJson);
+        void onGroupReconfigurationFailed(const char *pszId, const char *pEventExtraJson);
     }
 
     public interface IHumanBiometricsNotifications
@@ -129,6 +139,8 @@ public class Engage
     public const int ENGAGE_RESULT_NOT_INITIALIZED = -2;
     public const int ENGAGE_RESULT_ALREADY_INITIALIZED = -3;
     public const int ENGAGE_RESULT_GENERAL_FAILURE = -4;
+    public const int ENGAGE_RESULT_NOT_STARTED = -5;
+    public const int ENGAGE_RESULT_ALREADY_STARTED = -6;
 
     // Jitter Buffer Latency types
     public enum JitterBufferLatency : int
@@ -177,6 +189,16 @@ public class Engage
         ERR_REQUIRES_ACTIVATION = -9
     }
 
+    // Logging levels
+    public enum LoggingLevel : int
+    {
+        FATAL = 0,
+        ERROR = 1,
+        WARNING = 2,
+        INFORMATION = 3,
+        DEBUG = 4
+    }
+
     // Blob payload types
     public const byte ENGAGE_BLOB_PT_UNDEFINED = 0;
     public const byte ENGAGE_BLOB_PT_APP_TEXT_UTF8 = 1;
@@ -203,6 +225,7 @@ public class Engage
     public const String GROUP_SOURCE_ENGAGE_MAGELLAN_DOMO = "com.rallytac.engage.magellan.domo";
     public const String GROUP_SOURCE_ENGAGE_MAGELLAN_KENWOOD = "com.rallytac.engage.magellan.kenwood";
     public const String GROUP_SOURCE_ENGAGE_MAGELLAN_TAIT = "com.rallytac.engage.magellan.tait";
+    public const String GROUP_SOURCE_ENGAGE_MAGELLAN_VOCALITY= "com.rallytac.engage.magellan.vocality";
 
     // Group disconnected reasons
     public const String GROUP_DISCONNECTED_REASON_NO_REAON = "NoReason";
@@ -210,6 +233,12 @@ public class Engage
     public const String GROUP_DISCONNECTED_REASON_UNREGISTERED = "Unregistered";
     public const String GROUP_DISCONNECTED_REASON_NOT_ALLOWED = "NotAllowed";
     public const String GROUP_DISCONNECTED_REASON_GENERAL_DENIAL = "GeneralDenial";
+
+    // Presence descriptor group item status flags
+    public const int ENGAGE_PDGI_FLAG_JOINED = 0x0001;
+    public const int ENGAGE_PDGI_FLAG_CONNECTED = 0x0002;
+    public const int ENGAGE_PDGI_FLAG_RX_MUTED = 0x0004;
+    public const int ENGAGE_PDGI_FLAG_TX_MUTED = 0x0008;
 
     // NetworkTxPriority
     public enum NetworkTxPriority : int
@@ -264,15 +293,22 @@ public class Engage
             public static String arrayName = "certificates";
             public static String id = "id";
             public static String hasPrivateKey = "hasPrivateKey";
+            public static String tags = "tags";
         }
 
         public class CertStoreDescriptor
         {
             public static String objectName = "certStoreDescriptor";
+            public static String id = "id";
             public static String fileName = "fileName";
             public static String version = "version";
             public static String flags = "flags";
             public static String certificates = "certificates";
+        }
+
+        public class ListOfAudioDevice
+        {
+            public static String objectName = "list";
         }
 
         public class AudioDevice
@@ -294,6 +330,12 @@ public class Engage
             public static String isDefault = "isDefault";
             public static String extra = "extra";
             public static String type = "type";
+            public static String isPresent = "isPresent";
+        }
+
+        public class ListOfNetworkInterfaceDevice
+        {
+            public static String objectName = "list";
         }
 
         public class NetworkInterfaceDevice
@@ -319,6 +361,14 @@ public class Engage
             public static String includeNodeId = "includeNodeId";
             public static String alias = "alias";
             public static String muted = "muted";
+            public static String txId = "txId";
+
+            public class AudioUri
+            {
+                public static String objectName = "audioUri";
+                public static String uri = "uri";
+                public static String repeatCount = "repeatCount";
+            }
         }
 
         public class License
@@ -339,6 +389,9 @@ public class Engage
             public static String objectName = "talkerInformation";
             public static String alias = "alias";
             public static String nodeId = "nodeId";
+            public static String rxFlags = "rxFlags";
+            public static String txPriority = "txPriority";
+            public static String txId = "txId";
         }
 
         public class GroupTalkers
@@ -375,14 +428,14 @@ public class Engage
             {
                 public static String objectName = "timelines";
                 public static String enabled = "enabled";
-                public static String maxAttachmentQuotaMb = "maxAttachmentQuotaMb";
                 public static String maxEventAgeSecs = "maxEventAgeSecs";
 	            public static String storageRoot = "storageRoot";
-                public static String maxStorageQuotaMb = "maxStorageQuotaMb";
+                public static String maxStorageMb = "maxStorageMb";
 	            public static String maxEvents = "maxEvents";
                 public static String groomingIntervalSecs = "groomingIntervalSecs";
                 public static String autosaveIntervalSecs = "autosaveIntervalSecs";
                 public static String disableSigningAndVerification = "disableSigningAndVerification";
+                public static String ephemeral = "ephemeral";                
             }
 
             public class Security
@@ -431,15 +484,22 @@ public class Engage
                 public static String preventMulticastFailover = "preventMulticastFailover";
                 public static String rtcpPresenceTimeoutMs = "rtcpPresenceTimeoutMs";
                 public static String rtpJtterLatencyMode = "rtpJtterLatencyMode"; 
+                public static String rtpJitterMaxExceededClipPerc = "rtpJitterMaxExceededClipPerc";
+                public static String rtpJitterMaxExceededClipHangMs = "rtpJitterMaxExceededClipHangMs";
+                public static String rtpZombieLifetimeMs = "rtpZombieLifetimeMs";
+                public static String rtpMaxTrimMs = "rtpMaxTrimMs";
             }
 
             public class Audio
             {
                 public static String objectName = "audio";
+                public static String enabled = "enabled";
                 public static String internalRate = "internalRate";
                 public static String internalChannels = "internalChannels";
                 public static String allowOutputOnTransmit = "allowOutputOnTransmit";
                 public static String muteTxOnTx = "muteTxOnTx";
+                public static String denoiseInput = "denoiseInput";
+                public static String denoiseOutput = "denoiseOutput";
 
                 public class Aec
                 {
@@ -456,6 +516,34 @@ public class Engage
                     public static String enabled = "enabled";
                     public static String mode = "mode";
                 }
+
+                public class Android
+                {
+                    public static String objectName = "android";
+                    public static String api = "api";
+                }
+
+                public class InputAgc
+                {
+                    public static String objectName = "inputAgc";
+                    public static String enabled = "enabled";
+                    public static String minLevel = "minLevel";
+                    public static String maxLevel = "maxLevel";
+                    public static String compressionGainDb = "compressionGainDb";
+                    public static String enableLimiter = "enableLimiter";
+                    public static String targetLevelDb = "targetLevelDb";
+                }
+
+                public class OutputAgc
+                {
+                    public static String objectName = "outputAgc";
+                    public static String enabled = "enabled";
+                    public static String minLevel = "minLevel";
+                    public static String maxLevel = "maxLevel";
+                    public static String compressionGainDb = "compressionGainDb";
+                    public static String enableLimiter = "enableLimiter";
+                    public static String targetLevelDb = "targetLevelDb";
+                }            
             }
 
             public class Discovery
@@ -494,6 +582,8 @@ public class Engage
             public static String name = "name";
             public static String description = "description";
             public static String modPin = "modPin";
+            public static String certStoreId = "certStoreId";
+            public static String multicastFailoverPolicy = "multicastFailoverPolicy";
         }
 
         public class Rallypoint
@@ -513,6 +603,7 @@ public class Engage
             public static String verifyPeer = "verifyPeer";
             public static String allowSelfSignedCertificate = "allowSelfSignedCertificate";
             public static String transactionTimeoutMs = "transactionTimeoutMs";
+            public static String connectionTimeoutSecs = "connectionTimeoutSecs";            
             public static String disableMessageSigning = "disableMessageSigning";
             public static String use = "use";
         }
@@ -547,8 +638,34 @@ public class Engage
             public static String type = "type";
             public static String source = "source";
             public static String cryptoPassword = "cryptoPassword";
-            public static String fdx = "fdx";
             public static String alias = "alias";
+            public static String maxRxSecs = "maxRxSecs";
+            public static String enableMulticastFailover = "enableMulticastFailover";
+            public static String multicastFailoverSecs = "multicastFailoverSecs";
+            public static String interfaceName = "interfaceName";
+            public static String anonymousAlias = "anonymousAlias";
+            public static String lbCrypto = "lbCrypto";
+
+            public class Timeline
+            {
+                public static String objectName = "timeline";
+                public static String enabled = "enabled";
+            }
+
+            public class Audio
+            {
+                public static String objectName = "audio";
+                public static String inputId = "inputId";
+                public static String outputId = "outputId";
+            }
+
+            public class PriorityTranslation
+            {
+                public static String objectName = "priorityTranslation";
+                public static String priority = "priority";
+                public static String rx = "rx";
+                public static String tx = "tx";
+            }
         }
 
         public class TxAudio
@@ -559,6 +676,12 @@ public class Engage
             public static String framingMs = "framingMs";
             public static String maxTxSecs = "maxTxSecs";
             public static String noHdrExt = "noHdrExt";
+            public static String customRtpPayloadType = "customRtpPayloadType";
+            public static String encoderName = "encoderName";
+            public static String extensionSendInterval = "extensionSendInterval";
+            public static String initialHeaderBurst = "initialHeaderBurst";
+            public static String trailingHeaderBurst = "initialHeaderBurst";
+
         }
 
         public class NetworkTxOptions
@@ -573,8 +696,8 @@ public class Engage
             public static String objectName = "presence";
             public static String format = "format";
             public static String intervalSecs = "intervalSecs";
-            public static String forceOnAudioTransmit = "forceOnAudioTransmit";
             public static String listenOnly = "listenOnly";
+            public static String minIntervalSecs = "minIntervalSecs";
         }
 
         public class PresenceDescriptor
@@ -584,11 +707,12 @@ public class Engage
             public static String comment = "comment";
             public static String custom = "custom";
 
-            public class GroupAlias
+            public class GroupItem
             {
                 public static String arrayName = "groupAliases";
-                public static String groupId = "groupId";
+                public static String id = "groupId";
                 public static String alias = "alias";
+                public static String status = "status";
             }
         }
 
@@ -671,6 +795,33 @@ public class Engage
             public static String type = "type";
             public static String uri = "uri";
         }
+
+        public class TimelineQuery
+        {
+            public static String maxCount = "maxCount";
+            public static String mostRecentFirst = "mostRecentFirst";
+            public static String startedOnOrAfter = "startedOnOrAfter";
+            public static String endedOnOrBefore = "endedOnOrBefore";
+            public static String onlyDirection = "onlyDirection";
+            public static String onlyType = "onlyType";
+            public static String onlyCommitted = "onlyCommitted";
+            public static String onlyAlias = "onlyAlias";
+            public static String onlyNodeId = "onlyNodeId";
+            public static String onlyTxId = "onlyTxId";
+            public static String sql = "sql";
+        }
+
+        public class TimelineReport
+        {
+            public static String success = "success";
+            public static String errorMessage = "errorMessage";
+            public static String started = "started";
+            public static String ended = "ended";
+            public static String execMs = "execMs";
+            public static String records = "records";
+            public static String events = "events";
+            public static String count = "count";
+        }
     }
 
     #region Callback delegate types
@@ -700,6 +851,9 @@ public class Engage
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void EngageStringAndTwoIntCallback(string s, int i1, int i2, string eventExtraJson);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void EngageLoggingCallback(int level, string tag, string message);
     #endregion
 
     #region Structures
@@ -801,6 +955,12 @@ public class Engage
         public EngageStringCallback PFN_ENGAGE_GROUP_STATS_REPORT_FAILED;
 
         public EngageString2AndInt2Callback PFN_ENGAGE_GROUP_RX_VOLUME_CHANGED;
+        public EngageString2Callback PFN_ENGAGE_GROUP_RX_DTMF;
+
+        public EngageVoidCallback PFN_ENGAGE_ENGINE_AUDIO_DEVICES_REFRESHED;
+
+        public EngageStringCallback PFN_ENGAGE_GROUP_RECONFIGURED;
+        public EngageStringCallback PFN_ENGAGE_GROUP_RECONFIGURATION_FAILED;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]     // 9 bytes
@@ -940,19 +1100,25 @@ public class Engage
     private static extern int engageUpdatePresenceDescriptor(string id, string jsonDescriptor, int forceBeacon);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageSendGroupBlob(string id, byte[] blob, int blobSize, string jsonBlobParams);
+    private static extern int engageSendGroupBlob(string id, IntPtr blob, int blobSize, string jsonBlobParams);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageSendGroupRtp(string id, byte[] payload, int payloadSize, string jsonRtpHeader);
+    private static extern int engageSendGroupRtp(string id, IntPtr payload, int payloadSize, string jsonRtpHeader);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageSendGroupRaw(string id, byte[] raw, int rawSize,string jsonRtpHeader);
+    private static extern int engageSendGroupRaw(string id, IntPtr raw, int rawSize, string jsonRtpHeader);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageQueryGroupTimeline(string id, string jsonParams);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageSetLogLevel(int level);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageSetLogTagExtension(string tagExtension);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageSetLoggingOutputOverride(EngageLoggingCallback hookFn);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageEnableSyslog(int enable);
@@ -973,6 +1139,9 @@ public class Engage
     private static extern IntPtr engageGenerateMission(string keyPhrase, int audioGroupCount, string rallypointHost, string missionName);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr engageGenerateMissionUsingCertStore(string keyPhrase, int audioGroupCount, string rallypointHost, string missionName, string certStoreFn, string certStorePasswordHexByteString, string certStoreElement);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageSetMissionId(string missionId);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
@@ -985,10 +1154,10 @@ public class Engage
     private static extern int engageCloseCertStore();
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageSetCertStoreCertificatePem(string id, string certificatePem, string privateKeyPem);
+    private static extern int engageSetCertStoreCertificatePem(string id, string certificatePem, string privateKeyPem, string tags);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageSetCertStoreCertificateP12(string id, byte[] data, int size, string password);
+    private static extern int engageSetCertStoreCertificateP12(string id,IntPtr data, int size, string password, string tags);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageDeleteCertStoreCertificate(string id);
@@ -1000,7 +1169,7 @@ public class Engage
     private static extern IntPtr engageGetCertificateDescriptorFromPem(string pem);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int engageImportCertStoreElementFromCertStore(string id, string srcId, string srcFileName, string srcPasswordHexByteString);
+    private static extern int engageImportCertStoreElementFromCertStore(string id, string srcId, string srcFileName, string srcPasswordHexByteString, string tags);
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr engageQueryCertStoreContents(string fileName, string passwordHexByteString);
@@ -1022,6 +1191,10 @@ public class Engage
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageDecrypt(IntPtr src, int size, IntPtr dst, string passwordHexByteString);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engagePlatformNotifyChanges(string jsonChangesArray);
+
     #endregion
 
     #region Internal functions
@@ -1077,6 +1250,7 @@ public class Engage
 
         cb.PFN_ENGAGE_ENGINE_STARTED = on_ENGAGE_ENGINE_STARTED;
         cb.PFN_ENGAGE_ENGINE_STOPPED = on_ENGAGE_ENGINE_STOPPED;
+        cb.PFN_ENGAGE_ENGINE_AUDIO_DEVICES_REFRESHED = on_ENGAGE_ENGINE_AUDIO_DEVICES_REFRESHED;
 
         cb.PFN_ENGAGE_RP_PAUSING_CONNECTION_ATTEMPT = on_ENGAGE_RP_PAUSING_CONNECTION_ATTEMPT;
         cb.PFN_ENGAGE_RP_CONNECTING = on_ENGAGE_RP_CONNECTING;
@@ -1157,6 +1331,10 @@ public class Engage
         cb.PFN_ENGAGE_BRIDGE_DELETED = on_ENGAGE_BRIDGE_DELETED;
 
         cb.PFN_ENGAGE_GROUP_RX_VOLUME_CHANGED = on_ENGAGE_GROUP_RX_VOLUME_CHANGED;
+        cb.PFN_ENGAGE_GROUP_RX_DTMF = on_ENGAGE_GROUP_RX_DTMF;
+
+        cb.PFN_ENGAGE_GROUP_RECONFIGURED = on_ENGAGE_GROUP_RECONFIGURED;
+        cb.PFN_ENGAGE_GROUP_RECONFIGURATION_FAILED = on_ENGAGE_GROUP_RECONFIGURATION_FAILED;
 
         return engageRegisterEventCallbacks(ref cb);
     }
@@ -1209,6 +1387,7 @@ public class Engage
     private static List<ILicenseNotifications> _licenseNotificationSubscribers = new List<ILicenseNotifications>();
     private static List<IHumanBiometricsNotifications> _humanBiometricsNotifications = new List<IHumanBiometricsNotifications>();
     private static List<IBridgeNotifications> _bridgeNotificationSubscribers = new List<IBridgeNotifications>();
+    private static List<ILoggingNotifications> _loggingNotificationSubscribers = new List<ILoggingNotifications>();
     #endregion
 
     #region Callback delegates
@@ -1233,6 +1412,17 @@ public class Engage
             }
         }
     };
+
+    private EngageVoidCallback on_ENGAGE_ENGINE_AUDIO_DEVICES_REFRESHED = (string eventExtraJson) =>
+    {
+        lock (_engineNotificationSubscribers)
+        {
+            foreach (IEngineNotifications n in _engineNotificationSubscribers)
+            {
+                n.onEngineAudioDevicesRefreshed(eventExtraJson);
+            }
+        }
+    };    
 
     private EngageStringCallback on_ENGAGE_RP_PAUSING_CONNECTION_ATTEMPT = (string id, string eventExtraJson) =>
     {
@@ -1288,6 +1478,18 @@ public class Engage
             }
         }
     };
+
+    private EngageLoggingCallback on_ENGAGE_LOG_MESSAGE_HOOK_CALLBACK = (int level, string tag, string message) =>
+    {
+        lock (_loggingNotificationSubscribers)
+        {
+            foreach (ILoggingNotifications n in _loggingNotificationSubscribers)
+            {
+                n.onEngageLogMessage(level, tag, message);
+            }
+        }
+    };
+
 
     private EngageStringCallback on_ENGAGE_GROUP_CREATED = (string id, string eventExtraJson) =>
     {
@@ -1910,7 +2112,7 @@ public class Engage
         }
     };
 
-    private EngageStringCallback on_ENGAGE_GROUP_RX_VOLUME_CHANGED = (string id, int leftLevelPerc, int rightLevelPerc, string eventExtraJson) =>
+    private EngageString2AndInt2Callback on_ENGAGE_GROUP_RX_VOLUME_CHANGED = (string id, int leftLevelPerc, int rightLevelPerc, string eventExtraJson) =>
     {
         lock (_groupNotificationSubscribers)
         {
@@ -1920,6 +2122,40 @@ public class Engage
             }
         }
     };
+
+    private EngageString2Callback on_ENGAGE_GROUP_RX_DTMF = (string id, string dtmfJson, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupRxDtmf(id, dtmfJson, eventExtraJson);
+            }
+        }
+    };
+
+    private EngageStringCallback on_ENGAGE_GROUP_RECONFIGURED = (string id, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupReconfigured(id, eventExtraJson);
+            }
+        }
+    };
+
+    private EngageStringCallback on_ENGAGE_GROUP_RECONFIGURATION_FAILED = (string id, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupReconfigurationFailed(id, eventExtraJson);
+            }
+        }
+    };
+
     #endregion
 
     #region Public functions
@@ -2016,6 +2252,32 @@ public class Engage
         lock (_bridgeNotificationSubscribers)
         {
             _bridgeNotificationSubscribers.Remove(n);
+        }
+    }
+
+    public void subscribe(ILoggingNotifications n)
+    {
+        lock (_loggingNotificationSubscribers)
+        {
+            _loggingNotificationSubscribers.Add(n);
+
+            if(_loggingNotificationSubscribers.size() == 1)
+            {
+                engageSetLoggingOutputOverride(on_ENGAGE_LOG_MESSAGE_HOOK_CALLBACK);
+            }
+        }
+    }
+
+    public void unsubscribe(ILoggingNotifications n)
+    {
+        lock (_loggingNotificationSubscribers)
+        {
+            _loggingNotificationSubscribers.Remove(n);
+            
+            if(_loggingNotificationSubscribers.size() == 0)
+            {
+                engageSetLoggingOutputOverride(null);
+            }
         }
     }
 
@@ -2137,6 +2399,11 @@ public class Engage
         return engageSetLogLevel(level);
     }    
 
+    public int setLogTagExtensionLevel(string tagExtension)
+    {
+        return engageSetLogTagExtension(tagExtension);
+    }    
+
     public int enableSyslog(bool enable)
     {
         return engageEnableSyslog(enable ? 1 : 0);
@@ -2144,7 +2411,7 @@ public class Engage
 
     public int enableWatchdog(bool enable)
     {
-        return engageEnableWatchdog(enable ? 1 : 0);
+        return engageWatchdog(enable ? 1 : 0);
     }    
 
     public String getVersion()
@@ -2265,15 +2532,19 @@ public class Engage
         return engageCloseCertStore();
     }
 
-    public int setCertStoreCertificatePem(string id, string certificatePem, string privateKeyPem)
+    public int setCertStoreCertificatePem(string id, string certificatePem, string privateKeyPem, string tags)
     {
-        return engageSetCertStoreCertificatePem(id, certificatePem, privateKeyPem);
+        return engageSetCertStoreCertificatePem(id, certificatePem, privateKeyPem, tags);
     }
 
-    public int setCertStoreCertificateP12(string id, byte[] data, int size, string password)
+    public int setCertStoreCertificateP12(string id, byte[] data, int size, string password, string tags)
     {
-        // TODO
-        return -1;
+        IntPtr pinned_data = Marshal.AllocHGlobal(size);
+        Marshal.Copy(data, 0, pinned_data, size);
+        int rc = engageSetCertStoreCertificateP12(id, pinned_data, size, password, tags);
+        Marshal.FreeHGlobal(pinned_data);
+
+        return rc;
     }
 
     public int deleteCertStoreCertificate(string id)
@@ -2309,9 +2580,9 @@ public class Engage
         }
     }
     
-    public int importCertStoreElementFromCertStore(string id, string srcId, string srcFileName, string srcPasswordHexByteString)
+    public int importCertStoreElementFromCertStore(string id, string srcId, string srcFileName, string srcPasswordHexByteString, string tags)
     {
-        return engageImportCertStoreElementFromCertStore(id, srcId, srcFileName, srcPasswordHexByteString);
+        return engageImportCertStoreElementFromCertStore(id, srcId, srcFileName, srcPasswordHexByteString, tags);
     }
 
     public String queryCertStoreContents(string fileName, string passwordHexByteString)
@@ -2387,6 +2658,20 @@ public class Engage
     public String generateMission(string keyPhrase, int audioGroupCount, string rallypointHost, string missionName)
     {
         IntPtr ptr = engageGenerateMission(keyPhrase, audioGroupCount, rallypointHost, missionName);
+
+        if (ptr == IntPtr.Zero)
+        {
+            return null;
+        }
+        else
+        {
+            return Marshal.PtrToStringAnsi(ptr);
+        }
+    }
+
+    public String generateMissionUsingCertStore(string keyPhrase, int audioGroupCount, string rallypointHost, string missionName, string certStoreFn, string certStorePasswordHexByteString, string certStoreElement)
+    {
+        IntPtr ptr = engageGenerateMissionUsingCertStore(keyPhrase, audioGroupCount, rallypointHost, missionName, certStoreFn, certStorePasswordHexByteString, certStoreElement);
 
         if (ptr == IntPtr.Zero)
         {
@@ -2493,7 +2778,7 @@ public class Engage
                     se["s"] = s;
                 }
 
-                // Add the series elemement
+                // Add the series element
                 dataSeriesArray.Add(se);
             }
 
@@ -2515,6 +2800,11 @@ public class Engage
         }
 
         return rc;
+    }
+
+    public int platformNotifyChanges(string jsonChangesArray)
+    {
+        return engagePlatformNotifyChanges(jsonChangesArray);
     }
 
     #endregion
