@@ -2,7 +2,7 @@
 empu is a little tool written in Python to pack and unpack mission files for Engage-based applications.
 
 ## Dependencies
-ebm needs Python version or higher installed module installed.  Make sure you have it on your machine.
+empu needs Python version 3 or higher installed module installed.  Make sure you have it on your machine.
 
 ## Running empu
 To run empu, simply fire it up using Python and pass the operation you want (`pack` or `unpack`) and the
