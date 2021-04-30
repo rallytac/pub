@@ -1,0 +1,28 @@
+{
+  "id": "{9282a495-da1b-42d4-985f-fb9ee587cfa1}",
+  "name": "My Mission",
+  "groups": [
+    {
+      "id": "{d0518233-9226-417a-bf23-5c50511eb3fd}",
+      "type": 1,
+      "name": "Engage Group 1",
+      "rx": {
+        "address": "239.42.42.42",
+        "port": 27000
+      },
+      "tx": {
+        "address": "239.42.42.42",
+        "port": 27000
+      },
+      "txAudio": {
+        "encoder": 25,
+        "framingMs": 20,
+        "maxTxSecs": 30
+      },
+      "txOptions": {
+        "priority": 4,
+        "ttl": 42
+      }
+    }
+  ]
+}
