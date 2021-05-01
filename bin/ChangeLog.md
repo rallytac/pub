@@ -1,8 +1,20 @@
 # Change Log
 
+## May 1, 2021 - 1.209.9047
+- Adds additional support for ultra-low bandwidth environments
+- Adds the ability to disable jitter buffer trimming for extreme jitter environments
+- Adds additional protection against over-queuing of inbound audio due to synchronization mismatches
+- Adds an ncurses-based status display to engage-cmd on supported platforms
+- Adds new functions in engage-cmd for Lua scripts
+- Improves Rallypoints' prioritization of media vs non-media traffic
+- Corrects an issue where audio from a previously registered transmitter periodically stops being delivered to the speaker
+- Corrects an issue related to the processing of invalid GUIDs
+- Corrects an issue related to unsynchronized RX started/ended events
+- Corrects a variety of edge-case memory leaks and corruption issues
+
 ## April 8, 2021 - 1.208.9046
 - Adds support for the [Speex](https://www.speex.org/) CODEC for interoperability with legacy systems
-- Adds experimental support for [Codec2](https://en.wikipedia.org/wiki/Codec_2) for ultr-low bandwidth environments (requires custom Engine build)
+- Adds experimental support for [Codec2](https://en.wikipedia.org/wiki/Codec_2) for ultra-low bandwidth environments (requires custom Engine build)
 - Adds the engageRefreshAudioDevices() API to request the Engine to update it's internal audio device registry
 - Adds the engageReconfigureGroup() API to, at this time, change a group's audio input and/or output audio devices without restarting the group object
 - Adds experimental 'lbCrypto' group configuration option to reduce bandwidth utilization on encrypted groups
