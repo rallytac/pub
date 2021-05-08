@@ -150,7 +150,7 @@ namespace AppConfigurationObjects
     /**
      * @brief Human Biometric Types.
      *
-     * TODO: More detailed TxCodec_t description.
+     * TODO: More detailed HumanBiometricsTypes_t description.
      */
     typedef enum
     {
@@ -2151,6 +2151,112 @@ namespace AppConfigurationObjects
 
 
     //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(NetworkDeviceDescriptor)
+    /**
+     * @brief Custom Network Device Configuration
+     *
+     * Helper C++ class to serialize and de-serialize NetworkDeviceDescriptor JSON used in @ref engageNetworkDeviceRegister API.
+     *
+     * Example: @include[doc] examples/NetworkDeviceDescriptor.json
+     *
+     * @see engageNetworkDeviceRegister
+     */
+    class NetworkDeviceDescriptor : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(NetworkDeviceDescriptor)
+
+    public:
+        /**
+         * @brief [Read Only] Unique device identifier assigned by Engage Engine at time of device creation.
+         *
+         */
+        int             deviceId;
+
+        /** @brief Name of the device assigned by the platform */
+        std::string     name;
+
+        /** @brief Device manufacturer (if any) */
+        std::string     manufacturer;
+
+        /** @brief Device mode (if any) */
+        std::string     model;
+
+        /** @brief Device hardware ID (if any) */
+        std::string     hardwareId;
+
+        /** @brief Device serial number (if any) */
+        std::string     serialNumber;
+
+        /** @brief Device type (if any) */
+        std::string     type;
+
+        /** @brief Extra data provided by the platform (if any) */
+        std::string     extra;
+
+        NetworkDeviceDescriptor()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            deviceId = 0;
+
+            name.clear();
+            manufacturer.clear();
+            model.clear();
+            hardwareId.clear();
+            serialNumber.clear();
+            type.clear();
+            extra.clear();
+        }
+
+        virtual std::string toString()
+        {
+            char buff[2048];
+
+            sprintf_s(buff, sizeof(buff), "deviceId=%d, name=%s, manufacturer=%s, model=%s, hardwareId=%s, serialNumber=%s, type=%s, extra=%s",
+                        deviceId,
+                        name.c_str(),
+                        manufacturer.c_str(),
+                        model.c_str(),
+                        hardwareId.c_str(),
+                        serialNumber.c_str(),
+                        type.c_str(),
+                        extra.c_str());
+
+            return std::string(buff);
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const NetworkDeviceDescriptor& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(deviceId),
+            TOJSON_IMPL(name),
+            TOJSON_IMPL(manufacturer),
+            TOJSON_IMPL(model),
+            TOJSON_IMPL(hardwareId),
+            TOJSON_IMPL(serialNumber),
+            TOJSON_IMPL(type),
+            TOJSON_IMPL(extra)
+        };
+    }
+    static void from_json(const nlohmann::json& j, NetworkDeviceDescriptor& p)
+    {
+        p.clear();
+        getOptional<int>("deviceId", p.deviceId, j, 0);
+        getOptional("name", p.name, j);
+        getOptional("manufacturer", p.manufacturer, j);
+        getOptional("model", p.model, j);
+        getOptional("hardwareId", p.hardwareId, j);
+        getOptional("serialNumber", p.serialNumber, j);
+        getOptional("type", p.type, j);
+        getOptional("extra", p.extra, j);
+    }
+
+    //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(TxAudio)
     /**
      * @brief Configuration for the audio transmit properties for a group
@@ -2183,6 +2289,7 @@ namespace AppConfigurationObjects
             /** @brief Unknown Codec type */
             ctUnknown       = 0,
 
+            /* G.711 */
             /** @brief G711 U-Law 64 (kbit/s) <a href="https://en.wikipedia.org/wiki/G.711" target="_blank">See for more info</a> */
             ctG711ulaw      = 1,
 
@@ -2190,13 +2297,17 @@ namespace AppConfigurationObjects
             ctG711alaw      = 2,
 
 
+            /* GSM */
             /** @brief GSM Full Rate 13.2 (kbit/s) <a href="https://en.wikipedia.org/wiki/Full_Rate" target="_blank">See for more info</a> */
             ctGsm610        = 3,
 
 
+            /* G.729 */
             /** @brief G.729a 8 (kbit/s) <a href="https://en.wikipedia.org/wiki/G.729" target="_blank">See for more info</a> */
-            //ctG729a         = 4,
+            ctG729a         = 4,
 
+
+            // AMR Narrowband */
             /** @brief AMR Narrowband 4.75 (kbit/s) <a href="https://en.wikipedia.org/wiki/Adaptive_Multi-Rate_audio_codec" target="_blank">See for more info</a> */
             ctAmrNb4750     = 10,
 
@@ -2222,6 +2333,7 @@ namespace AppConfigurationObjects
             ctAmrNb12200    = 17,
 
 
+            /* Opus */
             /** @brief Opus 6 (kbit/s) <a href="http://opus-codec.org" target="_blank">See for more info</a> */
             ctOpus6000      = 20,
 
@@ -2250,7 +2362,70 @@ namespace AppConfigurationObjects
             ctOpus22000     = 28,
 
             /** @brief Opus 24 (kbit/s) <a href="http://opus-codec.org" target="_blank">See for more info</a> */
-            ctOpus24000     = 29
+            ctOpus24000     = 29,
+
+
+            /* Speex */
+            /** @brief Speex 2.15 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb2150     = 30,
+
+            /** @brief Speex 3.95 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb3950     = 31,
+
+            /** @brief Speex 5.95 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb5950     = 32,
+
+            /** @brief Speex 8 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb8000     = 33,
+
+            /** @brief Speex 11 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb11000    = 34,
+
+            /** @brief Speex 15 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb15000    = 35,
+
+            /** @brief Speex 18.2 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb18200    = 36,
+
+            /** @brief Speex 24.6 (kbit/s) <a href="http://https://www.speex.org/" target="_blank">See for more info</a> */
+            ctSpxNb24600    = 37,
+
+
+            /* Codec2 */
+            /** @brief Codec2 0.45 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC2450         = 40,
+
+            /** @brief Codec2 0.70 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC2700         = 41,
+
+            /** @brief Codec2 1.2 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC21200        = 42,
+
+            /** @brief Codec2 1.3 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC21300        = 43,
+
+            /** @brief Codec2 1.4 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC21400        = 44,
+
+            /** @brief Codec2 1.6 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC21600        = 45,
+
+            /** @brief Codec2 2.4 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC22400        = 46,
+
+            /** @brief Codec2 3.2 (kbit/s) <a href="https://www.rowetel.com/?page_id=452" target="_blank">See for more info</a> */
+            ctC23200        = 47,
+
+
+            /* MELPe */
+            /** @brief MELPe 0.60 (kbit/s) <a href="https://en.wikipedia.org/wiki/Mixed-excitation_linear_prediction" target="_blank">See for more info</a> */
+            ctMelpe600      = 50,
+
+            /** @brief MELPe 1.2 (kbit/s) <a href="https://en.wikipedia.org/wiki/Mixed-excitation_linear_prediction" target="_blank">See for more info</a> */
+            ctMelpe1200     = 51,
+
+            /** @brief MELPe 2.4 (kbit/s) <a href="https://en.wikipedia.org/wiki/Mixed-excitation_linear_prediction" target="_blank">See for more info</a> */
+            ctMelpe2400     = 52
         } TxCodec_t;
 
         /** @brief [Optional, Default: @ref ctOpus8000] Specifies the Codec Type to use for the transmission. See @ref TxCodec_t for all codec types */
@@ -2262,6 +2437,9 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default: 60] Audio sample framing size in milliseconds. */
         int             framingMs;
 
+        /** @brief [Optional, Default: 0] If >0, derives framingMs based on the encoder's internal operation */
+        int             blockCount;
+        
         /** @brief [Optional, Default: false] Indicates if full duplex audio is supported. */
         bool            fdx;
 
@@ -2308,9 +2486,10 @@ namespace AppConfigurationObjects
 
         void clear()
         {
-            encoder = ctUnknown;
+            encoder = TxAudio::TxCodec_t::ctUnknown;
             encoderName.clear();
             framingMs = 60;
+            blockCount = 0;
             fdx = false;
             noHdrExt = false;
             maxTxSecs = 0;
@@ -2328,6 +2507,7 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(encoder),
             TOJSON_IMPL(encoderName),
             TOJSON_IMPL(framingMs),
+            TOJSON_IMPL(blockCount),
             TOJSON_IMPL(fdx),
             TOJSON_IMPL(noHdrExt),
             TOJSON_IMPL(maxTxSecs),
@@ -2345,6 +2525,7 @@ namespace AppConfigurationObjects
         getOptional<TxAudio::TxCodec_t>("encoder", p.encoder, j, TxAudio::TxCodec_t::ctOpus8000);
         getOptional<std::string>("encoderName", p.encoderName, j, EMPTY_STRING);
         getOptional("framingMs", p.framingMs, j, 60);
+        getOptional("blockCount", p.blockCount, j, 0);
         getOptional("fdx", p.fdx, j, false);
         getOptional("noHdrExt", p.noHdrExt, j, false);
         getOptional("maxTxSecs", p.maxTxSecs, j, 0);
@@ -3068,6 +3249,62 @@ namespace AppConfigurationObjects
 
 
     //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(GroupSatPaq)
+    /**
+     * @brief Configuration for the optional SatPaq transport functionality for Group.
+     *
+     * Helper C++ class to serialize and de-serialize GroupSatPaq JSON
+     *
+     * Example: @include[doc] examples/GroupSatPaq.json
+     *
+     * @see ConfigurationObjects::Group
+     */
+    class GroupSatPaq : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(GroupSatPaq)
+
+    public:
+        /** @brief [Optional, Default: false] Enables SatPaq feature. */
+        bool                        enabled;
+
+        /** @brief The sender ID. */
+        uint16_t                    senderId;
+
+        /** @brief The talkgroup ID. */
+        uint8_t                     talkgroupId;
+
+        GroupSatPaq()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            enabled = false;
+            senderId = 0;
+            talkgroupId = 0;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const GroupSatPaq& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(senderId),
+            TOJSON_IMPL(talkgroupId)
+        };
+    }
+    static void from_json(const nlohmann::json& j, GroupSatPaq& p)
+    {
+        p.clear();
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<uint16_t>("senderId", p.senderId, j, 0);
+        getOptional<uint8_t>("talkgroupId", p.talkgroupId, j, 0);
+    }
+
+
+    //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(Group)
     /**
      * @brief Group Configuration
@@ -3226,6 +3463,15 @@ namespace AppConfigurationObjects
         /** @brief [Optional] Alias to use for inbound streams that do not have an alias component  */
         std::string                             anonymousAlias;
 
+        /** @brief [Optional] Settings necessary if the group is transported via the SatPaq protocol  */
+        GroupSatPaq                             satPaq;
+
+        /** @brief [Optional] The name of the registered transport to use  */
+        std::string                             transportName;
+
+        /** @brief [Optional, Default: false] Allows for processing of looped back packets - primarily meant for debugging  */
+        bool                                    allowLoopback;
+
         Group()
         {
             clear();
@@ -3277,6 +3523,10 @@ namespace AppConfigurationObjects
             stickyTidHangSecs = 10;
             anonymousAlias.clear();
             lbCrypto = false;
+
+            satPaq.clear();
+            transportName.clear();
+            allowLoopback = false;
         }
     };
 
@@ -3317,7 +3567,10 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(priorityTranslation),
             TOJSON_IMPL(stickyTidHangSecs),
             TOJSON_IMPL(anonymousAlias),
-            TOJSON_IMPL(lbCrypto)
+            TOJSON_IMPL(lbCrypto),
+            TOJSON_IMPL(satPaq),
+            TOJSON_IMPL(transportName),
+            TOJSON_IMPL(allowLoopback)
         };
 
         // rallypointCluster takes precedence if it has elements
@@ -3364,6 +3617,9 @@ namespace AppConfigurationObjects
         getOptional<int>("stickyTidHangSecs", p.stickyTidHangSecs, j, 10);
         getOptional<std::string>("anonymousAlias", p.anonymousAlias, j);
         getOptional<bool>("lbCrypto", p.lbCrypto, j, false);
+        getOptional<GroupSatPaq>("satPaq", p.satPaq, j);
+        getOptional<std::string>("transportName", p.transportName, j);
+        getOptional<bool>("allowLoopback", p.allowLoopback, j, false);
     }
 
 
@@ -6335,7 +6591,7 @@ namespace AppConfigurationObjects
         int                                         ioPools;
 
         /** @brief Details for producing a status report. @see RallypointServerStatusReportConfiguration */
-        RallypointServerStatusReportConfiguration                statusReport;
+        RallypointServerStatusReportConfiguration   statusReport;
 
         /** @brief Details for capacity limits and determining processing load. @see RallypointServerLimits */
         RallypointServerLimits                      limits;
@@ -6344,7 +6600,7 @@ namespace AppConfigurationObjects
         RallypointServerLinkGraph                   linkGraph;
 
         /** @brief Details concerning the Rallypoint's interaction with an external health-checker such as a load-balancer.  @see ExternalHealthCheckResponder */
-        ExternalHealthCheckResponder      externalHealthCheckResponder;
+        ExternalHealthCheckResponder                externalHealthCheckResponder;
 
         /** @brief Set to true to allow forwarding of packets received from other Rallypoints to all other Rallypoints.  *WARNING* Be exceptionally careful when enabling this capability! */
         bool                                        allowPeerForwarding;
@@ -6421,6 +6677,9 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default 0] Internal system flags */
         uint32_t                                    sysFlags;
 
+        /** @brief [Optional, Default 0] Sets the queue's normal task bias */
+        uint32_t                                    normalTaskQueueBias;
+
         RallypointServer()
         {
             clear();
@@ -6467,6 +6726,7 @@ namespace AppConfigurationObjects
             featureset.clear();
             udpStreaming.clear();
             sysFlags = 0;
+            normalTaskQueueBias = 0;
         }
     };
 
@@ -6511,7 +6771,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(featureset),
             TOJSON_IMPL(licensing),
             TOJSON_IMPL(udpStreaming),
-            TOJSON_IMPL(sysFlags)
+            TOJSON_IMPL(sysFlags),
+            TOJSON_IMPL(normalTaskQueueBias)
         };
     }
     static void from_json(const nlohmann::json& j, RallypointServer& p)
@@ -6556,6 +6817,7 @@ namespace AppConfigurationObjects
         getOptional<Featureset>("featureset", p.featureset, j);
         getOptional<RallypointUdpStreaming>("udpStreaming", p.udpStreaming, j);
         getOptional<uint32_t>("sysFlags", p.sysFlags, j, 0);
+        getOptional<uint32_t>("normalTaskQueueBias", p.normalTaskQueueBias, j, 0);
     }
 
 
@@ -7164,8 +7426,8 @@ namespace AppConfigurationObjects
             /** @brief Undefined */
             ctUndefined                     = 0,
 
-            /** @brief IP multicast */
-            ctIPMulticast                   = 1,
+            /** @brief Direct datagram */
+            ctDirectDatagram                = 1,
 
             /** @brief Rallypoint */
             ctRallypoint                    = 2

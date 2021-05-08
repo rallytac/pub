@@ -108,8 +108,8 @@ public class Engage
         void onGroupRxVolumeChanged(string id, int leftLevelPerc, int rightLevelPerc, string eventExtraJson);
         void onGroupRxDtmf(string id, string dtmfJson, string eventExtraJson);
 
-        void onGroupReconfigured(const char *pszId, const char *pEventExtraJson);
-        void onGroupReconfigurationFailed(const char *pszId, const char *pEventExtraJson);
+        void onGroupReconfigured(string id, string eventExtraJson);
+        void onGroupReconfigurationFailed(string id, string eventExtraJson);
     }
 
     public interface IHumanBiometricsNotifications
@@ -2261,7 +2261,7 @@ public class Engage
         {
             _loggingNotificationSubscribers.Add(n);
 
-            if(_loggingNotificationSubscribers.size() == 1)
+            if(_loggingNotificationSubscribers.Count() == 1)
             {
                 engageSetLoggingOutputOverride(on_ENGAGE_LOG_MESSAGE_HOOK_CALLBACK);
             }
@@ -2274,7 +2274,7 @@ public class Engage
         {
             _loggingNotificationSubscribers.Remove(n);
             
-            if(_loggingNotificationSubscribers.size() == 0)
+            if(_loggingNotificationSubscribers.Count() == 0)
             {
                 engageSetLoggingOutputOverride(null);
             }
