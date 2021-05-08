@@ -73,6 +73,7 @@ PLATFORM_API void PlatformOnThreadStarted();
 PLATFORM_API void PlatformOnThreadEnded();
 PLATFORM_API void PlatformSetThreadName(const char *nm);
 PLATFORM_API void PlatformGetThreadName(char *buff, size_t buffSize);
+PLATFORM_API void PlatformOnPlatformChangeNotification(const char *notification);
 
 #ifdef __cplusplus
 }

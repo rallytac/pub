@@ -409,6 +409,7 @@ static CrossThreadCallbackWorker *getCallback(const char *cbName)
 // ENGAGE_CB_xx_PARAMS macros.  For the others, we'll actually write all the code for each.
 ENGAGE_CB_NO_PARAMS(engineStarted)
 ENGAGE_CB_NO_PARAMS(engineStopped)
+ENGAGE_CB_NO_PARAMS(engineAudioDevicesRefreshed)
 
 ENGAGE_CB_ID_PARAM(rpPausingConnectionAttempt)
 ENGAGE_CB_ID_PARAM(rpConnecting)
@@ -562,6 +563,7 @@ NAN_METHOD(initialize)
 
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_ENGINE_STARTED, engineStarted);
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_ENGINE_STOPPED, engineStopped);
+    ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_ENGINE_AUDIO_DEVICES_REFRESHED, engineAudioDevicesRefreshed);
 
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_RP_PAUSING_CONNECTION_ATTEMPT, rpPausingConnectionAttempt);
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_RP_CONNECTING, rpConnecting);
