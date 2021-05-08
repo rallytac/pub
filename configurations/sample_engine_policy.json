@@ -12,7 +12,7 @@
     "timelines": {
         "enabled":false,
 	"storageRoot":"",
-        "maxStorageQuotaMb":128,
+        "maxStorageMb":128,
         "maxEventAgeSecs":2592000,
 	"maxEvents":10000,
 	"groomingIntervalSecs":1800
