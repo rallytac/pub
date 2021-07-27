@@ -34,10 +34,10 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="16dp"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@+id/ivCard"
         app:layout_constraintTop_toBottomOf="@+id/ivSpeaker"
-        app:srcCompat="@drawable/ic_ptt_unmuted" />
+        app:srcCompat="@drawable/ic_ptt_unmuted"
+        android:visibility="@string/show_selected_for_ptt_on_small_card"/>
 
     <TextView
         android:id="@+id/tvGroupName"

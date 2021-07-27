@@ -58,7 +58,8 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             app:srcCompat="@drawable/ic_map"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:visibility="@string/show_map_icon_on_top_icons"/>
 
         <ImageView
             android:id="@+id/ivNetwork"

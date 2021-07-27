@@ -7,7 +7,55 @@
     android:background="@color/colorBlack"
     android:fadingEdge="vertical">
 
-    <ImageView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layError"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/ivErrorIcon"
+            android:layout_width="@dimen/large_finger_touch_icon"
+            android:layout_height="@dimen/large_finger_touch_icon"
+            app:layout_constraintHeight_percent="25"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_error" />
+
+        <TextView
+            android:id="@+id/tvErrorTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/placeholder"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/large_card_primary_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ivErrorIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ivErrorIcon"
+            app:layout_constraintTop_toTopOf="@+id/ivErrorIcon" />
+
+        <TextView
+            android:id="@+id/tvErrorMsg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/large_card_primary_text_size"
+            android:text="@string/placeholder"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvErrorTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tvErrorTitle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <ImageView
         android:id="@+id/ivCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -88,4 +136,5 @@
         app:layout_constraintBottom_toBottomOf="@+id/ivNetError"
         app:layout_constraintEnd_toStartOf="@+id/ivNetError"
         app:srcCompat="@drawable/ic_net_failover" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

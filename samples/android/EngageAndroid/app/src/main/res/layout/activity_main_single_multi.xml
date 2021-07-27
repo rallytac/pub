@@ -179,7 +179,8 @@
         android:layout_marginStart="24dp"
         app:layout_constraintStart_toEndOf="@+id/ivTeam"
         app:layout_constraintTop_toTopOf="@+id/ivTeam"
-        app:srcCompat="@drawable/ic_map" />
+        app:srcCompat="@drawable/ic_map"
+        android:visibility="@string/show_map_icon_on_top_icons"/>
 
     <ImageView
         android:id="@+id/ivPreviousGroup"

@@ -7,10 +7,6 @@ apply plugin: 'com.google.gms.google-services'
 // Addition flavors that we want to build for
 def additionalFlavorsFile = "flavors/flavors.gradle"
 
-// The application ID in the final APK.  Change this string for a different
-// APK package name .
-def apkPackageName = "com.rallytac.engageandroid"
-
 android {
     flavorDimensions "version"
 
@@ -18,7 +14,7 @@ android {
         // This is the Rally Tactical Systems "reference" flavor
         reference {
             dimension "version"
-            applicationIdSuffix ".reference"
+            applicationId "com.rallytac.engageandroid.reference"
         }
     }
 
@@ -32,11 +28,13 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId apkPackageName
+        // The default application ID will be overridden by the one
+        // defined in the product flavor
+        applicationId "com.rallytac.example.package"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1254
-        versionName "1254"
+        versionCode 1275
+        versionName "1275"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         android.defaultConfig.vectorDrawables.useSupportLibrary = true
@@ -58,19 +56,11 @@ android {
         variant.outputs.all { output ->
             def apkBaseName = variant.productFlavors.get(0).name
             def SEP = "_"
-            def buildType = variant.variantData.variantConfiguration.buildType.name
+            def buildType = variant.buildType.name
             def version = variant.versionCode
-            def date = new Date()
-            def formattedDate = date.format('yyyyMMdd_HHmmss')
-            def newApkName = apkBaseName + SEP + version + SEP + buildType + SEP + formattedDate + ".apk"
+            def newApkName = apkBaseName + SEP + version + SEP + buildType + ".apk"
 
             outputFileName = new File(newApkName)
-        }
-    }
-
-    repositories {
-        maven {
-            url 'https://dl.bintray.com/rallytac/maven'
         }
     }
 }
@@ -78,9 +68,13 @@ android {
 dependencies {
     // Engage Engine
     def relType = 'release'
-    def engineVersion = '1.206.9044'
+    def engineVersion = '1.210.9048'
 
-    implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'
+    // From a binary repository such as Maven
+    // implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'
+    
+    // From a local file tree - replace <path_to_the_aar_file> with a valid path in youe environment
+    implementation fileTree(dir: '<path_to_the_aar_file>', include: ["engage-engine-" + relType + "-" + engineVersion + ".aar"])
 
     // Android goodies
     implementation 'androidx.appcompat:appcompat:1.0.0'
