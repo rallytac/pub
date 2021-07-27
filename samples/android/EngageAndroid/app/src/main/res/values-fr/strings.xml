@@ -213,7 +213,7 @@
     <string name="share_mission_mission_uploaded">Mission téléchargée</string>
     <string name="share_mission_share">Partager</string>
     <string name="share_mission_upload_to_mission_hub">Télécharger sur le hub de mission</string>
-    <string name="tap_the_qr_code_to_toggle_zoom">Appuyez sur le code QR pour basculer le zoom</string>
+    <string name="tap_the_qr_code_to_zoom">Appuyez sur le code QR pour basculer le zoom</string>
     <string name="text_message_hint_enter_text_message">saisir un message texte</string>
     <string name="text_message_send_message">Envoyer le message</string>
     <string name="tx_status_reason_akready_tx">Transmettant déjà sur ce groupe</string>

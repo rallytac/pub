@@ -24,6 +24,7 @@
     <dimen name="ptt_width_large">260dp</dimen>
     <dimen name="ptt_bottom">8dp</dimen>
     <dimen name="ptt_end">8dp</dimen>
+    <string name="show_map_icon_on_top_icons" translatable="false">@string/visibility_visible</string>
 
     <!-- Information -->
     <string name="ui_sizing_type" translatable="false">default</string>
@@ -56,6 +57,7 @@
 
     <string name="show_priority_icon_on_large_card" translatable="false">@string/visibility_visible</string>
     <string name="show_priority_icon_on_small_card" translatable="false">@string/visibility_gone</string>
+    <string name="show_selected_for_ptt_on_small_card" translatable="false">@string/visibility_visible</string>
     <string name="show_priority_icon_on_app_single_view" translatable="false">@string/visibility_gone</string>
     <string name="show_priority_icon_on_app_multi_view" translatable="false">@string/visibility_gone</string>
     <string name="show_tx_alert_icon_on_app_single_view" translatable="false">@string/visibility_visible</string>
@@ -67,5 +69,14 @@
     <string name="show_top_icons_in_multi_view" translatable="false">@string/visibility_gone</string>
 
     <bool name="opt_supports_ept">false</bool>
+    <bool name="opt_supports_fdx">true</bool>
     <bool name="opt_supports_anonymous_alias">false</bool>
+    <bool name="opt_supports_unlimited_tx">false</bool>
+    <bool name="opt_supports_alert">true</bool>
+    <bool name="opt_supports_enterprise_id">false</bool>
+    <bool name="opt_auto_generate_sample_mission">true</bool>
+    <bool name="opt_supports_ui_theme">false</bool>
+    <bool name="opt_log_to_engage">false</bool>
+
+    <integer name="opt_min_mission_generate_passphrase_len">0</integer>
 </resources>

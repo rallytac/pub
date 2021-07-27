@@ -105,6 +105,7 @@
         <activity
             android:name=".CertStoreListActivity"
             android:label="@string/title_activity_certstores" />
+
         <activity
             android:name=".OrientationIndependentQrCodeScanActivity"
             android:screenOrientation="fullSensor"
@@ -114,13 +115,9 @@
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map" />
-        <activity android:name=".ShareMissionActivity">
-            <intent-filter>
-                <action android:name="@string/share_mission_activity_action" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+        <activity
+            android:name=".ShareMissionActivity"
+            android:label="@string/title_share_mission_share"/>
         <activity android:name=".AboutActivity" />
         <activity android:name=".DeveloperTestActivity" />
         <activity

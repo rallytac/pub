@@ -20,7 +20,7 @@
 
     <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
     <string name="opt_lock_orientation" translatable="false">1</string>
-    <string name="opt_ptt_latching" translatable="false">0</string>
+    <string name="opt_ptt_latching" translatable="false">1</string>
     <string name="opt_experimental_general_enabled" translatable="false">1</string>
     <string name="opt_experimental_human_biometrics_enabled" translatable="false">1</string>
     <string name="opt_firebase_analytics_enabled" translatable="false">1</string>

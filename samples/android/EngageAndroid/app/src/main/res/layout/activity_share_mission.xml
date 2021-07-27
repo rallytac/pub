@@ -88,8 +88,8 @@
 
                     <ImageView
                         android:id="@+id/ivQrCode"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
@@ -107,18 +107,25 @@
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="8dp"
-                        android:text="@string/tap_the_qr_code_to_toggle_zoom"
+                        android:gravity="center"
+                        android:text="@string/tap_the_qr_code_to_zoom"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/ivQrCode" />
 
-                    <Switch
-                        android:id="@+id/swUpload"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/tvOtherOptions"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="16dp"
-                        android:text="@string/share_mission_upload_to_mission_hub"
+                        android:layout_marginEnd="8dp"
+                        android:gravity="center"
+                        android:text="@string/other_sharing_options"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/tvQrCodeDescription" />
 
@@ -127,7 +134,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="8dp"
                         android:layout_marginEnd="8dp"
                         android:onClick="onClickShare"
                         android:text="@string/share_mission_share"
@@ -136,14 +143,23 @@
                         app:layout_constraintTop_toBottomOf="@+id/swUpload" />
 
                     <Switch
+                        android:id="@+id/swUpload"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/share_mission_upload_to_mission_hub"
+                        app:layout_constraintEnd_toEndOf="@+id/swShareJson"
+                        app:layout_constraintTop_toBottomOf="@+id/swShareJson" />
+
+                    <Switch
                         android:id="@+id/swShareJson"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_marginEnd="8dp"
                         android:text="@string/share_json"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvQrCodeDescription" />
+                        app:layout_constraintTop_toBottomOf="@+id/tvOtherOptions" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

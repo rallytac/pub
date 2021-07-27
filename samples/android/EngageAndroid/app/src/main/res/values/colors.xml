@@ -7,6 +7,9 @@
     <color name="colorSentMessage">#007777</color>
     <color name="colorReceivedMessage">#5f5f5f</color>
 
+    <color name="colorMainDark">#000000</color>
+    <color name="colorMainLight">#FFB1B1B1</color>
+
     <color name="normalTalker">#5f5f5f</color>
     <color name="priorityTalker">#D3491E</color>
     <color name="emergencyTalker">#FF0000</color>

@@ -51,6 +51,7 @@
             android:key="network_multicastFailover.enabled"
             android:title="@string/set_connectivity_enable_multicast_failover"/>
 
+        <!--
         <ListPreference
             android:defaultValue="10"
             android:entries="@array/multicast_failover_secs_names"
@@ -60,6 +61,7 @@
             android:positiveButtonText="@null"
             android:title="@string/set_connectivity_multicast_failover_threshold"
             android:dependency="network_multicastFailover.enabled"/>
+        -->
     </PreferenceScreen>
 
 
@@ -134,10 +136,12 @@
                 android:positiveButtonText="@null"
                 android:title="@string/set_android_audio_api" />
 
+            <!--
             <SwitchPreference
                 android:defaultValue="false"
                 android:key="user_audio_jitter_buffer_low_latency.enabled"
                 android:title="@string/set_connectivity_enable_jitter_buffer_low_latency"/>
+            -->
         </PreferenceCategory>
 
         <PreferenceCategory android:title="@string/set_hdr_aec">
@@ -146,7 +150,6 @@
                 android:title="@string/set_aec_enable"
                 android:defaultValue="true"/>
 
-            <!--
             <ListPreference
                 android:defaultValue="5"
                 android:entries="@array/aec_mode_names"
@@ -156,7 +159,6 @@
                 android:positiveButtonText="@null"
                 android:title="@string/set_aec_aggressiveness"
                 android:dependency="user_audio.aec.enabled" />
-            -->
 
             <SwitchPreference
                 android:key="user_audio.aec.cng"
@@ -253,6 +255,14 @@
                 android:defaultValue="false"
                 android:key="user_ui.pttLatching"
                 android:title="@string/set_user_interface_latch_unlatch_ptt" />
+
+            <!--
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="user_theme.mode.dark"
+                android:title="@string/set_user_interface_dark_mode" />
+            -->
+
             <!--
             <SwitchPreference
                 android:defaultValue="false"
@@ -300,10 +310,22 @@
 
     <PreferenceCategory android:title="@string/set_hdr_experimental" android:key="prefcat_experimental_general">
         <SwitchPreference
+            android:key="user_experiment.tx.smoothing.enable"
+            android:title="@string/set_experimental_tx_smoothing"
+            android:defaultValue="true"
+            android:enabled="true"/>
+
+        <SwitchPreference
+            android:key="user_experiment.tx.allow_dtx"
+            android:title="@string/set_experimental_tx_dtx"
+            android:defaultValue="true"
+            android:enabled="true"/>
+
+        <SwitchPreference
             android:key="user_experiment.discovery.ssdp.enable"
             android:title="@string/set_experimental_discover_ssdp_assets"
             android:defaultValue="false"
-            android:enabled="false"/>
+            android:enabled="true"/>
 
         <!-- CISTECH -->
         <SwitchPreference
