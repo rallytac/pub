@@ -54,7 +54,7 @@ public class SonimBroadcastReceiver extends BroadcastReceiver
             return;
         }
 
-        Log.d(TAG, "onReceive: (" + action + "): " + intent.toString());//NON-NLS
+        Globals.getLogger().d(TAG, "onReceive: (" + action + "): " + intent.toString());//NON-NLS
 
         if(action.equals(ACTION_PTT_DOWN_SONIM))
         {
@@ -67,7 +67,7 @@ public class SonimBroadcastReceiver extends BroadcastReceiver
         }
         else
         {
-            Log.e(TAG, "Unhandled notification: (" + action + "): " + intent.toString());//NON-NLS
+            Globals.getLogger().e(TAG, "Unhandled notification: (" + action + "): " + intent.toString());//NON-NLS
         }
     }
 }

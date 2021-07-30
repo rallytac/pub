@@ -108,7 +108,7 @@ public class LicenseActivationTask extends AsyncTask<String, Void, String>
         }
         catch (Exception e)
         {
-            Log.e(TAG, "exception: _result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
+            Globals.getLogger().e(TAG, "exception: _result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
             return null;
         }
 
@@ -202,17 +202,17 @@ public class LicenseActivationTask extends AsyncTask<String, Void, String>
                 br.close();
 
                 JSONObject rc = new JSONObject(sb.toString());
-                Log.d(TAG, rc.toString());
+                Globals.getLogger().d(TAG, rc.toString());
 
                 _result = rc.getInt("returnCode");//NON-NLS
                 _resultMessage = rc.optString("returnCodeDescr", null);//NON-NLS
                 _resultActivationCode = rc.optString("activationCode", null);//NON-NLS
 
-                Log.d(TAG, "_result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
+                Globals.getLogger().d(TAG, "_result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
             }
             else
             {
-                Log.e(TAG, "exception: HTTP failure " + httpResultCode);//NON-NLS
+                Globals.getLogger().e(TAG, "exception: HTTP failure " + httpResultCode);//NON-NLS
                 throw new Exception("HTTP failure " + httpResultCode);
             }
         }
@@ -221,7 +221,7 @@ public class LicenseActivationTask extends AsyncTask<String, Void, String>
             _result = -1;
             _activationCode = null;
             _resultMessage = ex.getLocalizedMessage();
-            Log.e(TAG, "exception: _result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
+            Globals.getLogger().e(TAG, "exception: _result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
         }
         finally
         {
@@ -231,7 +231,7 @@ public class LicenseActivationTask extends AsyncTask<String, Void, String>
             }
         }
 
-        Log.d(TAG, "_result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
+        Globals.getLogger().d(TAG, "_result=" + _result + ", _resultMessage=" + _resultMessage + ", _resultActivationCode=" + _resultActivationCode);//NON-NLS
 
         return null;
     }

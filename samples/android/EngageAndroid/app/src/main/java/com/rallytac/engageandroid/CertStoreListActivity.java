@@ -179,7 +179,7 @@ public class CertStoreListActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        Log.d(TAG, "onActivityResult");//NON-NLS
+        Globals.getLogger().d(TAG, "onActivityResult");//NON-NLS
 
         if(resultCode == RESULT_OK)
         {

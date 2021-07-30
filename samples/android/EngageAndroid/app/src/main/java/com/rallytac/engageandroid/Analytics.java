@@ -5,6 +5,7 @@ public class Analytics
     public static final String ENGINE_STARTED = "ENGINE_STARTED";//NON-NLS
     public static final String ENGINE_START_FAILED = "ENGINE_START_FAILED";//NON-NLS
     public static final String ENGINE_STOPPED = "ENGINE_STOPPED";//NON-NLS
+    public static final String ENGINE_AUDIO_DEVICES_REFRESH = "ENGINE_AUDIO_DEVICES_REFRESH";//NON-NLS
 
     public static final String GROUP_CREATED = "GRP_CREATED";//NON-NLS
     public static final String GROUP_CREATE_FAILED = "GRP_CREATE_FAILED";//NON-NLS

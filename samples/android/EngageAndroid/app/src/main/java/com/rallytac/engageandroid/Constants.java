@@ -153,4 +153,6 @@ public class Constants
     public final static int PICK_CERTSTORE_FILE_REQUEST_CODE = 55;
     public final static int PICK_QR_MISSION_FILE_REQUEST_CODE = 56;
 
+    public final static int PICK_ENTERPRISE_ID_FILE_REQUEST_CODE = 57;
+    public final static int PICK_QR_ENTERPRISE_ID_FILE_REQUEST_CODE = 58;
 }

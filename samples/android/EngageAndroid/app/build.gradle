@@ -42,7 +42,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -66,7 +66,7 @@ android {
 }
 
 dependencies {
-    // Engage Engine
+    // Engage Engine - change this to use a particular version
     def relType = 'release'
     def engineVersion = '1.210.9048'
 

@@ -18,7 +18,7 @@ public class PreferenceKeys
 
     public static String NETWORK_BINDING_NIC_NAME = "network_bindingNic";//NON-NLS
     public static String NETWORK_MULTICAST_FAILOVER_ENABLED = "network_multicastFailover.enabled";//NON-NLS
-    public static String NETWORK_MULTICAST_FAILOVER_SECS = "network_multicastFailover.secs";//NON-NLS
+    //public static String NETWORK_MULTICAST_FAILOVER_SECS = "network_multicastFailover.secs";//NON-NLS
 
 
     public static String ACTIVE_MISSION_CONFIGURATION_JSON = "activeConfiguration_jsonTemplate";//NON-NLS
@@ -42,7 +42,7 @@ public class PreferenceKeys
     public static String USER_AUDIO_AEC_CNG = "user_audio.aec.cng";//NON-NLS
     public static String USER_AUDIO_AEC_SPEAKER_TAIL_MS = "user_audio.aec.speakerTailMs";//NON-NLS
     public static String USER_AUDIO_AEC_DISABLE_STEREO = "user_audio.aec.disableStereo";//NON-NLS
-    public static String USER_AUDIO_JITTER_LOW_LATENCY_ENABLED = "user_audio_jitter_buffer_low_latency.enabled";//NON-NLS
+    //public static String USER_AUDIO_JITTER_LOW_LATENCY_ENABLED = "user_audio_jitter_buffer_low_latency.enabled";//NON-NLS
     public static String USER_AUDIO_ANDROID_AUDIO_API = "user_audio.android.api";//NON-NLS
     public static String USER_AUDIO_ENGINE_INTERNAL_AUDIO = "user_audio.engine.internal.audio";//NON-NLS
 
@@ -80,6 +80,10 @@ public class PreferenceKeys
     public static String USER_NOTIFY_VIBRATIONS = "user_notify.vibrations";//NON-NLS
     public static String USER_NOTIFY_PTT_EVERY_TIME = "user_notify.ptt_everyTime";//NON-NLS
 
+
+    public static String USER_EXPERIMENT_ENABLE_TX_SMOOTHING = "user_experiment.tx.smoothing.enable";//NON-NLS
+    public static String USER_EXPERIMENT_ALLOW_DTX = "user_experiment.tx.allow_dtx";//NON-NLS
+
     public static String USER_EXPERIMENT_ENABLE_SSDP_DISCOVERY = "user_experiment.discovery.ssdp.enable";//NON-NLS
 
     public static String USER_EXPERIMENT_ENABLE_CISTECH_GV1_DISCOVERY = "user_experiment.discovery.cistech.gv1.enable";//NON-NLS
@@ -113,6 +117,7 @@ public class PreferenceKeys
     public static String USER_LICENSING_KEY = "user_licensing.key";//NON-NLS
     public static String USER_LICENSING_ACTIVATION_CODE = "user_licensing.activationCode";//NON-NLS
     public static String CHECKED_FOR_LICENSING_DONE = "checkedForLicensingDone";//NON-NLS
+    public static String USER_ENTERPRISE_ID = "user_enterprise_id";//NON-NLS
 
     public static String DEVELOPER_MODE_ACTIVE = "developer_modeActive";//NON-NLS
     public static String DEVELOPER_USE_DEV_LICENSING_SYSTEM = "developer_useDevLicensingSystem";//NON-NLS
@@ -123,6 +128,7 @@ public class PreferenceKeys
     public static String USER_CERT_DEFAULT_ID = "user_cert.default.id";//NON-NLS
     public static String USER_CERT_DEFAULT_KEY = "user_cert.default.key";//NON-NLS
     public static String USER_CERT_DEFAULT_CA = "user_cert.default.ca";//NON-NLS
+    public static String USER_THEME_DARK_MODE = "user_theme.mode.dark";//NON-NLS
 
     public static String ENGINE_POLICY_JSON = "engine_policy_json";//NON-NLS
 }

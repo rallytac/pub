@@ -89,12 +89,12 @@ public class AudioPlayerManager
         /*
         if(id == _currentPlayResourceId)
         {
-            Log.i(TAG, "playResource: play requested for already-playing resource - ignoring");//NON-NLS
+            Globals.getLogger().i(TAG, "playResource: play requested for already-playing resource - ignoring");//NON-NLS
             return;
         }
         */
 
-        Log.d(TAG, "playResource: play starting id=" + id + ", left=" + leftVolume + ", right=" + rightVolume);//NON-NLS
+        Globals.getLogger().d(TAG, "playResource: play starting id=" + id + ", left=" + leftVolume + ", right=" + rightVolume);//NON-NLS
 
         final MediaPlayer p = getPlayer(id);
         if(p != null)
@@ -106,7 +106,7 @@ public class AudioPlayerManager
                 @Override
                 public void onCompletion(MediaPlayer mp)
                 {
-                    Log.d(TAG, "playResource: play complete id=" + id);//NON-NLS
+                    Globals.getLogger().d(TAG, "playResource: play complete id=" + id);//NON-NLS
                     if(id == _currentPlayResourceId)
                     {
                         _currentPlayResourceId = -1;
@@ -132,7 +132,7 @@ public class AudioPlayerManager
         }
         else
         {
-            Log.e(TAG, "playResource: cannot obtain a media player for resource " + id);//NON-NLS
+            Globals.getLogger().e(TAG, "playResource: cannot obtain a media player for resource " + id);//NON-NLS
             throw new Exception("cannot obtain a media player for resource " + id);
         }
     }

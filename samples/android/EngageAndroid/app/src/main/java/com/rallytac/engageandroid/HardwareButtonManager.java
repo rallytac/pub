@@ -66,7 +66,7 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
     @Override
     public void onBluetoothDeviceConnected()
     {
-        Log.d(TAG, "onBluetoothDeviceConnected");//NON-NLS
+        Globals.getLogger().d(TAG, "onBluetoothDeviceConnected");//NON-NLS
         if(_btNotification != null)
         {
             _btNotification.onBluetoothDeviceConnected();
@@ -76,7 +76,7 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
     @Override
     public void onBluetoothDeviceDisconnected()
     {
-        Log.d(TAG, "onBluetoothDeviceDisconnected");//NON-NLS
+        Globals.getLogger().d(TAG, "onBluetoothDeviceDisconnected");//NON-NLS
         if(_btNotification != null)
         {
             _btNotification.onBluetoothDeviceDisconnected();
