@@ -35,6 +35,7 @@ import android.preference.PreferenceManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 
+import android.system.Os;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -274,7 +275,7 @@ public class EngageApplication
     {
         try
         {
-            //Log.w(TAG, "wakeup() called but not processed at this time!!");
+            //Globals.getLogger().w(TAG, "wakeup() called but not processed at this time!!");
 
             String launchActivityName = Utils.getMetaData(Constants.KEY_LAUNCH_ACTIVITY);
             if(!Utils.isEmptyString(launchActivityName))
@@ -444,7 +445,7 @@ public class EngageApplication
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            Log.i(TAG, "{DBG}: MyApplicationIntentReceiver: " + intent.toString());
+            Globals.getLogger().i(TAG, "{DBG}: MyApplicationIntentReceiver: " + intent.toString());
 
             String action = intent.getAction();
             if(action == null)
@@ -459,7 +460,7 @@ public class EngageApplication
             }
 
             action = action.substring(pos + 1);
-            Log.i(TAG, "{DBG}: MyApplicationIntentReceiver: action=" + action);
+            Globals.getLogger().i(TAG, "{DBG}: MyApplicationIntentReceiver: action=" + action);
 
             if(action.compareTo(getString(R.string.app_intent_ptt_on)) == 0)
             {
@@ -504,7 +505,7 @@ public class EngageApplication
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            Log.i(TAG, "{DBG}: " + intent.toString());
+            Globals.getLogger().i(TAG, "{DBG}: " + intent.toString());
 
             String action = intent.getAction();
             if(action == null)
@@ -512,7 +513,7 @@ public class EngageApplication
                 return;
             }
 
-            Log.i(TAG, "{DBG}: action=" + action);
+            Globals.getLogger().i(TAG, "{DBG}: action=" + action);
 
             if(action.compareTo(WifiManager.RSSI_CHANGED_ACTION) == 0)
             {
@@ -539,7 +540,7 @@ public class EngageApplication
                     NetworkInfo info1 = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
                     NetworkInfo info2 = intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
 
-                    Log.i(TAG, "{DBG}: info1=" + info1);
+                    Globals.getLogger().i(TAG, "{DBG}: info1=" + info1);
 
                     if (info1 != null)
                     {
@@ -627,7 +628,7 @@ public class EngageApplication
             }
             else
             {
-                Log.w(TAG, "{DBG}: unhandled action '" + action + "'");
+                Globals.getLogger().w(TAG, "{DBG}: unhandled action '" + action + "'");
             }
         }
     }
@@ -730,10 +731,8 @@ public class EngageApplication
 
             try
             {
-
                 Process process = Runtime.getRuntime().exec( "logcat -c");
                 process = Runtime.getRuntime().exec( "logcat -f " + logFile);
-
             }
             catch ( IOException e )
             {
@@ -754,7 +753,7 @@ public class EngageApplication
 
     public void ensureAllIsGood()
     {
-        Log.d(TAG, "ensureAllIsGood");
+        Globals.getLogger().d(TAG, "ensureAllIsGood");
         registerActivityLifecycleCallbacks(this);
         startService(new Intent(this, EngageService.class));
     }
@@ -762,12 +761,26 @@ public class EngageApplication
     @Override
     public void onCreate()
     {
-        Log.d(TAG, "onCreate");
-
         super.onCreate();
+
+        // Its important to set this stuff as soon as possible!
+        Engine.setApplicationContext(this.getApplicationContext());
+        Globals.setEngageApplication(this);
+        Globals.setContext(getApplicationContext());
+        Globals.setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this));
+        Globals.setAudioPlayerManager(new AudioPlayerManager(this));
+
+        ((SimpleLogger)Globals.getLogger()).setLogToEngage(false);
+
+        Globals.getLogger().d(TAG, "onCreate");
 
         _engine = new Engine();
         _engine.initialize();
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_log_to_engage))
+        {
+            ((SimpleLogger) Globals.getLogger()).setLogToEngage(true);
+        }
 
         // We don't want logging callbacks.  But put this code in anyway to show how its done
         //getEngine().addLoggingListener(this);
@@ -779,28 +792,18 @@ public class EngageApplication
 
         loadAndroidAudioDeviceCache();
 
-        // Its important to set this as soon as possible!
-        Engine.setApplicationContext(this.getApplicationContext());
-
         // Note: This is for developer testing only!!
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         {
             try
             {
-                //Os.setenv("ENGAGE_OVERRIDE_DEVICE_ID", "$RTS$DELETEME01", true);
-                //Os.setenv("ENGAGE_LICENSE_CHECK_INTERVAL_MS", "5000", true);
-
+                Os.setenv("ENGAGE_FORCE_CRASH_ON_TX", "Y", true);
             }
             catch (Exception e)
             {
-                Log.e(TAG, "cannot set 'ENGAGE_OVERRIDE_DEVICE_ID' environment variable");
+                Globals.getLogger().e(TAG, "cannot set 'ENGAGE_OVERRIDE_DEVICE_ID' environment variable");
             }
         }
-
-        Globals.setEngageApplication(this);
-        Globals.setContext(getApplicationContext());
-        Globals.setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this));
-        Globals.setAudioPlayerManager(new AudioPlayerManager(this));
 
         setupDirectories();
         //setupFilesystemLogging();
@@ -826,7 +829,7 @@ public class EngageApplication
     @Override
     public void onTerminate()
     {
-        Log.d(TAG, "onTerminate");
+        Globals.getLogger().d(TAG, "onTerminate");
         stopDeviceMonitor();
         stopAppIntentReceiver();
 
@@ -848,7 +851,7 @@ public class EngageApplication
     @Override
     public void onActivityCreated(Activity activity, Bundle bundle)
     {
-        Log.d(TAG, "onActivityCreated: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityCreated: " + activity.toString());
         /*
         if(!_hasEngineBeenInitialized)
         {
@@ -867,50 +870,50 @@ public class EngageApplication
     @Override
     public void onActivityStarted(Activity activity)
     {
-        Log.d(TAG, "onActivityStarted: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityStarted: " + activity.toString());
     }
 
     @Override
     public void onActivityResumed(Activity activity)
     {
-        Log.d(TAG, "onActivityResumed: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityResumed: " + activity.toString());
     }
 
     @Override
     public void onActivityPaused(Activity activity)
     {
-        Log.d(TAG, "onActivityPaused: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityPaused: " + activity.toString());
     }
 
     @Override
     public void onActivityStopped(Activity activity)
     {
-        Log.d(TAG, "onActivityStopped: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityStopped: " + activity.toString());
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle bundle)
     {
-        Log.d(TAG, "onActivitySaveInstanceState: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivitySaveInstanceState: " + activity.toString());
     }
 
     @Override
     public void onActivityDestroyed(Activity activity)
     {
-        Log.d(TAG, "onActivityDestroyed: " + activity.toString());
+        Globals.getLogger().d(TAG, "onActivityDestroyed: " + activity.toString());
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder)
     {
-        Log.d(TAG, "onServiceConnected: " + name.toString() + ", " + binder.toString());
+        Globals.getLogger().d(TAG, "onServiceConnected: " + name.toString() + ", " + binder.toString());
         //_svc = ((EngageService.EngageServiceBinder)binder).getService();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name)
     {
-        Log.d(TAG, "onServiceDisconnected: " + name.toString());
+        Globals.getLogger().d(TAG, "onServiceDisconnected: " + name.toString());
         //cleanupServiceConnection();
         //_svc = null;
     }
@@ -918,7 +921,7 @@ public class EngageApplication
     @Override
     public void onBindingDied(ComponentName name)
     {
-        Log.d(TAG, "onBindingDied: " + name.toString());
+        Globals.getLogger().d(TAG, "onBindingDied: " + name.toString());
         //cleanupServiceConnection();
         //_svc = null;
     }
@@ -926,7 +929,7 @@ public class EngageApplication
     @Override
     public void onNullBinding(ComponentName name)
     {
-        Log.d(TAG, "onNullBinding: " + name.toString());
+        Globals.getLogger().d(TAG, "onNullBinding: " + name.toString());
         //cleanupServiceConnection();
         //_svc = null;
     }
@@ -1208,7 +1211,7 @@ public class EngageApplication
             }
             catch (Exception e)
             {
-                Log.d(TAG, "stop: exception");
+                Globals.getLogger().d(TAG, "stop: exception");
             }
         }
     }
@@ -1341,7 +1344,7 @@ public class EngageApplication
 
     public void startHardwareButtonManager()
     {
-        Log.d(TAG, "startHardwareButtonManager");
+        Globals.getLogger().d(TAG, "startHardwareButtonManager");
         _hardwareButtonManager = new HardwareButtonManager(this, this, this);
         _hardwareButtonManager.start();
     }
@@ -1357,7 +1360,7 @@ public class EngageApplication
 
     public void startLocationUpdates()
     {
-        Log.d(TAG, "startLocationUpdates");
+        Globals.getLogger().d(TAG, "startLocationUpdates");
         stopLocationUpdates();
 
         ActiveConfiguration.LocationConfiguration lc = getActiveConfiguration().getLocationConfiguration();
@@ -1376,7 +1379,7 @@ public class EngageApplication
 
     public void stopLocationUpdates()
     {
-        Log.d(TAG, "stopLocationUpdates");
+        Globals.getLogger().d(TAG, "stopLocationUpdates");
         if(_locationManager != null)
         {
             _locationManager.stop();
@@ -1386,7 +1389,7 @@ public class EngageApplication
 
     public void setMissionChangedStatus(boolean s)
     {
-        Log.d(TAG, "setMissionChangedStatus: " + s);
+        Globals.getLogger().d(TAG, "setMissionChangedStatus: " + s);
         _missionChangedStatus = s;
     }
 
@@ -1399,7 +1402,7 @@ public class EngageApplication
     {
         if(pd == null)
         {
-            Log.w(TAG, "sendUpdatedPd with null PD");
+            Globals.getLogger().w(TAG, "sendUpdatedPd with null PD");
             return;
         }
 
@@ -1407,7 +1410,7 @@ public class EngageApplication
         {
             if(getActiveConfiguration() != null)
             {
-                Log.d(TAG, "sendUpdatedPd pd=" + pd.toString());
+                Globals.getLogger().d(TAG, "sendUpdatedPd pd=" + pd.toString());
 
                 if(getActiveConfiguration().getMissionGroups() != null)
                 {
@@ -1425,21 +1428,21 @@ public class EngageApplication
 
                     if(!anyPresenceGroups)
                     {
-                        Log.w(TAG, "sendUpdatedPd but no presence groups");
+                        Globals.getLogger().w(TAG, "sendUpdatedPd but no presence groups");
                     }
                     else
                     {
-                        Log.i(TAG, "sendUpdatedPd sent updated PD: " + pdString);
+                        Globals.getLogger().i(TAG, "sendUpdatedPd sent updated PD: " + pdString);
                     }
                 }
                 else
                 {
-                    Log.w(TAG, "sendUpdatedPd but no mission groups");
+                    Globals.getLogger().w(TAG, "sendUpdatedPd but no mission groups");
                 }
             }
             else
             {
-                Log.w(TAG, "sendUpdatedPd but no active configuration");
+                Globals.getLogger().w(TAG, "sendUpdatedPd but no active configuration");
             }
         }
         catch (Exception e)
@@ -1452,7 +1455,7 @@ public class EngageApplication
     @Override
     public void onLocationUpdated(Location loc)
     {
-        Log.d(TAG, "onLocationUpdated: " + loc.toString());
+        Globals.getLogger().d(TAG, "onLocationUpdated: " + loc.toString());
         updateCachedPdLocation(loc);
         sendUpdatedPd(buildPd());
     }
@@ -1529,7 +1532,7 @@ public class EngageApplication
 
             rc = obj.toString();
 
-            //Log.e(TAG, rc);
+            //Globals.getLogger().e(TAG, rc);
         }
         catch (Exception e)
         {
@@ -1560,6 +1563,18 @@ public class EngageApplication
 
             if(group.optInt(Engine.JsonFields.Group.type, 0) == 1)
             {
+                /*
+                {
+                    JSONArray inboundRtpPayloadTypeTranslations = new JSONArray();
+                    JSONObject translation = new JSONObject();
+
+                    translation.put("external", 117);
+                    translation.put("engage", 77);
+                    inboundRtpPayloadTypeTranslations.put(translation);
+                    group.put("inboundRtpPayloadTypeTranslations", inboundRtpPayloadTypeTranslations);
+                }
+                */
+
                 if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_anonymous_alias) && gd.anonymousAlias)
                 {
                     group.put(Engine.JsonFields.Group.anonymousAlias, Globals.getContext().getString(R.string.anonymous_alias));
@@ -1586,6 +1601,26 @@ public class EngageApplication
                 }
 
                 group.put(Engine.JsonFields.Group.Audio.objectName, audio);
+
+                // TXAudio
+                {
+                    try
+                    {
+                        JSONObject txAudio = group.optJSONObject(Engine.JsonFields.TxAudio.objectName);
+                        if(txAudio == null)
+                        {
+                            txAudio = new JSONObject();
+                        }
+
+                        txAudio.put(Engine.JsonFields.TxAudio.enableSmoothing, _activeConfiguration.getEnforceTransmitSmoothing());
+                        txAudio.put(Engine.JsonFields.TxAudio.dtx, _activeConfiguration.getAllowDtx());
+                        group.put(Engine.JsonFields.TxAudio.objectName, txAudio);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
 
                 // If we have EPT active then add in priority translation
                 if(gd.ept > 0)
@@ -1619,7 +1654,10 @@ public class EngageApplication
                 }
             }
 
-            if(_activeConfiguration.getUseRp())
+            // This group may be forced in multicast or rallypoint mode - check it!
+            GroupDescriptor.GroupNetworkMode networkMode = gd.getNetworkMode();
+
+            if((networkMode == GroupDescriptor.GroupNetworkMode.nothingSpecial || networkMode == GroupDescriptor.GroupNetworkMode.rallypointOnly) && _activeConfiguration.getUseRp())
             {
                 JSONObject rallypoint = new JSONObject();
 
@@ -1641,7 +1679,7 @@ public class EngageApplication
                 group.put(Engine.JsonFields.Group.enableMulticastFailover, _activeConfiguration.getMulticastFailoverConfiguration().enabled);
                 group.put(Engine.JsonFields.Group.multicastFailoverSecs, _activeConfiguration.getMulticastFailoverConfiguration().thresholdSecs);
             }
-            else
+            else if((networkMode == GroupDescriptor.GroupNetworkMode.nothingSpecial || networkMode == GroupDescriptor.GroupNetworkMode.multicastOnly))
             {
                 JSONObject txOptions = new JSONObject();
 
@@ -1719,7 +1757,7 @@ public class EngageApplication
 
     public void createAllGroupObjects()
     {
-        Log.d(TAG, "createAllGroupObjects");
+        Globals.getLogger().d(TAG, "createAllGroupObjects");
         try
         {
             for(GroupDescriptor gd : _activeConfiguration.getMissionGroups())
@@ -1751,7 +1789,7 @@ public class EngageApplication
 
                 if(ok)
                 {
-                    Log.d(TAG, "creating " + gd.id + " (" + gd.name + ") of mission " + _activeConfiguration.getMissionName());
+                    Globals.getLogger().d(TAG, "creating " + gd.id + " (" + gd.name + ") of mission " + _activeConfiguration.getMissionName());
 
                     getEngine().engageCreateGroup(groupJson);
                     if(gd.type == GroupDescriptor.Type.gtAudio)
@@ -1762,7 +1800,7 @@ public class EngageApplication
                 }
                 else
                 {
-                    Log.w(TAG, "not creating " + gd.id + " (" + gd.name + ") of mission " + _activeConfiguration.getMissionName() + " because it's configuration is not suitable at this time");
+                    Globals.getLogger().w(TAG, "not creating " + gd.id + " (" + gd.name + ") of mission " + _activeConfiguration.getMissionName() + " because it's configuration is not suitable at this time");
                 }
             }
         }
@@ -1774,7 +1812,7 @@ public class EngageApplication
 
     public void joinSelectedGroups()
     {
-        Log.d(TAG, "joinSelectedGroups");
+        Globals.getLogger().d(TAG, "joinSelectedGroups");
 
         try
         {
@@ -1792,7 +1830,7 @@ public class EngageApplication
 
     public void joinGroup(String id)
     {
-        Log.d(TAG, "joinGroup " + id);
+        Globals.getLogger().d(TAG, "joinGroup " + id);
 
         try
         {
@@ -1807,7 +1845,7 @@ public class EngageApplication
 
     public void leaveGroup(String id)
     {
-        Log.d(TAG, "leaveGroup " + id);
+        Globals.getLogger().d(TAG, "leaveGroup " + id);
 
         try
         {
@@ -1834,7 +1872,7 @@ public class EngageApplication
 
     public void leaveAllGroups()
     {
-        Log.d(TAG, "leaveAllGroups");
+        Globals.getLogger().d(TAG, "leaveAllGroups");
         try
         {
             stopGroupHealthCheckTimer();
@@ -1851,7 +1889,7 @@ public class EngageApplication
 
     private void startGroupHealthCheckerTimer()
     {
-        Log.d(TAG, "startGroupHealthCheckerTimer");
+        Globals.getLogger().d(TAG, "startGroupHealthCheckerTimer");
         if(_groupHealthCheckTimer == null)
         {
             _groupHealthCheckTimer = new Timer();
@@ -1868,7 +1906,7 @@ public class EngageApplication
 
     private void stopGroupHealthCheckTimer()
     {
-        Log.d(TAG, "stopGroupHealthCheckTimer");
+        Globals.getLogger().d(TAG, "stopGroupHealthCheckTimer");
         if(_groupHealthCheckTimer != null)
         {
             _groupHealthCheckTimer.cancel();
@@ -1919,7 +1957,7 @@ public class EngageApplication
 
     public void playAssetDiscoveredNotification()
     {
-        Log.d(TAG, "playAssetDiscoveredOnNotification");
+        Globals.getLogger().d(TAG, "playAssetDiscoveredOnNotification");
 
         vibrate();
 
@@ -1941,7 +1979,7 @@ public class EngageApplication
 
     public void playAssetUndiscoveredNotification()
     {
-        Log.d(TAG, "playAssetUndiscoveredNotification");
+        Globals.getLogger().d(TAG, "playAssetUndiscoveredNotification");
 
         vibrate();
 
@@ -1963,7 +2001,7 @@ public class EngageApplication
 
     public void playNetworkDownNotification()
     {
-        Log.d(TAG, "playNetworkDownNotification");
+        Globals.getLogger().d(TAG, "playNetworkDownNotification");
 
         vibrate();
 
@@ -1985,7 +2023,7 @@ public class EngageApplication
 
     public void playGeneralErrorNotification()
     {
-        Log.d(TAG, "playGeneralErrorNotification");
+        Globals.getLogger().d(TAG, "playGeneralErrorNotification");
 
         vibrate();
 
@@ -2008,7 +2046,7 @@ public class EngageApplication
 
     public boolean playTxOnNotification(Runnable onPlayComplete)
     {
-        Log.d(TAG, "playTxOnNotification");
+        Globals.getLogger().d(TAG, "playTxOnNotification");
 
         vibrate();
 
@@ -2036,7 +2074,7 @@ public class EngageApplication
     // TODO:
     public void playTxOffNotification()
     {
-        Log.d(TAG, "playTxOffNotification");
+        Globals.getLogger().d(TAG, "playTxOffNotification");
         /*
         float volume = _activeConfiguration.getPttToneNotificationLevel();
         if(volume == 0.0)
@@ -2057,7 +2095,7 @@ public class EngageApplication
 
     public void restartEngine()
     {
-        Log.d(TAG, "restartEngine");
+        Globals.getLogger().d(TAG, "restartEngine");
         _startOnEngineStopped = true;
         stopEngine();
     }
@@ -2140,7 +2178,7 @@ public class EngageApplication
                 raf.readFully(rc);
                 raf.close();
 
-                Log.i(TAG, "Auto-importing custom certificate store '" + fn + "'");
+                Globals.getLogger().i(TAG, "Auto-importing custom certificate store '" + fn + "'");
             }
         }
         catch (Exception e)
@@ -2468,6 +2506,16 @@ public class EngageApplication
         getEngine().deinitialize();
     }
 
+    private void createEmptyConfiguration()
+    {
+        String missionJson = Utils.getStringResource(this, R.raw.empty_mission_template);
+
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_JSON, missionJson);
+        Globals.getSharedPreferencesEditor().apply();
+
+        ActiveConfiguration.installMissionJson(null, missionJson, true);
+    }
+
     public void onEngineServiceOnline()
     {
         if(!_engineRunning)
@@ -2480,7 +2528,7 @@ public class EngageApplication
 
     public boolean startEngine()
     {
-        Log.d(TAG, "startEngine");
+        Globals.getLogger().d(TAG, "startEngine");
         boolean rc = false;
 
         try
@@ -2493,7 +2541,15 @@ public class EngageApplication
             updateActiveConfiguration();
             if (_activeConfiguration == null)
             {
-                createSampleConfiguration();
+                if(Globals.getContext().getResources().getBoolean(R.bool.opt_auto_generate_sample_mission))
+                {
+                    createSampleConfiguration();
+                }
+                else
+                {
+                    createEmptyConfiguration();
+                }
+
                 updateActiveConfiguration();
             }
 
@@ -2505,7 +2561,7 @@ public class EngageApplication
             String enginePolicyJson = getActiveConfiguration().makeEnginePolicyObjectFromBaseline(policyBaseline).toString();
             String identityJson = getActiveConfiguration().makeIdentityObject().toString();
 
-            Log.d(TAG, "policy=" + enginePolicyJson);
+            Globals.getLogger().d(TAG, "policy=" + enginePolicyJson);
 
             int initRc = getEngine().engageInitialize(enginePolicyJson,
                     identityJson,
@@ -2644,7 +2700,6 @@ public class EngageApplication
     {
         ArrayList<PresenceDescriptor> rc = new ArrayList<>();
 
-        /*
         synchronized(_nodes)
         {
             for (PresenceDescriptor pd : _nodes.values())
@@ -2655,14 +2710,13 @@ public class EngageApplication
                 }
                 else
                 {
-                    if(pd.groupAliases.keySet().contains(forGroupId))
+                    if(pd.groupMembership.keySet().contains(forGroupId))
                     {
                         rc.add(pd);
                     }
                 }
             }
         }
-        */
 
         return rc;
     }
@@ -2681,7 +2735,7 @@ public class EngageApplication
 
     public PresenceDescriptor processNodeDiscovered(String nodeJson)
     {
-        Log.d(TAG, "processNodeDiscovered > nodeJson=" + nodeJson);//NON-NLS
+        Globals.getLogger().d(TAG, "processNodeDiscovered > nodeJson=" + nodeJson);//NON-NLS
 
         PresenceDescriptor pd;
 
@@ -2704,7 +2758,7 @@ public class EngageApplication
                         pd = discoveredPd;
                     }
 
-                    Log.d(TAG, "processNodeDiscovered > nid=" + discoveredPd.nodeId + ", u=" + discoveredPd.userId + ", d=" + discoveredPd.displayName);//NON-NLS
+                    Globals.getLogger().d(TAG, "processNodeDiscovered > nid=" + discoveredPd.nodeId + ", u=" + discoveredPd.userId + ", d=" + discoveredPd.displayName);//NON-NLS
                 }
 
                 ArrayList<GroupDescriptor> groupsRequiringUiRefresh = getActiveConfiguration().updateGroupMemberPresenceForNode(pd);
@@ -2719,7 +2773,7 @@ public class EngageApplication
             }
             else
             {
-                Log.w(TAG, "failed to parse node information");//NON-NLS
+                Globals.getLogger().w(TAG, "failed to parse node information");//NON-NLS
                 pd = null;
             }
         }
@@ -2745,7 +2799,7 @@ public class EngageApplication
                 {
                     _nodes.remove(pd.nodeId);
 
-                    Log.d(TAG, "processNodeUndiscovered < nid=" + pd.nodeId + ", u=" + pd.userId + ", d=" + pd.displayName);//NON-NLS
+                    Globals.getLogger().d(TAG, "processNodeUndiscovered < nid=" + pd.nodeId + ", u=" + pd.userId + ", d=" + pd.displayName);//NON-NLS
                 }
 
                 // Make sure there aren't any group memberships
@@ -2763,7 +2817,7 @@ public class EngageApplication
             }
             else
             {
-                Log.w(TAG, "failed to parse node information");//NON-NLS
+                Globals.getLogger().w(TAG, "failed to parse node information");//NON-NLS
                 pd = null;
             }
         }
@@ -2778,7 +2832,7 @@ public class EngageApplication
 
     public ActiveConfiguration updateActiveConfiguration()
     {
-        Log.d(TAG, "updateActiveConfiguration");
+        Globals.getLogger().d(TAG, "updateActiveConfiguration");
         _activeConfiguration = Utils.loadConfiguration(_activeConfiguration, _dynamicGroups);
 
         if(_activeConfiguration != null)
@@ -2835,14 +2889,14 @@ public class EngageApplication
 
     private void runPreflightCheck()
     {
-        Log.d(TAG, "runPreflightCheck");
+        Globals.getLogger().d(TAG, "runPreflightCheck");
 
         {
             String mnf = Build.MANUFACTURER;
             String brand = Build.BRAND;
             String model = Build.MODEL;
 
-            Log.i(TAG, "mnf=" + mnf + ", brand=" + brand + ", model=" + model);
+            Globals.getLogger().i(TAG, "mnf=" + mnf + ", brand=" + brand + ", model=" + model);
         }
 
         // See if we're running for the first time
@@ -3018,7 +3072,7 @@ public class EngageApplication
                     {
                         if(!_groupsSelectedForTx.isEmpty())
                         {
-                            Log.e(TAG, "attempt to begin tx while there is already a pending/active tx");
+                            Globals.getLogger().e(TAG, "attempt to begin tx while there is already a pending/active tx");
                             playGeneralErrorNotification();
                             return;
                         }
@@ -3110,7 +3164,7 @@ public class EngageApplication
                             }
                             else
                             {
-                                Log.w(TAG, "tx task runnable found no groups to tx on");
+                                Globals.getLogger().w(TAG, "tx task runnable found no groups to tx on");
                             }
                         }
         
@@ -3183,7 +3237,7 @@ public class EngageApplication
                         }
                         else
                         {
-                            Log.w(TAG, "#SB# - endTx but no groups selected for tx");
+                            Globals.getLogger().w(TAG, "#SB# - endTx but no groups selected for tx");
 
                         }
 
@@ -3208,7 +3262,7 @@ public class EngageApplication
             if(_txPending)
             {
                 _txPending = false;
-                Log.i(TAG, "cancelling previous tx pending");
+                Globals.getLogger().i(TAG, "cancelling previous tx pending");
                 cancelPreviousTxPending();
             }
             */
@@ -3251,7 +3305,7 @@ public class EngageApplication
                         {
                             if (testGroup.tx || testGroup.txPending)
                             {
-                                //Log.wtf(TAG, "#SB# data model says group is tx or txPending but the group is not in the tx set!!, tx=" + testGroup.tx + ", txPending=" + testGroup.txPending);
+                                //Globals.getLogger().wtf(TAG, "#SB# data model says group is tx or txPending but the group is not in the tx set!!, tx=" + testGroup.tx + ", txPending=" + testGroup.txPending);
                             }
 
                             testGroup.tx = false;
@@ -3654,13 +3708,13 @@ public class EngageApplication
     @Override
     public void onBluetoothDeviceConnected()
     {
-        Log.d(TAG, "onBluetoothDeviceConnected");
+        Globals.getLogger().d(TAG, "onBluetoothDeviceConnected");
     }
 
     @Override
     public void onBluetoothDeviceDisconnected()
     {
-        Log.d(TAG, "onBluetoothDeviceDisconnected");
+        Globals.getLogger().d(TAG, "onBluetoothDeviceDisconnected");
     }
 
     @Override
@@ -3686,7 +3740,7 @@ public class EngageApplication
             {
                 logEvent(Analytics.ENGINE_STARTED);
 
-                Log.d(TAG, "onEngineStarted");
+                Globals.getLogger().d(TAG, "onEngineStarted");
                 _engineRunning = true;
                 createAllGroupObjects();
                 joinSelectedGroups();
@@ -3708,7 +3762,7 @@ public class EngageApplication
             {
                 logEvent(Analytics.ENGINE_START_FAILED);
 
-                Log.e(TAG, "onEngineStartFailed");
+                Globals.getLogger().e(TAG, "onEngineStartFailed");
                 _engineRunning = false;
                 stop();
             }
@@ -3729,7 +3783,7 @@ public class EngageApplication
 
                 getEngine().engageShutdown();
 
-                Log.d(TAG, "onEngineStopped");
+                Globals.getLogger().d(TAG, "onEngineStopped");
                 goIdle();
 
                 if(_terminateOnEngineStopped)
@@ -3753,6 +3807,21 @@ public class EngageApplication
     }
 
     @Override
+    public void onEngineAudioDevicesRefreshed(String eventExtraJson)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                logEvent(Analytics.ENGINE_AUDIO_DEVICES_REFRESH);
+
+                Globals.getLogger().i(TAG, "onEngineAudioDevicesRefreshed");
+            }
+        });
+    }
+
+    @Override
     public void onGroupCreated(final String id, final String eventExtraJson)
     {
         runOnUiThread(new Runnable()
@@ -3765,11 +3834,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupCreated: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupCreated: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupCreated: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupCreated: id='" + id + "', n='" + gd.name + "'");
 
                 gd.resetState();
                 gd.created = true;
@@ -3796,15 +3865,25 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupCreateFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupCreateFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupCreateFailed: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupCreateFailed: id='" + id + "', n='" + gd.name + "'");
 
                 gd.resetState();
                 gd.created = false;
                 gd.createError = true;
+
+                try
+                {
+                    JSONObject jo = new JSONObject(eventExtraJson);
+                    gd.inoperableErrorCode =  jo.optJSONObject("groupCreationDetail").optInt("status", 0);
+                }
+                catch(Exception e)
+                {
+                    gd.inoperableErrorCode = 0;
+                }
 
                 notifyGroupUiListeners(gd);
             }
@@ -3824,11 +3903,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupDeleted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupDeleted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupDeleted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupDeleted: id='" + id + "', n='" + gd.name + "'");
 
                 gd.resetState();
                 gd.created = false;
@@ -3853,11 +3932,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupConnected: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupConnected: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupConnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupConnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 try
                 {
@@ -3936,11 +4015,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupConnectFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupConnectFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupConnectFailed: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupConnectFailed: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 try
                 {
@@ -4010,11 +4089,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupDisconnected: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupDisconnected: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupDisconnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupDisconnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 try
                 {
@@ -4086,11 +4165,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupJoined: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupJoined: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupJoined: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupJoined: id='" + id + "', n='" + gd.name + "'");
 
                 gd.joined = true;
                 gd.joinError = false;
@@ -4113,11 +4192,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupJoinFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupJoinFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.e(TAG, "onGroupJoinFailed: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().e(TAG, "onGroupJoinFailed: id='" + id + "', n='" + gd.name + "'");
 
                 gd.resetState();
                 gd.joinError = true;
@@ -4140,11 +4219,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupLeft: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupLeft: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupLeft: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupLeft: id='" + id + "', n='" + gd.name + "'");
 
                 gd.resetState();
                 gd.joined = false;
@@ -4168,11 +4247,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupMemberCountChanged: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupMemberCountChanged: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupMemberCountChanged: id='" + id + "', n=" + gd.name + ", c=" + newCount);
+                Globals.getLogger().d(TAG, "onGroupMemberCountChanged: id='" + id + "', n=" + gd.name + ", c=" + newCount);
 
                 notifyGroupUiListeners(gd);
             }
@@ -4192,11 +4271,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxStarted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxStarted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxStarted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxStarted: id='" + id + "', n='" + gd.name + "'");
 
                 gd.rx = true;
 
@@ -4238,11 +4317,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxEnded: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxEnded: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxEnded: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxEnded: id='" + id + "', n='" + gd.name + "'");
 
                 gd.rx = false;
                 _lastAudioActivity = Utils.nowMs();
@@ -4265,11 +4344,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxSpeakersChanged: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxSpeakersChanged: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxSpeakersChanged: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxSpeakersChanged: id='" + id + "', n='" + gd.name + "'");
 
                 ArrayList<TalkerDescriptor> talkers = null;
 
@@ -4290,7 +4369,7 @@ public class EngageApplication
                                 td.rxFlags = obj.optLong(Engine.JsonFields.TalkerInformation.rxFlags, 0);
                                 td.txPriority = obj.optInt(Engine.JsonFields.TalkerInformation.txPriority, 0);
 
-                                Log.d(TAG, "onGroupRxSpeakersChanged: " + td.toString());
+                                Globals.getLogger().d(TAG, "onGroupRxSpeakersChanged: " + td.toString());
 
                                 if (talkers == null)
                                 {
@@ -4334,11 +4413,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxMuted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxMuted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxMuted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxMuted: id='" + id + "', n='" + gd.name + "'");
 
                 gd.rxMuted = true;
 
@@ -4360,11 +4439,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxUnmuted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxUnmuted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxUnmuted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxUnmuted: id='" + id + "', n='" + gd.name + "'");
 
                 gd.rxMuted = false;
 
@@ -4386,11 +4465,11 @@ public class EngageApplication
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxStarted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxStarted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxStarted: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupTxStarted: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 // Run this task either right away or after we've played our grant tone
                 Runnable txTask = new Runnable()
@@ -4446,7 +4525,7 @@ public class EngageApplication
                         }
                         else
                         {
-                            Log.d(TAG, "group " + gd.id + " is no longer selected for TX after tone was played");
+                            Globals.getLogger().d(TAG, "group " + gd.id + " is no longer selected for TX after tone was played");
                         }
                     }
                 };
@@ -4487,11 +4566,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxEnded: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxEnded: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxEnded: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupTxEnded: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 if (gd.lastTxStartTime > 0)
                 {
@@ -4529,11 +4608,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxFailed: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupTxFailed: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 gd.tx = false;
                 gd.txPending = false;
@@ -4574,11 +4653,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxUsurpedByPriority: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxUsurpedByPriority: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxUsurpedByPriority: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                Globals.getLogger().d(TAG, "onGroupTxUsurpedByPriority: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
                 gd.tx = false;
                 gd.txPending = false;
@@ -4619,11 +4698,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupMaxTxTimeExceeded: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupMaxTxTimeExceeded: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupMaxTxTimeExceeded: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupMaxTxTimeExceeded: id='" + id + "', n='" + gd.name + "'");
 
                 gd.tx = false;
                 gd.txPending = false;
@@ -4664,11 +4743,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxMuted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxMuted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxMuted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupTxMuted: id='" + id + "', n='" + gd.name + "'");
 
                 // TX muted means something else here
                 //gd.txMuted = true;
@@ -4691,11 +4770,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTxUnmuted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTxUnmuted: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupTxUnmuted: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupTxUnmuted: id='" + id + "', n='" + gd.name + "'");
 
                 // TX muted means something else here
                 //gd.txMuted = false;
@@ -4719,11 +4798,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxVolumeChanged: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxVolumeChanged: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxVolumeChanged: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxVolumeChanged: id='" + id + "', n='" + gd.name + "'");
 
                 notifyGroupUiListeners(gd);
             }
@@ -4743,11 +4822,55 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupRxDtmf: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupRxDtmf: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupRxDtmf: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupRxDtmf: id='" + id + "', n='" + gd.name + "'");
+
+                notifyGroupUiListeners(gd);
+            }
+        });
+    }
+
+    @Override
+    public void onGroupReconfigured(final String id, final String s1)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                GroupDescriptor gd = getGroup(id);
+                if (gd == null)
+                {
+                    Globals.getLogger().d(TAG, "onGroupReconfigured: cannot find group id='" + id + "'");
+                    return;
+                }
+
+                Globals.getLogger().d(TAG, "onGroupReconfigured: id='" + id + "', n='" + gd.name + "'");
+
+                notifyGroupUiListeners(gd);
+            }
+        });
+    }
+
+    @Override
+    public void onGroupReconfigurationFailed(final String id, String s1)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                GroupDescriptor gd = getGroup(id);
+                if (gd == null)
+                {
+                    Globals.getLogger().d(TAG, "onGroupReconfigurationFailed: cannot find group id='" + id + "'");
+                    return;
+                }
+
+                Globals.getLogger().d(TAG, "onGroupReconfigurationFailed: id='" + id + "', n='" + gd.name + "'");
 
                 notifyGroupUiListeners(gd);
             }
@@ -4767,11 +4890,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupNodeDiscovered: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupNodeDiscovered: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupNodeDiscovered: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupNodeDiscovered: id='" + id + "', n='" + gd.name + "'");
 
                 PresenceDescriptor pd = processNodeDiscovered(nodeJson);
                 if (pd != null)
@@ -4821,11 +4944,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupNodeRediscovered: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupNodeRediscovered: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupNodeRediscovered: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupNodeRediscovered: id='" + id + "', n='" + gd.name + "'");
 
                 PresenceDescriptor pd = processNodeDiscovered(nodeJson);
                 if (pd != null)
@@ -4857,11 +4980,11 @@ public class EngageApplication
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupNodeUndiscovered: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupNodeUndiscovered: cannot find group id='" + id + "'");
                     return;
                 }
 
-                Log.d(TAG, "onGroupNodeUndiscovered: id='" + id + "', n='" + gd.name + "'");
+                Globals.getLogger().d(TAG, "onGroupNodeUndiscovered: id='" + id + "', n='" + gd.name + "'");
 
                 PresenceDescriptor pd = processNodeUndiscovered(nodeJson);
                 if (pd != null)
@@ -4915,7 +5038,7 @@ public class EngageApplication
             {
                 logEvent(Analytics.LICENSE_CHANGED);
 
-                Log.d(TAG, "onLicenseChanged");
+                Globals.getLogger().d(TAG, "onLicenseChanged");
                 _licenseExpired = false;
                 _licenseSecondsLeft = 0;
                 cancelObtainingActivationCode();
@@ -4944,7 +5067,7 @@ public class EngageApplication
                     logEvent(Analytics.LICENSE_EXPIRED);
                 }
 
-                Log.d(TAG, "onLicenseExpired");
+                Globals.getLogger().d(TAG, "onLicenseExpired");
                 _licenseExpired = true;
                 _licenseSecondsLeft = 0;
                 scheduleObtainingActivationCode();
@@ -4970,7 +5093,7 @@ public class EngageApplication
             {
                 //logEvent(Analytics.LICENSE_EXPIRING);
 
-                Log.d(TAG, "onLicenseExpiring - " + secondsLeft + " seconds remaining");
+                Globals.getLogger().d(TAG, "onLicenseExpiring - " + secondsLeft + " seconds remaining");
                 _licenseExpired = false;
                 _licenseSecondsLeft = secondsLeft;
                 scheduleObtainingActivationCode();
@@ -4992,24 +5115,24 @@ public class EngageApplication
         switch(level)
         {
             case debug:
-                Log.d(tag, message);
+                Globals.getLogger().d(tag, message);
                 break;
 
             case information:
-                Log.i(tag, message);
+                Globals.getLogger().i(tag, message);
                 break;
 
             case warning:
-                Log.w(tag, message);
+                Globals.getLogger().w(tag, message);
                 break;
 
             case error:
-                Log.e(tag, message);
+                Globals.getLogger().e(tag, message);
                 break;
 
             case fatal:
             default:
-                Log.wtf(tag, message);
+                Globals.getLogger().f(tag, message);
                 break;
         }
     }
@@ -5161,7 +5284,7 @@ public class EngageApplication
 
                 if(blob.length > 0)
                 {
-                    Log.i(TAG, "Reporting human biometrics data - blob size is " + blob.length + " bytes");
+                    Globals.getLogger().i(TAG, "Reporting human biometrics data - blob size is " + blob.length + " bytes");
 
                     // Our JSON parameters indicate that the payload is binary human biometric data in Engage format
                     JSONObject bi = new JSONObject();
@@ -5179,7 +5302,7 @@ public class EngageApplication
                 }
                 else
                 {
-                    Log.w(TAG, "Cannot report human biometrics data - no presence group found");
+                    Globals.getLogger().w(TAG, "Cannot report human biometrics data - no presence group found");
                 }
             }
             catch(Exception e)
@@ -5201,7 +5324,7 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_ASSET_DISCOVERED);
 
-                Log.d(TAG, "onGroupAssetDiscovered: id='" + id + "', json='" + nodeJson + "'");
+                Globals.getLogger().d(TAG, "onGroupAssetDiscovered: id='" + id + "', json='" + nodeJson + "'");
 
                 synchronized (_assetChangeListeners)
                 {
@@ -5227,7 +5350,7 @@ public class EngageApplication
                         }
                         else
                         {
-                            Log.e(TAG, "onGroupAssetDiscovered: failed to load group descriptor from json");
+                            Globals.getLogger().e(TAG, "onGroupAssetDiscovered: failed to load group descriptor from json");
                         }
                     }
                 }
@@ -5282,7 +5405,7 @@ public class EngageApplication
                         }
                         else
                         {
-                            Log.e(TAG, "onGroupAssetRediscovered: failed to load group descriptor from json");
+                            Globals.getLogger().e(TAG, "onGroupAssetRediscovered: failed to load group descriptor from json");
                         }
                     }
                 }
@@ -5354,7 +5477,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupBlobSent");
+                Globals.getLogger().d(TAG, "onGroupBlobSent");
             }
         });
     }
@@ -5367,7 +5490,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.e(TAG, "onGroupBlobSendFailed");
+                Globals.getLogger().e(TAG, "onGroupBlobSendFailed");
             }
         });
     }
@@ -5380,7 +5503,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupBlobReceived: blobInfoJson=" + blobInfoJson);
+                Globals.getLogger().d(TAG, "onGroupBlobReceived: blobInfoJson=" + blobInfoJson);
 
                 try
                 {
@@ -5452,7 +5575,7 @@ public class EngageApplication
                         }
                         else
                         {
-                            Log.d(TAG, "ignoring message targeting node '" + target + "'");
+                            Globals.getLogger().d(TAG, "ignoring message targeting node '" + target + "'");
                         }
                     }
                 }
@@ -5472,7 +5595,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupRtpSent");
+                Globals.getLogger().d(TAG, "onGroupRtpSent");
             }
         });
     }
@@ -5485,7 +5608,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.e(TAG, "onGroupRtpSendFailed");
+                Globals.getLogger().e(TAG, "onGroupRtpSendFailed");
             }
         });
     }
@@ -5498,7 +5621,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupRtpReceived: rtpHeaderJson=" + rtpHeaderJson);
+                Globals.getLogger().d(TAG, "onGroupRtpReceived: rtpHeaderJson=" + rtpHeaderJson);
             }
         });
     }
@@ -5510,7 +5633,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupRawSent");
+                Globals.getLogger().d(TAG, "onGroupRawSent");
             }
         });
     }
@@ -5523,7 +5646,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.e(TAG, "onGroupRawSendFailed");
+                Globals.getLogger().e(TAG, "onGroupRawSendFailed");
             }
         });
     }
@@ -5536,7 +5659,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupRawReceived");
+                Globals.getLogger().d(TAG, "onGroupRawReceived");
             }
         });
     }
@@ -5549,12 +5672,12 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupTimelineEventStarted: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineEventStarted: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineEventStarted: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineEventStarted: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5577,12 +5700,12 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupTimelineEventUpdated: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineEventUpdated: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineEventUpdated: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineEventUpdated: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5605,12 +5728,12 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onGroupTimelineEventEnded: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineEventEnded: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineEventEnded: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineEventEnded: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5635,12 +5758,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_TIMELINE_REPORT);
 
-                Log.d(TAG, "onGroupTimelineReport: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineReport: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineReport: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineReport: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5665,12 +5788,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_TIMELINE_REPORT_FAILED);
 
-                Log.d(TAG, "onGroupTimelineReportFailed: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineReportFailed: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineReportFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineReportFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5695,12 +5818,12 @@ public class EngageApplication
             {
                 //logEvent(Analytics.GROUP_TIMELINE_REPORT);
 
-                Log.d(TAG, "onGroupTimelineGroomed: " + id);
+                Globals.getLogger().d(TAG, "onGroupTimelineGroomed: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupTimelineGroomed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupTimelineGroomed: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5725,12 +5848,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_STATS_REPORT);
 
-                Log.d(TAG, "onGroupStatsReport: " + id);
+                Globals.getLogger().d(TAG, "onGroupStatsReport: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupStatsReport: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupStatsReport: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5756,12 +5879,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_STATS_REPORT_FAILED);
 
-                Log.d(TAG, "onGroupStatsReportFailed: " + id);
+                Globals.getLogger().d(TAG, "onGroupStatsReportFailed: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupStatsReportFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupStatsReportFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5787,12 +5910,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_HEALTH_REPORT);
 
-                Log.d(TAG, "onGroupHealthReport: " + id);
+                Globals.getLogger().d(TAG, "onGroupHealthReport: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupHealthReport: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupHealthReport: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5817,12 +5940,12 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_HEALTH_REPORT_FAILED);
 
-                Log.d(TAG, "onGroupHealthReportFailed: " + id);
+                Globals.getLogger().d(TAG, "onGroupHealthReportFailed: " + id);
 
                 final GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
-                    Log.d(TAG, "onGroupHealthReportFailed: cannot find group id='" + id + "'");
+                    Globals.getLogger().d(TAG, "onGroupHealthReportFailed: cannot find group id='" + id + "'");
                     return;
                 }
 
@@ -5845,7 +5968,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onRallypointPausingConnectionAttempt");
+                Globals.getLogger().d(TAG, "onRallypointPausingConnectionAttempt");
                 // Stub
             }
         });
@@ -5859,7 +5982,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "onRallypointConnecting: " + id);
+                Globals.getLogger().d(TAG, "onRallypointConnecting: " + id);
                 // Stub
             }
         });
@@ -5875,7 +5998,7 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_RP_CONNECTED);
 
-                Log.d(TAG, "onRallypointConnected: " + id);
+                Globals.getLogger().d(TAG, "onRallypointConnected: " + id);
                 // Stub
             }
         });
@@ -5886,7 +6009,7 @@ public class EngageApplication
     {
         logEvent(Analytics.GROUP_RP_DISCONNECTED);
 
-        Log.d(TAG, "onRallypointDisconnected: " + id);
+        Globals.getLogger().d(TAG, "onRallypointDisconnected: " + id);
         // Stub
     }
 
@@ -5923,7 +6046,7 @@ public class EngageApplication
                     logEvent(Analytics.GROUP_RP_RT_0);
                 }
 
-                Log.d(TAG, "onRallypointRoundtripReport: " + id + ", ms=" + rtMs + ", qual=" + rtQualityRating);
+                Globals.getLogger().d(TAG, "onRallypointRoundtripReport: " + id + ", ms=" + rtMs + ", qual=" + rtQualityRating);
                 // Stub
             }
         });
@@ -5936,7 +6059,7 @@ public class EngageApplication
               @Override
               public void run()
               {
-                  Log.d(TAG, "pauseLicenseActivation");
+                  Globals.getLogger().d(TAG, "pauseLicenseActivation");
                   _licenseActivationPaused = true;
               }
           });
@@ -5949,7 +6072,7 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Log.d(TAG, "resumeLicenseActivation");
+                Globals.getLogger().d(TAG, "resumeLicenseActivation");
                 _licenseActivationPaused = false;
             }
         });
@@ -5994,7 +6117,7 @@ public class EngageApplication
                     delay = Constants.MAX_LICENSE_ACTIVATION_DELAY_MS;
                 }
 
-                Log.i(TAG, "scheduling obtaining of activation code in " + (delay / 1000) + " seconds");
+                Globals.getLogger().i(TAG, "scheduling obtaining of activation code in " + (delay / 1000) + " seconds");
 
                 _licenseActivationTimer = new Timer();
                 _licenseActivationTimer.schedule(new TimerTask()
@@ -6034,7 +6157,7 @@ public class EngageApplication
             {
                 if(_licenseActivationPaused)
                 {
-                    Log.d(TAG, "license activation paused - rescheduling");
+                    Globals.getLogger().d(TAG, "license activation paused - rescheduling");
 
                     // Schedule for another time
                     scheduleObtainingActivationCode();
@@ -6043,7 +6166,7 @@ public class EngageApplication
                 {
                     try
                     {
-                        Log.i(TAG, "attempting to obtain a license activation code");
+                        Globals.getLogger().i(TAG, "attempting to obtain a license activation code");
 
                         cancelObtainingActivationCode();
 
@@ -6082,7 +6205,7 @@ public class EngageApplication
                     }
                     catch (Exception e)
                     {
-                        Log.d(TAG, "obtainActivationCode: " + e.getMessage());
+                        Globals.getLogger().d(TAG, "obtainActivationCode: " + e.getMessage());
                         scheduleObtainingActivationCode();
                     }
                 }
@@ -6102,7 +6225,7 @@ public class EngageApplication
 
                 if(_licenseActivationPaused)
                 {
-                    Log.d(TAG, "license activation paused - rescheduling");
+                    Globals.getLogger().d(TAG, "license activation paused - rescheduling");
                     needScheduling = true;
                 }
                 else
@@ -6112,13 +6235,13 @@ public class EngageApplication
                         String key = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_KEY, null);
                         if (!Utils.isEmptyString(key))
                         {
-                            Log.i(TAG, "onLicenseActivationTaskComplete: attempt succeeded");
+                            Globals.getLogger().i(TAG, "onLicenseActivationTaskComplete: attempt succeeded");
 
                             String ac = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, "");
                             if (ac.compareTo(activationCode) == 0)
                             {
                                 logEvent(Analytics.LICENSE_ACT_OK_ALREADY);
-                                Log.w(TAG, "onLicenseActivationTaskComplete: new activation code matches existing activation code");
+                                Globals.getLogger().w(TAG, "onLicenseActivationTaskComplete: new activation code matches existing activation code");
                             }
                             else
                             {
@@ -6132,14 +6255,14 @@ public class EngageApplication
                         else
                         {
                             logEvent(Analytics.LICENSE_ACT_FAILED_NO_KEY);
-                            Log.e(TAG, "onLicenseActivationTaskComplete: no license key present");
+                            Globals.getLogger().e(TAG, "onLicenseActivationTaskComplete: no license key present");
                             needScheduling = true;
                         }
                     }
                     else
                     {
                         logEvent(Analytics.LICENSE_ACT_FAILED);
-                        Log.e(TAG, "onLicenseActivationTaskComplete: attempting failed - " + resultMessage);
+                        Globals.getLogger().e(TAG, "onLicenseActivationTaskComplete: attempting failed - " + resultMessage);
                         needScheduling = true;
                     }
                 }

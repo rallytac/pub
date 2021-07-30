@@ -185,14 +185,24 @@ public class MissionEditActivity extends AppCompatActivity
         final Switch swEpt = view.findViewById(R.id.swEpt);
         final Switch swAnonymousAlias = view.findViewById(R.id.swAnonymousAlias);
 
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_fdx))
+        {
+            swFullDuplex.setVisibility(View.GONE);
+        }
+
         if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_ept))
         {
-            swEpt.setVisibility(View.INVISIBLE);
+            swEpt.setVisibility(View.GONE);
         }
 
         if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_anonymous_alias))
         {
-            swAnonymousAlias.setVisibility(View.INVISIBLE);
+            swAnonymousAlias.setVisibility(View.GONE);
+        }
+
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_unlimited_tx))
+        {
+            swUnlimitedTx.setVisibility(View.GONE);
         }
 
         dialogBuilder.setCancelable(true)
@@ -340,10 +350,26 @@ public class MissionEditActivity extends AppCompatActivity
         swEncrypted.setEnabled(_allowEdit);
         btnRegen.setEnabled(_allowEdit && group._useCrypto);
         swDisableHeaderExtensions.setEnabled(_allowEdit);
-        swFullDuplex.setEnabled(_allowEdit);
-        swEpt.setEnabled(_allowEdit);
-        swAnonymousAlias.setEnabled(_allowEdit);
-        swUnlimitedTx.setEnabled(_allowEdit);
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_fdx))
+        {
+            swFullDuplex.setEnabled(_allowEdit);
+        }
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_ept))
+        {
+            swEpt.setEnabled(_allowEdit);
+        }
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_anonymous_alias))
+        {
+            swAnonymousAlias.setEnabled(_allowEdit);
+        }
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_unlimited_tx))
+        {
+            swUnlimitedTx.setEnabled(_allowEdit);
+        }
 
         alertDialog.show();
     }

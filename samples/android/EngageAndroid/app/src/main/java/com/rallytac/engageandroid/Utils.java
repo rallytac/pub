@@ -123,14 +123,14 @@ public class Utils
             BufferedInputStream is = new BufferedInputStream(getContentResolver().openInputStream(uri));
             Bitmap bm = BitmapFactory.decodeStream(is);
             String dataString = Utils.qrCodeBitmapToString(bm);
-            Log.e(TAG, "dataString=" + dataString);
+            Globals.getLogger().e(TAG, "dataString=" + dataString);
 
             //if(dataString.startsWith(Constants.QR_CODE_HEADER))
             {
                 byte[] base91DecodedBytes = Base91.decode(dataString.getBytes(Utils.getEngageCharSet()));
                 byte[] decompressed = Utils.inflate(base91DecodedBytes);
                 dataString = new String(decompressed, Utils.getEngageCharSet());
-                Log.e(TAG, "dataString=" + dataString);
+                Globals.getLogger().e(TAG, "dataString=" + dataString);
             }
         }
         catch (Exception e)
@@ -589,7 +589,8 @@ public class Utils
             try
             {
                 // !!!!!!!!!! BEGIN EXPERIMENTAL !!!!!!!!!!
-
+                rc.setEnforceTransmitSmoothing(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_TX_SMOOTHING, true));
+                rc.setAllowDtx(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ALLOW_DTX, true));
                 rc.setDiscoverSsdpAssets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_SSDP_DISCOVERY, false));
                 rc.setDiscoverTrelliswareAssets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_TRELLISWARE_DISCOVERY, false));
 
@@ -665,7 +666,7 @@ public class Utils
                 {
                     mc.enabled = Globals.getSharedPreferences().getBoolean(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_ENABLED, Constants.DEF_MULTICAST_FAILOVER_ENABLED);
                 }
-                mc.thresholdSecs = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_SECS, Integer.toString(Constants.DEF_MULTICAST_FAILOVER_THRESHOLD_SECS)));
+                //mc.thresholdSecs = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_SECS, Integer.toString(Constants.DEF_MULTICAST_FAILOVER_THRESHOLD_SECS)));
                 rc.setMulticastFailoverConfiguration(mc);
 
                 rc.setPriorityTxLevel(0);
@@ -1256,6 +1257,54 @@ public class Utils
         {
             return s;
         }
+    }
+
+    public static int intOpt(int resId, int defaultValue)
+    {
+        int rc;
+
+        try
+        {
+            rc = Globals.getContext().getResources().getInteger(resId);
+        }
+        catch (Exception e)
+        {
+            rc = defaultValue;
+        }
+
+        return rc;
+    }
+
+    public static boolean boolOpt(int resId, boolean defaultValue)
+    {
+        boolean rc;
+
+        try
+        {
+            rc = Globals.getContext().getResources().getBoolean(resId);
+        }
+        catch (Exception e)
+        {
+            rc = defaultValue;
+        }
+
+        return rc;
+    }
+
+    public static String stringOpt(int resId, String defaultValue)
+    {
+        String rc;
+
+        try
+        {
+            rc = Globals.getContext().getResources().getString(resId);
+        }
+        catch (Exception e)
+        {
+            rc = defaultValue;
+        }
+
+        return rc;
     }
 
     public static String readTextFile(Context ctx, Uri uri)

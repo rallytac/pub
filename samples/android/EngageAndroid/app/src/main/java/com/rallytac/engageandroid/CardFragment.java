@@ -165,6 +165,11 @@ public abstract class CardFragment extends Fragment
     protected abstract int getCardResId(boolean secure);
     protected abstract int getCardTxResId(boolean secure);
 
+    private void drawForError()
+    {
+
+    }
+
     public void draw()
     {
         getActivity().runOnUiThread(new Runnable()
@@ -176,14 +181,28 @@ public abstract class CardFragment extends Fragment
                 {
                     if(getView() != null)
                     {
-                        ((TextView) getView().findViewById(R.id.tvGroupName)).setText(_gd.name);
+                        if(_gd.hasInoperableError())
+                        {
+                            getView().findViewById(R.id.layMain).setVisibility(View.GONE);
+                            getView().findViewById(R.id.layError).setVisibility(View.VISIBLE);
 
-                        updateNetworkStatus();
-                        updateTalkers();
-                        updateSpeakerStatus();
-                        updateTxEnabledStatus();
-                        updateRxTxUi();
-                        updateMembers();
+                            ((TextView) getView().findViewById(R.id.tvErrorTitle)).setText(_gd.name);
+                            ((TextView) getView().findViewById(R.id.tvErrorMsg)).setText(_gd.getInoperableErrorMessage());
+                        }
+                        else
+                        {
+                            getView().findViewById(R.id.layError).setVisibility(View.GONE);
+                            getView().findViewById(R.id.layMain).setVisibility(View.VISIBLE);
+
+                            ((TextView) getView().findViewById(R.id.tvGroupName)).setText(_gd.name);
+
+                            updateNetworkStatus();
+                            updateTalkers();
+                            updateSpeakerStatus();
+                            updateTxEnabledStatus();
+                            updateRxTxUi();
+                            updateMembers();
+                        }
                     }
                }
             }
@@ -336,7 +355,7 @@ public abstract class CardFragment extends Fragment
                 }
                 else
                 {
-                    Log.e("CardFragment", "========================no group descriptor in updateRxTxUi");//NON-NLS
+                    Globals.getLogger().e("CardFragment", "========================no group descriptor in updateRxTxUi");//NON-NLS
                 }
             }
         });
@@ -352,7 +371,7 @@ public abstract class CardFragment extends Fragment
                 if(_gd != null)
                 {
                     int count = _gd.getMemberCountForStatus(Constants.GMT_STATUS_FLAG_CONNECTED);
-                    //Log.e("CardFragment", "#DBG#: updateMembers, count = " + count);//NON-NLS
+                    //Globals.getLogger().e("CardFragment", "#DBG#: updateMembers, count = " + count);//NON-NLS
                     ((TextView) getView().findViewById(R.id.tvMemberCount)).setText(Integer.toString(count));
                 }
             }

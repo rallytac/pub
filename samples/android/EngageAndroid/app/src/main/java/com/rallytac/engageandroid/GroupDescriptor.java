@@ -39,6 +39,45 @@ public class GroupDescriptor implements Parcelable
 
     private HashMap<String, GroupMembershipTracker> memberNodes = new HashMap<>();
 
+    public enum GroupNetworkMode
+    {
+        nothingSpecial,         // 0
+        multicastOnly,          // 1
+        rallypointOnly          // 2
+    }
+
+    public static GroupNetworkMode groupNetworkModeFromInt(int i)
+    {
+        if(i == 2)
+        {
+            return GroupNetworkMode.nothingSpecial;
+        }
+        else if(i == 1)
+        {
+            return GroupNetworkMode.multicastOnly;
+        }
+        else
+        {
+            return GroupNetworkMode.rallypointOnly;
+        }
+    }
+
+    public static int intFromGroupNetworkMode(GroupNetworkMode m)
+    {
+        if(m == GroupNetworkMode.rallypointOnly)
+        {
+            return 2;
+        }
+        else if(m == GroupNetworkMode.multicastOnly)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     // State
     public boolean selectedForSingleView;
     public boolean selectedForMultiView;
@@ -55,6 +94,7 @@ public class GroupDescriptor implements Parcelable
     public boolean txSelected;
     public ArrayList<TalkerDescriptor> talkerList = new ArrayList<>();
     public long lastTxStartTime;
+    public long inoperableErrorCode;
 
     public static final Creator CREATOR = new Creator()
     {
@@ -69,6 +109,7 @@ public class GroupDescriptor implements Parcelable
         }
     };
 
+
     public GroupDescriptor()
     {
         resetState();
@@ -79,6 +120,7 @@ public class GroupDescriptor implements Parcelable
         joinError = false;
         _isDynamic = false;
         lastTxStartTime = 0;
+        inoperableErrorCode = 0;
 
         this.type = Type.gtUnknown;
     }
@@ -93,6 +135,7 @@ public class GroupDescriptor implements Parcelable
         joinError = false;
         _isDynamic = false;
         lastTxStartTime = 0;
+        inoperableErrorCode = 0;
 
         this.jsonConfiguration = in.readString();
         this.type = Type.values()[in.readInt()];
@@ -119,6 +162,7 @@ public class GroupDescriptor implements Parcelable
 
         this._isDynamic = (in.readInt() == 1);
         this.lastTxStartTime = in.readLong();
+        this.inoperableErrorCode = in.readLong();
     }
 
     public boolean isDynamic()
@@ -148,6 +192,62 @@ public class GroupDescriptor implements Parcelable
         talkerList.clear();
         memberNodes.clear();
         lastTxStartTime = 0;
+    }
+
+    public boolean hasInoperableError()
+    {
+        return createError;
+    }
+
+    public String getInoperableErrorMessage()
+    {
+        String rc = "An unhandled error has occurred";
+
+        if(createError)
+        {
+            Engine.CreationStatus cs = null;
+
+            try
+            {
+                cs = Engine.CreationStatus.fromInt((int)inoperableErrorCode);
+            }
+            catch (Exception e)
+            {
+                cs = Engine.CreationStatus.csUndefined;
+            }
+
+            rc = "The group could not be created due to ";
+
+            if(cs == Engine.CreationStatus.csUndefined)
+                    rc += "an undefined error (csUndefined)";
+            else if(cs == Engine.CreationStatus.csOk)
+                    rc += "an undefined error (csOk)";
+            else if(cs == Engine.CreationStatus.csNoJson)
+                    rc += "no configuration provided";
+            else if(cs == Engine.CreationStatus.csConflictingRpListAndCluster)
+                    rc += "a conflicting Rallypoint list and cluster";
+            else if(cs == Engine.CreationStatus.csAlreadyExists)
+                    rc += "the group already existing";
+            else if(cs == Engine.CreationStatus.csInvalidConfiguration)
+                    rc += "an invalid configuration";
+            else if(cs == Engine.CreationStatus.csInvalidJson)
+                    rc += "an invalid JSON configuration";
+            else if(cs == Engine.CreationStatus.csCryptoFailure)
+                    rc += "a crypto error";
+            else if(cs == Engine.CreationStatus.csAudioInputFailure)
+                    rc += "an error with the desired audio input device";
+            else if(cs == Engine.CreationStatus.csAudioOutputFailure)
+                    rc += "an error with the desired audio output device";
+            else if(cs == Engine.CreationStatus.csUnsupportedAudioEncoder)
+                    rc += "a requirement for an encoder not supported on this platform";
+            else if(cs == Engine.CreationStatus.csNoLicense)
+                    rc += "insufficient licensing";
+            else
+                    rc += "an unhandled error (" + inoperableErrorCode + ")";
+
+        }
+
+        return rc;
     }
 
     @Override
@@ -184,6 +284,7 @@ public class GroupDescriptor implements Parcelable
 
         dest.writeInt(this._isDynamic ? 1 : 0);
         dest.writeLong(this.lastTxStartTime);
+        dest.writeLong(this.inoperableErrorCode);
     }
 
     public void updateTalkers(ArrayList<TalkerDescriptor> list)
@@ -307,7 +408,7 @@ public class GroupDescriptor implements Parcelable
         {
             for(GroupMembershipTracker gmt: memberNodes.values())
             {
-                //Log.i(TAG, "#DBG#: getMemberCountForStatus: " + gmt._nodeId + ", status=" + gmt._statusFlags);
+                //Globals.getLogger().i(TAG, "#DBG#: getMemberCountForStatus: " + gmt._nodeId + ", status=" + gmt._statusFlags);
                 if((gmt._statusFlags & status) == status)
                 {
                     rc++;
@@ -391,6 +492,24 @@ public class GroupDescriptor implements Parcelable
         catch (Exception e)
         {
             rc = false;
+        }
+
+        return rc;
+    }
+
+    public GroupNetworkMode getNetworkMode()
+    {
+        GroupNetworkMode rc = GroupNetworkMode.nothingSpecial;
+
+        try
+        {
+            JSONObject j = new JSONObject(jsonConfiguration);
+
+            rc = groupNetworkModeFromInt(j.optInt("networkMode", intFromGroupNetworkMode(GroupNetworkMode.nothingSpecial)));
+        }
+        catch (Exception e)
+        {
+            rc = GroupNetworkMode.nothingSpecial;
         }
 
         return rc;

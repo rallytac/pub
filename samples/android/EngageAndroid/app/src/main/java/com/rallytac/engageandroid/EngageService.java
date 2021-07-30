@@ -62,18 +62,18 @@ public class EngageService extends Service
             // Ignore any intents if we're not initialized
             if(!_initialized)
             {
-                Log.w(TAG, "ignoring intent - not initialized");//NON-NLS
+                Globals.getLogger().w(TAG, "ignoring intent - not initialized");//NON-NLS
                 return;
             }
 
             String action = intent.getAction();
             if(action == null || action.isEmpty())
             {
-                Log.e(TAG, "received empty action!");//NON-NLS
+                Globals.getLogger().e(TAG, "received empty action!");//NON-NLS
                 return;
             }
 
-            Log.i(TAG, "received intent [" + action + "]");//NON-NLS
+            Globals.getLogger().i(TAG, "received intent [" + action + "]");//NON-NLS
 
             // TODO: handle intent actions
 
@@ -83,7 +83,7 @@ public class EngageService extends Service
             }
             else
             {
-                Log.e(TAG, "unhandled request action '" + action + "'");
+                Globals.getLogger().e(TAG, "unhandled request action '" + action + "'");
             }
         }
 
@@ -125,7 +125,7 @@ public class EngageService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.i(TAG, "=====================onStartCommand: intent=" + ((intent != null) ? intent.toString() : "null") + ", flags=" + flags + ", startId=" + startId);//NON-NLS
+        Globals.getLogger().i(TAG, "=====================onStartCommand: intent=" + ((intent != null) ? intent.toString() : "null") + ", flags=" + flags + ", startId=" + startId);//NON-NLS
         super.onStartCommand(intent, flags, startId);
 
         if(startId == 1)
@@ -139,7 +139,7 @@ public class EngageService extends Service
     @Override
     public void onCreate()
     {
-        Log.d(TAG, "onCreate");//NON-NLS
+        Globals.getLogger().d(TAG, "onCreate");//NON-NLS
         super.onCreate();
 
         initializeOsNotifications();
@@ -149,7 +149,7 @@ public class EngageService extends Service
     @Override
     public void onDestroy()
     {
-        Log.d(TAG, "onDestroy");//NON-NLS
+        Globals.getLogger().d(TAG, "onDestroy");//NON-NLS
         super.onDestroy();
 
         deinitializeService();
@@ -160,7 +160,7 @@ public class EngageService extends Service
     {
         if(_initialized)
         {
-            Log.w(TAG, "attempt to initialize when already initialized");//NON-NLS
+            Globals.getLogger().w(TAG, "attempt to initialize when already initialized");//NON-NLS
             return;
         }
 
@@ -214,18 +214,6 @@ public class EngageService extends Service
         {
             e.printStackTrace();
         }
-
-
-        // Shut down the Engage engine
-        try
-        {
-            //engineStop();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
 
         // Handle issues shutting down the network managers
         try
@@ -319,51 +307,24 @@ public class EngageService extends Service
     {
         try
         {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            Notification notification = new NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID + getString(R.string.android_notification_channel_id))
+                    .setContentTitle(title)
+                    .setContentText(msg)
+                    .setSmallIcon(iconId)
+                    .build();
+
+            notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
+
+            Intent i = new Intent(INTENT_ACTION_WAKEUP);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+            notification.contentIntent = pendingIntent;
+
+            if(_notificationManager != null)
             {
-                Notification notification = new NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID + getString(R.string.android_notification_channel_id))
-                        .setContentTitle(title)
-                        .setContentText(msg)
-                        .setSmallIcon(iconId)
-                        .build();
-
-                notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
-
-                Intent i = new Intent(INTENT_ACTION_WAKEUP);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
-                notification.contentIntent = pendingIntent;
-
-                if(_notificationManager != null)
-                {
-                    _notificationManager.notify(NOTIFICATION_ID, notification);
-                }
-
-                startForeground(NOTIFICATION_ID, notification);
+                _notificationManager.notify(NOTIFICATION_ID, notification);
             }
-            else
-            {
-                //startForeground(NOTIFICATION_ID, null);
 
-                Notification notification = new NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID + getString(R.string.android_notification_channel_id))
-                        .setContentTitle(title)
-                        .setContentText(msg)
-                        .setSmallIcon(iconId)
-                        .build();
-
-                notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
-
-                Intent i = new Intent(INTENT_ACTION_WAKEUP);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
-                notification.contentIntent = pendingIntent;
-
-                if(_notificationManager != null)
-                {
-                    _notificationManager.notify(NOTIFICATION_ID, notification);
-                }
-
-                startForeground(NOTIFICATION_ID, notification);
-
-            }
+            startForeground(NOTIFICATION_ID, notification);
         }
         catch (Exception e)
         {

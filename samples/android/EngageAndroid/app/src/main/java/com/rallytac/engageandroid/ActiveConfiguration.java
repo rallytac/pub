@@ -141,6 +141,9 @@ public class ActiveConfiguration
     private boolean _pttLatching;
     private boolean _pttVoiceControl;
 
+    private boolean _enforceTransmitSmoothing;
+    private boolean _allowDtx;
+
     private boolean _discoverSsdpAssets;
     private boolean _discoverTrelliswareAssets;
 
@@ -239,6 +242,26 @@ public class ActiveConfiguration
     public String getInputJson()
     {
         return _inputJson;
+    }
+
+    public boolean getAllowDtx()
+    {
+        return _allowDtx;
+    }
+
+    public void setAllowDtx(boolean allow)
+    {
+        _allowDtx = allow;
+    }
+
+    public boolean getEnforceTransmitSmoothing()
+    {
+        return _enforceTransmitSmoothing;
+    }
+
+    public void setEnforceTransmitSmoothing(boolean enforce)
+    {
+        _enforceTransmitSmoothing = enforce;
     }
 
     public boolean getDiscoverSsdpAssets()
@@ -561,7 +584,7 @@ public class ActiveConfiguration
         }
         catch (Exception e)
         {
-            Log.e(TAG, "addDynamicGroup: " + e.getMessage());//NON-NLS
+            Globals.getLogger().e(TAG, "addDynamicGroup: " + e.getMessage());//NON-NLS
             rc = false;
         }
 
@@ -593,7 +616,7 @@ public class ActiveConfiguration
         }
         catch (Exception e)
         {
-            Log.e(TAG, "updateDynamicGroup: " + e.getMessage());//NON-NLS
+            Globals.getLogger().e(TAG, "updateDynamicGroup: " + e.getMessage());//NON-NLS
             rc = false;
         }
 
@@ -609,7 +632,7 @@ public class ActiveConfiguration
         }
         catch (Exception e)
         {
-            Log.e(TAG, "removeDynamicGroup: " + e.getMessage());//NON-NLS
+            Globals.getLogger().e(TAG, "removeDynamicGroup: " + e.getMessage());//NON-NLS
             rc = false;
         }
 
@@ -1126,7 +1149,6 @@ public class ActiveConfiguration
                         audio.put(Engine.JsonFields.EnginePolicy.Audio.internalChannels, 1);
                         break;
 
-
                     case 0:
                     default:
                         audio.put(Engine.JsonFields.EnginePolicy.Audio.internalRate, 16000);
@@ -1145,15 +1167,14 @@ public class ActiveConfiguration
                     boolean aecEnabled = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_ENABLED, Constants.DEF_AEC_ENABLED);
                     aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.enabled, aecEnabled);
                     aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.cng, Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_CNG, Constants.DEF_AEC_CNG));
-
-                    //aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_MODE, Integer.toString(Constants.DEF_AEC_MODE))));
+                    aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_MODE, Integer.toString(Constants.DEF_AEC_MODE))));
                     aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.mode, Integer.parseInt(Integer.toString(Constants.DEF_AEC_MODE)));
-
                     aec.put(Engine.JsonFields.EnginePolicy.Audio.Aec.speakerTailMs, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_AEC_SPEAKER_TAIL_MS, Integer.toString(Constants.DEF_AEC_SPEAKER_TAIL_MS))));
 
                     audio.put(Engine.JsonFields.EnginePolicy.Audio.Aec.objectName, aec);
 
                     // Maybe change to mono output if desired
+                    /*
                     if (aecEnabled)
                     {
                         boolean disableStereo = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_AEC_DISABLE_STEREO, Constants.DEF_AEC_STEREO_DISABLED);
@@ -1162,6 +1183,7 @@ public class ActiveConfiguration
                             audio.put(Engine.JsonFields.EnginePolicy.Audio.internalChannels, 1);
                         }
                     }
+                    */
                 }
 
                 // Android
@@ -1269,6 +1291,7 @@ public class ActiveConfiguration
 
                 networking.put(Engine.JsonFields.EnginePolicy.Networking.defaultNic, _networkInterfaceName);
 
+                /*
                 if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_AUDIO_JITTER_LOW_LATENCY_ENABLED, Constants.DEF_USER_AUDIO_JITTER_LOW_LATENCY_ENABLED))
                 {
                     networking.put(Engine.JsonFields.EnginePolicy.Networking.rtpJtterLatencyMode, Engine.JitterBufferLatency.toInt(Engine.JitterBufferLatency.lowLatency));
@@ -1277,6 +1300,7 @@ public class ActiveConfiguration
                 {
                     networking.put(Engine.JsonFields.EnginePolicy.Networking.rtpJtterLatencyMode, Engine.JitterBufferLatency.toInt(Engine.JitterBufferLatency.standard));
                 }
+                */
 
                 rc.put(Engine.JsonFields.EnginePolicy.Networking.objectName, networking);
             }
@@ -1398,7 +1422,10 @@ public class ActiveConfiguration
                 {
                     if(gd.selectedForSingleView)
                     {
-                        return true;
+                        if(!gd.hasInoperableError())
+                        {
+                            return true;
+                        }
                     }
                 }
                 else if(_uiMode == Constants.UiMode.vMulti)
@@ -1407,7 +1434,10 @@ public class ActiveConfiguration
                     {
                         if(gd.txSelected)
                         {
-                            return true;
+                            if(!gd.hasInoperableError())
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

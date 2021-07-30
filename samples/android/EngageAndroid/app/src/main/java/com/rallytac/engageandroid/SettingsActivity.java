@@ -54,7 +54,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
         {
             String stringValue = value.toString();
 
-            //Log.e(TAG, ">>>>>> onPreferenceChange: " + preference.getKey());
+            //Globals.getLogger().e(TAG, ">>>>>> onPreferenceChange: " + preference.getKey());
 
             if(!_prefChangeIsBeingForcedByBinding)
             {
@@ -64,7 +64,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                     || key.startsWith("network_")//NON-NLS
                     || key.startsWith("mission_"))//NON-NLS
                 {
-                    Log.i(TAG, "mission parameters changed");//NON-NLS
+                    Globals.getLogger().i(TAG, "mission parameters changed");//NON-NLS
                     _thisActivity.indicateMissionChanged();
                 }
             }
@@ -284,17 +284,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NODE_LEAVE));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NEW_AUDIO_RX));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NETWORK_ERROR));
+            //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_THEME_DARK_MODE));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_DENOISE));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_ENABLED));
-            //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_MODE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_MODE));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_CNG));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_SPEAKER_TAIL_MS));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_AEC_DISABLE_STEREO));
-            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_JITTER_LOW_LATENCY_ENABLED));
+
+            //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_JITTER_LOW_LATENCY_ENABLED));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ENGINE_INTERNAL_AUDIO));
@@ -372,7 +374,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 }
 
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_ENABLED));
-                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_SECS));
+                //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.NETWORK_MULTICAST_FAILOVER_SECS));
             }
 
 
@@ -481,6 +483,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             }
             else
             {
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_EXPERIMENT_ENABLE_TX_SMOOTHING));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_EXPERIMENT_ALLOW_DTX));
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_EXPERIMENT_ENABLE_SSDP_DISCOVERY));
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_EXPERIMENT_ENABLE_CISTECH_GV1_DISCOVERY));
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_EXPERIMENT_CISTECH_GV1_DISCOVERY_ADDRESS));

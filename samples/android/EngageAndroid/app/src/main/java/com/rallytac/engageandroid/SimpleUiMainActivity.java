@@ -40,6 +40,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Environment;
+import android.text.Layout;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -291,21 +292,21 @@ public class SimpleUiMainActivity
     @Override
     public void onPresenceAdded(PresenceDescriptor pd)
     {
-        //Log.e(TAG, "onPresenceAdded: " + pd.nodeId + ", " + pd.displayName);
+        //Globals.getLogger().e(TAG, "onPresenceAdded: " + pd.nodeId + ", " + pd.displayName);
         updateMap();
     }
 
     @Override
     public void onPresenceChange(PresenceDescriptor pd)
     {
-        //Log.e(TAG, "onPresenceChange: " + pd.nodeId + ", " + pd.displayName);
+        //Globals.getLogger().e(TAG, "onPresenceChange: " + pd.nodeId + ", " + pd.displayName);
         updateMap();
     }
 
     @Override
     public void onPresenceRemoved(PresenceDescriptor pd)
     {
-        //Log.e(TAG, "onPresenceRemoved: " + pd.nodeId + ", " + pd.displayName);
+        //Globals.getLogger().e(TAG, "onPresenceRemoved: " + pd.nodeId + ", " + pd.displayName);
         updateMap();
     }
 
@@ -355,7 +356,7 @@ public class SimpleUiMainActivity
 
         if (vectorDrawable == null)
         {
-            Log.e(TAG, "Requested vector resource was not found");
+            Globals.getLogger().e(TAG, "Requested vector resource was not found");
             return BitmapDescriptorFactory.defaultMarker();
         }
 
@@ -563,7 +564,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d(TAG, "onCreate");
+        Globals.getLogger().d(TAG, "onCreate");
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
@@ -631,7 +632,28 @@ public class SimpleUiMainActivity
 
         restoreSavedState(savedInstanceState);
 
-        assignGroupsToFragments();
+        if(assignGroupsToFragments() == 0)
+        {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AlertDialog dlg = new AlertDialog.Builder(SimpleUiMainActivity.this)
+                            .setTitle(R.string.no_groups_to_display_title)
+                            .setCancelable(true)
+                            .setMessage(R.string.no_groups_to_display_description)
+                            .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Does nothing
+                                }
+                            })
+                            .create();
+
+                    dlg.show();
+                }
+            });
+        }
+
         setupMainScreen();
         redrawPttButton();
 
@@ -669,7 +691,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onSaveInstanceState(Bundle outState)
     {
-        Log.d(TAG, "onSaveInstanceState");//NON-NLS
+        Globals.getLogger().d(TAG, "onSaveInstanceState");//NON-NLS
         saveState(outState);
         super.onSaveInstanceState(outState);
     }
@@ -677,14 +699,14 @@ public class SimpleUiMainActivity
     @Override
     protected void onStart()
     {
-        Log.d(TAG, "onStart");//NON-NLS
+        Globals.getLogger().d(TAG, "onStart");//NON-NLS
         super.onStart();
     }
 
     @Override
     protected void onResume()
     {
-        Log.d(TAG, "onResume");//NON-NLS
+        Globals.getLogger().d(TAG, "onResume");//NON-NLS
         super.onResume();
         Globals.getEngageApplication().ensureAllIsGood();
         setLockScreenSettings();
@@ -697,7 +719,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onPause()
     {
-        Log.d(TAG, "onPause");//NON-NLS
+        Globals.getLogger().d(TAG, "onPause");//NON-NLS
         super.onPause();
         stopTimelineAudioPlayer();
         stopAllTx();
@@ -708,7 +730,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onStop()
     {
-        Log.d(TAG, "onStop");//NON-NLS
+        Globals.getLogger().d(TAG, "onStop");//NON-NLS
         stopTimelineAudioPlayer();
         stopAllTx();
         cancelTimers();
@@ -718,7 +740,7 @@ public class SimpleUiMainActivity
     @Override
     protected void onDestroy()
     {
-        Log.d(TAG, "onDestroy");//NON-NLS
+        Globals.getLogger().d(TAG, "onDestroy");//NON-NLS
         stopTimelineAudioPlayer();
         stopAllTx();
         cancelTimers();
@@ -743,7 +765,7 @@ public class SimpleUiMainActivity
         {
             if(resultCode == SettingsActivity.MISSION_CHANGED_RESULT || Globals.getEngageApplication().getMissionChangedStatus())
             {
-                Log.i(TAG, "============= mission has changed, recreating =======================");//NON-NLS
+                Globals.getLogger().i(TAG, "============= mission has changed, recreating =======================");//NON-NLS
                 onMissionChanged();
             }
         }
@@ -844,7 +866,7 @@ public class SimpleUiMainActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        //Log.d(TAG, "---onKeyDown keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", _lastHeadsetKeyhookDown=" + _lastHeadsetKeyhookDown);
+        //Globals.getLogger().d(TAG, "---onKeyDown keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", _lastHeadsetKeyhookDown=" + _lastHeadsetKeyhookDown);
 
         if(_keycodePtt != 0 && keyCode == _keycodePtt)
         {
@@ -858,13 +880,13 @@ public class SimpleUiMainActivity
 
                     if (_pttRequested)
                     {
-                        Log.d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
+                        Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
                         _pttRequestIsLatched = true;
                         Globals.getEngageApplication().startTx("");
                     }
                     else
                     {
-                        Log.d(TAG, "---onKeyDown requesting endTx");//NON-NLS
+                        Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
                         _pttRequestIsLatched = false;
                         Globals.getEngageApplication().endTx();
                     }
@@ -875,7 +897,7 @@ public class SimpleUiMainActivity
                     {
                         _pttRequested = false;
                         _pttRequestIsLatched = false;
-                        Log.d(TAG, "---onKeyDown requesting endTx");//NON-NLS
+                        Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
                         Globals.getEngageApplication().endTx();
                     }
                 }
@@ -888,7 +910,7 @@ public class SimpleUiMainActivity
                 {
                     _pttRequested = true;
                     _pttRequestIsLatched = false;
-                    Log.d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
+                    Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
                     Globals.getEngageApplication().startTx("");
                 }
             }
@@ -912,12 +934,12 @@ public class SimpleUiMainActivity
 
                         if (_pttRequested)
                         {
-                            Log.d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
+                            Globals.getLogger().d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
                             Globals.getEngageApplication().startTx("");
                         }
                         else
                         {
-                            Log.d(TAG, "---onKeyDown requesting endTx due to media button double-push");//NON-NLS
+                            Globals.getLogger().d(TAG, "---onKeyDown requesting endTx due to media button double-push");//NON-NLS
                             Globals.getEngageApplication().endTx();
                         }
                     }
@@ -931,7 +953,7 @@ public class SimpleUiMainActivity
         {
             if(!_pttRequested)
             {
-                Log.d(TAG, "---onKeyDown requesting startTx due to media button push");
+                Globals.getLogger().d(TAG, "---onKeyDown requesting startTx due to media button push");
                 _pttRequested = true;
                 Globals.getEngageApplication().startTx(0, 0);
             }
@@ -945,7 +967,7 @@ public class SimpleUiMainActivity
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
         long diffTime = (event.getEventTime() - event.getDownTime());
-        //Log.d(TAG, "---onKeyUp keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", diff=" + diffTime);
+        //Globals.getLogger().d(TAG, "---onKeyUp keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", diff=" + diffTime);
 
         if(_keycodePtt != 0 && keyCode == _keycodePtt)
         {
@@ -953,7 +975,7 @@ public class SimpleUiMainActivity
             {
                 _pttRequested = false;
                 _pttRequestIsLatched = false;
-                Log.d(TAG, "---onKeyUp requesting endTx");//NON-NLS
+                Globals.getLogger().d(TAG, "---onKeyUp requesting endTx");//NON-NLS
                 Globals.getEngageApplication().endTx();
             }
         }
@@ -967,12 +989,12 @@ public class SimpleUiMainActivity
                 {
                     if (!_pttRequested)
                     {
-                        Log.d(TAG, "---onKeyUp requesting startTx due to media button PTT");
+                        Globals.getLogger().d(TAG, "---onKeyUp requesting startTx due to media button PTT");
                         Globals.getEngageApplication().startTx(0, 0);
                     }
                     else
                     {
-                        Log.d(TAG, "---onKeyUp requesting endTx due to media button PTT");
+                        Globals.getLogger().d(TAG, "---onKeyUp requesting endTx due to media button PTT");
                         Globals.getEngageApplication().endTx();
                     }
 
@@ -982,7 +1004,7 @@ public class SimpleUiMainActivity
                 {
                     if (_pttRequested)
                     {
-                        Log.d(TAG, "---onKeyUp requesting endTx due to media button release");
+                        Globals.getLogger().d(TAG, "---onKeyUp requesting endTx due to media button release");
                         _pttRequested = false;
                         Globals.getEngageApplication().endTx();
                     }
@@ -1266,7 +1288,7 @@ public class SimpleUiMainActivity
     @Override
     public void onAnyTxPending()
     {
-        Log.d(TAG, "onAnyTxPending");//NON-NLS
+        Globals.getLogger().d(TAG, "onAnyTxPending");//NON-NLS
         _anyTxPending = true;
         redrawPttButton();
         redrawCardFragments();
@@ -1275,7 +1297,7 @@ public class SimpleUiMainActivity
     @Override
     public void onAnyTxActive()
     {
-        Log.d(TAG, "onAnyTxActive");//NON-NLS
+        Globals.getLogger().d(TAG, "onAnyTxActive");//NON-NLS
         _anyTxActive = true;
         _anyTxPending = true;
         redrawPttButton();
@@ -1286,14 +1308,14 @@ public class SimpleUiMainActivity
     @Override
     public void onAnyTxEnding()
     {
-        Log.d(TAG, "onAnyTxEnding");//NON-NLS
+        Globals.getLogger().d(TAG, "onAnyTxEnding");//NON-NLS
         // Nothing to do here
     }
 
     @Override
     public void onAllTxEnded()
     {
-        Log.d(TAG, "onAllTxEnded");//NON-NLS
+        Globals.getLogger().d(TAG, "onAllTxEnded");//NON-NLS
         _anyTxActive = false;
         _anyTxPending = false;
         _pttRequested = false;
@@ -1467,12 +1489,12 @@ public class SimpleUiMainActivity
 
     private void saveState(Bundle bundle)
     {
-        Log.d(TAG, "saveState");//NON-NLS
+        Globals.getLogger().d(TAG, "saveState");//NON-NLS
     }
 
     private void restoreSavedState(Bundle bundle)
     {
-        Log.d(TAG, "restoreSavedState");//NON-NLS
+        Globals.getLogger().d(TAG, "restoreSavedState");//NON-NLS
     }
 
     private void performDevSimulation()
@@ -1650,7 +1672,7 @@ public class SimpleUiMainActivity
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b)
                 {
-                    Log.w(TAG, "onProgressChanged i=" + i);
+                    Globals.getLogger().w(TAG, "onProgressChanged i=" + i);
                     if(_timeLineEventPlayerSeekIsTouched)
                     {
                         _timelineEventMediaPlayer.seekTo(i * TIMELINE_EVENT_AUDIO_SCALE);
@@ -1664,14 +1686,14 @@ public class SimpleUiMainActivity
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar)
                 {
-                    Log.w(TAG, "onStartTrackingTouch");
+                    Globals.getLogger().w(TAG, "onStartTrackingTouch");
                     _timeLineEventPlayerSeekIsTouched = true;
                 }
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar)
                 {
-                    Log.w(TAG, "onStopTrackingTouch");
+                    Globals.getLogger().w(TAG, "onStopTrackingTouch");
                     _timeLineEventPlayerSeekIsTouched = false;
                 }
             });
@@ -1689,7 +1711,7 @@ public class SimpleUiMainActivity
                     public void onPrepared(MediaPlayer mediaPlayer)
                     {
                         final int durationSecs = (mediaPlayer.getDuration() / 1000);
-                        Log.w(TAG, "onPrepared, durationSecs=" + durationSecs);
+                        Globals.getLogger().w(TAG, "onPrepared, durationSecs=" + durationSecs);
 
                         /*
                         _timelineEventPlayerSeekbar.post(new Runnable()
@@ -1715,7 +1737,7 @@ public class SimpleUiMainActivity
                                     if(_timelineEventMediaPlayer.isPlaying())
                                     {
                                         int positionSecs = (_timelineEventMediaPlayer.getCurrentPosition() / 1000);
-                                        Log.d(TAG, "updating seekbar, position=" + positionSecs);
+                                        Globals.getLogger().d(TAG, "updating seekbar, position=" + positionSecs);
                                         _timelineEventPlayerSeekbar.setProgress(positionSecs);
                                     }
                                 }
@@ -2223,7 +2245,7 @@ public class SimpleUiMainActivity
             {
                 if(Globals.getEngageApplication().isEngineRunning())
                 {
-                    Log.i(TAG, "engine is running, proceeding");//NON-NLS
+                    Globals.getLogger().i(TAG, "engine is running, proceeding");//NON-NLS
                     _waitForEngineStartedTimer.cancel();
 
                     runOnUiThread(new Runnable()
@@ -2237,7 +2259,7 @@ public class SimpleUiMainActivity
                 }
                 else
                 {
-                    Log.i(TAG, "waiting for engage engine to restart");//NON-NLS
+                    Globals.getLogger().i(TAG, "waiting for engage engine to restart");//NON-NLS
                 }
             }
         }, 0, 100);
@@ -2391,8 +2413,10 @@ public class SimpleUiMainActivity
         }
     }
 
-    private void assignGroupsToFragments()
+    private int assignGroupsToFragments()
     {
+        int groupsAssigned = 0;
+
         FragmentManager fragMan = getSupportFragmentManager();
         List<Fragment> fragments = fragMan.getFragments();
 
@@ -2438,6 +2462,7 @@ public class SimpleUiMainActivity
                             gd.txSelected = true;
 
                             ((CardFragment)f).setGroupDescriptor(gd);
+                            groupsAssigned++;
 
                             Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_SELECTED_GROUPS_SINGLE, gd.id);
                             Globals.getSharedPreferencesEditor().apply();
@@ -2465,6 +2490,8 @@ public class SimpleUiMainActivity
                             if(((CardFragment)f).getGroupDescriptor() == null)
                             {
                                 ((CardFragment)f).setGroupDescriptor(gd);
+                                groupsAssigned++;
+
                                 break;
                             }
                         }
@@ -2495,6 +2522,8 @@ public class SimpleUiMainActivity
             ft.commit();
             findViewById(id).setVisibility(View.GONE);
         }
+
+        return groupsAssigned;
     }
 
     private void switchNetworking(boolean useRp)
@@ -2585,7 +2614,7 @@ public class SimpleUiMainActivity
 
     public void onClickPlayOrPauseEventAudio(View view)
     {
-        Log.e(TAG, "onClickPlayOrPauseEventAudio todo");
+        Globals.getLogger().e(TAG, "onClickPlayOrPauseEventAudio todo");
         ImageView iv = (ImageView)view;
 
         if(_timelineEventPlayerTracker._mediaPlayer.isPlaying())
@@ -2714,6 +2743,24 @@ public class SimpleUiMainActivity
     {
         ImageView iv;
 
+        // Background
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_ui_theme))
+        {
+            int color;
+
+            if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_THEME_DARK_MODE, true))
+            {
+                color = ContextCompat.getColor(this, R.color.colorMainDark);
+            }
+            else
+            {
+                color = ContextCompat.getColor(this, R.color.colorMainLight);
+            }
+
+            View layMainRoot = findViewById(R.id.layMainRoot);
+            layMainRoot.setBackgroundColor(color);
+        }
+
         // Network
         iv = findViewById(R.id.ivNetwork);
         if(iv != null)
@@ -2808,21 +2855,28 @@ public class SimpleUiMainActivity
 
         // Alert TX
         final ImageView ivTxAlert = findViewById(R.id.ivTxAlert);
+
         if(ivTxAlert != null)
         {
-            ivTxAlert.setLongClickable(true);
-            ivTxAlert.setOnLongClickListener(new View.OnLongClickListener()
+            if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_alert))
             {
-                @Override
-                public boolean onLongClick(View v)
+                ivTxAlert.setLongClickable(true);
+                ivTxAlert.setOnLongClickListener(new View.OnLongClickListener()
                 {
-                    _transmittingAlertProgressDialog = Utils.showProgressMessage(SimpleUiMainActivity.this, getString(R.string.transmitting_alert), _transmittingAlertProgressDialog);
+                    @Override
+                    public boolean onLongClick(View v)
+                    {
+                        _transmittingAlertProgressDialog = Utils.showProgressMessage(SimpleUiMainActivity.this, getString(R.string.transmitting_alert), _transmittingAlertProgressDialog);
 
-                    // This is kinda nasty - hardcoded audio file.  But this is demonstration only so ok for now.
-                    Globals.getEngageApplication().startTx(Globals.getEngageApplication().getRawFilesCacheDir() + "/" + "engage_hail_1.wav");
-                    return true;
-                }
-            });
+                        // This is kinda nasty - hardcoded audio file.  But this is demonstration only so ok for now.
+                        Globals.getEngageApplication().startTx(Globals.getEngageApplication().getRawFilesCacheDir() + "/" + "engage_hail_1.wav");
+                        return true;
+                    }
+                });
+            }
+            {
+                ivTxAlert.setVisibility(View.GONE);
+            }
         }
     }
 

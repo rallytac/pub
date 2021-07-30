@@ -15,6 +15,7 @@ public class Globals
     private static SharedPreferences _sp = null;
     private static SharedPreferences.Editor _spEd = null;
     private static AudioPlayerManager _apm = null;
+    private static ILogger _logger = new SimpleLogger();
 
     public static void setContext(Context ctx)
     {
@@ -29,6 +30,11 @@ public class Globals
     public static void setEngageApplication(EngageApplication app)
     {
         _app = app;
+    }
+
+    public static ILogger getLogger()
+    {
+        return _logger;
     }
 
     public static EngageApplication getEngageApplication()

@@ -9,6 +9,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -34,6 +36,8 @@ import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 
+import org.json.JSONObject;
+
 import java.util.Date;
 
 public class AboutActivity extends
@@ -45,7 +49,7 @@ public class AboutActivity extends
 {
     private static String TAG = AboutActivity.class.getSimpleName();
 
-    private enum ScanType {stUnknown, stLicenseKey, stActivationCode}
+    private enum ScanType {stUnknown, stLicenseKey, stActivationCode, stEnterpriseId}
 
     private ImageView _ivAppLogo;
     private TextView _tvAppName;
@@ -54,6 +58,7 @@ public class AboutActivity extends
     private EditText _etDeviceId;
     private EditText _etLicenseKey;
     private EditText _etActivationCode;
+    private EditText _etEnterpriseId;
     private boolean _creating;
     private ScanType _scanType;
     private ProgressDialog _progressDialog = null;
@@ -64,7 +69,6 @@ public class AboutActivity extends
     private ImageView _ivLoadLicenseKey = null;
     private ImageView _ivScanActivationCode = null;
     private ImageView _ivWebFetchActivationCode = null;
-
 
     private int _numberOfClicksOfAppLogo = 0;
     private int _numberOfClicksOfAppName = 0;
@@ -170,6 +174,7 @@ public class AboutActivity extends
             });
         }
 
+        String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
         String key = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_KEY, "");
         String ac = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, "");
 
@@ -185,6 +190,29 @@ public class AboutActivity extends
         _tvLicenseHeader = findViewById(R.id.tvLicenseHeader);
         _tvLicensingMessage = findViewById(R.id.tvLicensingMessage);
         _etDeviceId = findViewById(R.id.etDeviceId);
+        _etEnterpriseId = findViewById(R.id.etEnterpriseId);
+        _etEnterpriseId.setText(ei);
+        _etEnterpriseId.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                String ei = s.toString();
+                Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_ENTERPRISE_ID, ei);
+                Globals.getSharedPreferencesEditor().apply();
+            }
+        });
+
         _etLicenseKey = findViewById(R.id.etLicenseKey);
         _etLicenseKey.addTextChangedListener(new TextWatcher()
         {
@@ -290,7 +318,7 @@ public class AboutActivity extends
                 ac = "";
             }
 
-            Log.i(TAG, "saving licensing [" + getString(R.string.licensing_entitlement) + "] [" + key + "] [" + ac + "]"); //NON-NLS
+            Globals.getLogger().i(TAG, "saving licensing [" + getString(R.string.licensing_entitlement) + "] [" + key + "] [" + ac + "]"); //NON-NLS
 
             Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_LICENSING_KEY, key);
             Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, ac);
@@ -325,9 +353,12 @@ public class AboutActivity extends
         String key = _etLicenseKey.getText().toString();
         String ac = _etActivationCode.getText().toString();
 
-        _newLd = parseIntoInternalDescriptor(Globals.getEngageApplication()
-                                                    .getEngine()
-                                                    .engageGetLicenseDescriptor(getString(R.string.licensing_entitlement), key, ac, getString(R.string.manufacturer_id)));
+        String entitlement = getString(R.string.licensing_entitlement);
+        String mnfId = getString(R.string.manufacturer_id);
+
+        String ldJson = Globals.getEngageApplication().getEngine().engageGetLicenseDescriptor(entitlement, key, ac, mnfId);
+
+        _newLd = parseIntoInternalDescriptor(ldJson);
 
         _newLd._needsSaving = true;
     }
@@ -471,6 +502,15 @@ public class AboutActivity extends
         {
             findViewById(R.id.layActivationSection).setVisibility(View.GONE);
         }
+
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_enterprise_id))
+        {
+            findViewById(R.id.layEnterpriseIdSection).setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            findViewById(R.id.layEnterpriseIdSection).setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -496,6 +536,52 @@ public class AboutActivity extends
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
+        /*
+        String stringData = null;
+
+        JSONObject complexObject = null;
+        String licenseKey = null;
+        String activationCode = null;
+        String enterpriseId = null;
+
+
+        try
+        {
+            // First, try to see if we have a URI to read from
+            Uri uri = intent.getData();
+
+            if(uri != null)
+            {
+                byte[] byteData = Utils.readBinaryFile(this, uri);
+
+                // Perhaps it's a a bitmap (representing a QR code)
+                Bitmap bm = BitmapFactory.decodeByteArray(byteData, 0, byteData.length);
+                if(bm != null)
+                {
+                    stringData = Utils.qrCodeBitmapToString(bm);
+                }
+                else
+                {
+                    // Its not a bitmap.  Maybe its just a string
+                    // TODO
+                }
+            }
+            else
+            {
+                // OK, no URI, maybe its a camera scan of a QR code
+                IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+                if(result != null)
+                {
+                    stringData = result.getContents();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            complexObject = null;
+        }
+        */
+
         if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
         {
             _scanning = false;
@@ -515,6 +601,11 @@ public class AboutActivity extends
                     else if(_scanType == ScanType.stActivationCode)
                     {
                         _etActivationCode.setText(scannedString);
+                        updateUi();
+                    }
+                    else if(_scanType == ScanType.stEnterpriseId)
+                    {
+                        _etEnterpriseId.setText(scannedString);
                         updateUi();
                     }
                 }
@@ -564,11 +655,101 @@ public class AboutActivity extends
 
                     if(!ok)
                     {
-                        Utils.showErrorMsg(AboutActivity.this, "Failed to load the license data");
+                        Utils.showErrorMsg(AboutActivity.this, getString(R.string.failed_to_load_license_key_data));
                     }
                 }
             }
         }
+        /*
+        else if(requestCode == Constants.PICK_ENTERPRISE_ID_FILE_REQUEST_CODE)
+        {
+            if(intent != null)
+            {
+                if (resultCode == RESULT_OK)
+                {
+                    boolean ok = false;
+
+                    try
+                    {
+                        String idString = Utils.readTextFile(AboutActivity.this, intent.getData());
+
+                        if(!Utils.isEmptyString(idString))
+                        {
+                            Utils.trimString(idString);
+                            idString = idString.toUpperCase();
+                            _etEnterpriseId.setText(idString);
+                            updateUi();
+                            ok = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        ok = false;
+                    }
+
+                    if(!ok)
+                    {
+                        Utils.showErrorMsg(AboutActivity.this, getString(R.string.failed_to_load_enterprise_id_data));
+                    }
+                }
+            }
+        }
+        else if(requestCode == Constants.PICK_QR_LICENSE_FILE_REQUEST_CODE || requestCode == Constants.PICK_QR_ACTIVATION_FILE_REQUEST_CODE)
+        {
+            boolean ok = false;
+
+            try
+            {
+                Uri uri = intent.getData();
+                if(uri != null)
+                {
+                    byte[] qrCodeBytesFromFile = Utils.readBinaryFile(this, uri);
+
+                    Bitmap bm = BitmapFactory.decodeByteArray(qrCodeBytesFromFile, 0, qrCodeBytesFromFile.length);
+                    if(bm != null)
+                    {
+                        String s = Utils.qrCodeBitmapToString(bm);
+                        if(!Utils.isEmptyString(s))
+                        {
+                            Log.e(TAG, s);
+
+                            if(requestCode == Constants.PICK_QR_LICENSE_FILE_REQUEST_CODE)
+                            {
+                                JSONObject jo = new JSONObject(s);
+                                String license = jo.optJSONObject("licensing").optString("key");
+                                if(!Utils.isEmptyString(license))
+                                {
+                                    Utils.trimString(license);
+                                    if(license.length() == 24)
+                                    {
+                                        license = license.toUpperCase();
+                                        _etLicenseKey.setText(license);
+                                        updateUi();
+                                        ok = true;
+                                    }
+                                }
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                ok = false;
+            }
+
+            if(!ok)
+            {
+                Utils.showErrorMsg(AboutActivity.this, getString(R.string.failed_to_load_license_key_data));
+            }
+        }
+        */
     }
 
     private String machineInfo()
@@ -640,6 +821,49 @@ public class AboutActivity extends
                 .setView(message).create();
 
         dlg.show();
+    }
+
+    public void onClickShareEnterpriseId(View view)
+    {
+        String idString = _etEnterpriseId.getText().toString();
+        if(Utils.isEmptyString(idString))
+        {
+            return;
+        }
+
+        Bitmap bm = Utils.stringToQrCodeBitmap(idString, Constants.QR_CODE_WIDTH, Constants.QR_CODE_HEIGHT);
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.qr_code_displayer, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(dialogView);
+        alertDialogBuilder.setCancelable(true);
+        AlertDialog alert = alertDialogBuilder.create();
+
+        ImageView iv = dialogView.findViewById(R.id.ivQrCode);
+        iv.setImageBitmap(bm);
+
+        alert.show();
+    }
+
+    public void onClickLoadEnterpriseId(View view)
+    {
+        try
+        {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_ENTERPRISE_ID_FILE_REQUEST_CODE);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void onClickScanEnterpriseId(View view)
+    {
+        scanData(getString(R.string.scan_enterprise_id), ScanType.stEnterpriseId, view, getString(R.string.select_qr_code_file), Constants.PICK_QR_ENTERPRISE_ID_FILE_REQUEST_CODE);
     }
 
     public void onClickShareLicenseKey(View view)
@@ -822,6 +1046,7 @@ public class AboutActivity extends
                     userChangedLicensedData();
                     updateUi();
                     Toast.makeText(AboutActivity.this, R.string.deactivated, Toast.LENGTH_LONG).show();
+                    recreate();
                 }
             });
         }
@@ -894,6 +1119,7 @@ public class AboutActivity extends
                         userChangedLicensedData();
                         updateUi();
                         Toast.makeText(AboutActivity.this, R.string.deactivated, Toast.LENGTH_LONG).show();
+                        recreate();
 
                         startActivity(intent);
                     }

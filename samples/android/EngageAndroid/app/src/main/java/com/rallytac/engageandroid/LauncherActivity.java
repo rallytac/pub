@@ -360,7 +360,7 @@ public class LauncherActivity extends AppCompatActivity
             }
             else
             {
-                Log.e(TAG, "This device is not supported.");//NON-NLS
+                Globals.getLogger().e(TAG, "This device is not supported.");//NON-NLS
                 showIssueAndFinish(getString(R.string.title_google_play_services_error), getString(R.string.google_play_services_not_installed_or_out_of_date));
             }
 
@@ -459,7 +459,7 @@ public class LauncherActivity extends AppCompatActivity
             }
             else
             {
-                Log.w(TAG, "permission " + permissions[x] + " provided but not requested");
+                Globals.getLogger().w(TAG, "permission " + permissions[x] + " provided but not requested");
             }
         }
 
@@ -472,7 +472,7 @@ public class LauncherActivity extends AppCompatActivity
             if(e.getRequired() && !e.getGranted())
             {
                 allRequiredAllowed = false;
-                Log.w(TAG, "permission " + e.getPermission() + " has not been granted");
+                Globals.getLogger().w(TAG, "permission " + e.getPermission() + " has not been granted");
             }
         }
 
@@ -626,12 +626,12 @@ public class LauncherActivity extends AppCompatActivity
         /*
         if(Globals.getEngageApplication().isEngineRunning())
         {
-            Log.i(TAG, "engine is already running - ui was likely relaunched");//NON-NLS
+            Globals.getLogger().i(TAG, "engine is already running - ui was likely relaunched");//NON-NLS
             launchUiActivity();
             return;
         }
 
-        Log.i(TAG, "engaging ...");//NON-NLS
+        Globals.getLogger().i(TAG, "engaging ...");//NON-NLS
 
         long tmrDelay;
         long tmrPeriod;
@@ -669,7 +669,7 @@ public class LauncherActivity extends AppCompatActivity
                         showIssueAndFinish(getString(R.string.title_startup_error), getString(R.string.startup_cannot_connect_to_engine));
                     }
 
-                    Log.i(TAG, "waiting for engage service to come online");//NON-NLS
+                    Globals.getLogger().i(TAG, "waiting for engage service to come online");//NON-NLS
                 }
             }
         }, tmrDelay, tmrPeriod);

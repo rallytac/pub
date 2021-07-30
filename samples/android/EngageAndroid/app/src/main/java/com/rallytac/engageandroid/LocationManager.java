@@ -73,7 +73,7 @@ public class LocationManager
                 public void onLocationResult(LocationResult locationResult) {
                     for (Location location : locationResult.getLocations())
                     {
-                        Log.d(TAG, "locationUpdate: " + location.toString());//NON-NLS
+                        Globals.getLogger().d(TAG, "locationUpdate: " + location.toString());//NON-NLS
                         onLocationUpdated(location);
                     }
                 }
@@ -113,7 +113,7 @@ public class LocationManager
 
     private void onLocationUpdated(Location location)
     {
-        //Log.d(TAG, "processNewLocationData " + location.toString());
+        //Globals.getLogger().d(TAG, "processNewLocationData " + location.toString());
 
         if(_notificationSubscriber != null)
         {
@@ -134,12 +134,12 @@ public class LocationManager
                      {
                          Location location = task.getResult();
 
-                         //Log.d(TAG, "onLicenseActivationTaskComplete success : " + location.toString());
+                         //Globals.getLogger().d(TAG, "onLicenseActivationTaskComplete success : " + location.toString());
                          onLocationUpdated(location);
                      }
                      else
                      {
-                         Log.e(TAG, "onLicenseActivationTaskComplete failure");//NON-NLS
+                         Globals.getLogger().e(TAG, "onLicenseActivationTaskComplete failure");//NON-NLS
                      }
                  }
              }

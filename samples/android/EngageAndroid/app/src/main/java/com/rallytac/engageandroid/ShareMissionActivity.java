@@ -12,10 +12,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -46,7 +49,6 @@ public class ShareMissionActivity extends AppCompatActivity
     private String _pwd;
     private String _deflectionUrl;
     private Bitmap _bm;
-    private boolean _qrCodeZoomed = false;
     private String _base91DataString = null;
     private JSONObject _jsonConfiguration = null;
     private byte[] _compressedDataBytes = null;
@@ -95,7 +97,6 @@ public class ShareMissionActivity extends AppCompatActivity
 
         setElements();
         setBitmap();
-        updateZoomView();
     }
 
     @Override
@@ -113,7 +114,7 @@ public class ShareMissionActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState)
     {
-        Log.d(TAG, "onSaveInstanceState");//NON-NLS
+        Globals.getLogger().d(TAG, "onSaveInstanceState");//NON-NLS
         saveState(outState);
         super.onSaveInstanceState(outState);
     }
@@ -125,7 +126,6 @@ public class ShareMissionActivity extends AppCompatActivity
         bundle.putString(KEY_PWD, _pwd);
         bundle.putString(KEY_DEFLECTION_URL, _deflectionUrl);
         bundle.putString(KEY_DATASTRING, _base91DataString);
-        bundle.putBoolean(KEY_ZOOMED, _qrCodeZoomed);
         bundle.putByteArray(KEY_COMPRESSED_DATA_BYTES, _compressedDataBytes);
         bundle.putString(KEY_MISSION_ID, _missionIdToShare);
     }
@@ -140,28 +140,28 @@ public class ShareMissionActivity extends AppCompatActivity
         _pwd = bundle.getString(KEY_PWD);
         _deflectionUrl = bundle.getString(KEY_DEFLECTION_URL, null);
         _base91DataString = bundle.getString(KEY_DATASTRING, null);
-        _qrCodeZoomed = bundle.getBoolean(KEY_ZOOMED, false);
         _compressedDataBytes = bundle.getByteArray(KEY_COMPRESSED_DATA_BYTES);
         _missionIdToShare = bundle.getString(KEY_MISSION_ID, null);
     }
 
-    public void onClickQrCode(View view)
+    private void popupQrCode()
     {
-        _qrCodeZoomed = !_qrCodeZoomed;
-        updateZoomView();
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View dialogView = layoutInflater.inflate(R.layout.qr_code_displayer, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(dialogView);
+        alertDialogBuilder.setCancelable(true);
+        AlertDialog alert = alertDialogBuilder.create();
+
+        ImageView iv = dialogView.findViewById(R.id.ivQrCode);
+        iv.setImageBitmap(_bm);
+
+        alert.show();
     }
 
-    private void updateZoomView()
+    public void onClickQrCode(View view)
     {
-        LinearLayout lay = findViewById(R.id.layoutQrControls);
-        if(_qrCodeZoomed)
-        {
-            lay.setVisibility(View.GONE);
-        }
-        else
-        {
-            lay.setVisibility(View.VISIBLE);
-        }
+        popupQrCode();
     }
 
     private void getElements()
@@ -321,6 +321,9 @@ public class ShareMissionActivity extends AppCompatActivity
             // Finally, we can create our QR code!
             buildBitmap();
             setBitmap();
+
+            // And display it
+            popupQrCode();
 
             Globals.getEngageApplication().logEvent(Analytics.MISSION_QR_CODE_DISPLAYED_FOR_SHARE);
         }

@@ -128,7 +128,7 @@ public class LicenseDeactivationTask extends AsyncTask<String, Void, String>
                 br.close();
 
                 JSONObject rc = new JSONObject(sb.toString());
-                Log.d(TAG, rc.toString());
+                Globals.getLogger().d(TAG, rc.toString());
 
                 _result = rc.getInt("returnCode");//NON-NLS
                 _resultMessage = rc.optString("returnCodeDescr", null);//NON-NLS

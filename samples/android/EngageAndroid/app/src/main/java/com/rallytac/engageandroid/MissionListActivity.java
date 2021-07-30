@@ -37,6 +37,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -367,7 +368,27 @@ public class MissionListActivity extends AppCompatActivity
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(promptView);
 
+        final String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
         final EditText etPassphrase = promptView.findViewById(R.id.etPassphrase);
+        final Switch swUseEnterpriseId = promptView.findViewById(R.id.swUseEnterpriseId);
+
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_enterprise_id))
+        {
+            swUseEnterpriseId.setVisibility(View.GONE);
+        }
+        else
+        {
+            if(Utils.isEmptyString(ei))
+            {
+                swUseEnterpriseId.setEnabled(false);
+                swUseEnterpriseId.setChecked(false);
+            }
+            else
+            {
+                swUseEnterpriseId.setChecked(true);
+            }
+        }
+
         final Spinner spnGroupCount = promptView.findViewById(R.id.spnGroupCount);
         final EditText etRallypoint = promptView.findViewById(R.id.etRallypoint);
         final EditText etName = promptView.findViewById(R.id.etName);
@@ -384,14 +405,37 @@ public class MissionListActivity extends AppCompatActivity
                         
                         if(!Utils.isEmptyString(_generatePassphrase))
                         {
-                            ArrayList<EngageCertStore> certStores = getCertStoreList();
-                            if(certStores == null || certStores.isEmpty())
+                            boolean continueOperation = true;
+                            int minSize = Utils.intOpt(R.integer.opt_min_mission_generate_passphrase_len, 0);
+                            if(minSize > 0)
                             {
-                                doMissionGeneration(null, null);
+                                if(_generatePassphrase.length() < minSize)
+                                {
+                                    continueOperation = false;
+                                    String msg = String.format(getResources().getString(R.string.a_passphrase_of_minimum_length_is_required_to_generate), minSize);
+                                    Toast.makeText(MissionListActivity.this, msg, Toast.LENGTH_LONG).show();
+                                }
                             }
-                            else
+
+                            if(continueOperation)
                             {
-                                promptForCertStoreToUseForMissionGeneration(certStores);
+                                if(swUseEnterpriseId.isChecked())
+                                {
+                                    if(!Utils.isEmptyString(ei))
+                                    {
+                                        _generatePassphrase = (ei + _generatePassphrase);
+                                    }
+                                }
+
+                                ArrayList<EngageCertStore> certStores = getCertStoreList();
+                                if(certStores == null || certStores.isEmpty())
+                                {
+                                    doMissionGeneration(null, null);
+                                }
+                                else
+                                {
+                                    promptForCertStoreToUseForMissionGeneration(certStores);
+                                }
                             }
                         }
                         else
@@ -408,6 +452,10 @@ public class MissionListActivity extends AppCompatActivity
                                 dialog.cancel();
                             }
                         });
+
+        TextView txtPassphraseTitle = promptView.findViewById(R.id.txtPassphraseTitle);
+        String title = String.format(getResources().getString(R.string.passphrase_title), Utils.intOpt(R.integer.opt_min_mission_generate_passphrase_len, 0));
+        txtPassphraseTitle.setText(title);
 
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
@@ -882,7 +930,7 @@ public class MissionListActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
-        Log.d(TAG, "onActivityResult");//NON-NLS
+        Globals.getLogger().d(TAG, "onActivityResult");//NON-NLS
 
         if(resultCode == RESULT_OK)
         {
