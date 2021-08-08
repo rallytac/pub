@@ -1,5 +1,25 @@
 # Change Log
 
+## August 7, 2021 - 1.212.9050
+- Adds per-group RTP profiles for network fine-tuning.
+- Adds per-group discontinuous transmission settings as an option for supported CODECs.
+- Adds (experimental) support for reverse subscription on leaf RP nodes for core-registered multicast reflectors.
+- Adds settings for more fine-grained control over the internal watchdog logic.
+- Adds timings for select internal tasks to better fine-tune platform-specific performance.
+- Adds transmission smoothing for audio as the default to be more accomodating to naive 3rd-party jitter buffers.
+- Adds optional per-reflector multicast interface names in the Rallypoint.
+- Adds support for MIL-STD-3005/STANAG-4591 MELPe CODEC at 600, 1200, and 2400 bps.
+- Adds engageGetActiveFeatureset() API that returns the currently active featureset (if any) - including active usage counts.
+- Adds Java annotations in Engine.java to better cater for minification under newer Android build environments.
+- Adds QoS options for Rallypoint TCP links.
+- Adds serial number and fingerprint information to X.509 descriptor JSON.
+- Adds Android-specific audio settings for sharing and performance modes, usage type, content type, and input preset.
+- Enhances jitter calculation logic on RTP receivers.
+- Enhances internal timers by switching from millisecond timing to nanosecond resolution.
+- Enhances date validation for X.509 certificates.
+- Corrects a random hanging issue when leaving a group on certain platforms.
+- Corrects an invalid RX state in the jitter buffer under rare conditions.
+
 ## May 19, 2021 - 1.210.9048
 - Adds (experimental) support for application-defined networking devices.
 - Adds support for looped-back network packets into the same group for debugging and testing purposes.
