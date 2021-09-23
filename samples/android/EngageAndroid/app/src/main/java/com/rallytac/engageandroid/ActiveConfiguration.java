@@ -1194,7 +1194,29 @@ public class ActiveConfiguration
                         androidAudio = new JSONObject();
                     }
 
-                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.api, Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API, Integer.toString(Constants.DEF_ANDROID_AUDIO_API))));
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.api,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_API))));
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.sharingMode,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_SHARING_MODE,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_SHARING_MODE))));
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.performanceMode,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_PERFORMANCE_MODE,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_PERFORMANCE_MODE))));
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.usage,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_USAGE,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_USAGE))));
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.contentType,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_CONTENT_TYPE,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_CONTENT_TYPE))));
+
+                    androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.inputPreset,
+                            Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET,
+                                    Integer.toString(Constants.DEF_ANDROID_AUDIO_INPUT_PRESET))));
 
                     audio.put(Engine.JsonFields.EnginePolicy.Audio.Android.objectName, androidAudio);
                 }

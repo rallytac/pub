@@ -19,7 +19,7 @@
     <string name="default_rallypoint">demo.rallytac.com</string>
 
     <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
-    <string name="opt_lock_orientation" translatable="false">1</string>
+    <string name="opt_lock_orientation" translatable="false">-1</string>
     <string name="opt_ptt_latching" translatable="false">1</string>
     <string name="opt_experimental_general_enabled" translatable="false">1</string>
     <string name="opt_experimental_human_biometrics_enabled" translatable="false">1</string>
@@ -42,4 +42,8 @@
     <string name="sample_mission_gen_use_default_rallypoint">0</string>
 
     <string name="application_internal_certificate_store_display_name">Engage Default Certificate Store</string>
+
+    <string-array name="flavor_defaults">
+        <item>ui.orientation,integer,1</item>
+    </string-array>
 </resources>

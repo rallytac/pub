@@ -16,7 +16,8 @@
     "housekeeperIntervalMs":1000,
     "maxTxSecs":86400,
     "logTaskQueueStatsIntervalMs":0,
-    "enableLazySpeakerClosure":false
+    "enableLazySpeakerClosure":false,
+    "delayedMicrophoneClosureSecs":15
   },
 
   "licensing":{

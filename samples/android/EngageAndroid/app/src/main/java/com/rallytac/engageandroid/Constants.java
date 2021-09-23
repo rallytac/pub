@@ -41,6 +41,12 @@ public class Constants
     public final static int DEF_AEC_SPEAKER_TAIL_MS = 60;
     public final static boolean DEF_AEC_STEREO_DISABLED = true;
     public final static int DEF_ANDROID_AUDIO_API = 0;
+    public final static int DEF_ANDROID_AUDIO_SHARING_MODE = 0;         // Exclusive
+    public final static int DEF_ANDROID_AUDIO_PERFORMANCE_MODE = 12;    // Low latency
+    public final static int DEF_ANDROID_AUDIO_USAGE = 2;                // Voice communication
+    public final static int DEF_ANDROID_AUDIO_CONTENT_TYPE = 1;         // Speech
+    public final static int DEF_ANDROID_AUDIO_INPUT_PRESET = 7;         // Voice communication
+
     public final static int DEF_ENGINE_INTERNAL_AUDIO = 0;
     public final static boolean DEF_MICROPHONE_NOISE_REDUCTION = false;
 

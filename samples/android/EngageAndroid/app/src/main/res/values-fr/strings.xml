@@ -8,6 +8,7 @@
     <string name="sample_mission_gen_mission_name_fmt">%1$s échantillon Mission</string>
 
     <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
 
     <string name="title_activity_settings">Paramètres</string>
     <string name="title_activity_missions">Mission Disponible</string>

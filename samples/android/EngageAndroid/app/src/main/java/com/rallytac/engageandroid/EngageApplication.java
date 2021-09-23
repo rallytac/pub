@@ -17,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -78,6 +79,7 @@ public class EngageApplication
                                     Engine.IGroupListener,
                                     Engine.ILicenseListener,
                                     Engine.ILoggingListener,
+                                    Engine.IAppNetworkDeviceListener,
                                     LocationManager.ILocationUpdateNotifications,
                                     IPushToTalkRequestHandler,
                                     BluetoothManager.IBtNotification,
@@ -143,6 +145,7 @@ public class EngageApplication
         void onGroupStatsReportFailed(GroupDescriptor gd);
     }
 
+    private static EngageApplication _instance = null;
     private Engine _engine = null;
 
     //private EngageService _svc = null;
@@ -758,9 +761,31 @@ public class EngageApplication
         startService(new Intent(this, EngageService.class));
     }
 
+    public static EngageApplication getInstance()
+    {
+        return _instance;
+    }
+
     @Override
     public void onCreate()
     {
+        /*
+        // Note: This is for developer testing only!!
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            try
+            {
+                Os.setenv("ENGAGE_FORCE_CRASH_ON_TX", "Y", true);
+            }
+            catch (Exception e)
+            {
+                //Globals.getLogger().e(TAG, "cannot set 'ENGAGE_FORCE_CRASH_ON_TX' environment variable");
+            }
+        }
+        */
+
+        _instance = this;
+
         super.onCreate();
 
         // Its important to set this stuff as soon as possible!
@@ -789,21 +814,9 @@ public class EngageApplication
         getEngine().addRallypointListener(this);
         getEngine().addGroupListener(this);
         getEngine().addLicenseListener(this);
+        getEngine().setAppNetworkDeviceListener(this);
 
         loadAndroidAudioDeviceCache();
-
-        // Note: This is for developer testing only!!
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-        {
-            try
-            {
-                Os.setenv("ENGAGE_FORCE_CRASH_ON_TX", "Y", true);
-            }
-            catch (Exception e)
-            {
-                Globals.getLogger().e(TAG, "cannot set 'ENGAGE_OVERRIDE_DEVICE_ID' environment variable");
-            }
-        }
 
         setupDirectories();
         //setupFilesystemLogging();
@@ -1704,7 +1717,7 @@ public class EngageApplication
             rc = null;
         }
 
-        return rc;
+        return FlavorSpecific.applyGroupModifications(rc);
     }
 
     public String getDefaultCertificateIdUri()
@@ -2337,7 +2350,7 @@ public class EngageApplication
         }
     }
 
-    public String applyFlavorSpecificGeneratedMissionModifications(String json, boolean isSampleMission)
+    public String applyFlavorSpecificGeneratedMissionModifications(String json, boolean flavorSpecificBool01)
     {
         String rc;
 
@@ -2363,7 +2376,7 @@ public class EngageApplication
             rc = json;
         }
 
-        return FlavorSpecific.applyGeneratedMissionModifications(rc, isSampleMission);
+        return FlavorSpecific.applyGeneratedMissionModifications(rc, flavorSpecificBool01);
     }
 
     public String getEnginePolicy()
@@ -2487,7 +2500,7 @@ public class EngageApplication
                 }
             }
 
-            missionJson = applyFlavorSpecificGeneratedMissionModifications(jo.toString(), true);
+            missionJson = applyFlavorSpecificGeneratedMissionModifications(jo.toString(), false);
         }
         catch (Exception e)
         {
@@ -3819,6 +3832,66 @@ public class EngageApplication
                 Globals.getLogger().i(TAG, "onEngineAudioDevicesRefreshed");
             }
         });
+    }
+
+    @Override
+    public int onAppNetworkDeviceStart(long l, String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Globals.getLogger().i(TAG, "onAppNetworkDeviceStart");
+            }
+        });
+
+        return 0;
+    }
+
+    @Override
+    public int onAppNetworkDeviceStop(long l, String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Globals.getLogger().i(TAG, "onAppNetworkDeviceStop");
+            }
+        });
+
+        return 0;
+    }
+
+    @Override
+    public Engine.EngageDatagram onAppNetworkDeviceRecvEngageDatagram(int i, int i1, String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Globals.getLogger().i(TAG, "onAppNetworkDeviceStop");
+            }
+        });
+
+        return null;
+    }
+
+    @Override
+    public int onAppNetworkDeviceSendEngageDatagram(int i, Engine.EngageDatagram engageDatagram, int i1, String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Globals.getLogger().i(TAG, "onAppNetworkDeviceStop");
+            }
+        });
+
+        return 0;
     }
 
     @Override

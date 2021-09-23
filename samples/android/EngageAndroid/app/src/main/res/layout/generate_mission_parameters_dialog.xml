@@ -35,10 +35,9 @@
             android:layout_height="wrap_content"
             android:hint="@string/passphrase"
             android:inputType="textPassword"/>
-
         <Switch
             android:id="@+id/swUseEnterpriseId"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/use_enterprise_id_for_enhanced_security" />
@@ -58,7 +57,6 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,6 +68,15 @@
             android:layout_height="wrap_content"
             android:entries="@array/audio_group_count" />
     </LinearLayout>
+
+    <Switch
+        android:id="@+id/swFlavorSpecificMg01"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:padding="10dp"
+        android:text="@string/flavor_specific_mg_sw_01_text" />
 
     <EditText
         android:id="@+id/etName"

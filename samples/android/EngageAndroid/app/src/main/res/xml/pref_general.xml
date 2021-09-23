@@ -136,6 +136,51 @@
                 android:positiveButtonText="@null"
                 android:title="@string/set_android_audio_api" />
 
+            <ListPreference
+                android:defaultValue="0"
+                android:entries="@array/android_audio_sharing_mode_names"
+                android:entryValues="@array/android_audio_sharing_mode_values"
+                android:key="user_audio.android.sharingMode"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_android_audio_sharing_mode" />
+
+            <ListPreference
+                android:defaultValue="12"
+                android:entries="@array/android_audio_performance_mode_names"
+                android:entryValues="@array/android_audio_performance_mode_values"
+                android:key="user_audio.android.performanceMode"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_android_audio_performance_mode" />
+
+            <ListPreference
+                android:defaultValue="2"
+                android:entries="@array/android_audio_usage_names"
+                android:entryValues="@array/android_audio_usage_values"
+                android:key="user_audio.android.usage"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_android_audio_usage" />
+
+            <ListPreference
+                android:defaultValue="1"
+                android:entries="@array/android_audio_content_type_names"
+                android:entryValues="@array/android_audio_content_type_values"
+                android:key="user_audio.android.contentType"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_android_content_type" />
+
+            <ListPreference
+                android:defaultValue="7"
+                android:entries="@array/android_audio_input_preset_names"
+                android:entryValues="@array/android_audio_input_preset_values"
+                android:key="user_audio.android.inputPreset"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_android_input_preset" />
+
             <!--
             <SwitchPreference
                 android:defaultValue="false"
@@ -151,7 +196,7 @@
                 android:defaultValue="true"/>
 
             <ListPreference
-                android:defaultValue="5"
+                android:defaultValue="0"
                 android:entries="@array/aec_mode_names"
                 android:entryValues="@array/aec_mode_values"
                 android:key="user_audio.aec.mode"
@@ -241,6 +286,15 @@
         </PreferenceCategory>
 
         <PreferenceCategory android:title="@string/set_hdr_user_interface"  android:key="prefcat_user_interface">
+            <ListPreference
+                android:defaultValue="1"
+                android:entries="@array/ui_orientation_names"
+                android:entryValues="@array/ui_orientation_values"
+                android:key="ui.orientation"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null"
+                android:title="@string/set_user_interface_orientation" />
+
             <SwitchPreference
                 android:defaultValue="false"
                 android:key="ui.showOnLockScreen"

@@ -59,6 +59,7 @@ public class MissionListActivity extends AppCompatActivity
     private int _generateGroupCount = 0;
     private String _generateRp = null;
     private String _generateName = null;
+    private boolean _generatedMissionFlavorSpecificMg01 = false;
 
     private class MissionListAdapter extends ArrayAdapter<DatabaseMission>
     {
@@ -249,7 +250,7 @@ public class MissionListActivity extends AppCompatActivity
                             .getEngine().engageGenerateMission(_generatePassphrase,
                                                                _generateGroupCount,
                                                                _generateRp,
-                                                               _generateName), false);
+                                                               _generateName), _generatedMissionFlavorSpecificMg01);
 
             if(Utils.isEmptyString(json))
             {
@@ -262,12 +263,12 @@ public class MissionListActivity extends AppCompatActivity
             json = Globals.getEngageApplication()
                     .applyFlavorSpecificGeneratedMissionModifications(Globals.getEngageApplication()
                             .getEngine().engageGenerateMissionUsingCertStore(_generatePassphrase,
-                                                                             _generateGroupCount,
+                                                                            _generateGroupCount,
                                                                              _generateRp,
                                                                              _generateName,
                                                                              certStoreFn,
                                                                              passwordHexString,
-                                                                             ""), false);//NON-NLS
+                                                                             ""), _generatedMissionFlavorSpecificMg01);//NON-NLS
 
             if(Utils.isEmptyString(json))
             {
@@ -389,7 +390,23 @@ public class MissionListActivity extends AppCompatActivity
             }
         }
 
+        final Switch swFlavorSpecificMg01 = promptView.findViewById(R.id.swFlavorSpecificMg01);
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_flavor_specific_mg_01))
+        {
+            swFlavorSpecificMg01.setVisibility(View.GONE);
+            swFlavorSpecificMg01.setEnabled(false);
+            swFlavorSpecificMg01.setChecked(false);
+        }
+        else
+        {
+            swFlavorSpecificMg01.setVisibility(View.VISIBLE);
+            swFlavorSpecificMg01.setEnabled(true);
+            swFlavorSpecificMg01.setChecked(false);
+        }
+
         final Spinner spnGroupCount = promptView.findViewById(R.id.spnGroupCount);
+        spnGroupCount.setSelection(3);
+
         final EditText etRallypoint = promptView.findViewById(R.id.etRallypoint);
         final EditText etName = promptView.findViewById(R.id.etName);
 
@@ -402,6 +419,10 @@ public class MissionListActivity extends AppCompatActivity
                         _generateGroupCount = Integer.parseInt(spnGroupCount.getSelectedItem().toString());
                         _generateRp = etRallypoint.getText().toString();
                         _generateName = etName.getText().toString();
+                        if(Utils.isEmptyString(_generateName))
+                        {
+                            _generateName = getString(R.string.generated_mission_name);
+                        }
                         
                         if(!Utils.isEmptyString(_generatePassphrase))
                         {
@@ -426,6 +447,8 @@ public class MissionListActivity extends AppCompatActivity
                                         _generatePassphrase = (ei + _generatePassphrase);
                                     }
                                 }
+
+                                _generatedMissionFlavorSpecificMg01 = swFlavorSpecificMg01.isChecked();
 
                                 ArrayList<EngageCertStore> certStores = getCertStoreList();
                                 if(certStores == null || certStores.isEmpty())

@@ -8,6 +8,7 @@ package com.rallytac.engageandroid;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.media.AudioDeviceInfo;
 import android.os.Build;
@@ -62,7 +63,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 if(key.startsWith("rallypoint_")//NON-NLS
                     || key.startsWith("user_")//NON-NLS
                     || key.startsWith("network_")//NON-NLS
-                    || key.startsWith("mission_"))//NON-NLS
+                    || key.startsWith("mission_") //NON-NLS
+                    || key.startsWith("ui."))//NON-NLS
                 {
                     Globals.getLogger().i(TAG, "mission parameters changed");//NON-NLS
                     _thisActivity.indicateMissionChanged();
@@ -299,6 +301,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_JITTER_LOW_LATENCY_ENABLED));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_SHARING_MODE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_PERFORMANCE_MODE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_USAGE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_CONTENT_TYPE));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET));
+
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ENGINE_INTERNAL_AUDIO));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_VIBRATIONS));
@@ -316,6 +324,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             /*
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL));
             */
+
+            // Show/hide the ability to set the screen orientation
+            if(Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+            {
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.UI_ORIENTATION));
+            }
+            else
+            {
+                hidePreferenceInCategory(PreferenceKeys.UI_ORIENTATION, "prefcat_user_interface");
+            }
 
             // NICs
             {
