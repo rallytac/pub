@@ -77,6 +77,6 @@
     <bool name="opt_auto_generate_sample_mission">true</bool>
     <bool name="opt_supports_ui_theme">false</bool>
     <bool name="opt_log_to_engage">false</bool>
-
+    <bool name="opt_flavor_specific_mg_01">false</bool>
     <integer name="opt_min_mission_generate_passphrase_len">0</integer>
 </resources>

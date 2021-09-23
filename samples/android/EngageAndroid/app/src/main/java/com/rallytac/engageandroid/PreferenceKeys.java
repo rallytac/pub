@@ -15,6 +15,7 @@ public class PreferenceKeys
     public static String UI_SHOW_TEXT_MESSAGING = "ui.showTextMessaging";//NON-NLS
     public static String UI_LARGE_PTT_BUTTON = "ui.largePttButton";//NON-NLS
     public static String UI_SHOW_ON_LOCK_SCREEN = "ui.showOnLockScreen";//NON-NLS
+    public static String UI_ORIENTATION = "ui.orientation";//NON-NLS
 
     public static String NETWORK_BINDING_NIC_NAME = "network_bindingNic";//NON-NLS
     public static String NETWORK_MULTICAST_FAILOVER_ENABLED = "network_multicastFailover.enabled";//NON-NLS
@@ -43,7 +44,14 @@ public class PreferenceKeys
     public static String USER_AUDIO_AEC_SPEAKER_TAIL_MS = "user_audio.aec.speakerTailMs";//NON-NLS
     public static String USER_AUDIO_AEC_DISABLE_STEREO = "user_audio.aec.disableStereo";//NON-NLS
     //public static String USER_AUDIO_JITTER_LOW_LATENCY_ENABLED = "user_audio_jitter_buffer_low_latency.enabled";//NON-NLS
+
     public static String USER_AUDIO_ANDROID_AUDIO_API = "user_audio.android.api";//NON-NLS
+    public static String USER_AUDIO_ANDROID_AUDIO_SHARING_MODE = "user_audio.android.sharingMode";//NON-NLS
+    public static String USER_AUDIO_ANDROID_AUDIO_PERFORMANCE_MODE = "user_audio.android.performanceMode";//NON-NLS
+    public static String USER_AUDIO_ANDROID_AUDIO_USAGE = "user_audio.android.usage";//NON-NLS
+    public static String USER_AUDIO_ANDROID_AUDIO_CONTENT_TYPE = "user_audio.android.contentType";//NON-NLS
+    public static String USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET = "user_audio.android.inputPreset";//NON-NLS
+
     public static String USER_AUDIO_ENGINE_INTERNAL_AUDIO = "user_audio.engine.internal.audio";//NON-NLS
 
     public static String USER_AUDIO_MICROPHONE_DENOISE = "user_audio.microphone.denoise";//NON-NLS

@@ -17,6 +17,8 @@ import android.provider.Settings;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.TextWatcher;
@@ -28,6 +30,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +42,7 @@ import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class AboutActivity extends
@@ -506,6 +511,27 @@ public class AboutActivity extends
         if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_enterprise_id))
         {
             findViewById(R.id.layEnterpriseIdSection).setVisibility(View.VISIBLE);
+
+            String s = Utils.trimString(_etEnterpriseId.getText().toString());
+            if(Utils.isEmptyString(s))
+            {
+                ((ImageView)findViewById(R.id.ivSetOrClearEnterpriseId)).setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_set_enterprise_id));
+            }
+            else
+            {
+                ((ImageView)findViewById(R.id.ivSetOrClearEnterpriseId)).setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_clear_enterprise_id));
+            }
+
+            /*
+            if(Utils.isEmptyString(_etEnterpriseId.getText().toString()))
+            {
+                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
+            }
+            else
+            {
+                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.VISIBLE);
+            }
+            */
         }
         else
         {
@@ -531,6 +557,49 @@ public class AboutActivity extends
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private JSONObject parseLicensing(String s)
+    {
+        JSONObject rc = null;
+
+        if(!Utils.isEmptyString(s))
+        {
+            String localTrimmedCopy = Utils.trimString(s);
+            if(!Utils.isEmptyString(localTrimmedCopy))
+            {
+                try
+                {
+                    rc = new JSONObject(Utils.trimString(localTrimmedCopy));
+                }
+                catch (Exception e)
+                {
+                    try
+                    {
+                        // If its not JSON then assume its just a license key.  And that license key MUST be 24 characters!
+                        if(localTrimmedCopy.length() == 24)
+                        {
+                            rc = new JSONObject();
+
+                            JSONObject licensingSubobject = new JSONObject();
+                            licensingSubobject.put(Engine.JsonFields.EnginePolicy.Licensing.key, localTrimmedCopy);
+
+                            rc.put(Engine.JsonFields.EnginePolicy.Licensing.objectName, licensingSubobject);
+                        }
+                        else
+                        {
+                            rc = null;
+                        }
+                    }
+                    catch (Exception innerE)
+                    {
+                        rc = null;
+                    }
+                }
+            }
+        }
+
+        return rc;
     }
 
     @Override
@@ -582,29 +651,48 @@ public class AboutActivity extends
         }
         */
 
-        if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
+         if(requestCode == Globals.getEngageApplication().getQrCodeScannerRequestCode())
         {
             _scanning = false;
 
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
             if(result != null)
             {
-                String scannedString = result.getContents();
-
-                if (!Utils.isEmptyString(scannedString))
+                if (_scanType == ScanType.stLicenseKey || _scanType == ScanType.stActivationCode)
                 {
-                    if(_scanType == ScanType.stLicenseKey)
+                    JSONObject jsonLicensing = parseLicensing(result.getContents());
+
+                    if (jsonLicensing != null)
                     {
-                        _etLicenseKey.setText(scannedString);
-                        updateUi();
+                        try
+                        {
+                            if (_scanType == ScanType.stLicenseKey)
+                            {
+                                _etLicenseKey.setText(jsonLicensing.optJSONObject(Engine.JsonFields.EnginePolicy.Licensing.objectName).optString(Engine.JsonFields.EnginePolicy.Licensing.key, "").toUpperCase());
+                                updateUi();
+                            }
+                            else if (_scanType == ScanType.stActivationCode)
+                            {
+                                _etActivationCode.setText(jsonLicensing.optJSONObject(Engine.JsonFields.EnginePolicy.Licensing.objectName).optString(Engine.JsonFields.EnginePolicy.Licensing.activationCode, "").toUpperCase());
+                                updateUi();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Utils.showErrorMsg(this, getString(R.string.failed_to_load_license_key_data));
+                        }
                     }
-                    else if(_scanType == ScanType.stActivationCode)
+                    else
                     {
-                        _etActivationCode.setText(scannedString);
-                        updateUi();
+                        Utils.showErrorMsg(this, getString(R.string.failed_to_load_license_key_data));
                     }
-                    else if(_scanType == ScanType.stEnterpriseId)
+                }
+                else if (_scanType == ScanType.stEnterpriseId)
+                {
+                    String scannedString = result.getContents();
+                    if(!Utils.isEmptyString(scannedString))
                     {
+                        scannedString = Utils.trimString(scannedString);
                         _etEnterpriseId.setText(scannedString);
                         updateUi();
                     }
@@ -633,17 +721,24 @@ public class AboutActivity extends
 
                     try
                     {
-                        String license = Utils.readTextFile(AboutActivity.this, intent.getData());
+                        String fileData = Utils.readTextFile(AboutActivity.this, intent.getData());
 
-                        if(!Utils.isEmptyString(license))
+                        if(!Utils.isEmptyString(fileData))
                         {
-                            Utils.trimString(license);
-                            if(license.length() == 24)
+                            JSONObject jsonLicensing = parseLicensing(fileData);
+
+                            if (jsonLicensing != null)
                             {
-                                license = license.toUpperCase();
-                                _etLicenseKey.setText(license);
-                                updateUi();
-                                ok = true;
+                                try
+                                {
+                                    _etLicenseKey.setText(jsonLicensing.optJSONObject(Engine.JsonFields.EnginePolicy.Licensing.objectName).optString(Engine.JsonFields.EnginePolicy.Licensing.key, "").toUpperCase());
+                                    updateUi();
+                                    ok = true;
+
+                                }
+                                catch (Exception e)
+                                {
+                                }
                             }
                         }
                     }
@@ -823,6 +918,27 @@ public class AboutActivity extends
         dlg.show();
     }
 
+
+    public void onClickSetOrClearEnterpriseId(View view)
+    {
+        String s = Utils.trimString(_etEnterpriseId.getText().toString());
+    }
+
+    public void onClickLoadEnterpriseId(View view)
+    {
+        try
+        {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_ENTERPRISE_ID_FILE_REQUEST_CODE);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public void onClickShareEnterpriseId(View view)
     {
         String idString = _etEnterpriseId.getText().toString();
@@ -844,21 +960,6 @@ public class AboutActivity extends
         iv.setImageBitmap(bm);
 
         alert.show();
-    }
-
-    public void onClickLoadEnterpriseId(View view)
-    {
-        try
-        {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.select_a_file)), Constants.PICK_ENTERPRISE_ID_FILE_REQUEST_CODE);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public void onClickScanEnterpriseId(View view)
@@ -1175,5 +1276,47 @@ public class AboutActivity extends
                 dlg.show();
             }
         });
+    }
+
+    private void promptForNewEnterpriseId()
+    {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View promptView = layoutInflater.inflate(R.layout.set_enterprise_id_dialog, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptView);
+
+        final String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
+        final EditText etEnterpriseId = promptView.findViewById(R.id.etEnterpriseId);
+
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton(R.string.generate_mission_button, new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int id) {
+                        setNewEnterpriseId(Utils.trimString(etEnterpriseId.getText().toString()));
+                    }
+                })
+                .setNegativeButton(R.string.cancel,
+                        new DialogInterface.OnClickListener()
+                        {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+                                dialog.cancel();
+                            }
+                        });
+
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+    private void setNewEnterpriseId(String newId)
+    {
+        if(Utils.isEmptyString(newId))
+        {
+
+        }
+        else
+        {
+            
+        }
     }
 }

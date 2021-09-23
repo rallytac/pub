@@ -12,4 +12,9 @@ public class FlavorSpecific
         // Nothing to be done here for the reference app
         return json;
     }
+
+    public static String applyGroupModifications(String json)
+    {
+        return json;
+    }
 }

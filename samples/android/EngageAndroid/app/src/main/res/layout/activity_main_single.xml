@@ -97,6 +97,15 @@
             android:layout_weight="1"/>
 
         <ImageView
+            android:id="@+id/ivSpeakerphoneToggle"
+            android:onClick="onClickSpeakerphoneToggleIcon"
+            android:layout_width="@dimen/topicons_hw"
+            android:layout_height="@dimen/topicons_hw"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_group_list"
+            android:layout_weight="1"/>
+
+        <ImageView
             android:id="@+id/ivMainScreenMenu"
             android:onClick="onClickMenuIcon"
             android:layout_width="@dimen/topicons_hw"

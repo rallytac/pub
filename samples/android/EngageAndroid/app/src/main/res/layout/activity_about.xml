@@ -156,6 +156,7 @@
 
             <ImageView
                 android:id="@+id/ivScanEnterpriseId"
+                android:visibility="visible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
@@ -168,6 +169,7 @@
 
             <ImageView
                 android:id="@+id/ivLoadEnterpriseId"
+                android:visibility="visible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="32dp"
@@ -179,15 +181,27 @@
 
             <ImageView
                 android:id="@+id/ivShareEnterpriseId"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="32dp"
                 android:onClick="onClickShareEnterpriseId"
-                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@+id/ivLoadEnterpriseId"
                 app:layout_constraintEnd_toStartOf="@+id/ivLoadEnterpriseId"
                 app:layout_constraintTop_toTopOf="@+id/ivLoadEnterpriseId"
-                app:srcCompat="@drawable/ic_visibility" />
+                app:srcCompat="@drawable/ic_share" />
+
+            <ImageView
+                android:id="@+id/ivSetOrClearEnterpriseId"
+                android:visibility="visible"
+                android:layout_marginEnd="32dp"
+                android:onClick="onClickSetOrClearEnterpriseId"
+                app:layout_constraintBottom_toBottomOf="@+id/ivLoadEnterpriseId"
+                app:layout_constraintEnd_toStartOf="@+id/ivShareEnterpriseId"
+                app:layout_constraintTop_toTopOf="@+id/ivLoadEnterpriseId"
+                app:srcCompat="@drawable/ic_set_enterprise_id"
+                android:layout_height="0dp"
+                android:layout_width="0dp"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout

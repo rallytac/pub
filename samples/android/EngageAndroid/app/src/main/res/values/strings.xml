@@ -18,7 +18,7 @@
     <string name="app_intent_unmute_group" translatable="false">UNMUTE_GROUP</string>
 
     <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
-    <string name="opt_lock_orientation" translatable="false">1</string>
+    <string name="opt_lock_orientation" translatable="false">-1</string>
     <string name="opt_ptt_latching" translatable="false">0</string>
     <string name="opt_experimental_general_enabled" translatable="false">0</string>
     <string name="opt_experimental_human_biometrics_enabled" translatable="false">0</string>
@@ -51,6 +51,7 @@
     <string name="sample_mission_gen_passphrase" translatable="false"></string>
 
     <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
     <string name="replacement_main_screen_title_bar">${appName} : ${missionName}</string>
 
     <string name="application_internal_certificate_store_display_name">Default Certificate Store</string>
@@ -131,6 +132,8 @@
     <string name="share_failed_to_create_shareable_configuration_package">Failed to create a shareable configuration package</string>
     <string name="about_to_share_qr">You\'re about to share your mission using a QR code. You can protect it with a password if you\'d like. You can mislead other QR code scanners by entering a deflection URL.</string>
     <string name="passphrase">passphrase</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">enterprise id</string>
     <string name="rallypoint_optional">rallypoint (optional)</string>
     <string name="mission_name_optional">mission name (optional)</string>
     <string name="audio_group_count">number of audio groups</string>
@@ -541,6 +544,85 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="android_audio_sharing_mode_names">
+        <item>Exclusive</item>
+        <item>Shared</item>
+    </string-array>
+    <string-array name="android_audio_sharing_mode_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="android_audio_performance_mode_names">
+        <item>Default</item>
+        <item>Power Saving</item>
+        <item>Low Latency</item>
+    </string-array>
+    <string-array name="android_audio_performance_mode_values">
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+
+    <string-array name="android_audio_usage_names">
+        <item>Media</item>
+        <item>Voice Communication</item>
+        <item>Voice Communication w/ Signalling</item>
+        <item>Alarm</item>
+        <item>Notification</item>
+        <item>Notification Ringtone</item>
+        <item>Notification Event</item>
+        <item>Assistance Accessibility</item>
+        <item>Assistance Navigation Guidance</item>
+        <item>Assistance Sonification</item>
+        <item>Game</item>
+        <item>Assistant</item>
+    </string-array>
+    <string-array name="android_audio_usage_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>16</item>
+    </string-array>
+
+    <string-array name="android_audio_content_type_names">
+        <item>Speech</item>
+        <item>Music</item>
+        <item>Movie</item>
+        <item>Sonification</item>
+    </string-array>
+    <string-array name="android_audio_content_type_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="android_audio_input_preset_names">
+        <item>Generic</item>
+        <item>Camcorder</item>
+        <item>Voice Recognition</item>
+        <item>Voice Communication</item>
+        <item>Unprocessed</item>
+        <item>Voice Performance</item>
+    </string-array>
+    <string-array name="android_audio_input_preset_values">
+        <item>1</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
     <string-array name="engine_internal_audio_names">
         <item>Highest Clarity</item>
         <item>Balanced Clarity/Performance</item>
@@ -634,6 +716,21 @@
         <item>65</item>
         <item>100</item>
     </string-array>
+    <string-array name="ui_orientation_names">
+        <item>Unspecified</item>
+        <item>Portrait</item>
+        <item>Landscape</item>
+        <item>Reverse Portrait</item>
+        <item>Reverse Landscape</item>
+    </string-array>
+    <string-array name="ui_orientation_values">
+        <item>-1</item>
+        <item>1</item>
+        <item>0</item>
+        <item>9</item>
+        <item>8</item>
+    </string-array>
+
 
     <!-- <item>name,<string/boolean/integer/float>,value</item> -->
     <string-array name="flavor_defaults"></string-array>
@@ -701,6 +798,11 @@
     <string name="set_audio_input_device">Input device</string>
     <string name="set_audio_output_device">Output device</string>
     <string name="set_android_audio_api">Android Audio API</string>
+    <string name="set_android_audio_sharing_mode">Sharing Mode</string>
+    <string name="set_android_audio_performance_mode">Performance Mode</string>
+    <string name="set_android_audio_usage">Usage</string>
+    <string name="set_android_content_type">Content Type</string>
+    <string name="set_android_input_preset">Input Preset</string>
     <string name="set_engine_internal_audio">Clarity &amp; Performance</string>
     <string name="set_aec_enable">Enable</string>
     <string name="set_aec_aggressiveness">Aggressiveness</string>
@@ -725,6 +827,7 @@
     <string name="set_experimental_discover_ssdp_assets">Discover SSDP Assets</string>
     <string name="set_experimental_tx_smoothing">Enforce Transmit Smoothing</string>
     <string name="set_experimental_tx_dtx">Allow DTX</string>
+    <string name="set_user_interface_orientation">Screen Orientation</string>
 
     <string name="set_experimental_discover_cistech_gv1_assets">Discover CISTECH GV1 LMR Assets</string>
     <string name="set_experimental_cistech_gv1_address">Address</string>
@@ -884,8 +987,10 @@
     <string name="if_the_mission_you_re_loading_is_protected_with_a_password_or_passphrase_please_enter_it_now">If the mission you\'re loading is protected with a password or passphrase, please enter it now.</string>
     <string name="failed_to_load_enterprise_id_data">Failed to load the enterprise ID data</string>
     <string name="failed_to_load_license_key_data">Failed to load the license data</string>
-    <string name="use_enterprise_id_for_enhanced_security">Use Enterprise ID for enhanced security</string>
+    <string name="use_enterprise_id_for_enhanced_security">Use Organization ID for enhanced security</string>
     <string name="passphrase_title">Passphrase</string>
     <string name="no_groups_to_display_title">No Groups To Display</string>
     <string name="no_groups_to_display_description">It\'s likely your mission has no groups.\n\nCheck your configuration using the Missions menu option or use that same screen to create a mission with groups.</string>
+    <string name="flavor_specific_mg_sw_01_text"></string>
+    <string name="enterprise_id_explanation">Enter the new Enterprise ID.  The value will be used to generate a new sample mission and any previous sample mission will be deleted.</string>
 </resources>

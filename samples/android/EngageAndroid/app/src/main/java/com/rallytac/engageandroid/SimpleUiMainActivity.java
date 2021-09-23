@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 
 import androidx.annotation.ColorInt;
@@ -145,6 +146,7 @@ public class SimpleUiMainActivity
     private HashSet<String> _currentlySelectedGroups = null;
 
     private ProgressDialog _transmittingAlertProgressDialog = null;
+    private AudioManager _audioManager = null;
 
     private class TimelineEventPlayerTracker
     {
@@ -564,14 +566,33 @@ public class SimpleUiMainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        /*
+        Thread.setDefaultUncaughtExceptionHandler(new MyUncaughtExceptionHandler(this));
+        if (getIntent().getBooleanExtra("crash", false))
+        {
+            Toast.makeText(this, "App restarted after crash", Toast.LENGTH_SHORT).show();
+        }
+        */
+
         Globals.getLogger().d(TAG, "onCreate");
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
+        _audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         _ac = Globals.getEngageApplication().getActiveConfiguration();
 
         _optAllowMultipleChannelView = Utils.boolOpt(getString(R.string.opt_allow_multiple_channel_view), true);
-        //setRequestedOrientation(Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+
+        // See if the build options force an orientation
+        int desiredOrientation = Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
+        // If nothing forced, see if the user has selected an orientation
+        if(desiredOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+        {
+            desiredOrientation = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.UI_ORIENTATION, Integer.toString(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)));
+        }
+
+        setRequestedOrientation(desiredOrientation);
 
         _keycodePtt = Utils.intOpt(getString(R.string.app_keycode_ptt), 0);
 
@@ -2224,6 +2245,27 @@ public class SimpleUiMainActivity
         }
     }
 
+    private void toggleSpeakerPhone()
+    {
+        try
+        {
+            if(_audioManager.isSpeakerphoneOn())
+            {
+                _audioManager.setSpeakerphoneOn(false);
+            }
+            else
+            {
+                _audioManager.setSpeakerphoneOn(true);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        updateTopIcons();
+    }
+
     private void cancelTimers()
     {
         if(_waitForEngineStartedTimer != null)
@@ -2651,6 +2693,11 @@ public class SimpleUiMainActivity
         doRecreate();
     }
 
+    public void onClickSpeakerphoneToggleIcon(View view)
+    {
+        toggleSpeakerPhone();
+    }
+
     public void onClickShareIcon(View view)
     {
         try
@@ -2737,6 +2784,37 @@ public class SimpleUiMainActivity
     public void onClickBiometricsIcon(View view)
     {
         executeActionOnBiometricsClick();
+    }
+
+    private void updateTopIcons()
+    {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run()
+            {
+                ImageView iv;
+
+                iv = findViewById(R.id.ivSpeakerphoneToggle);
+                if(iv != null)
+                {
+                    try
+                    {
+                        if(_audioManager.isSpeakerphoneOn())
+                        {
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_speakerphone_on));
+                        }
+                        else
+                        {
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_speakerphone_off));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private void setupMainScreen()
@@ -2878,6 +2956,8 @@ public class SimpleUiMainActivity
                 ivTxAlert.setVisibility(View.GONE);
             }
         }
+
+        updateTopIcons();
     }
 
     public void redrawPttButton()
