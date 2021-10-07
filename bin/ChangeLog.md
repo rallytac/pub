@@ -1,5 +1,19 @@
 # Change Log
 
+## October 7, 2021 - 1.216.9054
+- Adds automatic restart of Android speaker and microphone devices when an error is encountered during audio playout or capture.
+- Adds Android-specific audio settings for more fine-grained customization of the audio experience.
+- Adds selected logging of API arguments to help with debugging.
+- Adds logged warnings to the Rallypoint when system CPU utilization exceeds a configured threshold (default is 65%).
+- Adds accomodation for new file descriptor tracking introduced with Android 11.
+- Optimizes microphone open/close operations to reduce stress on a platform's audio subsystem.
+- Optimizes Rallypoint logic to allow new client connections within 1.5 seconds of startup.
+- Changes mission generation to require peer verification.
+- Reclassifies some certificate logging messages from error to debug.
+- Corrects a transmission-side issue that causes receiving entities to create multiple timeline events for a single transmission.
+- Corrects a sporadic startup crash in Engage Activity Recorder and Engage Bridge.
+- Corrects a race condition in the high-resolution timer on some CPU architectures.
+  
 ## August 7, 2021 - 1.212.9050
 - Adds per-group RTP profiles for network fine-tuning.
 - Adds per-group discontinuous transmission settings as an option for supported CODECs.
