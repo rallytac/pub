@@ -8,6 +8,7 @@ package com.rallytac.engageandroid;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -24,6 +25,8 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -945,6 +948,23 @@ public class Utils
     public static void showLongPopupMsg(Context ctx, int msgId)
     {
         showPopupMsg(ctx, ctx.getString(msgId), Toast.LENGTH_LONG);
+    }
+
+    public static void showMessageInDialog(Context ctx, String title, String msg)
+    {
+        AlertDialog dlg = new AlertDialog.Builder(ctx)
+                .setTitle(title)
+                .setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton(ctx.getString(R.string.button_ok), new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                }).create();
+
+        dlg.show();
     }
 
     public static Intent intentToIgnoreBatteryOptimization(Context ctx)

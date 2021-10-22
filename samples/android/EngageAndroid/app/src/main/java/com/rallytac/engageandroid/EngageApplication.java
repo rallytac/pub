@@ -217,6 +217,8 @@ public class EngageApplication
     private int[] _audioDeviceIds = null;
     private String[] _audioDeviceNames = null;
     private HashMap<String, PresenceDescriptor> _nodes = new HashMap<String, PresenceDescriptor>();
+    private AudioManager _audioManager = null;
+    private int _audioSessionId = 0;
 
     //private ArrayList<JSONObject> _certificateStoreCache = new ArrayList<JSONObject>();
 
@@ -272,6 +274,16 @@ public class EngageApplication
     public boolean hasPermissionToRecordAudio()
     {
         return isPermissionGranted(Manifest.permission.RECORD_AUDIO);
+    }
+
+    public AudioManager getAudioManager()
+    {
+        return _audioManager;
+    }
+
+    public int getAudioSessionId()
+    {
+        return _audioSessionId;
     }
 
     public void wakeup()
@@ -379,11 +391,19 @@ public class EngageApplication
 
     private HashMap<String, ArrayList<TextMessage>> _textMessageDatabase = new HashMap<>();
 
+	private void wipeTextMessageDatabase()
+    {
+        synchronized (_textMessageDatabase)
+        {
+            _textMessageDatabase.clear();
+        }
+    }
+
 	private void cleanupTextMessageDatabase()
     {
         synchronized (_textMessageDatabase)
         {
-            // TODO: cleanup the text messaging database
+            // TODO: cleanup the text messaging database to remove old stuff
         }
     }
 
@@ -799,6 +819,9 @@ public class EngageApplication
 
         Globals.getLogger().d(TAG, "onCreate");
 
+        _audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        _audioSessionId = _audioManager.generateAudioSessionId();
+
         _engine = new Engine();
         _engine.initialize();
 
@@ -1199,6 +1222,9 @@ public class EngageApplication
         cancelObtainingActivationCode();
         stopAppIntentReceiver();
         stopDeviceMonitor();
+
+        // Clear out the text messaging database so that we don't have cached stuff hanging around
+        wipeTextMessageDatabase();
 
         if(getEngine() != null)
         {
@@ -2423,10 +2449,67 @@ public class EngageApplication
         return f;
     }
 
-    private void createSampleConfiguration()
+    private void deleteAllMissions()
+    {
+        // Wipe the active mission and database
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_JSON, "");
+        Globals.getSharedPreferencesEditor().putString(Constants.MISSION_DATABASE_NAME, "");
+        Globals.getSharedPreferencesEditor().apply();
+    }
+
+    public void deleteFixedIdSampleMission()
+    {
+        String sampleMissionFixedId = Globals.getContext().getResources().getString(R.string.opt_sample_mission_fixed_id);
+        if(!Utils.isEmptyString(sampleMissionFixedId))
+        {
+            ActiveConfiguration.deleteMissionById(sampleMissionFixedId);
+        }
+    }
+
+    public boolean isActiveMissionIdFixedSampleId()
+    {
+        String currentMissionId = Globals.getEngageApplication().getActiveConfiguration().getMissionId();
+
+        if(!Utils.isEmptyString(currentMissionId))
+        {
+            String sampleMissionFixedId = Globals.getContext().getResources().getString(R.string.opt_sample_mission_fixed_id);
+            if(!Utils.isEmptyString(sampleMissionFixedId))
+            {
+                return (sampleMissionFixedId.compareToIgnoreCase(currentMissionId) == 0);
+            }
+        }
+
+        return false;
+    }
+
+    public String createOrReplaceFixedIdSampleConfiguration(boolean forceNew)
+    {
+        String resultingMissionId = null;
+
+        // Some flavors want a sample mission generated automatically for a fixed ID but only if an enterprise ID is
+        // present and the fixed ID mission does not already exist
+        String sampleMissionFixedId = Globals.getContext().getResources().getString(R.string.opt_sample_mission_fixed_id);
+        if(!Utils.isEmptyString(sampleMissionFixedId))
+        {
+            String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
+            if(!Utils.isEmptyString(ei))
+            {
+                if(forceNew || !ActiveConfiguration.doesMissionByIdExistInDatabase(sampleMissionFixedId))
+                {
+                    resultingMissionId = createSampleConfiguration();
+                }
+            }
+        }
+
+        return resultingMissionId;
+    }
+
+
+    private String createSampleConfiguration()
     {
         String enginePolicyJson = ActiveConfiguration.makeBaselineEnginePolicyObject(getEnginePolicy()).toString();
         String identityJson = "{}";
+        String resultingMissionId = null;
 
         try
         {
@@ -2454,28 +2537,47 @@ public class EngageApplication
                 identityJson,
                 "");
 
-        String appId = getString(R.string.sample_mission_gen_passphrase);
-        if(Utils.isEmptyString(appId))
+        String passphrase = getString(R.string.sample_mission_gen_passphrase);
+
+        // If our flavor doesn't have a specific passphrase then use the app ID
+        if(Utils.isEmptyString(passphrase))
         {
-            appId = BuildConfig.APPLICATION_ID + getString(R.string.manufacturer_id);
+            passphrase = BuildConfig.APPLICATION_ID + getString(R.string.manufacturer_id);
         }
 
-        String passphrase = appId;
         String mn = String.format(getString(R.string.sample_mission_gen_mission_name_fmt), getString(R.string.app_name));
+
+        String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
+        if(!Utils.isEmptyString(ei))
+        {
+            passphrase = (passphrase + ei);
+        }
+
         String missionJson = getEngine().engageGenerateMission(passphrase, Integer.parseInt(getString(R.string.sample_mission_gen_group_count)), "", mn);
 
         try
         {
             JSONObject jo = new JSONObject(missionJson);
 
+            // Should we change the ID?
+            String sampleMissionFixedId = Globals.getContext().getResources().getString(R.string.opt_sample_mission_fixed_id);
+            if(!Utils.isEmptyString(sampleMissionFixedId))
+            {
+                jo.put(Engine.JsonFields.Mission.id, sampleMissionFixedId);
+            }
+
+            // Get the ID for returning
+            resultingMissionId = jo.getString(Engine.JsonFields.Mission.id);
+
             // RP
-            String rp = getString(R.string.default_rallypoint);
-            if (!Utils.isEmptyString(rp))
+            String rpAddress = getString(R.string.sample_mission_gen_rp_address);
+            int rpPort = Utils.intOpt(getString(R.string.sample_mission_gen_rp_port), 0);
+            if (!Utils.isEmptyString(rpAddress) && rpPort > 0)
             {
                 JSONObject rallypoint = new JSONObject();
-                rallypoint.put("use", Utils.boolOpt(getString(R.string.sample_mission_gen_use_default_rallypoint), false));
-                rallypoint.put(Engine.JsonFields.Rallypoint.Host.address, rp);
-                rallypoint.put(Engine.JsonFields.Rallypoint.Host.port, Utils.intOpt(getString(R.string.default_rallypoint_port), Constants.DEF_RP_PORT));
+                //rallypoint.put("use", Utils.boolOpt(getString(R.string.sample_mission_gen_use_default_rallypoint), false));
+                rallypoint.put(Engine.JsonFields.Rallypoint.Host.address, rpAddress);
+                rallypoint.put(Engine.JsonFields.Rallypoint.Host.port, rpPort);
                 jo.put(Engine.JsonFields.Rallypoint.objectName, rallypoint);
             }
 
@@ -2500,12 +2602,13 @@ public class EngageApplication
                 }
             }
 
-            missionJson = applyFlavorSpecificGeneratedMissionModifications(jo.toString(), false);
+            missionJson = applyFlavorSpecificGeneratedMissionModifications(jo.toString(), true);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             missionJson = "";
+            resultingMissionId = null;
         }
 
         Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_JSON, missionJson);
@@ -2517,6 +2620,8 @@ public class EngageApplication
         }
 
         getEngine().deinitialize();
+
+        return resultingMissionId;
     }
 
     private void createEmptyConfiguration()
@@ -2550,6 +2655,9 @@ public class EngageApplication
             {
                 _nodes.clear();
             }
+
+            // We may need to create a sample configuration for a fixed ID - check for that
+            //createOrReplaceFixedIdSampleConfiguration(false);
 
             updateActiveConfiguration();
             if (_activeConfiguration == null)

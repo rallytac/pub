@@ -87,10 +87,10 @@
 
         <ImageView
             android:id="@+id/ivVoiceOrTextMessaging"
-            android:onClick="onSwitchToVoiceView"
+            android:onClick="onToggleVoiceOrTextView"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_voice"
             android:layout_weight="1"/>
 
@@ -119,17 +119,17 @@
             android:id="@+id/card1"
             android:name="com.rallytac.engageandroid.SmallCardFragmentForTextMessaging"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="80dp"
             android:layout_weight="4" />
 
         <ImageView
             android:id="@+id/ivPtt"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="80dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
             app:srcCompat="@drawable/ic_ptt_idle" />
     </LinearLayout>
 
