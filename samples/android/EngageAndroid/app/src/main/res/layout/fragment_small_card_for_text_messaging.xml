@@ -4,108 +4,138 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+    android:background="@color/colorBlack"
+    android:fadingEdge="vertical">
 
-    <ImageView
-        android:id="@+id/ivCard"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:adjustViewBounds="false"
-        android:cropToPadding="false"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_multi_channel_background_clear_idle" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layError"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
-    <ImageView
-        android:id="@+id/ivSpeaker"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivCard"
-        app:layout_constraintEnd_toEndOf="@+id/ivCard"
-        app:layout_constraintTop_toTopOf="@+id/ivCard"
-        app:srcCompat="@drawable/ic_speaker_on" />
+        <ImageView
+            android:id="@+id/ivErrorIcon"
+            android:layout_width="@dimen/small_finger_touch_icon"
+            android:layout_height="@dimen/small_finger_touch_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_error" />
 
-    <ImageView
-        android:id="@+id/ivSelectedForPtt"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="@+id/ivCard"
-        app:layout_constraintTop_toBottomOf="@+id/ivSpeaker"
-        app:srcCompat="@drawable/ic_ptt_unmuted"
-        android:visibility="@string/show_selected_for_ptt_on_small_card"/>
+        <TextView
+            android:id="@+id/tvErrorTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/placeholder"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/small_card_primary_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ivErrorIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ivErrorIcon"
+            app:layout_constraintTop_toTopOf="@+id/ivErrorIcon" />
 
-    <TextView
-        android:id="@+id/tvGroupName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toTopOf="@+id/ivCard"
-        app:layout_constraintStart_toStartOf="@+id/ivCard"
-        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
-        android:text="@string/placeholder"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
- />
+        <TextView
+            android:id="@+id/tvErrorMsg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/small_card_secondary_text_size"
+            android:text="@string/placeholder"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvErrorTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tvErrorTitle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/tvTalkerList"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvGroupName"
-        app:layout_constraintStart_toStartOf="@+id/ivCard"
-        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-        android:text="@string/placeholder"
-        android:textColor="@android:color/white"
-        android:textSize="12sp" />
+        <ImageView
+            android:id="@+id/ivCard"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_single_channel_background_secure_idle" />
 
-    <TextView
-        android:id="@+id/tvMemberCount"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvTalkerList"
-        app:layout_constraintStart_toStartOf="@+id/ivCard"
-        app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+        <TextView
+            android:id="@+id/tvGroupName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/small_card_anchor_start"
+            android:layout_marginTop="@dimen/small_card_anchor_top"
+            android:layout_marginEnd="@dimen/small_gap"
+            android:text="@string/placeholder"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/small_card_primary_text_size"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvMemberCount"
+            app:layout_constraintStart_toStartOf="@+id/ivCard"
+            app:layout_constraintTop_toTopOf="@+id/ivCard" />
 
-        android:text="@string/placeholder"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"/>
 
-    <ImageView
-        android:id="@+id/ivNetError"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivSelectedForPtt"
-        app:layout_constraintEnd_toStartOf="@+id/ivSelectedForPtt"
-        app:layout_constraintTop_toTopOf="@+id/ivSelectedForPtt"
-        app:srcCompat="@drawable/ic_net_error"
-        android:visibility="invisible"/>
+        <TextView
+            android:id="@+id/tvMemberCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/small_gap"
+            android:text="@string/placeholder"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/small_card_primary_text_size"
+            android:textStyle="bold"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="@+id/tvGroupName"
+            app:layout_constraintEnd_toStartOf="@+id/ivSpeaker"
+            app:layout_constraintTop_toTopOf="@+id/tvGroupName"
+            android:visibility="@string/show_member_count_on_small_card"/>
 
-    <ImageView
-        android:id="@+id/ivNetFailover"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivSelectedForPtt"
-        app:layout_constraintEnd_toStartOf="@+id/ivNetError"
-        app:layout_constraintTop_toTopOf="@+id/ivSelectedForPtt"
-        app:srcCompat="@drawable/ic_net_failover"
-        android:visibility="invisible"/>
+        <fragment
+            android:id="@+id/fragTalkers"
+            android:name="com.rallytac.engageandroid.SmallCardTalkerFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/small_gap"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/ivSpeaker"
+            app:layout_constraintStart_toStartOf="@+id/tvGroupName"
+            app:layout_constraintTop_toBottomOf="@+id/tvGroupName" />
 
+        <ImageView
+            android:id="@+id/ivSpeaker"
+            android:layout_width="@dimen/small_finger_touch_icon"
+            android:layout_height="@dimen/small_finger_touch_icon"
+            android:layout_marginEnd="@dimen/small_card_anchor_end"
+            app:layout_constraintBottom_toBottomOf="@+id/tvGroupName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvGroupName"
+            app:srcCompat="@drawable/ic_speaker_on" />
+
+        <ImageView
+            android:id="@+id/ivNetError"
+            android:layout_width="@dimen/small_finger_touch_icon"
+            android:layout_height="@dimen/small_finger_touch_icon"
+            android:layout_marginBottom="@dimen/small_card_anchor_bottom"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/ivCard"
+            app:layout_constraintEnd_toEndOf="@+id/ivSpeaker"
+            app:srcCompat="@drawable/ic_net_error" />
+
+        <ImageView
+            android:id="@+id/ivNetFailover"
+            android:layout_width="@dimen/small_finger_touch_icon"
+            android:layout_height="@dimen/small_finger_touch_icon"
+            android:layout_marginEnd="@dimen/small_card_anchor_end"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/ivNetError"
+            app:layout_constraintEnd_toStartOf="@+id/ivNetError"
+            app:srcCompat="@drawable/ic_net_failover" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

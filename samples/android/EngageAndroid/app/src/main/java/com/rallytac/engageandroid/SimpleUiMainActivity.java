@@ -133,6 +133,7 @@ public class SimpleUiMainActivity
     private SeekBar _volumeSliderLastMoved = null;
 
     private boolean _optAllowMultipleChannelView = true;
+    private boolean _optSupportsTextMessaging = false;
 
     private GoogleMap _map;
     private boolean _firstCameraPositioningDone = false;
@@ -146,7 +147,7 @@ public class SimpleUiMainActivity
     private HashSet<String> _currentlySelectedGroups = null;
 
     private ProgressDialog _transmittingAlertProgressDialog = null;
-    private AudioManager _audioManager = null;
+    private boolean _allowPttResize = true;
 
     private class TimelineEventPlayerTracker
     {
@@ -578,10 +579,12 @@ public class SimpleUiMainActivity
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
-        _audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        forceSpeakerPhoneOn();
+
         _ac = Globals.getEngageApplication().getActiveConfiguration();
 
         _optAllowMultipleChannelView = Utils.boolOpt(getString(R.string.opt_allow_multiple_channel_view), true);
+        _optSupportsTextMessaging = Globals.getContext().getResources().getBoolean(R.bool.opt_supports_text_messaging);
 
         // See if the build options force an orientation
         int desiredOrientation = Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -603,10 +606,15 @@ public class SimpleUiMainActivity
             _ac.setUiMode(Constants.UiMode.vSingle);
         }
 
+        // Assume we allow PTT resizing
+        _allowPttResize = true;
+
         if (_ac.getUiMode() == Constants.UiMode.vSingle)
         {
-            if(_ac.showTextMessaging())
+            if(_optSupportsTextMessaging && _ac.showTextMessaging())
             {
+                // When we have a text messaging view, don't resize the PTT button in code
+                _allowPttResize = false;
                 setContentView(R.layout.activity_main_single_with_text_messaging);
             }
             else
@@ -1458,20 +1466,23 @@ public class SimpleUiMainActivity
 
     private void fixPttSize()
     {
-        ImageView iv = findViewById(R.id.ivPtt);
-
-        if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.UI_LARGE_PTT_BUTTON, false))
+        if(_allowPttResize)
         {
-            iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_large);
-            iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_large);
-        }
-        else
-        {
-            iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_standard);
-            iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_standard);
-        }
+            ImageView iv = findViewById(R.id.ivPtt);
 
-        iv.requestLayout();
+            if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.UI_LARGE_PTT_BUTTON, false))
+            {
+                iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_large);
+                iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_large);
+            }
+            else
+            {
+                iv.getLayoutParams().width = (int)getResources().getDimension(R.dimen.ptt_width_standard);
+                iv.getLayoutParams().height = (int)getResources().getDimension(R.dimen.ptt_height_standard);
+            }
+
+            iv.requestLayout();
+        }
     }
 
     private void updateBiometricsIconDisplay()
@@ -2245,17 +2256,31 @@ public class SimpleUiMainActivity
         }
     }
 
+    private void forceSpeakerPhoneOn()
+    {
+        try
+        {
+            Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(true);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        updateTopIcons();
+    }
+
     private void toggleSpeakerPhone()
     {
         try
         {
-            if(_audioManager.isSpeakerphoneOn())
+            if(Globals.getEngageApplication().getAudioManager().isSpeakerphoneOn())
             {
-                _audioManager.setSpeakerphoneOn(false);
+                Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(false);
             }
             else
             {
-                _audioManager.setSpeakerphoneOn(true);
+                Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(true);
             }
         }
         catch (Exception e)
@@ -2681,6 +2706,11 @@ public class SimpleUiMainActivity
         showGroupList();
     }
 
+    public void onToggleVoiceOrTextView(View view)
+    {
+        // Does nothing right now
+    }
+
     public void onSwitchToTextMessagingView(View view)
     {
         _ac.setShowTextMessaging(true);
@@ -2762,6 +2792,8 @@ public class SimpleUiMainActivity
                 ((TextMessagingFragment)f).sendEnteredTextIfAny();
             }
         }
+
+        Utils.hideKeyboardFrom(this, view);
     }
 
 
@@ -2799,7 +2831,7 @@ public class SimpleUiMainActivity
                 {
                     try
                     {
-                        if(_audioManager.isSpeakerphoneOn())
+                        if(Globals.getEngageApplication().getAudioManager().isSpeakerphoneOn())
                         {
                             iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_speakerphone_on));
                         }
@@ -3035,7 +3067,10 @@ public class SimpleUiMainActivity
 
                             if(changeAppPriorityIconVisibility)
                             {
-                                ivAppPriority.setVisibility(View.VISIBLE);
+                                if(ivAppPriority != null)
+                                {
+                                    ivAppPriority.setVisibility(View.VISIBLE);
+                                }
                             }
                         }
                         else
@@ -3043,7 +3078,10 @@ public class SimpleUiMainActivity
                             ivPtt.setVisibility(View.GONE);
                             if(changeAppPriorityIconVisibility)
                             {
-                                ivAppPriority.setVisibility(View.GONE);
+                                if(ivAppPriority != null)
+                                {
+                                    ivAppPriority.setVisibility(View.GONE);
+                                }
                             }
                         }
                     }
@@ -3052,7 +3090,10 @@ public class SimpleUiMainActivity
                         ivPtt.setVisibility(View.GONE);
                         if(changeAppPriorityIconVisibility)
                         {
-                            ivAppPriority.setVisibility(View.GONE);
+                            if(ivAppPriority != null)
+                            {
+                                ivAppPriority.setVisibility(View.GONE);
+                            }
                         }
                     }
 
@@ -3063,18 +3104,21 @@ public class SimpleUiMainActivity
                     }
                 }
 
-                Drawable dw;
-
-                if(_ac.getPriorityTxLevel() == 0)
+                if(ivAppPriority != null)
                 {
-                    dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_no_priority);
-                }
-                else
-                {
-                    dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_high_priority);
-                }
+                    Drawable dw;
 
-                ivAppPriority.setImageDrawable(dw);
+                    if(_ac.getPriorityTxLevel() == 0)
+                    {
+                        dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_no_priority);
+                    }
+                    else
+                    {
+                        dw = ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_high_priority);
+                    }
+
+                    ivAppPriority.setImageDrawable(dw);
+                }
             }
         });
     }

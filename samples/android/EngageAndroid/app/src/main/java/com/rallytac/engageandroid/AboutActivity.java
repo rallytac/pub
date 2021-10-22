@@ -17,6 +17,7 @@ import android.provider.Settings;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 
 import android.text.Editable;
@@ -26,6 +27,7 @@ import android.text.method.LinkMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -512,26 +514,15 @@ public class AboutActivity extends
         {
             findViewById(R.id.layEnterpriseIdSection).setVisibility(View.VISIBLE);
 
-            String s = Utils.trimString(_etEnterpriseId.getText().toString());
-            if(Utils.isEmptyString(s))
-            {
-                ((ImageView)findViewById(R.id.ivSetOrClearEnterpriseId)).setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_set_enterprise_id));
-            }
-            else
-            {
-                ((ImageView)findViewById(R.id.ivSetOrClearEnterpriseId)).setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_clear_enterprise_id));
-            }
-
-            /*
-            if(Utils.isEmptyString(_etEnterpriseId.getText().toString()))
-            {
-                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
-            }
-            else
+            String ei = _etEnterpriseId.getText().toString();
+            if(!Utils.isEmptyString(ei))
             {
                 findViewById(R.id.ivShareEnterpriseId).setVisibility(View.VISIBLE);
             }
-            */
+            else
+            {
+                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
+            }
         }
         else
         {
@@ -918,10 +909,47 @@ public class AboutActivity extends
         dlg.show();
     }
 
-
     public void onClickSetOrClearEnterpriseId(View view)
     {
-        String s = Utils.trimString(_etEnterpriseId.getText().toString());
+        if(Globals.getEngageApplication().isActiveMissionIdFixedSampleId())
+        {
+            Utils.showErrorMsg(this, getString(R.string.cannot_change_enterprise_id_in_use));
+            return;
+        }
+
+        String ei = Utils.trimString(_etEnterpriseId.getText().toString());
+
+        PopupMenu popup = new PopupMenu(this, findViewById(R.id.ivSetOrClearEnterpriseId));
+
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.about_box_enterprise_menu, popup.getMenu());
+
+        // Hide the clear option if we don't have anything
+        popup.getMenu().findItem(R.id.action_clear_id).setVisible(!Utils.isEmptyString(ei));
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                int id = item.getItemId();
+
+                if (id == R.id.action_set_id)
+                {
+                    promptForEnterpriseId();
+                    return true;
+                }
+                else if (id == R.id.action_clear_id)
+                {
+                    promptToClearEnterpriseId();
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        popup.show();
     }
 
     public void onClickLoadEnterpriseId(View view)
@@ -1278,21 +1306,62 @@ public class AboutActivity extends
         });
     }
 
-    private void promptForNewEnterpriseId()
+    private void promptToClearEnterpriseId()
     {
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        View promptView = layoutInflater.inflate(R.layout.set_enterprise_id_dialog, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        final TextView message = new TextView(this);
+        final SpannableString ss = new SpannableString(getString(R.string.clearing_ent_id_will_delete_mission));
+
+        message.setText(ss);
+        message.setMovementMethod(LinkMovementMethod.getInstance());
+        message.setPadding(32, 32, 32, 32);
+
+        AlertDialog dlg = new AlertDialog.Builder(this)
+                .setTitle(R.string.clear_enterprise_id_title)
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.button_yes), new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        clearEnterpriseId();
+                    }
+                }).setNegativeButton(getString(R.string.button_no), new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                    }
+                }).setView(message).create();
+
+        dlg.show();
+    }
+
+    private void promptForEnterpriseId()
+    {
+        LayoutInflater layoutInflater = LayoutInflater.from(AboutActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.enterprise_id_entry_dialog, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(AboutActivity.this);
         alertDialogBuilder.setView(promptView);
 
-        final String ei = Globals.getSharedPreferences().getString(PreferenceKeys.USER_ENTERPRISE_ID, "");
-        final EditText etEnterpriseId = promptView.findViewById(R.id.etEnterpriseId);
+        final EditText etEi = promptView.findViewById(R.id.etEnterpriseId);
 
         alertDialogBuilder.setCancelable(false)
-                .setPositiveButton(R.string.generate_mission_button, new DialogInterface.OnClickListener()
+                .setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener()
                 {
-                    public void onClick(DialogInterface dialog, int id) {
-                        setNewEnterpriseId(Utils.trimString(etEnterpriseId.getText().toString()));
+                    public void onClick(DialogInterface dialog, int id)
+                    {
+                        try
+                        {
+                            String ei = etEi.getText().toString();
+                            if(!Utils.isEmptyString(ei))
+                            {
+                                updateToNewEnterpriseId(ei);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .setNegativeButton(R.string.cancel,
@@ -1308,15 +1377,30 @@ public class AboutActivity extends
         alert.show();
     }
 
-    private void setNewEnterpriseId(String newId)
+    private void clearEnterpriseId()
     {
-        if(Utils.isEmptyString(newId))
-        {
+        _etEnterpriseId.setText(null);
+        updateUi();
 
-        }
-        else
+        Globals.getEngageApplication().deleteFixedIdSampleMission();
+    }
+
+    private void updateToNewEnterpriseId(String ei)
+    {
+        _etEnterpriseId.setText(ei);
+        String newId = Globals.getEngageApplication().createOrReplaceFixedIdSampleConfiguration(true);
+        if(!Utils.isEmptyString(newId))
         {
-            
+            String newName = ActiveConfiguration.getMissionNameForId(newId);
+            if(Utils.isEmptyString(newName))
+            {
+                newName = getString(R.string.no_mission_name);
+            }
+
+            String message = String.format(getString(R.string.new_sample_mission_msg_fmt), newName);
+            Utils.showMessageInDialog(AboutActivity.this, getString(R.string.new_sample_mission_title), message);
         }
+
+        updateUi();
     }
 }

@@ -141,6 +141,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvEnterpriseIdHeader" />
 
             <EditText
+                android:enabled="false"
                 android:id="@+id/etEnterpriseId"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -151,57 +152,32 @@
                 android:inputType="text"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/tvEnterpriseIdHeader"
                 app:layout_constraintTop_toBottomOf="@+id/tvEnterpriseIdStaticText" />
 
             <ImageView
-                android:id="@+id/ivScanEnterpriseId"
-                android:visibility="visible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="8dp"
-                android:onClick="onClickScanEnterpriseId"
-                app:layout_constraintBottom_toBottomOf="@+id/tvEnterpriseIdHeader"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvEnterpriseIdHeader"
-                app:srcCompat="@drawable/ic_outline_camera_enhance_24px" />
-
-            <ImageView
-                android:id="@+id/ivLoadEnterpriseId"
-                android:visibility="visible"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="32dp"
-                android:onClick="onClickLoadEnterpriseId"
-                app:layout_constraintBottom_toBottomOf="@+id/ivScanEnterpriseId"
-                app:layout_constraintEnd_toStartOf="@+id/ivScanEnterpriseId"
-                app:layout_constraintTop_toTopOf="@+id/ivScanEnterpriseId"
-                app:srcCompat="@drawable/ic_file" />
-
-            <ImageView
                 android:id="@+id/ivShareEnterpriseId"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="32dp"
                 android:onClick="onClickShareEnterpriseId"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLoadEnterpriseId"
-                app:layout_constraintEnd_toStartOf="@+id/ivLoadEnterpriseId"
-                app:layout_constraintTop_toTopOf="@+id/ivLoadEnterpriseId"
-                app:srcCompat="@drawable/ic_share" />
+                app:layout_constraintBottom_toBottomOf="@+id/ivSetOrClearEnterpriseId"
+                app:layout_constraintEnd_toStartOf="@+id/ivSetOrClearEnterpriseId"
+                app:layout_constraintTop_toTopOf="@+id/ivSetOrClearEnterpriseId"
+                app:srcCompat="@drawable/ic_visibility" />
 
             <ImageView
                 android:id="@+id/ivSetOrClearEnterpriseId"
-                android:visibility="visible"
-                android:layout_marginEnd="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="8dp"
                 android:onClick="onClickSetOrClearEnterpriseId"
-                app:layout_constraintBottom_toBottomOf="@+id/ivLoadEnterpriseId"
-                app:layout_constraintEnd_toStartOf="@+id/ivShareEnterpriseId"
-                app:layout_constraintTop_toTopOf="@+id/ivLoadEnterpriseId"
-                app:srcCompat="@drawable/ic_set_enterprise_id"
-                android:layout_height="0dp"
-                android:layout_width="0dp"/>
+                app:layout_constraintBottom_toBottomOf="@+id/tvEnterpriseIdHeader"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvEnterpriseIdHeader"
+                app:srcCompat="@drawable/ic_dialog_menu" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -278,7 +254,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="32dp"
                 android:onClick="onClickShareLicenseKey"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/ivLoadLicenseKey"
                 app:layout_constraintEnd_toStartOf="@+id/ivLoadLicenseKey"
                 app:layout_constraintTop_toTopOf="@+id/ivLoadLicenseKey"

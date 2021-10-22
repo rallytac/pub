@@ -1218,6 +1218,12 @@ public class ActiveConfiguration
                             Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET,
                                     Integer.toString(Constants.DEF_ANDROID_AUDIO_INPUT_PRESET))));
 
+                    int sessionId = Globals.getEngageApplication().getAudioSessionId();
+                    if(sessionId != 0)
+                    {
+                        androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.sessionId, sessionId);
+                    }
+
                     audio.put(Engine.JsonFields.EnginePolicy.Audio.Android.objectName, androidAudio);
                 }
 
@@ -1498,6 +1504,34 @@ public class ActiveConfiguration
         return rc;
     }
 
+    public static void deleteMissionById(String id)
+    {
+        MissionDatabase database = MissionDatabase.load(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+        if(database != null)
+        {
+            DatabaseMission dbm = database.getMissionById(id);
+            if(dbm != null)
+            {
+                database.deleteMissionById(id);
+                database.save(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+            }
+        }
+    }
+
+    public static boolean doesMissionByIdExistInDatabase(String id)
+    {
+        boolean rc = false;
+
+        MissionDatabase database = MissionDatabase.load(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+        if(database != null)
+        {
+            DatabaseMission dbm = database.getMissionById(id);
+            rc = (dbm != null);
+        }
+
+        return rc;
+    }
+
     public static boolean doesMissionExistInDatabase(String json)
     {
         boolean rc = false;
@@ -1514,6 +1548,21 @@ public class ActiveConfiguration
         }
 
         return rc;
+    }
+
+    public static String getMissionNameForId(String id)
+    {
+        MissionDatabase database = MissionDatabase.load(Globals.getSharedPreferences(), Constants.MISSION_DATABASE_NAME);
+        if(database != null)
+        {
+            DatabaseMission dbm = database.getMissionById(id);
+            if(dbm != null)
+            {
+                return dbm.getName();
+            }
+        }
+
+        return null;
     }
 
     public static boolean installMissionJson(Context ctx, String json, boolean allowOverwrite)

@@ -49,6 +49,9 @@
     <string name="sample_mission_gen_audio_group_name_fmt">Sample Group %1$d</string>
     <string name="sample_mission_gen_use_default_rallypoint" translatable="false">0</string>
     <string name="sample_mission_gen_passphrase" translatable="false"></string>
+    <string name="sample_mission_gen_rp_address" translatable="false"></string>
+    <string name="sample_mission_gen_rp_port" translatable="false">7443</string>
+
 
     <string name="generated_mission_description"></string>
     <string name="generated_mission_name"></string>
@@ -169,8 +172,8 @@
     <string name="about_version_placeholder">version placeholder</string>
     <string name="about_device_id">Device ID</string>
     <string name="about_license_key">License Key</string>
-    <string name="about_enterprise_id">Enterprise ID</string>
     <string name="about_enter_license_key">With a valid license (and activation code if appropriate) you\'ll be able to take full advantage of this application.</string>
+    <string name="about_enterprise_id">Enterprise ID</string>
     <string name="about_enter_enterprise_id">You don\'t absolutely need an enterprise ID but, if you do, it helps safeguard your communications even more when using shared infrastructures.</string>
     <string name="about_activation_code">Activation Code</string>
     <string name="about_enter_activation_code">Enter or scan your activation code below or click the cloud icon to obtain it from the Internet licensing server.</string>
@@ -828,6 +831,7 @@
     <string name="set_experimental_tx_smoothing">Enforce Transmit Smoothing</string>
     <string name="set_experimental_tx_dtx">Allow DTX</string>
     <string name="set_user_interface_orientation">Screen Orientation</string>
+    <string name="set_user_interface_show_text_messaging_ui">Enable Text Messaging</string>
 
     <string name="set_experimental_discover_cistech_gv1_assets">Discover CISTECH GV1 LMR Assets</string>
     <string name="set_experimental_cistech_gv1_address">Address</string>
@@ -993,4 +997,10 @@
     <string name="no_groups_to_display_description">It\'s likely your mission has no groups.\n\nCheck your configuration using the Missions menu option or use that same screen to create a mission with groups.</string>
     <string name="flavor_specific_mg_sw_01_text"></string>
     <string name="enterprise_id_explanation">Enter the new Enterprise ID.  The value will be used to generate a new sample mission and any previous sample mission will be deleted.</string>
+    <string name="cannot_change_enterprise_id_in_use">Cannot change the enterprise ID at this as the active mission is based on it.</string>
+    <string name="please_enter_the_new_enterprise_id">Please enter the new Enterprise ID</string>
+    <string name="clearing_ent_id_will_delete_mission">Clearing the enterprise ID will delete any previously auto-generated sample mission.\n\nProceed?</string>
+    <string name="clear_enterprise_id_title">Clear Enterprise ID</string>
+    <string name="new_sample_mission_title">New Sample Mission</string>
+    <string name="new_sample_mission_msg_fmt">A new sample mission named \'%1$s\' has been automatically created.</string>
 </resources>

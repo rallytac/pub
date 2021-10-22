@@ -310,6 +310,11 @@
                 android:key="user_ui.pttLatching"
                 android:title="@string/set_user_interface_latch_unlatch_ptt" />
 
+            <SwitchPreference
+                android:defaultValue="false"
+                android:key="ui.showTextMessaging"
+                android:title="@string/set_user_interface_show_text_messaging_ui" />
+
             <!--
             <SwitchPreference
                 android:defaultValue="true"

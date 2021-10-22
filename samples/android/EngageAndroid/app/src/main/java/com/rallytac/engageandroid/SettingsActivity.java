@@ -312,6 +312,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_VIBRATIONS));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME));
 
+            // Show/hide PTT latching depending on flavor option
             if(Utils.boolOpt(getString(R.string.opt_ptt_latching), false))
             {
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_LATCHING));
@@ -320,6 +321,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             {
                 hidePreferenceInCategory(PreferenceKeys.USER_UI_PTT_LATCHING, "prefcat_user_interface");
             }
+
+            // Show/hide text messaging option depending on flavor option
+            if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_text_messaging))
+            {
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.UI_SHOW_TEXT_MESSAGING));
+            }
+            else
+            {
+                hidePreferenceInCategory(PreferenceKeys.UI_SHOW_TEXT_MESSAGING, "prefcat_user_interface");
+            }
+
 
             /*
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL));

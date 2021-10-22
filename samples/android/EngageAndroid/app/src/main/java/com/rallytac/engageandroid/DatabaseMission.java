@@ -38,6 +38,16 @@ public class DatabaseMission
         return (obj != null ? obj.toString() : "null");
     }
 
+    public String getId()
+    {
+        return _id;
+    }
+
+    public String getName()
+    {
+        return _name;
+    }
+
     public DatabaseGroup getGroupById(String id)
     {
         for(DatabaseGroup group : _groups)
