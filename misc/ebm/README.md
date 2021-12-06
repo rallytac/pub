@@ -7,7 +7,7 @@ ebm needs the `colorama` Python module installed.  Typically you install it as f
 $ sudo pip install colorama
 ```
 
->NOTE: Its fine if you don't install colorama - `'ebm` will still work but won't be as pretty.
+>NOTE: Its fine if you don't install colorama - `ebm` will still work but won't be as pretty.
 
 ## Running ebm
 To run ebm, simply fire it up using Python and pass the name of the status file to be monitored.  For example:
