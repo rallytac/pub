@@ -8,6 +8,7 @@ import time
 import datetime
 import sys
 import os
+import signal
 
 try:
     import colorama
@@ -16,7 +17,7 @@ except ImportError as e:
     haveColorama = False
     pass
 
-appVersion = '0.1'
+appVersion = '0.2'
 statusFile = ''
 interval = 5
 
@@ -53,29 +54,29 @@ def loadInput():
 # --------------------------------------------------------------------------
 def bridgeState(s):
     switcher = {
-        -1  : "Error",
-        0   : "None",
-        1   : "OK",
-        2   : "Creating",
-        3   : "Deleted"
+        -1  : 'Error',
+        0   : 'None',
+        1   : 'OK',
+        2   : 'Creating',
+        3   : 'Deleted'
     }
 
-    return switcher.get(s, "Unknown")
+    return switcher.get(s, 'Unknown')
 
 # --------------------------------------------------------------------------
 def groupState(s):
     switcher = {
-        -1  : "Error",
-        0   : "None",
-        1   : "OK",
-        2   : "Creating",
-        3   : "Joining",
-        4   : "Left",
-        5   : "Disconnected",
-        6   : "Deleted"
+        -1  : 'Error',
+        0   : 'None',
+        1   : 'OK',
+        2   : 'Creating',
+        3   : 'Joining',
+        4   : 'Left',
+        5   : 'Disconnected',
+        6   : 'Deleted'
     }
 
-    return switcher.get(s, "Unknown")
+    return switcher.get(s, 'Unknown')
 
 # --------------------------------------------------------------------------
 def setCursor(r, c):
@@ -125,27 +126,25 @@ def timeDesc(seconds):
 
 # --------------------------------------------------------------------------
 def printHeadline(db):
-    tsdelta = time.time() - db['ts']
+    tsdelta = int(time.time() - db['ts'])
     if tsdelta > (interval * 2):
         clr = colorError()
-        msg = '(*POSSIBLY OFFLINE*)'
     else:
         clr = colorNone()
-        msg = ''
 
     now = datetime.datetime.now()
 
     print(clr, end = '')
-    print('-------------------------------------------------------------------------------------------------------------------------')
+    print('-----------------------------------------------------------------------------------------------------------------------------------------------')
     print('Engage Bridge Service Monitor v%s' % (appVersion))
-    print('Copyright (c) 2020 Rally Tactical Systems, Inc.')
+    print('Copyright (c) 2021 Rally Tactical Systems, Inc.')
     print('')
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
-    print('Last check at %s | uptime %s | updated %d seconds ago %s' % (now.strftime("%Y/%m/%d %H:%M:%S"), timeDesc(db['uptime']), tsdelta, msg))
-    print('-------------------------------------------------------------------------------------------------------------------------')
-    print('                                                                                                    ------ Packets ------')
-    print('%38s %10s %38s %10s%10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', "RX", "TX"))
-    print('-------------------------------------- ---------- -------------------------------------- ---------- ---------- ----------')
+    print('Last check at %s %s uptime %s %s updated %s ago' % (now.strftime('%Y/%m/%d %H:%M:%S'), chr(9608), timeDesc(db['uptime']), chr(9608), timeDesc(tsdelta)))
+    print('-----------------------------------------------------------------------------------------------------------------------------------------------')
+    print('                                                                                                    ------ Packets ------ ------- Bytes -------')
+    print('%38s %10s %38s %10s %10s %10s %10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', 'RX', 'TX', 'RX', 'TX'))
+    print('-------------------------------------- ---------- -------------------------------------- ---------- ---------- ---------- ---------- ----------')
     print(colorNone(), end = '')
 
 # --------------------------------------------------------------------------
@@ -177,9 +176,23 @@ def printBridges(db):
             print(clr, end = '')
 
             if firstLine:
-                print('%38s %10s %38s %10s %10s %10s' % (bridgeDetail['id'], bridgeState(bridgeDetail['state']), groupInfo['name'], groupState(groupInfo['state']), groupInfo["rxTraffic"]["packets"], groupInfo["txTraffic"]["packets"]))
+                print('%38s %10s %38s %10s %10s %10s %10s %10s' % 
+                        (bridgeDetail['id'], 
+                        bridgeState(bridgeDetail['state']), 
+                        groupInfo['name'], 
+                        groupState(groupInfo['state']), 
+                        groupInfo['rxTraffic']['packets'], 
+                        groupInfo['txTraffic']['packets'],
+                        groupInfo['rxTraffic']['bytes'], 
+                        groupInfo['txTraffic']['bytes']))
             else:
-                print('%49s %38s %10s %10s %10s' % (' ', groupInfo['name'], groupState(groupInfo['state']), groupInfo["rxTraffic"]["packets"], groupInfo["txTraffic"]["packets"]))
+                print('%49s %38s %10s %10s %10s %10s %10s' % (' ', 
+                        groupInfo['name'], 
+                        groupState(groupInfo['state']), 
+                        groupInfo['rxTraffic']['packets'], 
+                        groupInfo['txTraffic']['packets'],
+                        groupInfo['rxTraffic']['bytes'], 
+                        groupInfo['txTraffic']['bytes']))
 
             print(colorNone(), end = '')
 
@@ -188,29 +201,50 @@ def printBridges(db):
         print(' ')
 
 # --------------------------------------------------------------------------
+def showSyntax():
+    print('usage: python ebm.py <name_of_bridge_service_status_file> [-i:<polling_interval>]')
+
+def ctrlcHandler(sig, frame):
+    print('... exiting')
+    sys.exit(0)
+
+# --------------------------------------------------------------------------
 def main():
     while 1:
-        db = loadInput()        
-        clearScreen()
-        printHeadline(db)
-        
-        if len(db['bridges']) > 0:
-            printBridges(db)            
-        else:
-            print('No bridges')
+        try:
+            db = loadInput()
+            clearScreen()
+            printHeadline(db)
+            
+            if len(db['bridges']) > 0:
+                printBridges(db)            
+            else:
+                print('No bridges')
 
-        time.sleep(interval)
+            time.sleep(interval)
+        except Exception as e:
+            print(e)
+            showSyntax()
+            exit()
 
     if haveColorama:
         colorama.deinit()
 
 # --------------------------------------------------------------------------
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('usage: python ebm.py <name_of_bridge_service_status_file>')
+    if len(sys.argv) < 2:
+        showSyntax()
         exit()
+    else:
+        try:
+            for arg in sys.argv:
+                if arg.startswith('-i:'):
+                        interval = int(arg[3:])
+        except:
+            print('invalid argument ' + arg)
+            showSyntax()
+            exit()
     
+    signal.signal(signal.SIGINT, ctrlcHandler)
     statusFile = sys.argv[1]
     main()
-    #print(timeDesc(23000))
-
