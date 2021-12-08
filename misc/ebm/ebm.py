@@ -3,6 +3,7 @@
 # Copyright (c) 2020 Rally Tactical Systems, Inc.
 #
 
+from __future__ import print_function
 import json
 import time
 import datetime
@@ -16,6 +17,11 @@ try:
 except ImportError as e:
     haveColorama = False
     pass
+
+try:
+    headerSepChar = chr(9608)
+except:    
+    headerSepChar = '*'
 
 appVersion = '0.2'
 statusFile = ''
@@ -79,6 +85,11 @@ def groupState(s):
     return switcher.get(s, 'Unknown')
 
 # --------------------------------------------------------------------------
+def setColor(c):
+    if haveColorama:
+        print(c, end = '')
+
+# --------------------------------------------------------------------------
 def setCursor(r, c):
     if haveColorama:
         print('%s' % pos(r, c))
@@ -129,8 +140,10 @@ def printHeadline(db):
     tsdelta = int(time.time() - db['ts'])
     if tsdelta > (interval * 2):
         clr = colorError()
+        msg = '  (*POSSIBLY OFFLINE*)'
     else:
         clr = colorNone()
+        msg = ''
 
     now = datetime.datetime.now()
 
@@ -142,9 +155,9 @@ def printHeadline(db):
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
     print('Last check at %s %s uptime %s %s updated %s ago' % (now.strftime('%Y/%m/%d %H:%M:%S'), chr(9608), timeDesc(db['uptime']), chr(9608), timeDesc(tsdelta)))
     print('-----------------------------------------------------------------------------------------------------------------------------------------------')
-    print('                                                                                                    ------ Packets ------ ------- Bytes -------')
-    print('%38s %10s %38s %10s %10s %10s %10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', 'RX', 'TX', 'RX', 'TX'))
-    print('-------------------------------------- ---------- -------------------------------------- ---------- ---------- ---------- ---------- ----------')
+    print('                                                                                                        ------ Packets ------ ------- Bytes -------')
+    print('%38s %12s %38s %12s %10s %10s %10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', 'RX', 'TX', 'RX', 'TX'))
+    print('-------------------------------------- ------------ -------------------------------------- ------------ ---------- ---------- ---------- ----------')
     print(colorNone(), end = '')
 
 # --------------------------------------------------------------------------
@@ -173,10 +186,10 @@ def printBridges(db):
                 else:
                     clr = colorWarning()
 
-            print(clr, end = '')
+            setColor(clr)
 
             if firstLine:
-                print('%38s %10s %38s %10s %10s %10s %10s %10s' % 
+                print('%38s %12s %38s %12s %10s %10s %10s %10s' % 
                         (bridgeDetail['id'], 
                         bridgeState(bridgeDetail['state']), 
                         groupInfo['name'], 
@@ -186,7 +199,7 @@ def printBridges(db):
                         groupInfo['rxTraffic']['bytes'], 
                         groupInfo['txTraffic']['bytes']))
             else:
-                print('%49s %38s %10s %10s %10s %10s %10s' % (' ', 
+                print('%51s %38s %12s %10s %10s %10s %10s' % (' ', 
                         groupInfo['name'], 
                         groupState(groupInfo['state']), 
                         groupInfo['rxTraffic']['packets'], 
@@ -194,7 +207,7 @@ def printBridges(db):
                         groupInfo['rxTraffic']['bytes'], 
                         groupInfo['txTraffic']['bytes']))
 
-            print(colorNone(), end = '')
+            setColor(colorNone())
 
             firstLine = 0
         
