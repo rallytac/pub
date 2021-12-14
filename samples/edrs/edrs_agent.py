@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     if g_verbose:
         print("---------------------------------------------------------------------------------------------------")
-        print("Engage Document Archive Agent 0.1")
+        print("Engage Document Repositry Server Agent 0.1")
         print("Copyright (c) 2021 Rally Tactical Systems, Inc.")
         print("---------------------------------------------------------------------------------------------------")
     
