@@ -1,0 +1,163 @@
+{
+    "bridges": {
+        "count": 2,
+        "detail": [
+            {
+                "groups": [
+                    "net1",
+                    "net2",
+                    "net3",
+                    "net4",
+                    "net5"
+                ],
+                "id": "b1",
+                "name": "",
+                "state": 1
+            },
+            {
+                "groups": [
+                    "net6",
+                    "net5"
+                ],
+                "id": "b2",
+                "name": "",
+                "state": 1
+            }
+        ]
+    },
+    "groups": {
+        "count": 6,
+        "detail": [
+            {
+                "id": "net1",
+                "name": "net1",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            },
+            {
+                "id": "net4",
+                "name": "net4",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            },
+            {
+                "id": "net5",
+                "name": "net5",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            },
+            {
+                "id": "net6",
+                "name": "net6",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            },
+            {
+                "id": "net2",
+                "name": "net2",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            },
+            {
+                "id": "net3",
+                "name": "net3",
+                "rxTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                },
+                "state": 1,
+                "txTraffic": {
+                    "bytes": 0,
+                    "errors": 0,
+                    "packets": 0
+                }
+            }
+        ]
+    },
+    "healthChecks": {
+        "count": 0,
+        "rate": 0,
+        "rateEma": 0
+    },
+    "id": "sampleebs01",
+    "license": {
+        "activationCode": "",
+        "cargo": "0",
+        "cargoFlags": 0,
+        "deviceId": "",
+        "expires": 0,
+        "expiresFormatted": "",
+        "flags": 0,
+        "key": "",
+        "manufacturerId": "",
+        "status": 0,
+        "type": 2
+    },
+    "queue": {
+        "avgExecNanos": 592403,
+        "lowPriorityQueueDepth": 0,
+        "lowPriorityQueueFailures": 0,
+        "lowPriorityQueueMaxDepth": 0,
+        "maxExecNanos": 24785043,
+        "minExecNanos": 0,
+        "normalPriorityQueueDepth": 1,
+        "normalPriorityQueueFailures": 0,
+        "normalPriorityQueueMaxDepth": 6,
+        "ops": {
+            "count": 150,
+            "rate": 3.4,
+            "rateEma": 7.812
+        },
+        "spuriousWakeups": 37,
+        "wakeUps": 107
+    },
+    "systemCpuLoad": 6.25,
+    "ts": 163188185141,
+    "uptime": 36
+}
