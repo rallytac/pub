@@ -1,10 +1,10 @@
 {
-  "name": "ejars",
+  "name": "edrs",
   "version": "1.0.0",
-  "description": "Engage Status Archive REST Service (ejars)",
-  "main": "ejars.js",
+  "description": "Engage Document Repository Service (edrs)",
+  "main": "edrs.js",
   "scripts": {
-    "start": "node ejars.js",
+    "start": "node edrs.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rally Tactical Systems, Inc.",

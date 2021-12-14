@@ -16,10 +16,10 @@
 	"https":{
 		"host":"",
 		"port":6767,
-		"certPem":"./EjarsRestServer.cert",
-		"keyPem":"./EjarsRestServer.key",
+		"certPem":"./EdrsServer.cert",
+		"keyPem":"./EdrsServer.key",
 		"ca":[
-			"./EjarsCA.cert"
+			"./EdrsCA.cert"
 		],
 		"requestCert": true,
 		"rejectUnauthorized": true
