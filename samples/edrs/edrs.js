@@ -1,5 +1,5 @@
 //
-// Engage JSON Archive REST Service (ejars)
+// Engage Document Repository Service (edrs)
 // Copyright (c) 2021 Rally Tactical Systems, Inc.
 //
 // Dependencies:
@@ -73,7 +73,7 @@ process.on('SIGINT', function()
 process.chdir(__dirname)
 
 // Load up and validate the configuration
-var configuration = fileSystem.readJSONSync("./ejars_conf.json");
+var configuration = fileSystem.readJSONSync("./edrs_conf.json");
 if(!configuration.logging || !configuration.logging.level)
 {
     configuration.logging = {"level": LOG_INFO};
@@ -145,7 +145,7 @@ const server = https.createServer(httpsServerOpts, requestListener);
 server.listen(configuration.https.port, configuration.https.host, () => 
 {
     logI("---------------------------------------------------------------------------------------------------", true);
-    logI("Engage JSON Archive REST Service (ejars) " + VERSION, true);
+    logI("Engage Document Repository Service (edrs) " + VERSION, true);
     logI("Copyright (c) 2021 Rally Tactical Systems, Inc.", true);
     logI("", true);
     logI(configuration, true);
@@ -171,17 +171,17 @@ function archiveCleanup()
                 {
                     tenant.db.all(`SELECT
                                         item_key,
-                                        type,
+                                        tag,
                                         content_uri,
                                         ((strftime('%s', 'now') * 1000) - ts) AS age_ms
                                     FROM 
-                                        JSONS
+                                        DOCS
                                     WHERE
-                                            type LIKE '${item.type}'
+                                            tag LIKE '${item.tag}'
                                         AND
                                             age_ms > (${item.maxAgeHours} * 3600 * 1000)
                                     ORDER BY
-                                        type, age_ms;`,
+                                        tag, age_ms;`,
 
                     function(err, rows) 
                     {
@@ -200,7 +200,7 @@ function archiveCleanup()
                                     logD("removing stale item " + row.item_key + ", uri=" + row.content_uri);
 
                                     fileSystem.removeSync(row.content_uri);
-                                    tenant.db.run("DELETE FROM JSONS WHERE item_key = ?", [row.item_key]);
+                                    tenant.db.run("DELETE FROM DOCS WHERE item_key = ?", [row.item_key]);
                                 }
                                 else
                                 {
@@ -377,26 +377,34 @@ function setupDatabase(fn)
                     key_value TEXT
                 );`)
 
-        db.run(`CREATE TABLE IF NOT EXISTS JSONS(
+        db.run(`CREATE TABLE IF NOT EXISTS DOCS(
                     item_key CHAR(64) PRIMARY KEY NOT NULL,
                     instance CHAR(64) NOT NULL,
                     node_id CHAR(38) NOT NULL,
-                    type INT NOT NULL,
+                    tag CHAR(38) NOT NULL,
+                    mime_type CHAR(38) NOT NULL,
                     ts DATETIME NOT NULL,
+                    server_ts DATETIME NOT NULL,
                     content_uri TEXT NULL
                  );`);
 
-        db.run(`CREATE INDEX IF NOT EXISTS JSONS_IDX_INSTANCE
-                         ON JSONS(instance);`);
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_INSTANCE
+                         ON DOCS(instance);`);
 
-        db.run(`CREATE INDEX IF NOT EXISTS JSONS_IDX_NODE_ID
-                        ON JSONS(node_id);`);
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_NODE_ID
+                        ON DOCS(node_id);`);
 
-        db.run(`CREATE INDEX IF NOT EXISTS JSONS_IDX_TYPE
-                         ON JSONS(type);`);
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_TAG
+                         ON DOCS(tag);`);
 
-        db.run(`CREATE INDEX IF NOT EXISTS JSONS_IDX_TS
-                         ON JSONS(ts);`);
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_MIME_TYPE
+                        ON DOCS(mime_type);`);
+
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_TS
+                         ON DOCS(ts);`);
+
+        db.run(`CREATE INDEX IF NOT EXISTS DOCS_IDX_SERVER_TS
+                    ON DOCS(server_ts);`);
     });
     
     return db;
@@ -525,11 +533,21 @@ function handlePost(request, response)
             return;
         }
 
-        // Make sure we have a type
-        type = fields.type;
-        if(type == null)
+        // Make sure we have a tag
+        tag = fields.tag;
+        if(tag == null)
         {
-            logW("no type in form");
+            logW("no tag in form");
+            response.writeHead(BAD_REQUEST_RESULT);
+            response.end();
+            return;
+        }
+
+        // Make sure we have a mime type
+        mimeType = fields.mimeType;
+        if(mimeType == null)
+        {
+            logW("no mimeType in form");
             response.writeHead(BAD_REQUEST_RESULT);
             response.end();
             return;
@@ -571,19 +589,24 @@ function handlePost(request, response)
         // Only do database work if we have a database
         if(tenant.db)
         {
+            // Record the time (in milliseconds seconds since Jan 1 1970) that this server received the document
+            var serverTs = Date.now();
+
             // Construct the URI for the content
             contentUri = archiveDir + "/" + dstFn;
 
             // Plug it into our database
             tenant.db.serialize(() => 
             {
-                tenant.db.run(`INSERT INTO JSONS VALUES (?,?,?,?,?,?);`,
+                tenant.db.run(`INSERT INTO DOCS VALUES (?,?,?,?,?,?,?,?);`,
                         [
                             itemKey,
                             instance,
                             nodeId,
-                            type,
+                            tag,
+                            mimeType,
                             ts,
+                            serverTs,
                             contentUri
                         ], 
                         
@@ -712,8 +735,8 @@ class SqlQuery
     }
 }
 
-// Return a JSON file in the response and end it
-function returnJsonFile(response, contentUri)
+// Return a file in the response and end it
+function returnFile(response, contentUri, mimeType)
 {
     logD("returning:" + contentUri);
 
@@ -721,7 +744,7 @@ function returnJsonFile(response, contentUri)
     
     response.writeHead(OK_RESULT, 
     {
-        "Content-Type": "application/json",
+        "Content-Type": mimeType,
         "Content-Length": stat.size
     });
 
@@ -735,11 +758,12 @@ function returnJsonFile(response, contentUri)
 function handleRawGet(request, response, tenant, itemKey)
 {
     var q = new SqlQuery(`SELECT 
-                                JSONS.content_uri
+                                DOCS.content_uri,
+                                DOCS.mime_type
                             FROM 
-                                JSONS`);
+                                DOCS`);
 
-    q.addCriteria("JSONS.item_key", `{"eq":"${itemKey}"}`);
+    q.addCriteria("DOCS.item_key", `{"eq":"${itemKey}"}`);
     q.finalize("LIMIT 1");
 
     if(configuration.logging.logSql)
@@ -758,16 +782,18 @@ function handleRawGet(request, response, tenant, itemKey)
             }
             else
             {
-                var content_uri = null;
+                var contentUri = null;
+                var mimeType = null;
 
                 rows.forEach((row) => 
                 {
-                    content_uri = row.content_uri;
+                    contentUri = row.content_uri;
+                    mimeType = row.mime_type;
                 });
 
-                if(content_uri)
+                if(contentUri && mimeType)
                 {
-                    returnJsonFile(response, content_uri);
+                    returnJsonFile(response, contentUri, mimeType);
                 }
                 else
                 {
@@ -840,13 +866,14 @@ function handleGet(request, response)
     if(thePath == configuration.api.uris.getMostRecentRaw)
     {
         var q = new SqlQuery(`SELECT 
-                                JSONS.content_uri
+                                DOCS.content_uri
                             FROM 
-                                JSONS`);
+                                DOCS`);
 
-        q.addCriteria("JSONS.type", parsedUrl.query.type);
-        q.addCriteria("JSONS.node_id", parsedUrl.query.nodeId);
-        q.addCriteria("JSONS.instance", parsedUrl.query.instance);
+        q.addCriteria("DOCS.tag", parsedUrl.query.tag);
+        q.addCriteria("DOCS.mime_type", parsedUrl.query.mimeType);
+        q.addCriteria("DOCS.node_id", parsedUrl.query.nodeId);
+        q.addCriteria("DOCS.instance", parsedUrl.query.instance);
         
         q.finalize("ORDER BY ts DESC LIMIT 1");
 
@@ -889,13 +916,15 @@ function handleGet(request, response)
     }
 
     var q = new SqlQuery(`SELECT 
-                                JSONS.item_key,
-                                JSONS.node_id,
-                                JSONS.instance,
-                                JSONS.type,
-                                JSONS.ts
+                                DOCS.item_key,
+                                DOCS.node_id,
+                                DOCS.instance,
+                                DOCS.tag,
+                                DOCS.mime_type
+                                DOCS.ts,
+                                DOCS.server_ts
                             FROM 
-                                JSONS`);
+                                DOCS`);
 
     var theLimit = RESPONSE_ROW_LIMIT;
     var isSingleElementGet = false;
@@ -918,11 +947,13 @@ function handleGet(request, response)
     
     if(parsedUrl.query)
     {
-        q.addCriteria("JSONS.item_key", parsedUrl.query.itemKey);
-        q.addCriteria("JSONS.node_id", parsedUrl.query.nodeId);
-        q.addCriteria("JSONS.instance", parsedUrl.query.instance);
-        q.addCriteria("JSONS.type", parsedUrl.query.type);
-        q.addCriteria("JSONS.ts", parsedUrl.query.ts);
+        q.addCriteria("DOCS.item_key", parsedUrl.query.itemKey);
+        q.addCriteria("DOCS.node_id", parsedUrl.query.nodeId);
+        q.addCriteria("DOCS.instance", parsedUrl.query.instance);
+        q.addCriteria("DOCS.tag", parsedUrl.query.tag);
+        q.addCriteria("DOCS.mime_type", parsedUrl.query.mimeType);
+        q.addCriteria("DOCS.ts", parsedUrl.query.ts);
+        q.addCriteria("DOCS.server_ts", parsedUrl.query.serverTs);
     }
 
     // "limit" with a max of RESPONSE_ROW_LIMIT
@@ -935,7 +966,7 @@ function handleGet(request, response)
         }
     }
 
-    q.finalize("ORDER BY JSONS.ts DESC LIMIT " + theLimit);
+    q.finalize("ORDER BY DOCS.ts DESC LIMIT " + theLimit);
 
     if(configuration.logging.logSql)
     {
@@ -989,11 +1020,13 @@ function handleGet(request, response)
                                 "itemKey": row.item_key,
                                 "nodeId": row.node_id,
                                 "instance": row.instance,
-                                "type": row.type,
-                                "ts": row.ts
+                                "tag": row.tag,
+                                "mimeType": row.mime_type,
+                                "ts": row.ts,
+                                "serverTs": row.server_ts
                             };
                     
-                            resultJson.jsons.push(rowJson);
+                            resultJson.DOCS.push(rowJson);
                         }
                         else
                         {
