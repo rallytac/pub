@@ -1,0 +1,61 @@
+{
+   "id": "sampleebs01",
+   "serviceConfigurationFileCheckSecs": 5,
+   "bridgingConfigurationFileCheckSecs": 5,
+   "bridgingConfigurationFileCommand": "",
+   "bridgingConfigurationFileName": "./sample-bridges-01.json",
+   "certStoreFileName": "./all-rts-certs.certstore",
+   "certStorePasswordHex": "",
+   "internals": {
+      "disableWatchdog": true,
+      "watchdogHangDetectionMs": 2000,
+      "watchdogIntervalMs": 5000
+   },
+   "multicastTxOptions": {
+      "priority": 4,
+      "ttl": 64
+   },
+   "txOptions": {
+      "priority": 4,
+      "ttl": 64
+   },
+   "requireFips": false,
+   "statusReport": {
+      "enabled": true,
+      "fileName": "./${id}_status.json",
+      "intervalSecs": 5,
+      "includeGroupDetail": true,
+      "includeBridgeDetail": true,
+      "includeBridgeGroupDetail": true,
+      "runCmd": ""
+   },
+   "externalHealthCheckResponder": {
+      "immediateClose": true,
+      "listenPort": 0
+   },
+   "enginePolicy": {
+      "dataDirectory": "",
+      "networking": {
+         "defaultNic": ""
+      },
+      "security": {
+         "certificate": {
+            "certificate": "@certstore://rtsFactoryDefaultEngage",
+            "key": "@certstore://rtsFactoryDefaultEngage"
+         }
+      },
+      "audio": {
+         "internalRate": 8000,
+         "internalChannels": 1,
+         "allowOutputOnTransmit": true,
+         "muteTxOnTx": false,
+         "enableAec": false
+      },
+      "internals": {
+         "disableWatchdog": false,
+         "watchdogIntervalMs": 5000,
+         "watchdogHangDetectionMs": 2000,
+         "housekeeperIntervalMs": 1000
+      }
+   }
+}

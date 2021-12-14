@@ -1,0 +1,67 @@
+{
+	"id":"idOfThisService",
+	"localStorageRoot": "./.data",
+
+	"api": {
+		"version":"v1",
+		"uris":{
+			"postSingle": "/${version}/archive/json",
+			"getSingle": "/${version}/archive/json",
+			"getSingleRaw": "/${version}/archive/raw",
+			"getMultiple": "/${version}/archive/jsons",
+			"getMostRecentRaw": "/${version}/archive/raw/mostrecent"
+		}
+	},
+
+	"https":{
+		"host":"",
+		"port":6767,
+		"certPem":"./EjarsRestServer.cert",
+		"keyPem":"./EjarsRestServer.key",
+		"ca":[
+			"./EjarsCA.cert"
+		],
+		"requestCert": true,
+		"rejectUnauthorized": true
+	},
+
+	"timers":{
+		"cleanupIntervalSecs":600
+	},
+
+	"logging":{
+		"level":4,
+		"logSql":true
+	},
+
+	"tenants":[
+		{
+			"id":"C43C7D30BC1243289EE2321750EB1E5C",
+			"retentions":[
+				{"type":"%.config", "maxAgeHours":36, "retained":1},
+				{"type":"%.status", "maxAgeHours":36, "retained":4}
+			],
+			"apiKeys":[
+				{
+					"key":"2c93d24c26da43a9a34a9604a640cb1cf43c2471be904fafb5572dc6387a2a11",
+					"permissions": [
+						"POST",
+						"GET"
+					]
+				},
+				{
+					"key":"d0497292d40f413a970fe08d8ef30985ea9fe3aa40b2449a819c807ae7d979ff",
+					"permissions": [
+						"POST"
+					]
+				},
+				{
+					"key":"7c15d90d7373442799794691bd3e1efa83633dbf15844f8aaaf5ab7ff80f5e27",
+					"permissions": [
+						"GET"
+					]
+				}
+			]
+		}
+	]
+}

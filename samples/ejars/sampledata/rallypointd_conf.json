@@ -1,0 +1,22 @@
+{
+   "id": "samplerp",
+   "listenPort": 7443,
+   "interfaceName": "",
+   "allowMulticastForwarding": false,
+   "certStoreFileName": "./rallypointd.certstore",
+   "statusReport": {
+      "enabled": true,
+      "fileName": "./${id}_status.json",
+      "intervalSecs": 2
+   },
+   "peeringConfigurationFileName": "",
+   "peeringConfigurationFileCheckSecs": 30,
+   "certificate": {
+      "certificate": "@certstore://rtsFactoryDefaultRpSrv",
+      "key": "@certstore://rtsFactoryDefaultRpSrv"
+   },
+   "multicastTxOptions": {
+      "priority": 4,
+      "ttl": 1
+   }
+}
