@@ -199,7 +199,6 @@ if __name__ == "__main__":
             if g_verbose:
                 print("retry in", sleepSecs, "seconds")
 
-        sleepSecs = 1
         time.sleep(sleepSecs)
 
 # END
