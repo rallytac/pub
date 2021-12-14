@@ -38,8 +38,11 @@
 		{
 			"id":"C43C7D30BC1243289EE2321750EB1E5C",
 			"retentions":[
-				{"type":"%.config", "maxAgeHours":36, "retained":1},
-				{"type":"%.status", "maxAgeHours":36, "retained":4}
+				{"type":"rp.config", "maxAgeHours":36, "retained":1},
+				{"type":"rp.status", "maxAgeHours":36, "retained":4},
+				
+				{"type":"ebs.config", "maxAgeHours":36, "retained":1},
+				{"type":"ebs.status", "maxAgeHours":36, "retained":4}
 			],
 			"apiKeys":[
 				{
