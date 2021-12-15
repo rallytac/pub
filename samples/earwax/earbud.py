@@ -78,6 +78,11 @@ def archiveRowToUrl(row):
     except pycurl.error as e:
         rc = 500
         print("curl error:", e)
+        
+    # We're going to remove the file here to ensure that potential database rebuilds don't
+    # accidentally bring it back from archived status if the database needs to be rebuilt.
+    if rc >= 200 and rc <= 299:
+        os.remove(fn)        
 
     return rc        
 
