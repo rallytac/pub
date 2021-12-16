@@ -3,17 +3,19 @@
 # Copyright (c) 2020 Rally Tactical Systems, Inc.
 #
 
+from __future__ import print_function
 import os
 import sys
 import pycurl
 import time
 import random
 import json
+import signal
 
 UPLOAD_OK_RESULT = 200
+ALREADY_REPORTED_RESULT = 208
 UPLOAD_GENERAL_ERROR_RESULT = -1
 UPLOAD_SERVER_ERROR_RESULT = 500
-UPLOAD_DUPLICATE_RESULT = 513
 
 # Our global variables
 g_verbose = False
@@ -30,6 +32,11 @@ g_tag = ""
 g_instance = ""
 g_intervalSecs = 0  # NOTE: A value of 0 for the interval will cause this script to run once and exit
 g_useFileTs = False
+
+# A Ctrl-C handler
+def ctrlcHandler(sig, frame):
+    print('... exiting')
+    sys.exit(0)
 
 # Upload to a URL using cURL to POST a multipart form
 def uploadFileToUrl(path, fileTs):
@@ -83,7 +90,7 @@ def uploadFileToUrl(path, fileTs):
         rc = c.getinfo(c.RESPONSE_CODE)
         c.close() 
 
-        if rc == UPLOAD_DUPLICATE_RESULT:
+        if rc == ALREADY_REPORTED_RESULT:
             print(path, "already present on remote")
             rc = UPLOAD_OK_RESULT
 
@@ -112,6 +119,8 @@ def loadJson(path):
 
 # main()
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, ctrlcHandler)
+
     for x in range(1, len(sys.argv)):
         if sys.argv[x] == "-verbose":
             g_verbose = True

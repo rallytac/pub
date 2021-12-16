@@ -53,9 +53,9 @@ const NOT_FOUND_RESULT = 404;
 const METHOD_NOT_ALLOWED_RESULT = 405;
 
 const OK_RESULT = 200;
+const ALREADY_REPORTED_RESULT = 208;
 const GENERAL_ERROR_RESULT = -1;
 const SERVER_ERROR_RESULT = 500;
-const DUPLICATE_RESULT = 513;
 
 
 // Operation modes
@@ -81,8 +81,8 @@ if(!configuration.logging || !configuration.logging.level)
 
 // Translate the URIs for version
 configuration.api.uris.postSingle = configuration.api.uris.postSingle.replace(/\${version}/g, configuration.api.version).toLowerCase();
+configuration.api.uris.getRaw = configuration.api.uris.getRaw.replace(/\${version}/g, configuration.api.version).toLowerCase();
 configuration.api.uris.getSingle = configuration.api.uris.getSingle.replace(/\${version}/g, configuration.api.version).toLowerCase();
-configuration.api.uris.getSingleRaw = configuration.api.uris.getSingleRaw.replace(/\${version}/g, configuration.api.version).toLowerCase();
 configuration.api.uris.getMultiple = configuration.api.uris.getMultiple.replace(/\${version}/g, configuration.api.version).toLowerCase();
 configuration.api.uris.getMostRecentRaw = configuration.api.uris.getMostRecentRaw.replace(/\${version}/g, configuration.api.version).toLowerCase();
 
@@ -619,7 +619,7 @@ function handlePost(request, response)
                                     if(err.code == "SQLITE_CONSTRAINT")
                                     {
                                         logW(itemKey + " already exists - from " + request.connection.remoteAddress);
-                                        response.writeHead(DUPLICATE_RESULT);
+                                        response.writeHead(ALREADY_REPORTED_RESULT);
                                     }
                                     else
                                     {
@@ -793,7 +793,7 @@ function handleRawGet(request, response, tenant, itemKey)
 
                 if(contentUri && mimeType)
                 {
-                    returnJsonFile(response, contentUri, mimeType);
+                    returnFile(response, contentUri, mimeType);
                 }
                 else
                 {
@@ -820,16 +820,15 @@ function handleGet(request, response)
     const thePath = parsedUrl.pathname.toLowerCase();
 
     // Make sure we have a valid path
-    /*
-    if(thePath != configuration.api.uris.getSingle &&
-        thePath != configuration.api.uris.getSingleRaw &&
-        thePath != configuration.api.uris.getMultiple)
+    if(!thePath.startsWith(configuration.api.uris.getRaw) &&
+        thePath != configuration.api.uris.getSingle &&
+        thePath != configuration.api.uris.getMultiple &&
+        thePath != configuration.api.uris.getMostRecentRaw)
     {
         response.writeHead(BAD_REQUEST_RESULT);
         response.end();
         return;
     }
-    */
 
     // Get the tenant
     var tenant = getTenant(request.headers.apikey, "GET");
@@ -842,17 +841,15 @@ function handleGet(request, response)
     }
 
     // Special handling for a single recording where the caller wants the raw content
-    /*
-    if(thePath.startsWith(configuration.api.uris.getSingleRaw))
+    if(thePath.startsWith(configuration.api.uris.getRaw))
     {
         handleRawGet(request, 
             response, 
             tenant,
-            thePath.substring(configuration.api.uris.getSingleRaw.length + 1));
+            thePath.substring(configuration.api.uris.getRaw.length + 1));
 
         return;
     }
-    */
    
     // We can't continue if we don't have a database for the tenant
     if(!tenant.db)
@@ -863,10 +860,12 @@ function handleGet(request, response)
         return;
     }
 
+    // getMostRecentRaw
     if(thePath == configuration.api.uris.getMostRecentRaw)
     {
         var q = new SqlQuery(`SELECT 
-                                DOCS.content_uri
+                                DOCS.content_uri,
+                                DOCS.mime_type
                             FROM 
                                 DOCS`);
 
@@ -894,15 +893,17 @@ function handleGet(request, response)
             else
             {
                 var contentUri = null;
+                var mimeType = null;
 
                 rows.forEach((row) => 
                 {
                     contentUri = row.content_uri;
+                    mimeType = row.mime_type;
                 });
 
-                if(contentUri)
+                if(contentUri && mimeType)
                 {
-                    returnJsonFile(response, contentUri);
+                    returnFile(response, contentUri, mimeType);
                 }
                 else
                 {
@@ -920,7 +921,7 @@ function handleGet(request, response)
                                 DOCS.node_id,
                                 DOCS.instance,
                                 DOCS.tag,
-                                DOCS.mime_type
+                                DOCS.mime_type,
                                 DOCS.ts,
                                 DOCS.server_ts
                             FROM 
@@ -1001,7 +1002,7 @@ function handleGet(request, response)
                     {
                         "ts":Date.now(), 
                         "execMs":execTime,
-                        "jsons":[]
+                        "docs":[]
                     };
 
                     var ctr = 0;
@@ -1026,7 +1027,7 @@ function handleGet(request, response)
                                 "serverTs": row.server_ts
                             };
                     
-                            resultJson.DOCS.push(rowJson);
+                            resultJson.docs.push(rowJson);
                         }
                         else
                         {
