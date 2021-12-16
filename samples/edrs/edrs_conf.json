@@ -5,11 +5,11 @@
 	"api": {
 		"version":"v1",
 		"uris":{
-			"postSingle": "/${version}/archive/json",
-			"getSingle": "/${version}/archive/json",
-			"getSingleRaw": "/${version}/archive/raw",
-			"getMultiple": "/${version}/archive/jsons",
-			"getMostRecentRaw": "/${version}/archive/raw/mostrecent"
+			"getRaw": "/${version}/archive/raw",
+			"postSingle": "/${version}/archive/doc",
+			"getSingle": "/${version}/archive/doc",
+			"getMultiple": "/${version}/archive/docs",
+			"getMostRecentRaw": "/${version}/archive/mostrecent/raw"
 		}
 	},
 
@@ -38,11 +38,13 @@
 		{
 			"id":"C43C7D30BC1243289EE2321750EB1E5C",
 			"retentions":[
-				{"type":"rp.config", "maxAgeHours":36, "retained":1},
-				{"type":"rp.status", "maxAgeHours":36, "retained":4},
+				{"tag":"rp.config", "maxAgeHours":36, "retained":1},
+				{"tag":"rp.status", "maxAgeHours":36, "retained":4},
 				
-				{"type":"ebs.config", "maxAgeHours":36, "retained":1},
-				{"type":"ebs.status", "maxAgeHours":36, "retained":4}
+				{"tag":"ebs.config", "maxAgeHours":36, "retained":1},
+				{"tag":"ebs.status", "maxAgeHours":36, "retained":4},
+
+				{"tag":"dot", "maxAgeHours":36, "retained":4}
 			],
 			"apiKeys":[
 				{
