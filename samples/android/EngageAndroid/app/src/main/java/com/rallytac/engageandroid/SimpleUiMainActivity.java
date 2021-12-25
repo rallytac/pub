@@ -5,7 +5,6 @@
 
 package com.rallytac.engageandroid;
 
-import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -17,14 +16,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -40,11 +37,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Environment;
-import android.text.Layout;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -58,7 +52,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -81,9 +74,6 @@ import com.rallytac.engage.engine.Engine;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -142,7 +132,8 @@ public class SimpleUiMainActivity
     private RecyclerView _groupSelectorView = null;
     private GroupSelectorAdapter _groupSelectorAdapter = null;
 
-    private int _keycodePtt = 0;
+    private int _keycodePttCode = 0;
+    private int _keycodePttMode = Constants.KEYCODE_PTT_MODE_NONE;
 
     private HashSet<String> _currentlySelectedGroups = null;
 
@@ -583,11 +574,11 @@ public class SimpleUiMainActivity
 
         _ac = Globals.getEngageApplication().getActiveConfiguration();
 
-        _optAllowMultipleChannelView = Utils.boolOpt(getString(R.string.opt_allow_multiple_channel_view), true);
+        _optAllowMultipleChannelView = Globals.getContext().getResources().getBoolean(R.bool.opt_allow_multiple_channel_view);
         _optSupportsTextMessaging = Globals.getContext().getResources().getBoolean(R.bool.opt_supports_text_messaging);
 
         // See if the build options force an orientation
-        int desiredOrientation = Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        int desiredOrientation = Globals.getContext().getResources().getInteger(R.integer.opt_lock_orientation);
 
         // If nothing forced, see if the user has selected an orientation
         if(desiredOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
@@ -597,7 +588,8 @@ public class SimpleUiMainActivity
 
         setRequestedOrientation(desiredOrientation);
 
-        _keycodePtt = Utils.intOpt(getString(R.string.app_keycode_ptt), 0);
+        _keycodePttCode = Globals.getContext().getResources().getInteger(R.integer.opt_keycode_ptt_code);
+        _keycodePttMode = Globals.getContext().getResources().getInteger(R.integer.opt_keycode_ptt_mode);
 
         super.onCreate(savedInstanceState);
 
@@ -779,12 +771,14 @@ public class SimpleUiMainActivity
     @Override
     public void onBackPressed()
     {
+        /*
         if(_optAllowMultipleChannelView)
         {
             stopTimelineAudioPlayer();
             stopAllTx();
             toggleViewMode();
         }
+        */
     }
 
     @Override
@@ -897,79 +891,94 @@ public class SimpleUiMainActivity
     {
         //Globals.getLogger().d(TAG, "---onKeyDown keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", _lastHeadsetKeyhookDown=" + _lastHeadsetKeyhookDown);
 
-        if(_keycodePtt != 0 && keyCode == _keycodePtt)
+        if( _keycodePttMode == Constants.KEYCODE_PTT_MODE_PUSH_ON_AT_FIRST_REPEAT_RELEASE_OFF)
         {
-            if(event.getRepeatCount() == 0)
+            if(_keycodePttCode != 0 && keyCode == _keycodePttCode)
             {
-                long diff = (event.getDownTime() - _lastKeydown);
-
-                if (diff <= Constants.PTT_KEY_DOUBLE_CLICK_LATCH_THRESHOLD_MS)
+                if(!_pttRequested && event.getRepeatCount() > 0)
                 {
-                    _pttRequested = !_pttRequested;
-
-                    if (_pttRequested)
-                    {
-                        Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
-                        _pttRequestIsLatched = true;
-                        Globals.getEngageApplication().startTx("");
-                    }
-                    else
-                    {
-                        Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
-                        _pttRequestIsLatched = false;
-                        Globals.getEngageApplication().endTx();
-                    }
-                }
-                else
-                {
-                    if(_pttRequested || _anyTxActive || _anyTxPending)
-                    {
-                        _pttRequested = false;
-                        _pttRequestIsLatched = false;
-                        Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
-                        Globals.getEngageApplication().endTx();
-                    }
-                }
-
-                _lastKeydown = event.getDownTime();
-            }
-            else
-            {
-                if(!_pttRequested)
-                {
+                    Globals.getLogger().d(TAG, "---onKeyDown requesting startTx");//NON-NLS
                     _pttRequested = true;
-                    _pttRequestIsLatched = false;
-                    Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
                     Globals.getEngageApplication().startTx("");
                 }
             }
         }
-        else
+        else if( _keycodePttMode == Constants.KEYCODE_PTT_MODE_PUSH_ON_PUSH_OFF )
         {
-            if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK)
+            if(_keycodePttCode != 0 && keyCode == _keycodePttCode)
             {
-                if (_lastHeadsetKeyhookDown == 0)
+                if(event.getRepeatCount() == 0)
                 {
-                    _lastHeadsetKeyhookDown = event.getDownTime();
-                }
-                else
-                {
-                    long diffTime = (event.getDownTime() - _lastHeadsetKeyhookDown);
-                    if (diffTime <= 500)
-                    {
-                        _lastHeadsetKeyhookDown = 0;
+                    long diff = (event.getDownTime() - _lastKeydown);
 
+                    if (_lastKeydown == 0 || diff <= Constants.PTT_KEY_DOUBLE_CLICK_LATCH_THRESHOLD_MS)
+                    {
                         _pttRequested = !_pttRequested;
 
                         if (_pttRequested)
                         {
-                            Globals.getLogger().d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
+                            Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (latched)");//NON-NLS
+                            _pttRequestIsLatched = true;
                             Globals.getEngageApplication().startTx("");
                         }
                         else
                         {
-                            Globals.getLogger().d(TAG, "---onKeyDown requesting endTx due to media button double-push");//NON-NLS
+                            Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
+                            _pttRequestIsLatched = false;
                             Globals.getEngageApplication().endTx();
+                        }
+                    }
+                    else
+                    {
+                        if(_pttRequested || _anyTxActive || _anyTxPending)
+                        {
+                            _pttRequested = false;
+                            _pttRequestIsLatched = false;
+                            Globals.getLogger().d(TAG, "---onKeyDown requesting endTx");//NON-NLS
+                            Globals.getEngageApplication().endTx();
+                        }
+                    }
+
+                    _lastKeydown = event.getDownTime();
+                }
+                else
+                {
+                    if(!_pttRequested)
+                    {
+                        _pttRequested = true;
+                        _pttRequestIsLatched = false;
+                        Globals.getLogger().d(TAG, "---onKeyDown requesting startTx (ptt hold)");//NON-NLS
+                        Globals.getEngageApplication().startTx("");
+                    }
+                }
+            }
+            else
+            {
+                if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK)
+                {
+                    if (_lastHeadsetKeyhookDown == 0)
+                    {
+                        _lastHeadsetKeyhookDown = event.getDownTime();
+                    }
+                    else
+                    {
+                        long diffTime = (event.getDownTime() - _lastHeadsetKeyhookDown);
+                        if (diffTime <= 500)
+                        {
+                            _lastHeadsetKeyhookDown = 0;
+
+                            _pttRequested = !_pttRequested;
+
+                            if (_pttRequested)
+                            {
+                                Globals.getLogger().d(TAG, "---onKeyDown requesting startTx due to media button double-push");//NON-NLS
+                                Globals.getEngageApplication().startTx("");
+                            }
+                            else
+                            {
+                                Globals.getLogger().d(TAG, "---onKeyDown requesting endTx due to media button double-push");//NON-NLS
+                                Globals.getEngageApplication().endTx();
+                            }
                         }
                     }
                 }
@@ -995,21 +1004,35 @@ public class SimpleUiMainActivity
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        long diffTime = (event.getEventTime() - event.getDownTime());
         //Globals.getLogger().d(TAG, "---onKeyUp keyCode=" + keyCode + ", repeat=" + event.getRepeatCount() + ", event=" + event.toString() + ", diff=" + diffTime);
 
-        if(_keycodePtt != 0 && keyCode == _keycodePtt)
+        if( _keycodePttMode == Constants.KEYCODE_PTT_MODE_PUSH_ON_AT_FIRST_REPEAT_RELEASE_OFF)
         {
-            if((_pttRequested || _anyTxPending || _anyTxActive) && !_pttRequestIsLatched)
+            if(_keycodePttCode != 0 && keyCode == _keycodePttCode)
             {
-                _pttRequested = false;
-                _pttRequestIsLatched = false;
-                Globals.getLogger().d(TAG, "---onKeyUp requesting endTx");//NON-NLS
-                Globals.getEngageApplication().endTx();
+                if(_pttRequested)
+                {
+                    Globals.getLogger().d(TAG, "---onKeyUp requesting endTx");//NON-NLS
+                    _pttRequested = false;
+                    Globals.getEngageApplication().endTx();
+                }
             }
         }
-        else
+        else if( _keycodePttMode == Constants.KEYCODE_PTT_MODE_PUSH_ON_PUSH_OFF )
         {
+            long diffTime = (event.getEventTime() - event.getDownTime());
+            if(_keycodePttCode != 0 && keyCode == _keycodePttCode)
+            {
+                if((_pttRequested || _anyTxPending || _anyTxActive) && !_pttRequestIsLatched)
+                {
+                    _pttRequested = false;
+                    _pttRequestIsLatched = false;
+                    Globals.getLogger().d(TAG, "---onKeyUp requesting endTx");//NON-NLS
+                    Globals.getEngageApplication().endTx();
+                }
+            }
+            else
+            {
             /*
             // Handle PTT indication via specialized key
             if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK)
@@ -1040,6 +1063,7 @@ public class SimpleUiMainActivity
                 }
             }
             */
+            }
         }
 
         return super.onKeyUp(keyCode, event);
@@ -1061,12 +1085,15 @@ public class SimpleUiMainActivity
                 if(v != null)
                 {
                     ((TextView)v).setText(msg);
-                    if(_notificationBarAnimation == null)
+                    if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
                     {
-                        _notificationBarAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.notification_bar_pulse);
-                        v.startAnimation(_notificationBarAnimation);
-                        v.setVisibility(View.VISIBLE);
+                        if(_notificationBarAnimation == null)
+                        {
+                            _notificationBarAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.notification_bar_pulse);
+                            v.startAnimation(_notificationBarAnimation);
+                        }
                     }
+                    v.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -1134,8 +1161,11 @@ public class SimpleUiMainActivity
                             }
                         };
 
-                        _licensingBarAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.licensing_bar_pulse);
-                        v.startAnimation(_licensingBarAnimation);
+                        if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
+                        {
+                            _licensingBarAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.licensing_bar_pulse);
+                            v.startAnimation(_licensingBarAnimation);
+                        }
                         v.setVisibility(View.VISIBLE);
                     }
                 }
@@ -1203,8 +1233,11 @@ public class SimpleUiMainActivity
                             }
                         };
 
-                        _humanBiometricsAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.heart_pulse);
-                        v.startAnimation(_humanBiometricsAnimation);
+                        if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
+                        {
+                            _humanBiometricsAnimation = AnimationUtils.loadAnimation(SimpleUiMainActivity.this, R.anim.heart_pulse);
+                            v.startAnimation(_humanBiometricsAnimation);
+                        }
                         v.setVisibility(View.VISIBLE);
                     }
                 }
@@ -2258,36 +2291,13 @@ public class SimpleUiMainActivity
 
     private void forceSpeakerPhoneOn()
     {
-        try
-        {
-            Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(true);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
+        Globals.getEngageApplication().setSpeakerphoneOn();
         updateTopIcons();
     }
 
     private void toggleSpeakerPhone()
     {
-        try
-        {
-            if(Globals.getEngageApplication().getAudioManager().isSpeakerphoneOn())
-            {
-                Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(false);
-            }
-            else
-            {
-                Globals.getEngageApplication().getAudioManager().setSpeakerphoneOn(true);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
+        Globals.getEngageApplication().toggleSpeakerPhone();
         updateTopIcons();
     }
 
@@ -2949,7 +2959,7 @@ public class SimpleUiMainActivity
                     int currentLevel = _ac.getPriorityTxLevel();
                     if(currentLevel == 0)
                     {
-                        _ac.setPriorityTxLevel(Utils.intOpt(getString(R.string.opt_app_tx_priority_level), 0));
+                        _ac.setPriorityTxLevel(Globals.getContext().getResources().getInteger(R.integer.opt_app_tx_priority_level));
                     }
                     else
                     {
@@ -2994,11 +3004,28 @@ public class SimpleUiMainActivity
 
     public void redrawPttButton()
     {
+
         runOnUiThread(new Runnable()
         {
             @Override
             public void run()
             {
+                // If PTT is gone in our configuration then just leave
+                if(_ac.getUiMode() == Constants.UiMode.vSingle)
+                {
+                    if(getString(R.string.show_ptt_in_single_view).compareTo(getString(R.string.visibility_gone)) == 0)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    if(getString(R.string.show_ptt_in_multi_view).compareTo(getString(R.string.visibility_gone)) == 0)
+                    {
+                        return;
+                    }
+                }
+
                 ImageView ivPtt = findViewById(R.id.ivPtt);
                 ImageView ivAppPriority = findViewById(R.id.ivAppPriority);
                 ImageView ivTxAlert = findViewById(R.id.ivTxAlert);

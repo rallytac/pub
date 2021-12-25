@@ -1,11 +1,19 @@
+//
+//  Copyright (c) 2019 Rally Tactical Systems, Inc.
+//  All rights reserved.
+//
+
 package com.rallytac.engageandroid;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
+
+import java.util.ArrayList;
 
 public class HardwareButtonManager implements IPushToTalkRequestHandler,
-                                              BluetoothManager.IBtNotification
+                                              BluetoothManager.IBtNotification,
+                                              MyBleReader.EventListener
 {
     private static final String TAG = HardwareButtonManager.class.getSimpleName();
 
@@ -15,8 +23,15 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
 
     private String pttOn = "+PTT=P";//NON-NLS
     private String pttOff = "+PTT=R";//NON-NLS
-    private BluetoothManager _btm;
+    private BluetoothManager _btm = null;
+    private MyBleReader _mybler = null;
     private BluetoothManager.IBtNotification _btNotification;
+
+    private static final byte[] PRYME_BLE_PTT_ON = {0x01};
+    private static final byte[] PRYME_BLE_PTT_OFF = {0x00};
+
+    private byte[] BT_PTT_ON = null;
+    private byte[] BT_PTT_OFF = null;
 
     HardwareButtonManager(Context ctx,
                           IPushToTalkRequestHandler handler,
@@ -45,10 +60,38 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
                 _btm.start(btDeviceAddress, pttOn, pttOff);
             }
         }
+
+        // TODO: This is dreadful!  Need a cleaner and more generic way to support BTLE buttons
+        if(Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_support_pryme_btle_ptt_button))
+        {
+            ArrayList<BluetoothDevice> btDevices = MyBleReader.getBleDevices();
+            if(btDevices != null)
+            {
+                for(BluetoothDevice dev : btDevices)
+                {
+                    if(dev.getName().compareTo("PTT-Z") == 0)       // Pryme name their BLE PTT button 'PTT-Z'
+                    {
+                        BT_PTT_ON = PRYME_BLE_PTT_ON;
+                        BT_PTT_OFF = PRYME_BLE_PTT_OFF;
+
+                        _mybler = new MyBleReader(_ctx, dev, this);
+                        _mybler.start();
+
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     public void stop()
     {
+        if(_mybler != null)
+        {
+            _mybler.stop();
+            _mybler = null;
+        }
+
         if(_btm != null)
         {
             _btm.stop();
@@ -93,5 +136,61 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
     public void requestPttOff()
     {
         _handler.requestPttOff();
+    }
+
+    // MyBleReader events
+    @Override
+    public void onBleDeviceConnected(BluetoothDevice device)
+    {
+        Globals.getLogger().d(TAG, "onBleDeviceConnected " + device.getName());
+        onBluetoothDeviceConnected();
+    }
+
+    @Override
+    public void onBleDeviceDisconnected(BluetoothDevice device)
+    {
+        Globals.getLogger().d(TAG, "onBleDeviceDisconnected " + device.getName());
+        onBluetoothDeviceDisconnected();
+
+    }
+
+    @Override
+    public void onBleDataReceived(BluetoothDevice device, byte[] data)
+    {
+        Globals.getLogger().d(TAG, "onBleDataReceived: " + device.getName() + ", data=[" + Utils.toHexString(data) + "]");
+        if(data != null && data.length >= 1)
+        {
+            if(byteArrayMatch(data, BT_PTT_ON))
+            {
+                requestPttOn(0, 0);
+            }
+            else if(byteArrayMatch(data, BT_PTT_OFF))
+            {
+                requestPttOff();
+            }
+            else
+            {
+                Globals.getLogger().w(TAG, "unhandled data received from BLE device " + device.getName() + ", data=[" + Utils.toHexString(data) + "]");
+            }
+        }
+    }
+
+    private boolean byteArrayMatch(byte[] a1, byte[] a2)
+    {
+        if(a1 != null && a2 != null &&
+            a1.length == a2.length)
+        {
+            for(int x = 0; x < a1.length; x++)
+            {
+                if(a1[x] != a2[x])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

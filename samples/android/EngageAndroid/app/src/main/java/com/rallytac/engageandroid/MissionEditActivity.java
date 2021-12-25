@@ -438,7 +438,7 @@ public class MissionEditActivity extends AppCompatActivity
             _mission = new DatabaseMission();
             _mission._id = Utils.generateMissionId();
             _mission._rpAddress = getString(R.string.default_rallypoint);
-            _mission._rpPort = Utils.intOpt(getString(R.string.default_rallypoint_port), Constants.DEF_RP_PORT);
+            _mission._rpPort = Globals.getContext().getResources().getInteger(R.integer.opt_default_rallypoint_port);
             _mission._mcId = Utils.generateGroupId();
             _mission._mcCryptoPassword = Utils.generateCryptoPassword();
 
