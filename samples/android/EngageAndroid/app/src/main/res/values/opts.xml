@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="opt_default_rallypoint_port">7443</integer>
+    <bool name="opt_supports_ept">false</bool>
+    <bool name="opt_supports_fdx">true</bool>
+    <bool name="opt_supports_anonymous_alias">false</bool>
+    <bool name="opt_supports_unlimited_tx">false</bool>
+    <bool name="opt_supports_alert">true</bool>
+    <bool name="opt_supports_enterprise_id">false</bool>
+    <bool name="opt_auto_generate_sample_mission">true</bool>
+    <bool name="opt_supports_ui_theme">false</bool>
+    <bool name="opt_log_to_engage">false</bool>
+    <bool name="opt_flavor_specific_mg_01">false</bool>
+    <integer name="opt_min_mission_generate_passphrase_len">0</integer>
+    <string name="opt_sample_mission_fixed_id" translatable="false"></string>
+    <bool name="opt_supports_text_messaging">false</bool>
+    <bool name="opt_allow_animations">true</bool>
+
+    <bool name="opt_allow_multiple_channel_view">true</bool>
+    <integer name="opt_lock_orientation">-1</integer>
+    <bool name="opt_ptt_latching">false</bool>
+    <bool name="opt_experimental_general_enabled">false</bool>
+    <bool name="opt_experimental_human_biometrics_enabled">false</bool>
+    <bool name="opt_firebase_analytics_enabled">false</bool>
+    <integer name="opt_max_groups_allowed">4</integer>
+
+    <integer name="opt_group_tx_priority_level">100</integer>
+    <integer name="opt_app_tx_priority_level">100</integer>
+
+    <integer name="opt_keycode_ptt_code">0</integer>
+    <integer name="opt_keycode_ptt_mode">0</integer>
+
+    <bool name="opt_support_pryme_btle_ptt_button">false</bool>
+</resources>

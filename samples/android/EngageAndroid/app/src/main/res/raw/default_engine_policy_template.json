@@ -10,9 +10,13 @@
   },
 
   "internals":{
-    "disableWatchdog":false,
-    "watchdogIntervalMs":5000,
-    "watchdogHangDetectionMs":2000,
+    "watchdog": {
+      "enabled": true,
+      "intervalMs": 5000,
+      "hangDetectionMs": 2000,
+      "abortOnHang": true,
+      "slowExecutionThresholdMs": 100
+    },
     "housekeeperIntervalMs":1000,
     "maxTxSecs":86400,
     "logTaskQueueStatsIntervalMs":0,

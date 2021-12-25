@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class ShareMissionActivity extends AppCompatActivity
 {

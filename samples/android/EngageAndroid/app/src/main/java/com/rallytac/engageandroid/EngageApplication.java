@@ -60,6 +60,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.NetworkInterface;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -286,6 +287,47 @@ public class EngageApplication
         return _audioSessionId;
     }
 
+    public void setSpeakerphone(boolean onOrOff)
+    {
+        try
+        {
+            getAudioManager().setSpeakerphoneOn(onOrOff);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void toggleSpeakerPhone()
+    {
+        try
+        {
+            if(getAudioManager().isSpeakerphoneOn())
+            {
+                setSpeakerphoneOff();
+            }
+            else
+            {
+                setSpeakerphoneOff();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void setSpeakerphoneOn()
+    {
+        setSpeakerphone(true);
+    }
+
+    public void setSpeakerphoneOff()
+    {
+        setSpeakerphone(false);
+    }
+
     public void wakeup()
     {
         try
@@ -312,7 +354,7 @@ public class EngageApplication
 
     public int getMaxGroupsAllowed()
     {
-        return Utils.intOpt(getString(R.string.opt_max_groups_allowed), Constants.DEF_MAX_GROUPS_ALLOWED);
+        return Globals.getContext().getResources().getInteger(R.integer.opt_max_groups_allowed);
     }
 
     public String androidAudioDeviceName(int type)
@@ -658,7 +700,7 @@ public class EngageApplication
 
     private void startFirebaseAnalytics()
     {
-        if(Utils.boolOpt(getString(R.string.opt_firebase_analytics_enabled), false))
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_firebase_analytics_enabled))
         {
             try
             {
@@ -2571,11 +2613,11 @@ public class EngageApplication
 
             // RP
             String rpAddress = getString(R.string.sample_mission_gen_rp_address);
-            int rpPort = Utils.intOpt(getString(R.string.sample_mission_gen_rp_port), 0);
+            int rpPort = Globals.getContext().getResources().getInteger(R.integer.opt_sample_mission_gen_rp_port);
             if (!Utils.isEmptyString(rpAddress) && rpPort > 0)
             {
                 JSONObject rallypoint = new JSONObject();
-                //rallypoint.put("use", Utils.boolOpt(getString(R.string.sample_mission_gen_use_default_rallypoint), false));
+                //rallypoint.put("use", Globals.getContext().getResources().getBoolean(R.bool.sample_mission_gen_use_default_rallypoint));
                 rallypoint.put(Engine.JsonFields.Rallypoint.Host.address, rpAddress);
                 rallypoint.put(Engine.JsonFields.Rallypoint.Host.port, rpPort);
                 jo.put(Engine.JsonFields.Rallypoint.objectName, rallypoint);
@@ -3028,7 +3070,7 @@ public class EngageApplication
         // Do we want to enforce PTT latching
         if(!wasRunPreviously)
         {
-            Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Utils.boolOpt(getString(R.string.opt_ptt_latching), false));
+            Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Globals.getContext().getResources().getBoolean(R.bool.opt_ptt_latching));
             Globals.getSharedPreferencesEditor().apply();
 
             // Install a burnt-in license if we have one and we don't already have one scanned in

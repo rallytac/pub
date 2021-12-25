@@ -17,21 +17,7 @@
     <string name="app_intent_mute_group" translatable="false">MUTE_GROUP</string>
     <string name="app_intent_unmute_group" translatable="false">UNMUTE_GROUP</string>
 
-    <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
-    <string name="opt_lock_orientation" translatable="false">-1</string>
-    <string name="opt_ptt_latching" translatable="false">0</string>
-    <string name="opt_experimental_general_enabled" translatable="false">0</string>
-    <string name="opt_experimental_human_biometrics_enabled" translatable="false">0</string>
-    <string name="opt_firebase_analytics_enabled" translatable="false">0</string>
-    <string name="opt_max_groups_allowed" translatable="false">4</string>
-
-    <string name="opt_group_tx_priority_level" translatable="false">100</string>
-    <string name="opt_app_tx_priority_level" translatable="false">100</string>
-
-    <string name="app_keycode_ptt" translatable="false">0</string>
-
     <string name="default_rallypoint" translatable="false"></string>
-    <string name="default_rallypoint_port" translatable="false">7443</string>
 
     <string name="license_key" translatable="false"></string>
     <string name="activation_code" translatable="false"></string>
@@ -50,7 +36,7 @@
     <string name="sample_mission_gen_use_default_rallypoint" translatable="false">0</string>
     <string name="sample_mission_gen_passphrase" translatable="false"></string>
     <string name="sample_mission_gen_rp_address" translatable="false"></string>
-    <string name="sample_mission_gen_rp_port" translatable="false">7443</string>
+    <integer name="opt_sample_mission_gen_rp_port">7443</integer>
 
 
     <string name="generated_mission_description"></string>

@@ -211,11 +211,14 @@ public abstract class CardFragment extends Fragment
 
     private void startNetworkErrorAnimation()
     {
-        if(_networkErrorAnimation == null)
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
         {
-            _networkErrorAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.network_error_pulse);
-            getView().findViewById(R.id.ivNetError).startAnimation(_networkErrorAnimation);
-            getView().findViewById(R.id.ivNetError).setVisibility(View.VISIBLE);
+            if(_networkErrorAnimation == null)
+            {
+                _networkErrorAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.network_error_pulse);
+                getView().findViewById(R.id.ivNetError).startAnimation(_networkErrorAnimation);
+                getView().findViewById(R.id.ivNetError).setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -234,12 +237,16 @@ public abstract class CardFragment extends Fragment
 
     private void startNetworkFailoverAnimation()
     {
-        if(_networkFailoverAnimation == null)
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
         {
-            _networkFailoverAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.network_failover_pulse);
-            getView().findViewById(R.id.ivNetFailover).startAnimation(_networkFailoverAnimation);
-            getView().findViewById(R.id.ivNetFailover).setVisibility(View.VISIBLE);
+            if(_networkFailoverAnimation == null)
+            {
+                _networkFailoverAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.network_failover_pulse);
+                getView().findViewById(R.id.ivNetFailover).startAnimation(_networkFailoverAnimation);
+            }
         }
+
+        getView().findViewById(R.id.ivNetFailover).setVisibility(View.VISIBLE);
     }
 
     private void stopNetworkFailoverAnimation()
@@ -257,10 +264,13 @@ public abstract class CardFragment extends Fragment
 
     private void startSpeakerErrorAnimation()
     {
-        if(_speakerAnimation == null)
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_allow_animations))
         {
-            _speakerAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.speaker_rx_pulse);
-            getView().findViewById(R.id.ivSpeaker).startAnimation(_speakerAnimation);
+            if(_speakerAnimation == null)
+            {
+                _speakerAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.speaker_rx_pulse);
+                getView().findViewById(R.id.ivSpeaker).startAnimation(_speakerAnimation);
+            }
         }
     }
 
@@ -502,7 +512,7 @@ public abstract class CardFragment extends Fragment
 
     private void setupGestures(View view)
     {
-        if(!Utils.boolOpt(getString(R.string.opt_allow_multiple_channel_view), true))
+        if(!Globals.getContext().getResources().getBoolean(R.bool.opt_allow_multiple_channel_view))
         {
             return;
         }

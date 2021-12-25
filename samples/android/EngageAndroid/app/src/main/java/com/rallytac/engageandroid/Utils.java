@@ -1235,6 +1235,7 @@ public class Utils
         return rc;
     }
 
+    /*
     public static int intOpt(String s, int defaultValue)
     {
         int rc;
@@ -1326,6 +1327,7 @@ public class Utils
 
         return rc;
     }
+    */
 
     public static String readTextFile(Context ctx, Uri uri)
     {

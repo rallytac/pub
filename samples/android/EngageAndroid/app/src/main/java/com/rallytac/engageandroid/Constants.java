@@ -161,4 +161,8 @@ public class Constants
 
     public final static int PICK_ENTERPRISE_ID_FILE_REQUEST_CODE = 57;
     public final static int PICK_QR_ENTERPRISE_ID_FILE_REQUEST_CODE = 58;
+
+    public final static int KEYCODE_PTT_MODE_NONE = 0;
+    public final static int KEYCODE_PTT_MODE_PUSH_ON_AT_FIRST_REPEAT_RELEASE_OFF = 1;
+    public final static int KEYCODE_PTT_MODE_PUSH_ON_PUSH_OFF = 2;
 }

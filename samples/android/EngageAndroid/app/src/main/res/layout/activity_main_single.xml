@@ -18,7 +18,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="@string/show_title_in_single_view"/>
 
     <TextView
         android:id="@+id/tvNotificationBar"
@@ -162,7 +163,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:scaleType="fitXY"
-        app:srcCompat="@drawable/ic_ptt_idle" />
+        app:srcCompat="@drawable/ic_ptt_idle"
+        android:visibility="@string/show_ptt_in_single_view"/>
 
     <ImageView
         android:id="@+id/ivAppPriority"

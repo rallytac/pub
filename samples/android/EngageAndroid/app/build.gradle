@@ -68,7 +68,7 @@ android {
 dependencies {
     // Engage Engine - change this to use a particular version
     def relType = 'release'
-    def engineVersion = '1.215.9053'
+    def engineVersion = '1.218.9056'
 
     // From a binary repository such as Maven
     // implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'

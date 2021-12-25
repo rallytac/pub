@@ -427,7 +427,7 @@ public class MissionListActivity extends AppCompatActivity
                         if(!Utils.isEmptyString(_generatePassphrase))
                         {
                             boolean continueOperation = true;
-                            int minSize = Utils.intOpt(R.integer.opt_min_mission_generate_passphrase_len, 0);
+                            int minSize = Globals.getContext().getResources().getInteger(R.integer.opt_min_mission_generate_passphrase_len);
                             if(minSize > 0)
                             {
                                 if(_generatePassphrase.length() < minSize)
@@ -477,7 +477,7 @@ public class MissionListActivity extends AppCompatActivity
                         });
 
         TextView txtPassphraseTitle = promptView.findViewById(R.id.txtPassphraseTitle);
-        String title = String.format(getResources().getString(R.string.passphrase_title), Utils.intOpt(R.integer.opt_min_mission_generate_passphrase_len, 0));
+        String title = String.format(getResources().getString(R.string.passphrase_title), Globals.getContext().getResources().getInteger(R.integer.opt_min_mission_generate_passphrase_len));
         txtPassphraseTitle.setText(title);
 
         AlertDialog alert = alertDialogBuilder.create();

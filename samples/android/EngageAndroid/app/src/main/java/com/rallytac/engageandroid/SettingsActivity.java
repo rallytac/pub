@@ -313,7 +313,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME));
 
             // Show/hide PTT latching depending on flavor option
-            if(Utils.boolOpt(getString(R.string.opt_ptt_latching), false))
+            if(Globals.getContext().getResources().getBoolean(R.bool.opt_ptt_latching))
             {
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_UI_PTT_LATCHING));
             }
@@ -338,7 +338,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             */
 
             // Show/hide the ability to set the screen orientation
-            if(Utils.intOpt(getString(R.string.opt_lock_orientation), ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+            if(Globals.getContext().getResources().getInteger(R.integer.opt_lock_orientation) == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
             {
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.UI_ORIENTATION));
             }
@@ -507,7 +507,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_BT_DEVICE_ADDRESS));
             }
 
-            if(!Utils.boolOpt(getString(R.string.opt_experimental_general_enabled), false))
+            if(!Globals.getContext().getResources().getBoolean(R.bool.opt_experimental_general_enabled))
             {
                 hidePreferenceCategory("prefcat_experimental_general");//NON-NLS
             }
@@ -528,7 +528,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             }
 
 
-            if(!Utils.boolOpt(getString(R.string.opt_experimental_human_biometrics_enabled), false))
+            if(!Globals.getContext().getResources().getBoolean(R.bool.opt_experimental_human_biometrics_enabled))
             {
                 hidePreferenceCategory("prefcat_experimental_human_biometrics");//NON-NLS
             }
