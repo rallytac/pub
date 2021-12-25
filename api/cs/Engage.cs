@@ -110,6 +110,10 @@ public class Engage
 
         void onGroupReconfigured(string id, string eventExtraJson);
         void onGroupReconfigurationFailed(string id, string eventExtraJson);
+
+        void onGroupAudioRecordingStarted(string id, string eventExtraJson);
+        void onGroupAudioRecordingFailed(string id, string eventExtraJson);
+        void onGroupAudioRecordingEnded(string id, string eventExtraJson);
     }
 
     public interface IHumanBiometricsNotifications
@@ -122,6 +126,13 @@ public class Engage
         void onBridgeCreated(string id, string eventExtraJson);
         void onBridgeCreateFailed(string id, string eventExtraJson);
         void onBridgeDeleted(string id, string eventExtraJson);
+    }
+
+    public interface IAudioRecordingNotifications
+    {
+        void onAudioRecordingStarted(string id, string eventExtraJson);
+        void onAudioRecordingFailed(string id, string eventExtraJson);
+        void onAudioRecordingEnded(string id, string eventExtraJson);
     }
     #endregion
 
@@ -141,6 +152,7 @@ public class Engage
     public const int ENGAGE_RESULT_GENERAL_FAILURE = -4;
     public const int ENGAGE_RESULT_NOT_STARTED = -5;
     public const int ENGAGE_RESULT_ALREADY_STARTED = -6;
+    public const int ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE = -7;    
 
     // Jitter Buffer Latency types
     public enum JitterBufferLatency : int
@@ -251,6 +263,16 @@ public class Engage
 
     public class JsonFields
     {
+        public class WatchdogSettings
+        {
+            public static String objectName = "watchdog";
+            public static String enabled = "enabled";
+            public static String intervalMs = "intervalMs";
+            public static String hangDetectionMs = "hangDetectionMs";
+            public static String abortOnHang = "abortOnHang";
+            public static String slowExecutionThresholdMs = "slowExecutionThresholdMs";
+        }
+
         public class GroupCreationDetail
         {
             public static String objectName = "groupCreationDetail";
@@ -413,15 +435,13 @@ public class Engage
             public class Internals
             {
                 public static String objectName = "internals";
-                public static String disableWatchdog = "disableWatchdog";
-                public static String watchdogIntervalMs = "watchdogIntervalMs";
-                public static String watchdogHangDetectionMs = "watchdogHangDetectionMs";
                 public static String housekeeperIntervalMs = "housekeeperIntervalMs";
                 public static String logTaskQueueStatsIntervalMs = "logTaskQueueStatsIntervalMs";
                 public static String maxTxSecs = "maxTxSecs";
                 public static String maxRxSecs = "maxRxSecs";
                 public static String enableLazySpeakerClosure = "enableLazySpeakerClosure";
-                public static String rtpExpirationCheckIntervalMs = "rtpExpirationCheckIntervalMs";                
+                public static String rtpExpirationCheckIntervalMs = "rtpExpirationCheckIntervalMs";
+                public static String delayedMicrophoneClosureSecs = "delayedMicrophoneClosureSecs";
             }
 
             public class Timelines
@@ -681,7 +701,8 @@ public class Engage
             public static String extensionSendInterval = "extensionSendInterval";
             public static String initialHeaderBurst = "initialHeaderBurst";
             public static String trailingHeaderBurst = "initialHeaderBurst";
-
+            public static String enableSmoothing = "enableSmoothing";
+            public static String dtx = "dtx";
         }
 
         public class NetworkTxOptions
@@ -961,6 +982,10 @@ public class Engage
 
         public EngageStringCallback PFN_ENGAGE_GROUP_RECONFIGURED;
         public EngageStringCallback PFN_ENGAGE_GROUP_RECONFIGURATION_FAILED;
+
+        public EngageStringCallback PFN_ENGAGE_AUDIO_RECORDING_STARTED;
+        public EngageStringCallback PFN_ENGAGE_AUDIO_RECORDING_FAILED;
+        public EngageStringCallback PFN_ENGAGE_AUDIO_RECORDING_ENDED;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]     // 9 bytes
@@ -1028,7 +1053,16 @@ public class Engage
 
     #region Library functions
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void engageWin32LibraryInit();
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern void engageWin32LibraryDeinit();
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageRegisterEventCallbacks(ref EngageEvents_t callbacks);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageEnableNotifications(int enable);    
 
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engageInitialize(string enginePolicyConfiguration, string userIdentity, string tempStoragePath);
@@ -1195,6 +1229,18 @@ public class Engage
     [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int engagePlatformNotifyChanges(string jsonChangesArray);
 
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr engageBeginFileRecording(string jsonParams);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr engageEndFileRecording(string id);
+
+    //[DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    //private static extern int engageCompress(IntPtr src, int srcSize, IntPtr dst, int maxDstSize);
+
+    //[DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    //private static extern int engageDecompress(IntPtr src, int srcSize, IntPtr dst, int maxDstSize);
+
     #endregion
 
     #region Internal functions
@@ -1336,6 +1382,10 @@ public class Engage
         cb.PFN_ENGAGE_GROUP_RECONFIGURED = on_ENGAGE_GROUP_RECONFIGURED;
         cb.PFN_ENGAGE_GROUP_RECONFIGURATION_FAILED = on_ENGAGE_GROUP_RECONFIGURATION_FAILED;
 
+        cb.PFN_ENGAGE_AUDIO_RECORDING_STARTED = on_ENGAGE_AUDIO_RECORDING_STARTED;
+        cb.PFN_ENGAGE_AUDIO_RECORDING_FAILED = on_ENGAGE_AUDIO_RECORDING_FAILED;
+        cb.PFN_ENGAGE_AUDIO_RECORDING_ENDED = on_ENGAGE_AUDIO_RECORDING_ENDED;
+
         return engageRegisterEventCallbacks(ref cb);
     }
 
@@ -1388,6 +1438,7 @@ public class Engage
     private static List<IHumanBiometricsNotifications> _humanBiometricsNotifications = new List<IHumanBiometricsNotifications>();
     private static List<IBridgeNotifications> _bridgeNotificationSubscribers = new List<IBridgeNotifications>();
     private static List<ILoggingNotifications> _loggingNotificationSubscribers = new List<ILoggingNotifications>();
+    private static List<IAudioRecordingNotifications> _audioRecordingNotificationSubscribers = new List<IAudioRecordingNotifications>();    
     #endregion
 
     #region Callback delegates
@@ -2156,9 +2207,56 @@ public class Engage
         }
     };
 
+    private EngageStringCallback on_ENGAGE_AUDIO_RECORDING_STARTED = (string id, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupAudioRecordingStarted(id, eventExtraJson);
+            }
+        }
+    };
+
+    private EngageStringCallback on_ENGAGE_AUDIO_RECORDING_FAILED = (string id, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupAudioRecordingFailed(id, eventExtraJson);
+            }
+        }
+    };
+
+    private EngageStringCallback on_ENGAGE_AUDIO_RECORDING_ENDED = (string id, string eventExtraJson) =>
+    {
+        lock (_groupNotificationSubscribers)
+        {
+            foreach (IGroupNotifications n in _groupNotificationSubscribers)
+            {
+                n.onGroupAudioRecordingEnded(id, eventExtraJson);
+            }
+        }
+    };
+
     #endregion
 
     #region Public functions
+    public Engage()
+    {
+        engageEnableNotifications(0);
+        engageWin32LibraryInit();
+        engageEnableNotifications(1);
+    }
+
+    ~Engage()
+    {
+        engageEnableNotifications(0);
+        engageShutdown();
+        engageWin32LibraryDeinit();
+    }
+    
     public void subscribe(IEngineNotifications n)
     {
         lock(_engineNotificationSubscribers)
@@ -2281,6 +2379,32 @@ public class Engage
         }
     }
 
+    public void subscribe(IAudioRecordingNotifications n)
+    {
+        lock (_audioRecordingNotificationSubscribers)
+        {
+            _audioRecordingNotificationSubscribers.Add(n);
+        }
+    }
+
+    public void unsubscribe(IAudioRecordingNotifications n)
+    {
+        lock (_audioRecordingNotificationSubscribers)
+        {
+            _audioRecordingNotificationSubscribers.Remove(n);
+        }
+    }
+
+    public void win32Init()
+    {
+        engageWin32LibraryInit();
+    }
+
+    public void win32DeInit()
+    {
+        engageWin32LibraryDeinit();
+    }
+
     public int initialize(string enginePolicyConfiguration, string userIdentity, string tempStoragePath)
     {
         int rc;
@@ -2296,7 +2420,9 @@ public class Engage
 
     public int shutdown()
     {
-        return engageShutdown();
+        engageShutdown();
+
+        return 0;
     }
 
     public int start()
@@ -2654,6 +2780,106 @@ public class Engage
 
         return bytesDecrypted;
     }
+
+    /*
+    public int compress(byte[] src, int size, out byte[] dst)
+    {
+        int compressedSize = 0;
+
+        IntPtr pinned_src = Marshal.AllocHGlobal(size);
+        Marshal.Copy(src, 0, pinned_src, size);
+
+        int dstLen = (size + 64);
+        IntPtr pinned_dst = 0;
+
+        while( true )
+        {
+            dstLen *= 2;
+
+            if(pinned_dst != 0)
+            {
+                Marshal.FreeHGlobal(pinned_dst);
+            }
+
+            pinned_dst = Marshal.AllocHGlobal(dstLen);
+
+            compressedSize = engageCompress(pinned_src, size, pinned_dst, dstLen);
+
+            if(compressedSize > 0)
+            {
+                dst = new byte[compressedSize];
+                Marshal.Copy(pinned_dst, dst, 0, compressedSize);
+                break;
+            }
+            else
+            {
+                if(compressedSize != ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE)
+                {
+                    compressedSize = 0;
+                    break;
+                }
+            }
+        }
+
+        Marshal.FreeHGlobal(pinned_src);
+
+        if(pinned_dst != 0)
+        {
+            Marshal.FreeHGlobal(pinned_dst);
+        }
+
+        return compressedSize;
+    }
+
+    public int decompress(byte[] src, int size, out byte[] dst)
+    {
+        int decompressedSize = 0;
+
+        IntPtr pinned_src = Marshal.AllocHGlobal(size);
+        Marshal.Copy(src, 0, pinned_src, size);
+
+        int dstLen = ((size + 64) * 4);
+        IntPtr pinned_dst = 0;
+
+        while( true )
+        {
+            dstLen *= 2;
+
+            if(pinned_dst != 0)
+            {
+                Marshal.FreeHGlobal(pinned_dst);
+            }
+
+            pinned_dst = Marshal.AllocHGlobal(dstLen);
+
+            decompressedSize = engageDecompress(pinned_src, size, pinned_dst, dstLen);
+
+            if(decompressedSize > 0)
+            {
+                dst = new byte[decompressedSize];
+                Marshal.Copy(pinned_dst, dst, 0, decompressedSize);
+                break;
+            }
+            else
+            {
+                if(decompressedSize != ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE)
+                {
+                    decompressedSize = 0;
+                    break;
+                }
+            }
+        }
+
+        Marshal.FreeHGlobal(pinned_src);
+
+        if(pinned_dst != 0)
+        {
+            Marshal.FreeHGlobal(pinned_dst);
+        }
+
+        return decompressedSize;
+    }
+    */
 
     public String generateMission(string keyPhrase, int audioGroupCount, string rallypointHost, string missionName)
     {
