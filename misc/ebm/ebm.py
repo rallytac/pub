@@ -217,6 +217,8 @@ def printBridges(db):
 def showSyntax():
     print('usage: python ebm.py <name_of_bridge_service_status_file> [-i:<polling_interval>]')
 
+
+# --------------------------------------------------------------------------
 def ctrlcHandler(sig, frame):
     print('... exiting')
     sys.exit(0)
