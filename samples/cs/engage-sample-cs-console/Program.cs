@@ -768,6 +768,16 @@ namespace engage_sample_cs_console
             Console.WriteLine("C#: onGroupRawReceived: " + id);          
         }
 
+        void Engage.IGroupNotifications.onGroupReconfigured(string id, string eventExtraJson)
+        {  
+            Console.WriteLine("C#: onGroupReconfigured: " + id);          
+        }
+
+        void Engage.IGroupNotifications.onGroupReconfigurationFailed(string id, string eventExtraJson)
+        {  
+            Console.WriteLine("C#: onGroupReconfigurationFailed: " + id);          
+        }
+        
         void Engage.ILicenseNotifications.onLicenseChanged(string eventExtraJson)
         {
             Console.WriteLine("C#: onLicenseChanged");
@@ -856,6 +866,26 @@ namespace engage_sample_cs_console
         public void onEngageLogMessage(int level, string tag, string message)
         {
             Console.WriteLine("C#: onEngageLogMessage: " + level + ", " + tag + ", " + message);
+        }
+
+        void Engage.IEngineNotifications.onEngineAudioDevicesRefreshed(string eventExtraJson)
+        {
+            Console.WriteLine("C#: onEngineAudioDevicesRefreshed: " + eventExtraJson);
+        }
+
+        public void onGroupAudioRecordingStarted(string id, string eventExtraJson)
+        {
+            Console.WriteLine("C#: onGroupAudioRecordingStarted: " + id + ", " + eventExtraJson);
+        }
+
+        public void onGroupAudioRecordingFailed(string id, string eventExtraJson)
+        {
+            Console.WriteLine("C#: onGroupAudioRecordingFailed: " + id + ", " + eventExtraJson);
+        }
+
+        public void onGroupAudioRecordingEnded(string id, string eventExtraJson)
+        {
+            Console.WriteLine("C#: onGroupAudioRecordingEnded: " + id + ", " + eventExtraJson);
         }
         #endregion
     }
