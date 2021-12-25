@@ -559,6 +559,10 @@ NAN_METHOD(on)
 //--------------------------------------------------------
 NAN_METHOD(initialize)
 {
+    #if defined(WIN32)
+        engageWin32LibraryInit();
+    #endif
+
     memset(&g_eventCallbacks, 0, sizeof(g_eventCallbacks));
 
     ENGAGE_CB_TABLE_ENTRY(PFN_ENGAGE_ENGINE_STARTED, engineStarted);
@@ -684,6 +688,10 @@ NAN_METHOD(engageEnableWatchdog)
 NAN_METHOD(shutdown)
 {
     engageShutdown();
+
+    #if defined(WIN32)
+        engageWin32LibraryDeinit();
+    #endif
 }
 
 //--------------------------------------------------------

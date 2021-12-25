@@ -33,6 +33,8 @@ static const int ENGAGE_RESULT_GENERAL_FAILURE = -4;
 static const int ENGAGE_RESULT_NOT_STARTED = -5;
 /** @brief The Engine has already been started */
 static const int ENGAGE_RESULT_ALREADY_STARTED = -6;
+/** @brief Insufficient space in destination */
+static const int ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE = -7;
 /** @} */
 
 
