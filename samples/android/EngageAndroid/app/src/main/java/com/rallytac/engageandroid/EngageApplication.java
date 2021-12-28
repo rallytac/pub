@@ -64,6 +64,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -866,6 +867,44 @@ public class EngageApplication
 
         _engine = new Engine();
         _engine.initialize();
+
+        // Check for an invalid left-over activation key (bug from prior versions)
+        {
+            String ac = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, "");
+            if(!Utils.isEmptyString(ac))
+            {
+                boolean clearAc = false;
+                String key = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_KEY, "");
+                if(!Utils.isEmptyString(key))
+                {
+                    LicenseDescriptor descriptor;
+
+                    descriptor = LicenseDescriptor.fromJson(_engine.engageGetLicenseDescriptor(getString(R.string.licensing_entitlement), key, ac, getString(R.string.manufacturer_id)));
+
+                    // Check the status
+                    if(descriptor != null)
+                    {
+                        // null or negative means that its busted and we should, at least, clear the activation code
+                        if(descriptor._status == null || descriptor._status.toInt() < 0)
+                        {
+                            clearAc = true;
+                        }
+                    }
+                }
+                else
+                {
+                    // If there's no license then definitely clear out any activation code we have
+                    clearAc = true;
+                }
+
+                if(clearAc)
+                {
+                    Globals.getLogger().w(TAG, "clearing previous, seemingly invalid, activation code");
+                    Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, "");
+                    Globals.getSharedPreferencesEditor().apply();
+                }
+            }
+        }
 
         if(Globals.getContext().getResources().getBoolean(R.bool.opt_log_to_engage))
         {
