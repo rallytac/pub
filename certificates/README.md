@@ -20,6 +20,12 @@ This directory contains RTS factory certificates and keys used for development a
 
 * ***rtsFactoryDefaultRpSrv.key*** is the private key for *rtsFactoryDefaultRpSrv.pem*.
 
+* ***all-rts-certs.certstore*** contains all the above certificates.
+
+* ***engagebridged.certstore*** contains the above certificates used by `engagebridged`.
+
+* ***rallypointd.certstore*** contains the above certificates used by `rallypointd`.
+
 ### Android Files
 We use Android Studio for development of apps for Android, including the sample applications in this repository.  Now those sample applications need certificates as well - and those files have to be in a particular directory structure layout and need to be named in a particular fashion as per requirements for Android Studio.  So, you'll see a directory named *android* and, within that *raw*.  This is the direcrory where Android Studio points to for the certificate files.
 
@@ -34,7 +40,106 @@ Your best bet for production purposes is to use certificates issued by a trusted
 
 Failing that, though, you can issue your own certificates - either by self-signing them (not advised!) or by becoming a CA yourself, creating certificates using your CA certificate, and installing your CA certificates on machines that will be validating your certificates.  We're going to cover that procedure in the next section.
 
-## Generating your own certificates
+## Generating your own certificates (the easy way)
+In the next section we'll explain how to create your own certificates the hard way.  But there's an easier way - use the `mkcert.sh` script in this directory.
+
+Before we get going, understand that in order to create a certificate (and the private key that goes with it) you need a CA certificate.  So, `mkcert.sh` is going to need that CA certificate before it can do anything.
+
+Now, `mkcert.sh` is smart enough to know that if you don't already have the CA cert you're telling it to use; it will create that CA cert for you.  Subsequent certificate creation operations will then use that cert.  Neat huh!
+
+OK, let's get going...
+
+Assume we want to create a certificate named `MyCoolCertificate`.  And we want to use a CA cert named `MyCA`.  Our command-line looks like this
+
+```shell
+./mkcert.sh MyCA MyCoolCertificate
+```
+
+Now, remember, we don't yet have `MyCA`, so `mkcert.sh` will tell you that it is creating a CA certificate named `MyCA.cert` and will prompt you for information for it.  Here's what that looks like:
+```shell
+-------------------------------------------------------------------------
+CREATING CA CERTIFICATE MyCA.cert
+-------------------------------------------------------------------------
+
+
+Generating RSA private key, 2048 bit long modulus
+..........................................................................................................+++
+........+++
+e is 65537 (0x10001)
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:US
+State or Province Name (full name) []:Washington
+Locality Name (eg, city) []:Seattle
+Organization Name (eg, company) []:My Company
+Organizational Unit Name (eg, section) []:My Business Unit
+Common Name (eg, fully qualified host name) []:My Company CA Certificate
+Email Address []:support@mycompany.com
+```
+
+At this point the `MyCA` certificate has been created and `mkcert.sh` moves on to the next step of creating `MyCoolCertificate.cert` as follows:
+```shell
+-------------------------------------------------------------------------
+CREATING CERTIFICATE MyCoolCertificate.cert
+-------------------------------------------------------------------------
+
+
+Generating RSA private key, 2048 bit long modulus
+........+++
+.....+++
+e is 65537 (0x10001)
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) []:US
+State or Province Name (full name) []:Washington
+Locality Name (eg, city) []:Seattle
+Organization Name (eg, company) []:My Company
+Organizational Unit Name (eg, section) []:My Business Unit
+Common Name (eg, fully qualified host name) []:My Super Mega Ultra Cool Certificate
+Email Address []:support@mycompany.com
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+Signature ok
+subject=/C=US/ST=Washington/L=Seattle/O=My Company/OU=My Business Unit/CN=My Super Mega Ultra Cool Certificate/emailAddress=support@mycompany.com
+Getting CA Private Key
+```
+
+Once this is all done, a directory listing looks as follows:
+```shell
+ls -lsa
+total 40
+0 drwxr-xr-x   7 sbotha  wheel   224 Jan  7 13:18 .
+0 drwxr-xr-x  17 sbotha  wheel   544 Jan  7 13:12 ..
+8 -rw-r--r--   1 sbotha  wheel  1395 Jan  7 13:17 MyCA.cert
+8 -rw-r--r--   1 sbotha  wheel  1675 Jan  7 13:16 MyCA.key
+8 -rw-r--r--   1 sbotha  wheel  1411 Jan  7 13:18 MyCoolCertificate.cert
+8 -rw-r--r--   1 sbotha  wheel  1675 Jan  7 13:17 MyCoolCertificate.key
+```
+
+That;'s it!  All done.
+
+If you need to make another certificate signed by `MyCA` - let's call it `YetAnotherCertificate`; your command-line would look as follows:
+```shell
+./mkcert.sh MyCA YetAnotherCertificate
+```
+
+This time, though, you won't need to create `MyCA` as it'll already be present.
+
+>While it really shouldn't be necessary to say this, we will anyway ... the answers in the examples above to the prompts for things `Country Name`, `State or Province Name`, `Locality`, etc, etc are examples only.  Enter values that are specific to your organization.  Yes, it's a "duh!" statement to make; but we're just being sure :)
+
+## Generating your own certificates (the more difficult way)
 Creating your own certificates is actually pretty straightforward once you get past all the scary-looking command-line options offered by tools such as OpenSSL (which we're going to use here). OpenSSL is likely already installed on your machine but, if not, grab it from https://www.openssl.org.
 
 There are two main steps to this.  (A) Create your CA certificate and, (B) Use your CA certificate to create subsequent certificates.
