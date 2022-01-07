@@ -139,7 +139,7 @@ This time, though, you won't need to create `MyCA` as it'll already be present.
 
 >While it really shouldn't be necessary to say this, we will anyway ... the answers in the examples above to the prompts for things like `Country Name`, `State or Province Name`, `Locality`, etc, are **EXAMPLES ONLY**.  Enter values that are specific to your organization.  Yes, it's a "*duh*!" statement to make; but we're just being sure :)
 
->Oh, one more thing ... protect that private key (the `.key` file) with your life.  If that thing gets into the wild your security is dowmn the drain.
+>Oh, one more thing ... protect that private key (the `.key` file) with your life.  If that thing gets into the wild your security is down the drain.
 
 ## Generating your own certificates (the more difficult way)
 Creating your own certificates is actually pretty straightforward once you get past all the scary-looking command-line options offered by tools such as OpenSSL (which we're going to use here). OpenSSL is likely already installed on your machine but, if not, grab it from https://www.openssl.org.
