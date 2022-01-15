@@ -1,0 +1,110 @@
+{
+   "groups": [
+      {
+         "comment":[
+            "This channel only operates on multicast."
+         ],
+         "magellan":{
+            "enabled": true,
+            "policy":[
+               { "tx" : ["usdod"] },
+               { "rx" : ["usdod", "ukmod"] },
+               { "maxtx": 10 }
+            ]
+         },
+         "id": "{a15dfc12-3cfd-4667-8caf-a663cf210714}",
+         "type": 1,
+         "name": "LMR Channel 1",
+         "cryptoPassword": "18ECC15EBC43D587653D1FA503AD8E29686488B7AE515E02AE262E0F2523F891",
+         "rx": {
+            "address": "239.1.2.3",
+            "port": 42000
+         },
+         "tx": {
+            "address": "239.1.2.3",
+            "port": 42000
+         },	 
+         "txAudio": {
+            "encoder": 1,
+            "fdx": false,
+            "framingMs": 20,
+            "maxTxSecs": 86400
+         }
+      },
+
+      {
+         "comment":[
+            "This channel only operates via a Rallypoint on the current host."
+         ],
+         "magellan":{
+            "enabled": true,
+            "policy":[
+               { "tx" : ["usdod"] },
+               { "rx" : ["usdod", "ukmod"] },
+               { "maxtx": 10 }
+            ]
+         },
+         "id": "{ba27f7a5-cafa-4390-a9ca-5600b8f717d2}",
+         "type": 1,
+         "name": "LMR Channel 2",
+         "cryptoPassword": "711F6808D5674EEE9B801950E49DDE0E4089BC4AF2DA4EFEA4240B0C6730858A",
+	      "rallypoints": [
+            {
+               "host": {
+                  "address": "@host",
+                  "port": 7443
+               }
+            }
+         ],	 
+         "enableMulticastFailover": false,
+         "txAudio": {
+            "encoder": 1,
+            "fdx": false,
+            "framingMs": 20,
+            "maxTxSecs": 86400
+         }
+      },
+      
+      {
+         "comment":[
+            "This channel only operates via a Rallypoint on the current host",
+            "and is allowed to fail over to multicast."
+         ],
+         "magellan":{
+            "enabled": true,
+            "policy":[
+               { "tx" : ["usdod"] },
+               { "rx" : ["usdod", "ukmod"] },
+               { "maxtx": 10 }
+            ]
+         },
+         "id": "{d6cd2972-fbd9-40e2-8169-41205a116e59}",
+         "type": 1,
+         "name": "LMR Channel 3",
+         "cryptoPassword": "040066BE08B8450484CBA6A15A050A7FE35867B02DDA4188A93750AD20C2CBA5",
+	      "rallypoints": [
+            {
+               "host": {
+                  "address": "@host",
+                  "port": 7443
+               }
+            }
+         ],	 
+         "rx": {
+            "address": "239.1.2.4",
+            "port": 42002
+         },
+         "tx": {
+            "address": "239.1.2.4",
+            "port": 42002
+         },	          
+         "enableMulticastFailover": true,
+         "txAudio": {
+            "encoder": 1,
+            "fdx": false,
+            "framingMs": 20,
+            "maxTxSecs": 86400
+         }
+      }        
+   ]
+}
