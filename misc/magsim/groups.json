@@ -1,4 +1,24 @@
 {
+   "comment":[
+      "This JSON configuration is specific to magsim is and not a true representation",
+      "of the configuration of a production Magellan system.",
+
+      "Note the following:",
+
+      "Only groups with 'magellan.enabled' set to 'true' will be processed.",
+
+      "The 'policy' field in the 'magellan' is ignored by magsim.",
+
+      "The 'magellan' field of each group is removed by magsim before returning it to",
+      "an interrogating client application.",
+
+      "The 'comment' field of each group is removed by magsim before returning it to",
+      "an interrogating client application.",
+
+      "The '@host' value in addresses will be replaced with the machine address",
+      "of the machine where magsim is running."
+   ],
+
    "groups": [
       {
          "comment":[
