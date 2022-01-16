@@ -334,6 +334,10 @@ function buildRestResponseJson(arrayOfClientTokens) {
 
 				// Remove the Magellan goodies
 				delete group['magellan'];
+
+				if(group.comment != undefined) {
+					delete group['comment'];
+				}
 				
 				// Add to the array of groups being returned
 				rc.talkGroups.push(group);
