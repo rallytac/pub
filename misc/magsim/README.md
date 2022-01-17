@@ -102,14 +102,14 @@ SSDP broadcast advertising every 5 seconds.
 
 Press Ctrl-C to stop.
 ---------------------------------------------------------------------------
-config request from ::ffff:192.168.1.182
+unsecured config request from ::ffff:192.168.1.182
 ```
 
 Pretty straightforward - no!?
 
-The last line of the output above shows "`config request from ::ffff:192.168.1.182`".  This means that a discovering application on the network at `192.168.1.182` saw the SSDP advertisment and contacted the REST server for a configuration request.
+The last line of the output above shows "`unsecured config request from ::ffff:192.168.1.182`".  This means that a discovering application on the network at `192.168.1.182` saw the SSDP advertisment and contacted the REST server for a configuration request.  This will repeat each time a discovering client contacts the REST server.
 
-This will repeat each time a discovering client contacts the REST server.
+Note, though, that it specifically says `unsecured` in the log output.  That's because we specified `-nohttps` and therefore `magsim` will not request the far-end to send its own certificate.  If you want to secure the connection, you need to do some work on the application side as below.
 
 ## Certificates
 In production, an application that will discover Magellan assets needs to implement HTTPS (specifically TLS 1.2 and higher).  Hence, to verify the certificate presented by `magsim`, your application will need the CA certificate (the public portion only of course) that was used to create `magsim`'s certificate.  All this sample's certificates can be found in the `certs` directory - including the CA certificate (`ca.crt`) which was used to create `server.crt`.  You'll need to add `ca.crt` to your trust chain for verification.
@@ -128,6 +128,67 @@ In production, however, you'll not be using these sample certificates but, rathe
 |client.crt|The application's certificate.|Add it to your application.|
 |client.key|The application's certificate private key.|Add it to your application. But keep it *private*.|
 |client.serial|The serial number/thumbprint of the application's certificate.|Add it to your application and see below.|
+
+Now, let's say we've got our far-end application developed - including all the X.509 certificate stuff.  At this point you'll want to go fully secure and *NOT* specify `-nohttps`.  Things are going to look a little different:
+
+```shell
+$ node magsim.js -ma:192.168.1.79
+---------------------------------------------------------------------------
+Magellan Simulator (magsim) version 0.2
+
+Copyright (c) 2020 Rally Tactical Systems, Inc.
+---------------------------------------------------------------------------
+REST Server (SECURED) listening on 192.168.1.79:8081.
+SSDP multicast advertising every 5 seconds.
+SSDP broadcast advertising every 5 seconds.
+
+Press Ctrl-C to stop.
+---------------------------------------------------------------------------
+secured config request from ::ffff:192.168.1.182
+   >peer certificate O='Magellan App Developer Inc'
+   >issued by O='My Own Certificate Authority Inc'
+```
+
+- First off, `magsim` will now say that its REST server is **SECURED** in the header of the log output.
+- Next, when a peer (client/far-end application) successfully establishes a secure connection, `magsim` shows details of the peer's X.509 certificate as well as the CA certificate that peer certificate was created with.  (Actually, not all the certificate detail is being shown; only the `O` element of the certificate's `subject`.  But this is good enough for logging without filling the screen with goop.)
+
+### Client-Side Certificates
+Alright, in order to end up with output that looks like what we see above, some work is going to be required on the end-user application side.  Assuming you're developing an Engage-based application (and why would you not be!?), you're going to need to provide your Engage Engine with some certificate goodies in its policy JSON.  Specifically, you're going to need updates to the `discovery` field of that policy JSON.  Something like this:
+
+```javascript
+    .
+    .
+    .
+    "discovery": {
+        "magellan": {
+            "enabled":true,
+            "security": {
+                    "certificate": "@./client.crt",
+                    "key": "@./client.key"
+            },
+            "tls":{
+                "caCertificates" : [
+                    "@./ca.crt"
+                ]
+            }
+        },
+    }
+    .
+    .
+    .
+```
+
+Let's go through this stuff:
+
+- `discovery.magellan.enabled`: You obviously need to enable Magelllan discovery in your policy.  So this value needs to be `true`.
+- `discovery.magellan.security`: Here you'll need to provide the X.509 certificate that the application will present to `magsim` when the interrogation connection is made.  You'll also need to provide the private key for that certificate so that the connection can be properly secured.
+- `discovery.tls.caCertificates`: This list needs to include the CA certificate that `magsim`'s X.509 certificate was created with.
+
+In this example we've copied files from `magsim`'s `certs` directory to the application side.  Specifically, we brought over `client.crt`, `client.key`, and `ca.crt`.  In a production environment, you'll need to provide your own client certificate and provide that certificates' CA certificate to your Magellan-enabled devices.  Similarly, in your client application, you'll need CA certificates for the Magellan devices you intend connecting to.
+
+>This business with CA certificates seems awfully convoluted at first glance but, frankly, its not a major hurdle.  Implementors most often use certificates issued by commercial entities whose CA certificates are readily available and easy to install.  If an organization is its own CA (like governments very often tend to be), the CA certificate(s) used by that organization is similarly generally easily obtained and installed.
+
+>It is super-important, though, that your application feature some degree of certificate management - such as importing, secured storage, and so on.  To make that task a little easier, we highly recommend your Engage-powered applications use Engage's **Certificate Store** capabilities.  Check out [X.509 Certificates](https://github.com/rallytac/pub/wiki/Engage-Security#x509-certificates) and [how to use ecstool](https://github.com/rallytac/pub/wiki/Using-ecstool) in our wiki articles.
 
 ## Group Configurations
 This example of `magsim` is hardcoded to obtain its group definitions from `groups.json`.  If you're familiar with Engage configurations you'll quickly recognize that the structure of `magsim`'s groups configuration - as well as the Magellan-compliant JSON it returns in response to queries - looks almost exactly the same as Engage's `group` definitions.  Well, there's no coincidence there as we're the same people who built Engage and designed Magellan so it follows that we're going to have data structures that look similar.
