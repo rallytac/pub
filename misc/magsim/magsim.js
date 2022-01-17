@@ -136,14 +136,12 @@ if(useHttps) {
 	const httpsOptions = {
 		// Our certificate which will be presented to clients
 		cert: serverX509Certificate,
+
 		// Our private key which helps us prove we are supposed to be in possession of the certificate
 		key: serverX509Key,
-		// The CA certificate against which clients certs will be verified
-		ca: caX509Certificate,
-		// Indicate whether we wanrt certificates from the client - i.e. mutual authentiation
-		requestCert: requireClientCert,
-		// We won't allow unauthorized clients
-		rejectUnauthorized: true
+
+		// Indicate whether we want certificates from the client - i.e. mutual authentiation
+		requestCert: requireClientCert
 	};
 
 	restServer.createServer(httpsOptions, (req, res) => processHttpRequest(req, res)).listen(restServerPort);
@@ -162,17 +160,17 @@ function processHttpRequest (req, res) {
 
 	// Make sure the client is asking us for a URL we know about
 	if(req.url == "/config") {		
-		console.log('config request from ' + req.connection.remoteAddress);
-
 		// See if we're asking for a client certificate and, if so, make sure
 		// we have a subject
-		if(useHttps && options.requestCert) {
+		if(useHttps && requireClientCert) {
 			var cert = req.socket.getPeerCertificate();
 			if(cert == undefined) {
 				retval = 403;
 				console.log('no client certificate');
 			}
 			else {
+				// TODO: Need to validate the client's certificate against a CA chain we keep internally
+
 				var subject = cert.subject;
 		
 				if(subject == undefined) {
@@ -182,13 +180,13 @@ function processHttpRequest (req, res) {
 				else {
 					// TODO: Extract the tokens from the certificate and plug into clientCertTokens 
 					retval = 200;
-					console.log('   cert: C=' + subject.C 
-									+ ', O=' + subject.O
-									+ ', L=' + subject.L);
+
+					console.log('secured config request from ' + req.connection.remoteAddress + '\n   >peer certificate O=\'' + cert.subject.O + '\'\n   >issued by O=\'' + cert.issuer.O + '\'');
 				}
 			}
 		}
 		else {
+			console.log('unsecured config request from ' + req.connection.remoteAddress);
 			retval = 200;
 		}
 	}
