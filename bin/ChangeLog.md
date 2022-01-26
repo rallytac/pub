@@ -1,5 +1,18 @@
 # Change Log
 
+## January 26, 2022 - 1.218.9056
+- Adds preliminary hardware echo cancellation on select Android devices and OS versions.
+- Adds the ability for application-level provisioning of Android **audio** sessions.
+- Adds an adaptation for obtaining machine identifiers on iOS devices.
+- Adds Java method lookup caching to reduce CPU usage and battery drain.
+- Adds the option for "Ranger Packets" sent after a no-TX hang time to "wake up" network pathways without sacrificing useful payloads.
+- [EXPERIMENTAL-INTERNAL] Adds compression and decompression API calls that use the [Brotli](https://en.wikipedia.org/wiki/Brotli) algorithm.
+- Corrects an issue with EAR whereby an invalid encoder value caused a failure to configure a group for listening.
+- Corrects an issue with defaults for TLS & RP peer verifications and allowing of self-signed certificates.  
+- Corrects an issue with HTTP/HTTPS downloads for Magellan Discovery & Interrogation.
+- Corrects an issue with invalid receipt of IP multicast packets on different multicast addresses that share the same port.
+- Restricts the TLS subsystem to a minimum TLS version of 1.2.
+  
 ## October 7, 2021 - 1.216.9054
 - Adds automatic restart of Android speaker and microphone devices when an error is encountered during audio playout or capture.
 - Adds Android-specific audio settings for more fine-grained customization of the audio experience.

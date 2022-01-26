@@ -5408,7 +5408,7 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default: default system interface] The network interface to bind to for discovery packets.  */
         std::string                             interfaceName;
 
-        /** @brief  [Optional, Default 239.255.255.250:1900] IP address and port. */
+        /** @brief  [Optional, Default 255.255.255.255:1900] IP address and port. */
         NetworkAddress                          address;
 
         /** @brief [Optional] An array of regex strings to be used to filter SSDP requests and responses. */
@@ -5456,7 +5456,7 @@ namespace AppConfigurationObjects
         getOptional<NetworkAddress>("address", p.address, j);
         if(p.address.address.empty())
         {
-            p.address.address = "239.255.255.250";
+            p.address.address = "255.255.255.255";
         }
         if(p.address.port <= 0)
         {
