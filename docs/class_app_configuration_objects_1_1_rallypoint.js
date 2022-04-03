@@ -10,6 +10,7 @@ var class_app_configuration_objects_1_1_rallypoint =
     [ "connectionTimeoutSecs", "class_app_configuration_objects_1_1_rallypoint.html#ac015c71051857c89162fad206b423a3c", null ],
     [ "disableMessageSigning", "class_app_configuration_objects_1_1_rallypoint.html#a64ed18fc34d838eef71e86806e04a434", null ],
     [ "host", "class_app_configuration_objects_1_1_rallypoint.html#a65508d01740a6d62891e66b832573e6d", null ],
+    [ "tcpTxOptions", "class_app_configuration_objects_1_1_rallypoint.html#acabc28cc4edee47709d2d6fcc674fc21", null ],
     [ "transactionTimeoutMs", "class_app_configuration_objects_1_1_rallypoint.html#a0b3af2c1a7f4c0b3eea4e8c6f63c9188", null ],
     [ "verifyPeer", "class_app_configuration_objects_1_1_rallypoint.html#a6199b727e468c3a16ecbad4d67b72d8d", null ]
 ];

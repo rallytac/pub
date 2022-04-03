@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -118,11 +118,6 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6c8c0817442466bec6b3a303c4b1590e"><td class="memItemLeft" align="right" valign="top"><a id="a6c8c0817442466bec6b3a303c4b1590e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a6c8c0817442466bec6b3a303c4b1590e">Group</a> ()</td></tr>
-<tr class="memdesc:a6c8c0817442466bec6b3a303c4b1590e"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Internal - not serialized <br  />
- <br /></td></tr>
-<tr class="separator:a6c8c0817442466bec6b3a303c4b1590e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d44376d430f83dd17743a6c99f47f23"><td class="memItemLeft" align="right" valign="top"><a id="a3d44376d430f83dd17743a6c99f47f23"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
 <tr class="separator:a3d44376d430f83dd17743a6c99f47f23"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -219,7 +214,7 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="separator:a40753a31d404928cfc55029d69ee21d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99ff34fd0624dbc870f30eb2e3464c6e"><td class="memItemLeft" align="right" valign="top"><a id="a99ff34fd0624dbc870f30eb2e3464c6e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a99ff34fd0624dbc870f30eb2e3464c6e">enableMulticastFailover</a></td></tr>
-<tr class="memdesc:a99ff34fd0624dbc870f30eb2e3464c6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: true] Set this to true to enable failover to multicast operation if a <a class="el" href="class_app_configuration_objects_1_1_rallypoint.html" title="Rallypoint.">Rallypoint</a> connection cannot be established. <br /></td></tr>
+<tr class="memdesc:a99ff34fd0624dbc870f30eb2e3464c6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: false] Set this to true to enable failover to multicast operation if a <a class="el" href="class_app_configuration_objects_1_1_rallypoint.html" title="Rallypoint.">Rallypoint</a> connection cannot be established. <br /></td></tr>
 <tr class="separator:a99ff34fd0624dbc870f30eb2e3464c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adaac6a43f3f2582b6d609b783f225de3"><td class="memItemLeft" align="right" valign="top"><a id="adaac6a43f3f2582b6d609b783f225de3"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#adaac6a43f3f2582b6d609b783f225de3">multicastFailoverSecs</a></td></tr>
@@ -267,6 +262,11 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <tr class="memdesc:afa63edd013bc722beffcbe0c040159e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] Settings necessary if the group is transported via the SatPaq protocol <br  />
  <br /></td></tr>
 <tr class="separator:afa63edd013bc722beffcbe0c040159e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a048e32c0bb97570bbba7fa6d2f16dcbd"><td class="memItemLeft" align="right" valign="top"><a id="a048e32c0bb97570bbba7fa6d2f16dcbd"></a>
+<a class="el" href="class_app_configuration_objects_1_1_group_lyn_q_pro.html">GroupLynQPro</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a048e32c0bb97570bbba7fa6d2f16dcbd">lynqPro</a></td></tr>
+<tr class="memdesc:a048e32c0bb97570bbba7fa6d2f16dcbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] Settings necessary if the group is transported via the LynQPro protocol <br  />
+ <br /></td></tr>
+<tr class="separator:a048e32c0bb97570bbba7fa6d2f16dcbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a558c549443cf1e3de0e3b7dc26686e09"><td class="memItemLeft" align="right" valign="top"><a id="a558c549443cf1e3de0e3b7dc26686e09"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a558c549443cf1e3de0e3b7dc26686e09">transportName</a></td></tr>
 <tr class="memdesc:a558c549443cf1e3de0e3b7dc26686e09"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] The name of the registered transport to use <br  />
@@ -282,9 +282,28 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:abe7729d7c23e29c74a348d64c46dd509"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] RTP profile the group <br  />
  <br /></td></tr>
 <tr class="separator:abe7729d7c23e29c74a348d64c46dd509"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfbb998c737da857d071668a66a45efc"><td class="memItemLeft" align="right" valign="top"><a id="adfbb998c737da857d071668a66a45efc"></a>
+<a class="el" href="class_app_configuration_objects_1_1_ranger_packets.html">RangerPackets</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#adfbb998c737da857d071668a66a45efc">rangerPackets</a></td></tr>
+<tr class="memdesc:adfbb998c737da857d071668a66a45efc"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] Ranger packet options <br  />
+ <br /></td></tr>
+<tr class="separator:adfbb998c737da857d071668a66a45efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89dc33efeac529f17318e954431f771a"><td class="memItemLeft" align="right" valign="top"><a id="a89dc33efeac529f17318e954431f771a"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_wasDeserialized_rtpProfile</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a89dc33efeac529f17318e954431f771a">_wasDeserialized_rtpProfile</a></td></tr>
+<tr class="memdesc:a89dc33efeac529f17318e954431f771a"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Internal - not serialized <br  />
+ <br /></td></tr>
 <tr class="separator:a89dc33efeac529f17318e954431f771a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2673643a0598d0781d4896d2abba1fe"><td class="memItemLeft" align="right" valign="top"><a id="af2673643a0598d0781d4896d2abba1fe"></a>
+<a class="el" href="class_app_configuration_objects_1_1_transport_impairment.html">TransportImpairment</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#af2673643a0598d0781d4896d2abba1fe">txImpairment</a></td></tr>
+<tr class="memdesc:af2673643a0598d0781d4896d2abba1fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] The TX impairment to apply <br /></td></tr>
+<tr class="separator:af2673643a0598d0781d4896d2abba1fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59feb4e4b28892c76eaf7428f2631485"><td class="memItemLeft" align="right" valign="top"><a id="a59feb4e4b28892c76eaf7428f2631485"></a>
+<a class="el" href="class_app_configuration_objects_1_1_transport_impairment.html">TransportImpairment</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a59feb4e4b28892c76eaf7428f2631485">rxImpairment</a></td></tr>
+<tr class="memdesc:a59feb4e4b28892c76eaf7428f2631485"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] The RX impairment to apply <br /></td></tr>
+<tr class="separator:a59feb4e4b28892c76eaf7428f2631485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a156d61df77d533bfb558b129abe4d695"><td class="memItemLeft" align="right" valign="top"><a id="a156d61df77d533bfb558b129abe4d695"></a>
+std::vector&lt; uint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_group.html#a156d61df77d533bfb558b129abe4d695">specializerAffinities</a></td></tr>
+<tr class="memdesc:a156d61df77d533bfb558b129abe4d695"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of specializer IDs that the local node has an affinity for/member of. <br /></td></tr>
+<tr class="separator:a156d61df77d533bfb558b129abe4d695"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -351,7 +370,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <div class="line">}</div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="_engage_interface_8h.html#aacc2edf39fc20b6be45bfad37a50c90a" title="[ASYNC] Creates a group object">engageCreateGroup</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03663">3663</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03988">3988</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="abbb5d2d0ad3d9c879df6093c2ba71008"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abbb5d2d0ad3d9c879df6093c2ba71008">&#9670;&nbsp;</a></span>BridgingOpMode_t</h2>
@@ -375,7 +394,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03687">3687</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l04012">4012</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -404,7 +423,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03670">3670</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03995">3995</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -424,7 +443,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>Unique identity for the group. </p>
 <p>NOTE: Groups configured with the same multicast addresses but with different id's will NOT be routed correctly via RallyPoints as they are considered different streams. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03711">3711</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l04036">4036</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -443,7 +462,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>[Optional, Default: 0] Maximum number of seconds the Engine will receive for on this group. </p>
 <p>When the time limit is exceeded, the Engine will fire a PFN_ENGAGE_GROUP_MAX_RX_TIME_EXCEEDED event. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03772">3772</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l04097">4097</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -463,7 +482,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>Specifies how the Engine should record times lines. Timelines are used for instant replay and audio archival.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="_engage_interface_8h.html#a4649dcfb7324d8598517d3e5a6cdebd5" title="[ASYNC] Requests that the Engine deliver a timeline report for the group">engageQueryGroupTimeline</a>, PFN_ENGAGE_GROUP_TIMELINE_EVENT_??? events </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l03756">3756</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l04081">4081</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -477,7 +496,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 			<ul>
 				<li class="navelem"><b>AppConfigurationObjects</b></li><li class="navelem"><a class="el" href="class_app_configuration_objects_1_1_group.html">Group</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:04 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:07 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

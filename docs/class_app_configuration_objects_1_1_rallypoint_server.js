@@ -37,8 +37,8 @@ var class_app_configuration_objects_1_1_rallypoint_server =
     [ "staticReflectors", "class_app_configuration_objects_1_1_rallypoint_server.html#a401d22088e89df012ca87c2ce8c1c9d2", null ],
     [ "statusReport", "class_app_configuration_objects_1_1_rallypoint_server.html#a973a5937643a306ad669bbcd7c5607d1", null ],
     [ "sysFlags", "class_app_configuration_objects_1_1_rallypoint_server.html#a2719bc47cc0ed1608c69cab1acfef5e9", null ],
+    [ "tcpTxOptions", "class_app_configuration_objects_1_1_rallypoint_server.html#ad79dc65eec012a9536e95413e85822e5", null ],
     [ "tls", "class_app_configuration_objects_1_1_rallypoint_server.html#af9059f080068cfcac21cef6375974f23", null ],
-    [ "txOptions", "class_app_configuration_objects_1_1_rallypoint_server.html#a598c9c65c6cdb7b4cc534b53cee630ad", null ],
     [ "udpStreaming", "class_app_configuration_objects_1_1_rallypoint_server.html#ad85e3a7e3b7e0018f89a5e7b74b8f6d1", null ],
     [ "watchdog", "class_app_configuration_objects_1_1_rallypoint_server.html#a53d72ce753395acc83e906b050c2a089", null ]
 ];

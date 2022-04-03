@@ -22,5 +22,6 @@ var class_app_configuration_objects_1_1_rtp_profile =
     [ "latePacketTimestampRangeMs", "class_app_configuration_objects_1_1_rtp_profile.html#aac498b6c4bfa664bf5c1e6b1713f353f", null ],
     [ "mode", "class_app_configuration_objects_1_1_rtp_profile.html#a501d14f89abd32debfe3342274ab4810", null ],
     [ "rtcpPresenceTimeoutMs", "class_app_configuration_objects_1_1_rtp_profile.html#af49fd5feb73cedf4eca325f5f64fe698", null ],
+    [ "signalledInboundProcessorInactivityMs", "class_app_configuration_objects_1_1_rtp_profile.html#a06a506272c1899775d23d3a8bafb1d97", null ],
     [ "zombieLifetimeMs", "class_app_configuration_objects_1_1_rtp_profile.html#ac6437a0c81c26156693fd297c4474dcf", null ]
 ];

@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -509,12 +509,20 @@ $(document).ready(function(){initNavTree('_engage_interface_8h_source.html','');
 <div class="line"><a name="l01553"></a><span class="lineno"> 1553</span>&#160; </div>
 <div class="line"><a name="l01561"></a><span class="lineno"><a class="line" href="_engage_interface_8h.html#a0313af16bba0bce3acb0bf681bd1f488"> 1561</a></span>&#160;ENGAGE_API <span class="keyword">const</span> <span class="keywordtype">char</span> * _Nonnull <a class="code" href="_engage_interface_8h.html#a0313af16bba0bce3acb0bf681bd1f488">engageGetActiveFeatureset</a>();</div>
 <div class="line"><a name="l01562"></a><span class="lineno"> 1562</span>&#160; </div>
-<div class="line"><a name="l01563"></a><span class="lineno"> 1563</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160; </div>
-<div class="line"><a name="l01565"></a><span class="lineno"> 1565</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l01566"></a><span class="lineno"> 1566</span>&#160;}</div>
-<div class="line"><a name="l01567"></a><span class="lineno"> 1567</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l01568"></a><span class="lineno"> 1568</span>&#160;<span class="preprocessor">#endif // EngageInterface_h</span></div>
+<div class="line"><a name="l01563"></a><span class="lineno"> 1563</span>&#160;<span class="comment">// TODO: Engage compression/decompression functions not available at this time</span></div>
+<div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160;<span class="preprocessor">#if 0</span></div>
+<div class="line"><a name="l01565"></a><span class="lineno"> 1565</span>&#160; </div>
+<div class="line"><a name="l01586"></a><span class="lineno"> 1586</span>&#160;ENGAGE_API <span class="keywordtype">int</span> engageCompress(<span class="keyword">const</span> uint8_t * _Nonnull src, <span class="keywordtype">size_t</span> srcSize, uint8_t * _Nonnull dst, <span class="keywordtype">size_t</span> maxDstSize);</div>
+<div class="line"><a name="l01587"></a><span class="lineno"> 1587</span>&#160; </div>
+<div class="line"><a name="l01602"></a><span class="lineno"> 1602</span>&#160;ENGAGE_API <span class="keywordtype">int</span> engageDecompress(<span class="keyword">const</span> uint8_t * _Nonnull src, <span class="keywordtype">size_t</span> srcSize, uint8_t * _Nonnull dst, <span class="keywordtype">size_t</span> maxDstSize);</div>
+<div class="line"><a name="l01603"></a><span class="lineno"> 1603</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l01604"></a><span class="lineno"> 1604</span>&#160; </div>
+<div class="line"><a name="l01605"></a><span class="lineno"> 1605</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l01606"></a><span class="lineno"> 1606</span>&#160; </div>
+<div class="line"><a name="l01607"></a><span class="lineno"> 1607</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l01608"></a><span class="lineno"> 1608</span>&#160;}</div>
+<div class="line"><a name="l01609"></a><span class="lineno"> 1609</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l01610"></a><span class="lineno"> 1610</span>&#160;<span class="preprocessor">#endif // EngageInterface_h</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="a_engage_interface_8h_html_a68870032579ac106d817628ead577072"><div class="ttname"><a href="_engage_interface_8h.html#a68870032579ac106d817628ead577072">engageLogMsg</a></div><div class="ttdeci">ENGAGE_API int engageLogMsg(int level, const char *_Nonnull tag, const char *_Nonnull msg)</div><div class="ttdoc">[SYNC] Log a message via the Engine's logger</div></div>
@@ -598,7 +606,7 @@ $(document).ready(function(){initNavTree('_engage_interface_8h_source.html','');
 			<ul>
 				<li class="navelem"><a class="el" href="dir_1784a01aa976a8c78ef5dfc3737bcac8.html">c</a></li><li class="navelem"><a class="el" href="dir_2d10db7395ecfee73f7722e70cabff64.html">include</a></li><li class="navelem"><a class="el" href="_engage_interface_8h.html">EngageInterface.h</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:03 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:06 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

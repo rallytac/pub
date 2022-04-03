@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -119,8 +119,16 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isDocumenting
 Public Attributes</h2></td></tr>
 <tr class="memitem:ad77b3b0f666b760dc463b5abcf2fec2c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html#ad77b3b0f666b760dc463b5abcf2fec2c">enabled</a></td></tr>
 <tr class="separator:ad77b3b0f666b760dc463b5abcf2fec2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afeca9987f163ca204c242b65b8b41419"><td class="memItemLeft" align="right" valign="top"><a id="afeca9987f163ca204c242b65b8b41419"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html#afeca9987f163ca204c242b65b8b41419">interfaceName</a></td></tr>
+<tr class="memdesc:afeca9987f163ca204c242b65b8b41419"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: default system interface] The network interface to bind to for discovery packets. <br  />
+ <br /></td></tr>
+<tr class="separator:afeca9987f163ca204c242b65b8b41419"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d5bae3e11706bd9072f5a7fc266b3d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_app_configuration_objects_1_1_security_certificate.html">SecurityCertificate</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html#a3d5bae3e11706bd9072f5a7fc266b3d9">security</a></td></tr>
 <tr class="separator:a3d5bae3e11706bd9072f5a7fc266b3d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a877c418992a6e559fb500de173df4d02"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_app_configuration_objects_1_1_tls.html">Tls</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html#a877c418992a6e559fb500de173df4d02">tls</a></td></tr>
+<tr class="memdesc:a877c418992a6e559fb500de173df4d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] Details concerning Transport Layer Security.  <a href="class_app_configuration_objects_1_1_discovery_magellan.html#a877c418992a6e559fb500de173df4d02">More...</a><br /></td></tr>
+<tr class="separator:a877c418992a6e559fb500de173df4d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -134,7 +142,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>Helper C++ class to serialize and de-serialize <a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html" title="DiscoveryMagellan Discovery settings.">DiscoveryMagellan</a> JSON</p>
 <p>Example: </p><div class="fragment"></div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="_engage_interface_8h.html#aa35b6ba67b7d4e5466faae7ce6b22a23" title="[SYNC] Initializes the Engine.">engageInitialize</a>, ConfigurationObjects::DiscoveryConfiguration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05149">5149</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05577">5577</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="ad77b3b0f666b760dc463b5abcf2fec2c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad77b3b0f666b760dc463b5abcf2fec2c">&#9670;&nbsp;</a></span>enabled</h2>
@@ -147,9 +155,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>[Optional, Default false] Enable Trellisware discovery. </p>
+<p>[Optional, Default false] Enable Magellan discovery. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05157">5157</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05585">5585</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -166,7 +174,26 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 </div><div class="memdoc">
 <p>[Optional if disabled] X.509 certificate information for interrogation </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05160">5160</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05591">5591</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+
+</div>
+</div>
+<a id="a877c418992a6e559fb500de173df4d02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a877c418992a6e559fb500de173df4d02">&#9670;&nbsp;</a></span>tls</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_app_configuration_objects_1_1_tls.html">Tls</a> AppConfigurationObjects::DiscoveryMagellan::tls</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>[Optional] Details concerning Transport Layer Security. </p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_app_configuration_objects_1_1_tls.html" title="TODO: Transport Security Layer (TLS) settings.">Tls</a> </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l05594">5594</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -180,7 +207,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 			<ul>
 				<li class="navelem"><b>AppConfigurationObjects</b></li><li class="navelem"><a class="el" href="class_app_configuration_objects_1_1_discovery_magellan.html">DiscoveryMagellan</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:04 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:07 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

@@ -50,6 +50,7 @@ var class_app_configuration_objects_1_1_tx_audio =
     [ "clear", "class_app_configuration_objects_1_1_tx_audio.html#a23f72962df414671d159b54d4205d92e", null ],
     [ "blockCount", "class_app_configuration_objects_1_1_tx_audio.html#ac11805ea64201cbbd8a5822ad34484a1", null ],
     [ "customRtpPayloadType", "class_app_configuration_objects_1_1_tx_audio.html#ad596f6f12ee3e9ce561335eec684bea1", null ],
+    [ "dtx", "class_app_configuration_objects_1_1_tx_audio.html#aa2007eca43c8f37221b4d44c69a0e6e2", null ],
     [ "enableSmoothing", "class_app_configuration_objects_1_1_tx_audio.html#ae760de9ce53195f92b5064f5a49cf7d5", null ],
     [ "encoder", "class_app_configuration_objects_1_1_tx_audio.html#ab863e1a9695401053a7e3cd3ef227473", null ],
     [ "encoderName", "class_app_configuration_objects_1_1_tx_audio.html#aaf1b7b2109fc1f4ccd6fc46c1d92f3de", null ],
@@ -61,5 +62,6 @@ var class_app_configuration_objects_1_1_tx_audio =
     [ "maxTxSecs", "class_app_configuration_objects_1_1_tx_audio.html#a292837b853bae731f4f34bc5f3cffac4", null ],
     [ "noHdrExt", "class_app_configuration_objects_1_1_tx_audio.html#ae73c63a6e5bfc9b856012bc1ca44ccbe", null ],
     [ "resetRtpOnTx", "class_app_configuration_objects_1_1_tx_audio.html#a701987c8f93a5c30dc8d38f900d19668", null ],
+    [ "smoothedHangTimeMs", "class_app_configuration_objects_1_1_tx_audio.html#acac990e84d9b3fa64ad13c515c9fd948", null ],
     [ "trailingHeaderBurst", "class_app_configuration_objects_1_1_tx_audio.html#aedd31960f6dff84c6f2e5b9660d16560", null ]
 ];
