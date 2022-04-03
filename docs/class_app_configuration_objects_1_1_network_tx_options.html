@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -93,19 +93,21 @@ $(document).ready(function(){initNavTree('class_app_configuration_objects_1_1_ne
 </div><!--header-->
 <div class="contents">
 
-<p>Network Transmit Options used in <a class="el" href="class_app_configuration_objects_1_1_group.html">Group</a>.  
+<p>Network Transmit Options.  
  <a href="class_app_configuration_objects_1_1_network_tx_options.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>&gt;</code></p>
 
 <p>Inherits <a class="el" href="class_app_configuration_objects_1_1_configuration_object_base.html">AppConfigurationObjects::ConfigurationObjectBase</a>.</p>
+
+<p>Inherited by <a class="el" href="class_app_configuration_objects_1_1_tcp_network_tx_options.html">AppConfigurationObjects::TcpNetworkTxOptions</a>.</p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a4b802a0fa8fd2d027e02d2f2e5f2a04a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04a">TxPriority_t</a> { <a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa31727a6f160ab7982e6f83ddfb0fa532">priBestEffort</a> = 0, 
-<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa2770c0ac1121e3651cabdc1706a1a3e2">priSignaling</a> = 2, 
-<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa9397db06352e3dc5c303cb623ef74da3">priVideo</a> = 3, 
-<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa88096f711dbd045dd44fafe4b3f42a22">priVoice</a> = 4
+<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa2770c0ac1121e3651cabdc1706a1a3e2">priSignaling</a> = 1, 
+<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa9397db06352e3dc5c303cb623ef74da3">priVideo</a> = 2, 
+<a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04aa88096f711dbd045dd44fafe4b3f42a22">priVoice</a> = 3
  }</td></tr>
 <tr class="memdesc:a4b802a0fa8fd2d027e02d2f2e5f2a04a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Network Transmission Priority.  <a href="class_app_configuration_objects_1_1_network_tx_options.html#a4b802a0fa8fd2d027e02d2f2e5f2a04a">More...</a><br /></td></tr>
 <tr class="separator:a4b802a0fa8fd2d027e02d2f2e5f2a04a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,8 +146,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <tr class="separator:a001f87cf830d281a63e045e89d4e271a inherit pro_attribs_class_app_configuration_objects_1_1_configuration_object_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Network Transmit Options used in <a class="el" href="class_app_configuration_objects_1_1_group.html">Group</a>. </p>
-<p>Helper C++ class to serialize and de-serialize <a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html" title="Network Transmit Options used in Group.">NetworkTxOptions</a> JSON</p>
+<div class="textblock"><p>Network Transmit Options. </p>
+<p>Helper C++ class to serialize and de-serialize <a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html" title="Network Transmit Options.">NetworkTxOptions</a> JSON</p>
 <p>TODO: Complete this Class</p>
 <p>Example: </p><div class="fragment"><div class="line">{</div>
 <div class="line">   &quot;priority&quot;: 4,</div>
@@ -153,7 +155,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <div class="line">}</div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="class_app_configuration_objects_1_1_group.html" title="Group Configuration.">Group</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01762">1762</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01777">1777</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a4b802a0fa8fd2d027e02d2f2e5f2a04a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4b802a0fa8fd2d027e02d2f2e5f2a04a">&#9670;&nbsp;</a></span>TxPriority_t</h2>
@@ -180,7 +182,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01774">1774</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01789">1789</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -200,7 +202,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>[Optional, Default: 1] Time to live or hop limit is a mechanism that limits the lifespan or lifetime of data in a network. TTL prevents a data packet from circulating indefinitely. </p>
 <p>E.g If you don't want multicast data to leave your local network, set the TTL to 1. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01797">1797</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l01812">1812</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -214,7 +216,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 			<ul>
 				<li class="navelem"><b>AppConfigurationObjects</b></li><li class="navelem"><a class="el" href="class_app_configuration_objects_1_1_network_tx_options.html">NetworkTxOptions</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:04 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:07 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

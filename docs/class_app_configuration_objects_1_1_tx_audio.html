@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -233,6 +233,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_tx_audio.html#ae760de9ce53195f92b5064f5a49cf7d5">enableSmoothing</a></td></tr>
 <tr class="memdesc:ae760de9ce53195f92b5064f5a49cf7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: true] Smooth input audio <br /></td></tr>
 <tr class="separator:ae760de9ce53195f92b5064f5a49cf7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2007eca43c8f37221b4d44c69a0e6e2"><td class="memItemLeft" align="right" valign="top"><a id="aa2007eca43c8f37221b4d44c69a0e6e2"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_tx_audio.html#aa2007eca43c8f37221b4d44c69a0e6e2">dtx</a></td></tr>
+<tr class="memdesc:aa2007eca43c8f37221b4d44c69a0e6e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: false] Support discontinuous transmission on those CODECs that allow it <br /></td></tr>
+<tr class="separator:aa2007eca43c8f37221b4d44c69a0e6e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acac990e84d9b3fa64ad13c515c9fd948"><td class="memItemLeft" align="right" valign="top"><a id="acac990e84d9b3fa64ad13c515c9fd948"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_tx_audio.html#acac990e84d9b3fa64ad13c515c9fd948">smoothedHangTimeMs</a></td></tr>
+<tr class="memdesc:acac990e84d9b3fa64ad13c515c9fd948"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: 0] Hang timer for ongoing TX - only applicable if enableSmoothing is true <br /></td></tr>
+<tr class="separator:acac990e84d9b3fa64ad13c515c9fd948"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -259,7 +267,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <div class="line">   &quot;userTxPriority&quot;: 0</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02450">2450</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02566">2566</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="afd46d5529b3f590dc257a7d2047460af"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afd46d5529b3f590dc257a7d2047460af">&#9670;&nbsp;</a></span>TxCodec_t</h2>
@@ -366,7 +374,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02461">2461</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02577">2577</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -386,7 +394,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>[Optional, Default: 10] The number of packets when to periodically send the header extension. </p>
 <p>Eg, if its 3, then every third packed will contain the header extension. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02647">2647</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02763">2763</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -405,7 +413,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>[Optional, Default: 0] Maximum number of seconds the Engine will transmit for. </p>
 <p>When the time limit is exceeded, the Engine will fire a PFN_ENGAGE_GROUP_MAX_TX_TIME_EXCEEDED event. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02640">2640</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02756">2756</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -424,7 +432,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>[Optional, Default: false] Set to <b>true</b> whether to disable header extensions. </p>
 <p>Indicates whether the Engine should not add a header extension on the RTP packet. If the header extension is omitted then any of the information such as Alias, NodeID and Tx Priority will <b>not</b> be transmitted along with the audio. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02633">2633</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02749">2749</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -438,7 +446,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 			<ul>
 				<li class="navelem"><b>AppConfigurationObjects</b></li><li class="navelem"><a class="el" href="class_app_configuration_objects_1_1_tx_audio.html">TxAudio</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:04 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:07 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

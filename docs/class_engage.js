@@ -43,12 +43,14 @@ var class_engage =
       [ "PresenceDescriptor", "class_engage_1_1_json_fields_1_1_presence_descriptor.html", "class_engage_1_1_json_fields_1_1_presence_descriptor" ],
       [ "Rallypoint", "class_engage_1_1_json_fields_1_1_rallypoint.html", "class_engage_1_1_json_fields_1_1_rallypoint" ],
       [ "RallypointConnectionDetail", "class_engage_1_1_json_fields_1_1_rallypoint_connection_detail.html", "class_engage_1_1_json_fields_1_1_rallypoint_connection_detail" ],
+      [ "RangerPackets", "class_engage_1_1_json_fields_1_1_ranger_packets.html", "class_engage_1_1_json_fields_1_1_ranger_packets" ],
       [ "RtpHeader", "class_engage_1_1_json_fields_1_1_rtp_header.html", "class_engage_1_1_json_fields_1_1_rtp_header" ],
       [ "Rx", "class_engage_1_1_json_fields_1_1_rx.html", "class_engage_1_1_json_fields_1_1_rx" ],
       [ "TalkerInformation", "class_engage_1_1_json_fields_1_1_talker_information.html", "class_engage_1_1_json_fields_1_1_talker_information" ],
       [ "TimelineEvent", "class_engage_1_1_json_fields_1_1_timeline_event.html", "class_engage_1_1_json_fields_1_1_timeline_event" ],
       [ "TimelineQuery", "class_engage_1_1_json_fields_1_1_timeline_query.html", "class_engage_1_1_json_fields_1_1_timeline_query" ],
       [ "TimelineReport", "class_engage_1_1_json_fields_1_1_timeline_report.html", "class_engage_1_1_json_fields_1_1_timeline_report" ],
+      [ "Tls", "class_engage_1_1_json_fields_1_1_tls.html", "class_engage_1_1_json_fields_1_1_tls" ],
       [ "Tx", "class_engage_1_1_json_fields_1_1_tx.html", "class_engage_1_1_json_fields_1_1_tx" ],
       [ "TxAudio", "class_engage_1_1_json_fields_1_1_tx_audio.html", "class_engage_1_1_json_fields_1_1_tx_audio" ],
       [ "WatchdogSettings", "class_engage_1_1_json_fields_1_1_watchdog_settings.html", "class_engage_1_1_json_fields_1_1_watchdog_settings" ]
@@ -72,7 +74,8 @@ var class_engage =
       [ "ERR_INVALID_EXPIRATION_DATE", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fabcab6441bc98d0b4c326dc43282ee310", null ],
       [ "ERR_GENERAL_FAILURE", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fa51df27832578a9d1549b66118f03c3da", null ],
       [ "ERR_NOT_INITIALIZED", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fa7458b7fc8c728e123a4b2749bd675d24", null ],
-      [ "ERR_REQUIRES_ACTIVATION", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fa313d03e3f0b6b72d25e35d288b3b1faa", null ]
+      [ "ERR_REQUIRES_ACTIVATION", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fa313d03e3f0b6b72d25e35d288b3b1faa", null ],
+      [ "ERR_LICENSE_NOT_SUITED_FOR_ACTIVATION", "class_engage.html#a0b7728e640cd711f2c75892801fa1c8fa32a8973686e20d0890528063ab95dfaa", null ]
     ] ],
     [ "LoggingLevel", "class_engage.html#acc62db2f60eefb50e6246fcd7a94bc2c", [
       [ "FATAL", "class_engage.html#acc62db2f60eefb50e6246fcd7a94bc2ca19da7170bea36556dde582519795f3fc", null ],
@@ -244,6 +247,8 @@ var class_engage =
     [ "unsubscribe", "class_engage.html#aacb2519ceba2c9c0e40e9d7559c2c124", null ],
     [ "updateLicense", "class_engage.html#aa5f6ce9bea44a2d9f9aed78dc89aaddc", null ],
     [ "updatePresenceDescriptor", "class_engage.html#a045d82dd5344313d9d267b77d583d13e", null ],
+    [ "win32DeInit", "class_engage.html#ad8d65b9f65c25b75629ee6927a5d88d8", null ],
+    [ "win32Init", "class_engage.html#acd28c00753a47d790911e68bb572bb9b", null ],
     [ "_audioRecordingNotificationSubscribers", "class_engage.html#a4b235d2b5ba629096e9691ecfe99db77", null ],
     [ "_bridgeNotificationSubscribers", "class_engage.html#a0e218a22127f84cb5bbfbe0ec68c18e4", null ],
     [ "_engineNotificationSubscribers", "class_engage.html#a096d3e6f9c3f2a956170f6fc072344fc", null ],
@@ -274,6 +279,7 @@ var class_engage =
     [ "ENGAGE_RESULT_ALREADY_INITIALIZED", "class_engage.html#a633a3fb2b3b6a6ad6abe9c63604e6366", null ],
     [ "ENGAGE_RESULT_ALREADY_STARTED", "class_engage.html#aff470c6db1d6f8a96d1b25c30b1e3b41", null ],
     [ "ENGAGE_RESULT_GENERAL_FAILURE", "class_engage.html#a0fa490e82a17748ed2344d6c2ff0c0e5", null ],
+    [ "ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE", "class_engage.html#a1631687f4a57714d846a3a9f1c3faf3a", null ],
     [ "ENGAGE_RESULT_INVALID_PARAMETERS", "class_engage.html#a7af3a8bfaf43fdb17017bd4f8bf574b2", null ],
     [ "ENGAGE_RESULT_NOT_INITIALIZED", "class_engage.html#a14a7410a934fabf3fc1d91307f9d8341", null ],
     [ "ENGAGE_RESULT_NOT_STARTED", "class_engage.html#a412d2fad46fcb5607103b00ca1b3d7a9", null ],

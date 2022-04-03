@@ -1,6 +1,8 @@
 var class_engage_1_1_json_fields_1_1_tx_audio =
 [
     [ "customRtpPayloadType", "class_engage_1_1_json_fields_1_1_tx_audio.html#aa1eb88a316bcfac677391760934607f9", null ],
+    [ "dtx", "class_engage_1_1_json_fields_1_1_tx_audio.html#a9ddb9c1cf768537982efde57bcdf3792", null ],
+    [ "enableSmoothing", "class_engage_1_1_json_fields_1_1_tx_audio.html#a4cd9ee41d308f306f712210aa6b61f80", null ],
     [ "encoder", "class_engage_1_1_json_fields_1_1_tx_audio.html#af72890583ba219bca052a76c23ae1264", null ],
     [ "encoderName", "class_engage_1_1_json_fields_1_1_tx_audio.html#aaafe430002279937167970afe52b1254", null ],
     [ "extensionSendInterval", "class_engage_1_1_json_fields_1_1_tx_audio.html#ab29828158ae64efd6e4daf4b948021fc", null ],

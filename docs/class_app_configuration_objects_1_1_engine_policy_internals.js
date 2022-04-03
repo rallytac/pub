@@ -2,6 +2,7 @@ var class_app_configuration_objects_1_1_engine_policy_internals =
 [
     [ "EnginePolicyInternals", "class_app_configuration_objects_1_1_engine_policy_internals.html#abedd8bc198d3e3bbdff3d43c06f9f383", null ],
     [ "clear", "class_app_configuration_objects_1_1_engine_policy_internals.html#ae103c89661fe60b048626143a32ec342", null ],
+    [ "delayedMicrophoneClosureSecs", "class_app_configuration_objects_1_1_engine_policy_internals.html#a46b481bbffde0602f053a51745897b4f", null ],
     [ "enableLazySpeakerClosure", "class_app_configuration_objects_1_1_engine_policy_internals.html#a9164093ae16a4abc88b32f0f26619183", null ],
     [ "housekeeperIntervalMs", "class_app_configuration_objects_1_1_engine_policy_internals.html#ac68384540187d4ff673d577b34da6718", null ],
     [ "logTaskQueueStatsIntervalMs", "class_app_configuration_objects_1_1_engine_policy_internals.html#a235a2918abf05a5dd5fd470d66db0408", null ],

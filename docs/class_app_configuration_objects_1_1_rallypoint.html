@@ -28,7 +28,7 @@
 					<tr style="height: 56px;">
 						<td id="projectalign" style="padding-left: 0.5em;">
 							<div id="projectname">Engage Engine API
-								&#160;<span id="projectnumber">1.211.9049</span>
+								&#160;<span id="projectnumber">1.221.9059</span>
 							</div>
 						</td>
 					</tr>
@@ -151,8 +151,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a64ed18fc34d838eef71e86806e04a434"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac015c71051857c89162fad206b423a3c"><td class="memItemLeft" align="right" valign="top"><a id="ac015c71051857c89162fad206b423a3c"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_rallypoint.html#ac015c71051857c89162fad206b423a3c">connectionTimeoutSecs</a></td></tr>
-<tr class="memdesc:ac015c71051857c89162fad206b423a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: 5] Connection timeout in seconds to any RP in the cluster <br /></td></tr>
+<tr class="memdesc:ac015c71051857c89162fad206b423a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional, Default: 5] Connection timeout in seconds to the RP <br /></td></tr>
 <tr class="separator:ac015c71051857c89162fad206b423a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acabc28cc4edee47709d2d6fcc674fc21"><td class="memItemLeft" align="right" valign="top"><a id="acabc28cc4edee47709d2d6fcc674fc21"></a>
+<a class="el" href="class_app_configuration_objects_1_1_tcp_network_tx_options.html">TcpNetworkTxOptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_app_configuration_objects_1_1_rallypoint.html#acabc28cc4edee47709d2d6fcc674fc21">tcpTxOptions</a></td></tr>
+<tr class="memdesc:acabc28cc4edee47709d2d6fcc674fc21"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Optional] Tx options for the TCP link <br /></td></tr>
+<tr class="separator:acabc28cc4edee47709d2d6fcc674fc21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -176,7 +180,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <div class="line">   &quot;verifyPeer&quot;: false</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02075">2075</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02136">2136</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a483e6969b9e0f645c00c1aa55bfab515"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a483e6969b9e0f645c00c1aa55bfab515">&#9670;&nbsp;</a></span>certificate</h2>
@@ -194,7 +198,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>The full contents of the cert can be specified or the file path to where the cert is located can be specified by using an @ replacement string e.g</p>
 <div class="fragment"><div class="line">certificate=&quot;@/privatestore/certs/rp_cert.pem&quot;</div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02099">2099</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02160">2160</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -214,7 +218,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 <p>The full contents of the key can be specified or the file path to where the key is located can be specified by using an @ replacement string e.g</p>
 <div class="fragment"><div class="line">certificate=&quot;@/privatestore/certs/rp_private_key.key&quot;</div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02112">2112</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02173">2173</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -232,7 +236,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 
 <p>This is the host address for the Engine to connect to the RallyPoint service. </p>
 
-<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02086">2086</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_configuration_objects_8h_source.html#l02147">2147</a> of file <a class="el" href="_configuration_objects_8h_source.html">ConfigurationObjects.h</a>.</p>
 
 </div>
 </div>
@@ -246,7 +250,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_documenting</b></td>
 			<ul>
 				<li class="navelem"><b>AppConfigurationObjects</b></li><li class="navelem"><a class="el" href="class_app_configuration_objects_1_1_rallypoint.html">Rallypoint</a></li>
 				<li class="footer">
-					Generated on Fri Jul 23 2021 13:51:04 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
+					Generated on Sun Apr 3 2022 12:35:07 for Engage Engine API by <a href="http://www.doxygen.org/index.html">
 					<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.18.
 					Dark theme by <a href="http://majerle.eu" target="_new">Tilen Majerle</a>. All rights reserved.
 				</li>

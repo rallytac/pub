@@ -34,7 +34,6 @@ var NAVTREE =
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", "functions_vars" ],
         [ "Enumerations", "functions_enum.html", null ],
         [ "Enumerator", "functions_eval.html", null ]
@@ -58,16 +57,16 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 ".html",
-"_configuration_objects_8h.html#afd0b2ade8e767bccc5015cabaab8ee27",
-"class_app_configuration_objects_1_1_bridge.html#a9b56ffeae609da82e88b26f9a4ead5ad",
-"class_app_configuration_objects_1_1_engine_policy_internals.html#a206f2cced39de794761749e08ea81072",
-"class_app_configuration_objects_1_1_group_tx_detail.html#a7eb45fb731d459f9ea182546e6460c50ae5e3576a5afecd6495537a459797ebb0",
-"class_app_configuration_objects_1_1_rallypoint_server.html#a128abacc11be124f284dab6fa34ab6e0",
-"class_app_configuration_objects_1_1_tx_audio.html#afd46d5529b3f590dc257a7d2047460afad4e61bf8d65983600286e9c980de619c",
-"class_engage.html#a8ef908ffc14c34c6e9979dea199b042f",
-"class_engage_1_1_json_fields_1_1_engine_policy_1_1_discovery_1_1_ssdp.html#a3ea28851a03b5395f0715035c5e68640",
-"class_engage_1_1_json_fields_1_1_timeline_report.html#a07c71440ec72613ca4db85e4c60e7e31",
-"struct___engage_events__t.html"
+"_configuration_objects_8h.html#af70da09ba291ed8737c21d501b6d559b",
+"class_app_configuration_objects_1_1_blob_info.html#a06962835224f98b8c9dce095406aeb86",
+"class_app_configuration_objects_1_1_engine_policy_audio.html#a94a689648b1c7cda3429b41794ed330b",
+"class_app_configuration_objects_1_1_group_stats.html",
+"class_app_configuration_objects_1_1_rallypoint.html#ab59fa5cd25518151d02acc661227db79",
+"class_app_configuration_objects_1_1_transport_impairment.html#a43b3fe075bea12164bd926c6f4ee962f",
+"class_engage.html#a5a90c1f21813e89ed787e04b60b20643",
+"class_engage_1_1_json_fields_1_1_connectivity.html#a20992ac298003cb29a578d2d9c5f8011",
+"class_engage_1_1_json_fields_1_1_rallypoint.html#a46523e4f4ca0ac6ddaf44738d2ccc568",
+"interface_engage_1_1_i_bridge_notifications.html#ab83c87ccc7adfd24772641cbcc285a0b"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -15,5 +15,6 @@ var class_app_configuration_objects_1_1_rallypoint_server_limits =
     [ "maxStreamPaths", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#a865510508df1d1317bf5b9b3d72efb6c", null ],
     [ "maxTxBytesPerSec", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#a313095d90207e53de01cb357dc3d0cc9", null ],
     [ "maxTxPacketsPerSec", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#a3f103554486fc989b141075f27030286", null ],
-    [ "normalPriorityQueueThreshold", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#a2ad3fca618fd6071108b8b223165e106", null ]
+    [ "normalPriorityQueueThreshold", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#a2ad3fca618fd6071108b8b223165e106", null ],
+    [ "warnAtCpuThreshold", "class_app_configuration_objects_1_1_rallypoint_server_limits.html#ad32ea9f88ac1c24201d185b970f8fdfe", null ]
 ];
