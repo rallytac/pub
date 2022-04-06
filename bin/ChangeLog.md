@@ -1,5 +1,5 @@
 # Change Log
-## April 2, 2022, - 1.220.9058
+## April 5, 2022, - 1.222.9060
 - Corrects an issue with EBS whereby the enablement of a bridge was being ignored.
 - Adds a hang timer for smoothed audio transmission.
 - Replaces the low-level Android audio interface with a more flexible and portable implementation that takes better advantage of built-in Android audio capabilities.
