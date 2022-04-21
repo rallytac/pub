@@ -153,7 +153,7 @@ def printHeadline(db):
     print('Copyright (c) 2021 Rally Tactical Systems, Inc.')
     print('')
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
-    print('Last check at %s %s uptime %s %s updated %s ago' % (now.strftime('%Y/%m/%d %H:%M:%S'), chr(9608), timeDesc(db['uptime']), chr(9608), timeDesc(tsdelta)))
+    print('Last check at %s %s uptime %s %s updated %s ago' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
     print('-----------------------------------------------------------------------------------------------------------------------------------------------')
     print('                                                                                                        ------ Packets ------ ------- Bytes -------')
     print('%38s %12s %38s %12s %10s %10s %10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', 'RX', 'TX', 'RX', 'TX'))
