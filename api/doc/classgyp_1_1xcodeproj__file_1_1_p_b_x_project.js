@@ -1,0 +1,28 @@
+var classgyp_1_1xcodeproj__file_1_1_p_b_x_project =
+[
+    [ "__init__", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a54efcf99a1771b1e4060504324b0312f", null ],
+    [ "_AllSymrootsUnique", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#afa883e4ede2b92f4edf9de2db49887c8", null ],
+    [ "_DefinedSymroots", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a2ef6ef31f3720a09e39b245df25f997b", null ],
+    [ "_GroupByName", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#abc5b56c8b9cb87d650df40cf77dc1bc1", null ],
+    [ "_IsUniqueSymrootForTarget", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a879cf5574ac843a9ecb93d1832857a39", null ],
+    [ "_SetUpProductReferences", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#afe3970de9013b0b8c87912bf04276875", null ],
+    [ "AddOrGetFileInRootGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a5c136bd71fa6429afe30de9391caced2", null ],
+    [ "AddOrGetProjectReference", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a8f5d04f8499ca8c46349d2b9ed03c6b5", null ],
+    [ "Children", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a2d888272fba663763d0542e38a1696be", null ],
+    [ "Comment", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#afbdb5b15abb0e78a815821848ede2473", null ],
+    [ "FrameworksGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a1a9454d2115cfcb86ba0ca6ecc764ed2", null ],
+    [ "IntermediatesGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a09b2a274fb50fa3810c2391974d6a6d4", null ],
+    [ "Name", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a9d21e02448fe26e2a9d443825d294775", null ],
+    [ "Path", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a9187517f2ffa6dfffb8796b50847b5b6", null ],
+    [ "PBXProjectAncestor", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a0b53392bf44f7bf4d02b131328648546", null ],
+    [ "ProductsGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a0a7e1644c4ac5bd56297c862d942361e", null ],
+    [ "ProjectsGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a45a7d3bbe169ef5e6b130dd64dfbc36a", null ],
+    [ "RootGroupForPath", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#aaf7effaa3dc92ad2b8d004d551284931", null ],
+    [ "RootGroupsTakeOverOnlyChildren", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#aeca59448dcab806ecd54c60c5714c3f1", null ],
+    [ "SortGroups", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a4ea5a8350cf408b02ff485607ad06ff3", null ],
+    [ "SortRemoteProductReferences", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a6289bb6977ce989cdcb57511d1552aef", null ],
+    [ "SourceGroup", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#a7f95b6bf0a9d32bf1e818ec16cf26d73", null ],
+    [ "_other_pbxprojects", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#ae308fc30f4fc8fe07d1864a6b069c385", null ],
+    [ "_schema", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#acea4ddbc276604f22ec6328f20ad4534", null ],
+    [ "path", "classgyp_1_1xcodeproj__file_1_1_p_b_x_project.html#ab8dbe3973a230f6fc2bb06f88d5ce8b9", null ]
+];
