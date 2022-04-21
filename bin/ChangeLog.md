@@ -1,4 +1,8 @@
 # Change Log
+
+## April 20, 2022, - 1.224.9062
+- Corrects an issue on Android where the Engine was hung during shutdown while receiving audio.
+
 ## April 5, 2022, - 1.222.9060
 - Corrects an issue with EBS whereby the enablement of a bridge was being ignored.
 - Adds a hang timer for smoothed audio transmission.
