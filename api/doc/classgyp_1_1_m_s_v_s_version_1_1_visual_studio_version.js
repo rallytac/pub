@@ -1,0 +1,26 @@
+var classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version =
+[
+    [ "__init__", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a712df7104d9f55af005aec49830ff22f", null ],
+    [ "_SetupScriptInternal", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a0c01b5daa6cbba67b117d3e1fa4fb739", null ],
+    [ "DefaultToolset", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#acb86a072bb902d01a7c8ba21a1c517a4", null ],
+    [ "Description", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ac4a34b51c611a886a7be7dc2c4cda957", null ],
+    [ "FlatSolution", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a33295bb9cdd5669cb946c72162fbdf30", null ],
+    [ "Path", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a3171b39d6050710ee2d402e57d802fcc", null ],
+    [ "ProjectExtension", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ac85caedbecdec4dcea701d25b33d831e", null ],
+    [ "ProjectVersion", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a3f58590650d76d52481a9b32eabcdd8a", null ],
+    [ "SetupScript", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ab4ca5650d07a06c3897df15cc09a0a42", null ],
+    [ "ShortName", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ae40ea30afb7adae424b666b991a8f78f", null ],
+    [ "SolutionVersion", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ab42f30fb8a2cb7e4f3aa2c06b98a4261", null ],
+    [ "ToolPath", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ad27d3275e39348472026ac561b13abf4", null ],
+    [ "UsesVcxproj", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a9029e8303ff9125d2a50a76ff04dfa5d", null ],
+    [ "compatible_sdks", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ae6fecada5c07f6a9698335a16865b369", null ],
+    [ "default_toolset", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a08eb91e2b881a6886847d921bb85fd6a", null ],
+    [ "description", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a27f8c991faab755bcc88864a8055da1e", null ],
+    [ "flat_sln", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a0e703c41e6f40bb7226bec700966164e", null ],
+    [ "path", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#afccb923eeabae7ed0a374ba06eedc7d5", null ],
+    [ "project_version", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#ab57bba8b805203f7ff0d8961e259413e", null ],
+    [ "sdk_based", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a1286f2cb359092f86caa5621637bf6dc", null ],
+    [ "short_name", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a44be51c1898dd9be29c3b22cde8af9a3", null ],
+    [ "solution_version", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#af674a25a9e804fda4ed5637986dcf487", null ],
+    [ "uses_vcxproj", "classgyp_1_1_m_s_v_s_version_1_1_visual_studio_version.html#a2af004f9f41111b4db3599ac1558457b", null ]
+];
