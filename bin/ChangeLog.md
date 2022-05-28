@@ -1,5 +1,12 @@
 # Change Log
 
+## May 28, 2022, - 1.226.9066
+- Adds connection timeout settings for Rallypoint connections to better handle high-latency transports.
+- Adds preliminary detection of traffic loops on Rallypoint meshes.
+- Adds support for 3rd-party FIPS 140-2 cryptographic engines to be loaded at runtime.
+- Corrects a logging subsystem race-condition that caused some logging lines to be lost at shutdown.
+- Corrects a bug that generated extraneous onEngineStopped events.
+
 ## April 20, 2022, - 1.224.9062
 - Corrects an issue on Android where the Engine was hung during shutdown while receiving audio.
 
