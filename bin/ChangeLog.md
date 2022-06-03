@@ -1,5 +1,12 @@
 # Change Log
 
+## June 3 - 1.227.9067 (**BETA INTERIM RELEASE**)
+- Adds a security classification level setting to group definitions that allows implementors to determine communication types appropriate for a group.
+- Adds "--version" command-line parameter to engage-cmd, rallypointd, engagebridged, and eard.
+- Corrects a race-condition bug on shutdown that caused periodic memory corruption.
+- Corrects exported symbol clashes with additional SQLite instances in the same process.
+- Corrects a hung operation on engageStop - (**BETA**)
+
 ## May 28, 2022, - 1.226.9066
 - Adds connection timeout settings for Rallypoint connections to better handle high-latency transports.
 - Adds preliminary detection of traffic loops on Rallypoint meshes.
@@ -7,10 +14,10 @@
 - Corrects a logging subsystem race-condition that caused some logging lines to be lost at shutdown.
 - Corrects a bug that generated extraneous onEngineStopped events.
 
-## April 20, 2022, - 1.224.9062
+## April 20, 2022 - 1.224.9062
 - Corrects an issue on Android where the Engine was hung during shutdown while receiving audio.
 
-## April 5, 2022, - 1.222.9060
+## April 5, 2022 - 1.222.9060
 - Corrects an issue with EBS whereby the enablement of a bridge was being ignored.
 - Adds a hang timer for smoothed audio transmission.
 - Replaces the low-level Android audio interface with a more flexible and portable implementation that takes better advantage of built-in Android audio capabilities.
