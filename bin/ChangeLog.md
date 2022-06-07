@@ -1,11 +1,12 @@
 # Change Log
 
-## June 3 - 1.227.9067 (**BETA INTERIM RELEASE**)
+## June 6 - 1.228.9068
 - Adds a security classification level setting to group definitions that allows implementors to determine communication types appropriate for a group.
 - Adds "--version" command-line parameter to engage-cmd, rallypointd, engagebridged, and eard.
 - Corrects a race-condition bug on shutdown that caused periodic memory corruption.
 - Corrects exported symbol clashes with additional SQLite instances in the same process.
-- Corrects a hung operation on engageStop - (**BETA**)
+- Corrects a hung operation on engageStop.
+- Corrects a bug causing random crashes when packets are sent on a group that has failed over to multicast.
 
 ## May 28, 2022, - 1.226.9066
 - Adds connection timeout settings for Rallypoint connections to better handle high-latency transports.
