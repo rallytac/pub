@@ -1,0 +1,26 @@
+{
+    "id": "sbmac",
+
+    "networking": {
+        "interfaceAddress": "10.1.1.154",
+        "address": "239.17.18.19",
+        "port": 8513,
+        "ttl": 64
+    },
+
+    "run": {
+        "onIdle": "bash -c ./onIdle.sh",
+        "onGoingActive": "bash -c ./onGoingActive.sh",
+        "onActive": "bash -c ./onActive.sh"
+    },
+
+    "timing": {
+        "rxIntervalSecs": 1,
+        "txIntervalSecs": 1,
+        "transitionWaitSecs": 5
+    },
+
+    "logging":{
+        "level": 4
+    }
+}
