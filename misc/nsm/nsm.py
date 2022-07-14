@@ -36,6 +36,7 @@ global myToken
 global mutex
 
 global configuration
+global goActiveTime
 
 
 # ---------------------------------------------------------------
@@ -43,7 +44,16 @@ def logThis(lvl, msg):
         if lvl <= configuration['logging']['level']:
                 if lvl == LOG_FATAL:
                         t = 'F'
-                print(str(datetime.now()) + ' : ' + str(lvl) + ' : ' + msg)
+                elif lvl == LOG_ERROR:
+                        t = 'E'
+                elif lvl == LOG_WARN:
+                        t = 'W'
+                elif lvl == LOG_INFO:
+                        t = 'I'
+                elif lvl == LOG_DEBUG:
+                        t = 'D'
+
+                print(str(datetime.now()) + ' ' + t + ' : ' + msg)
 
 
 # ---------------------------------------------------------------
@@ -61,14 +71,27 @@ def loadConfiguration(path):
 
 
 # ---------------------------------------------------------------
+def getIpAddressForInterface(nm):
+        cmd = 'ifconfig ' + nm + ' | grep "inet " | awk \'{print $2}\''
+        f = os.popen(cmd)
+        rc = f.read()
+        rc = rc.replace('\n', '')
+        rc = rc.replace(' ', '')
+        return rc
+
+# ---------------------------------------------------------------
 def checkConfiguration():
         global configuration
         
         if configuration['id'] == '':
                 printErrorAndExit('no id defined')
 
+        if configuration['networking']['interfaceName'] == '':
+                printErrorAndExit('no networking.interfaceName defined')
+
+        configuration['networking']['interfaceAddress'] = getIpAddressForInterface(configuration['networking']['interfaceName'])
         if configuration['networking']['interfaceAddress'] == '':
-                printErrorAndExit('no networking.interfaceAddress defined')
+                printErrorAndExit('cannot determine ip address for "' + configuration['networking']['interfaceName'] + '"')                        
 
         if configuration['networking']['address'] == '':
                 printErrorAndExit('no networking.address defined')
@@ -105,10 +128,19 @@ def checkConfiguration():
 
 
 # ---------------------------------------------------------------
+def goActiveDesc():
+        if goActiveTime == datetime.max:
+                return 'until further notice'
+        else:
+                return 'until at least ' + str(goActiveTime)
+
+
+# ---------------------------------------------------------------
 def stateChange(newState):
         global configuration
         global state
-        global myToken        
+        global myToken
+        global goActiveTime
 
         cmdToRun = ''
 
@@ -116,17 +148,17 @@ def stateChange(newState):
 
         if newState != state:
                 if newState == ST_IDLE:
-                        logThis(LOG_DEBUG, '--->ST_IDLE')
+                        logThis(LOG_DEBUG, 'idle ' + goActiveDesc())
                         cmdToRun = configuration['run']['onIdle']
                         myToken = 0
 
                 elif newState == ST_GOING_ACTIVE:
-                        logThis(LOG_DEBUG, '--->ST_GOING_ACTIVE')
+                        logThis(LOG_DEBUG, 'going active ' + goActiveDesc())
                         cmdToRun = configuration['run']['onGoingActive']
                         myToken = random.randint(1, 100000)
 
                 elif newState == ST_ACTIVE:
-                        logThis(LOG_DEBUG, '--->ST_ACTIVE')
+                        logThis(LOG_DEBUG, 'active ' + goActiveDesc())
                         cmdToRun = configuration['run']['onActive']
 
                 else:
@@ -154,6 +186,7 @@ def getState():
 # ---------------------------------------------------------------
 def rxThread():
         global configuration
+        global goActiveTime
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -167,8 +200,6 @@ def rxThread():
 
         mreq = struct.pack('=4s4s', socket.inet_aton(configuration['networking']['address']), socket.inet_aton(configuration['networking']['interfaceAddress']))
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-
-        goActiveTime = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
 
         while running:
                 ready = select.select([sock], [], [], configuration['timing']['rxIntervalSecs'])
@@ -287,6 +318,7 @@ if __name__ == "__main__":
 
         logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
 
+        goActiveTime = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
         state = ST_NONE
         stateChange(ST_IDLE)
 

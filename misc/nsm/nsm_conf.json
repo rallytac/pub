@@ -1,8 +1,8 @@
 {
-    "id": "sbmac",
+    "id": "nsm01",
 
     "networking": {
-        "interfaceAddress": "10.1.1.154",
+        "interfaceName": "en0",
         "address": "239.17.18.19",
         "port": 8513,
         "ttl": 64
