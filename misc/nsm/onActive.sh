@@ -1,2 +1,2 @@
 #!/bin/bash
-echo onActive
+echo "-------> onActive, resource='${1}'"

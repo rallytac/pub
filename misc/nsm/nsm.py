@@ -3,7 +3,6 @@
 # Copyright (c) 2022 Rally Tactical Systems, Inc.
 #
 
-from distutils.command.config import config
 import socket
 import struct
 import threading
@@ -16,6 +15,8 @@ import json
 from datetime import datetime, timedelta
 import random
 import signal
+import uuid
+import argparse
 
 LOG_FATAL = 0
 LOG_ERROR = 1
@@ -31,12 +32,20 @@ ST_ACTIVE = 3
 global running
 global rx
 global tx
-global state
-global myToken
 global mutex
 
 global configuration
-global goActiveTime
+global trackers
+global fixedToken
+
+# ---------------------------------------------------------------
+def generateToken():
+        global fixedToken
+
+        if fixedToken >= 0:
+                return fixedToken
+        else:
+                return random.randint(1, 100000)
 
 
 # ---------------------------------------------------------------
@@ -63,11 +72,29 @@ def printErrorAndExit(msg):
 
 
 # ---------------------------------------------------------------
+def printTrackers():
+        global trackers
+
+        for res in trackers:
+                print("%20s : %s @ %s t=%d" % (res, stateDesc(trackers[res]['state']), trackers[res]['goActiveTime'], trackers[res]['token']))
+        
+
+# ---------------------------------------------------------------
 def loadConfiguration(path):
         global configuration
+        global trackers
+
+        trackers = {}
         
         with open(path) as f:
                 configuration = json.load(f)
+
+        for key in configuration['resources']:
+                trackers[key] = {}
+                trackers[key]['res'] = key
+                trackers[key]['state'] = ST_NONE
+                trackers[key]['token'] = 0
+                trackers[key]['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
 
 
 # ---------------------------------------------------------------
@@ -79,12 +106,13 @@ def getIpAddressForInterface(nm):
         rc = rc.replace(' ', '')
         return rc
 
+
 # ---------------------------------------------------------------
 def checkConfiguration():
         global configuration
         
         if configuration['id'] == '':
-                printErrorAndExit('no id defined')
+                configuration['id'] = str(uuid.uuid1())
 
         if configuration['networking']['interfaceName'] == '':
                 printErrorAndExit('no networking.interfaceName defined')
@@ -101,6 +129,9 @@ def checkConfiguration():
 
         if configuration['networking']['ttl'] <= 0:
                 printErrorAndExit('invalid networking.ttl')
+
+        if len(configuration['resources']) == 0:
+                printErrorAndExit('no resources defined')
 
         if configuration['run']['onIdle'] == '':
                 printErrorAndExit('no run.onIdle defined')
@@ -128,57 +159,66 @@ def checkConfiguration():
 
 
 # ---------------------------------------------------------------
-def goActiveDesc():
-        if goActiveTime == datetime.max:
+def goActiveDesc(gat):
+        if gat == datetime.max:
                 return 'until further notice'
         else:
-                return 'until at least ' + str(goActiveTime)
+                return 'until at least ' + str(gat)
 
 
 # ---------------------------------------------------------------
-def stateChange(newState):
+def stateDesc(s):
+        if s == ST_NONE:
+                return 'none'
+        elif s == ST_IDLE:
+                return 'idle'
+        elif s == ST_GOING_ACTIVE:
+                return 'going active'
+        elif s == ST_ACTIVE:
+                return 'active'
+
+        return 'unknown'
+
+
+# ---------------------------------------------------------------
+def stateChange(tracker, newState):
         global configuration
         global state
-        global myToken
-        global goActiveTime
+        global trackers
 
         cmdToRun = ''
 
-        mutex.acquire()
-
-        if newState != state:
+        if newState != tracker['state']:
                 if newState == ST_IDLE:
-                        logThis(LOG_DEBUG, 'idle ' + goActiveDesc())
+                        logThis(LOG_DEBUG, 'idle ' + goActiveDesc(tracker['goActiveTime']))
                         cmdToRun = configuration['run']['onIdle']
-                        myToken = 0
+                        tracker['token'] = 0
 
                 elif newState == ST_GOING_ACTIVE:
-                        logThis(LOG_DEBUG, 'going active ' + goActiveDesc())
+                        logThis(LOG_DEBUG, 'going active ' + goActiveDesc(tracker['goActiveTime']))
                         cmdToRun = configuration['run']['onGoingActive']
-                        myToken = random.randint(1, 100000)
+                        tracker['token'] = generateToken()
 
                 elif newState == ST_ACTIVE:
-                        logThis(LOG_DEBUG, 'active ' + goActiveDesc())
+                        logThis(LOG_DEBUG, 'active ' + goActiveDesc(tracker['goActiveTime']))
                         cmdToRun = configuration['run']['onActive']
 
                 else:
                         logThis(LOG_FATAL, '***STATE ERROR')
-                        myToken = 0
+                        tracker['token'] = 0
 
-                state = newState
-
-        mutex.release()
+                tracker['state'] = newState
 
         if cmdToRun != '':
-                runCmd(cmdToRun)
+                runCmd(tracker, cmdToRun)
 
 
 # ---------------------------------------------------------------
-def getState():
-        global state
+def getState(res):
+        global trackers
 
         mutex.acquire()
-        rc = state
+        rc = trackers[res]['state']
         mutex.release()
         return rc
 
@@ -186,7 +226,6 @@ def getState():
 # ---------------------------------------------------------------
 def rxThread():
         global configuration
-        global goActiveTime
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -207,42 +246,16 @@ def rxThread():
                 if ready[0]:
                         data = sock.recv(10240)
                         obj = json.loads(data)
-
-                        remoteId = obj['i']
-                        remoteToken = obj['t']
-                        remoteState = obj['s']
-
-                        if remoteId != configuration['id']:
-                                if remoteState == ST_ACTIVE:
-                                        goActiveTime = datetime.max
-                                        stateChange(ST_IDLE)
-                                        logThis(LOG_DEBUG, remoteId + ' is active, going or staying idle')
-
-                                elif remoteState == ST_GOING_ACTIVE:
-                                        if remoteToken > myToken:
-                                                goActiveTime = datetime.max
-                                                stateChange(ST_IDLE)
-                                                logThis(LOG_DEBUG, remoteId + ' is going active with a higher token, going or staying idle')
+                        processRx(obj)
 
                 else:
-                        if goActiveTime == datetime.max:
-                                if getState() == ST_IDLE:
-                                        goActiveTime = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
-
-                if goActiveTime != datetime.max:
-                        if datetime.now() >= goActiveTime:
-                                if getState() == ST_IDLE:
-                                        goActiveTime = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
-                                        stateChange(ST_GOING_ACTIVE)
-
-                                elif getState() == ST_GOING_ACTIVE:
-                                        goActiveTime = datetime.max
-                                        stateChange(ST_ACTIVE)
+                        processRx(None)
 
 
 # ---------------------------------------------------------------
 def txThread():
         global configuration
+        global trackers
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, configuration['networking']['ttl'])
@@ -254,19 +267,94 @@ def txThread():
                 time.sleep(configuration['timing']['txIntervalSecs'])
 
                 sendTheMsg = False
-                st = getState()
 
-                if st == ST_GOING_ACTIVE or st == ST_ACTIVE:
-                        sendTheMsg = True
-                        msg = '{'
-                        msg += '"i":"' + configuration['id'] + '"'
-                        msg += ',"t":' + str(myToken)
-                        msg += ',"s":' + str(st)
-                        msg += '}'
+                msg = '{'
+                msg += '"i":"' + configuration['id'] + '"'
+                msg += ',"r":['
+
+                cnt = 0
+
+                mutex.acquire()
+
+                for res in trackers:
+                        st = trackers[res]['state']
+
+                        if st == ST_GOING_ACTIVE or st == ST_ACTIVE:
+                                sendTheMsg = True
+                                cnt = cnt + 1
+                                if cnt > 1:
+                                        msg += ','
+
+                                msg += '{'
+                                msg += '"r":"' + str(res) + '"'
+                                msg += ',"t":' + str(trackers[res]['token'])
+                                msg += ',"s":' + str(st)
+                                msg += '}'
+
+                mutex.release()                                
+
+                msg += ']}'
 
                 if sendTheMsg:
                         logThis(LOG_DEBUG, 'sending ' + msg)
                         sock.sendto(msg.encode(), (configuration['networking']['address'], configuration['networking']['port']))
+
+
+# ---------------------------------------------------------------
+def processRx(obj):
+        global trackers
+
+        mutex.acquire()
+
+        if obj != None:
+                remoteId = obj['i']
+
+                if remoteId != configuration['id']:
+                        remoteTrackers = obj['r']
+
+                        for res in trackers:
+                                tracker = trackers[res]
+                                remoteTracker = None
+                                for remoteTracker in remoteTrackers:
+                                        if remoteTracker['r'] == res:
+                                                break
+
+                                if remoteTracker != None:
+                                        if remoteTracker['s'] == ST_ACTIVE:
+                                                tracker['goActiveTime'] = datetime.max
+                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
+                                                stateChange(tracker, ST_IDLE)
+
+                                        elif remoteTracker['s'] == ST_GOING_ACTIVE:
+                                                if remoteTracker['t'] > tracker['token']:
+                                                        tracker['goActiveTime'] = datetime.max
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
+                                                        stateChange(tracker, ST_IDLE)
+                                                else:
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
+
+        for res in trackers:
+                tracker = trackers[res]
+
+                if tracker['state'] == ST_NONE:
+                        stateChange(tracker, ST_IDLE)
+
+                else:
+                        if tracker['goActiveTime'] != datetime.max:
+                                if datetime.now() >= tracker['goActiveTime'] :
+                                        if tracker['state'] == ST_IDLE:
+                                                tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
+                                                stateChange(tracker, ST_GOING_ACTIVE)
+
+                                        elif tracker['state'] == ST_GOING_ACTIVE:
+                                                tracker['goActiveTime'] = datetime.max
+                                                stateChange(tracker, ST_ACTIVE)
+
+                        else:
+                                if tracker['state'] == ST_IDLE:
+                                        tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
+
+        mutex.release()
 
 
 # ---------------------------------------------------------------
@@ -298,9 +386,10 @@ def ctrlcHandler(sig, frame):
 
 
 # ---------------------------------------------------------------
-def runCmd(cmd):
-        logThis(LOG_INFO, 'running "' + cmd + '"')
-        os.system(cmd)
+def runCmd(tracker, cmd):
+        finalCmd = cmd.replace('${r}', tracker['res'])
+        logThis(LOG_INFO, 'running "' + finalCmd + '"')
+        os.system(finalCmd)
 
 
 # ---------------------------------------------------------------
@@ -310,20 +399,39 @@ if __name__ == "__main__":
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
 
-        loadConfiguration('nsm_conf.json')
+        mutex = Lock()
+
+        parser = argparse.ArgumentParser(description='')
+        parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
+        parser.add_argument('--id', type=str, help='Override the ID for this instance')
+        parser.add_argument('--log-level', type=int, help='Override the logging level in the configuration file')
+        parser.add_argument('--fixed-token', type=int, help='The global voting token to use (default is random per resource)')
+        args = parser.parse_args()
+
+        if args.config_file == None:
+                loadConfiguration('nsm_conf.json')
+        else:
+                loadConfiguration(args.config_file)
+
+        if args.id != None:
+                configuration['id'] = args.id
+
+        if args.fixed_token != None and args.fixed_token >= 0:
+                fixedToken = args.fixed_token
+        else:
+                fixedToken = -1
+
+        if args.log_level != None and args.log_level >= 0:
+                configuration['logging']['level'] = args.log_level
+
         checkConfiguration()
 
-        signal.signal(signal.SIGINT, ctrlcHandler)
-        mutex = Lock()
+        signal.signal(signal.SIGINT, ctrlcHandler)        
 
         logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
 
-        goActiveTime = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
-        state = ST_NONE
-        stateChange(ST_IDLE)
-
         running = True
-        myToken = 0
+        processRx(None)
 
         startRxTx()
 
@@ -333,6 +441,7 @@ if __name__ == "__main__":
         logThis(LOG_INFO, 'stopping...')
         stopRxTx()
 
-        stateChange(ST_IDLE)
+        for res in trackers:
+                stateChange(trackers[res], ST_IDLE)
 
         print('done!')

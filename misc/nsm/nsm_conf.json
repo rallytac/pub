@@ -1,5 +1,5 @@
 {
-    "id": "nsm01",
+    "id": "",
 
     "networking": {
         "interfaceName": "en0",
@@ -8,10 +8,14 @@
         "ttl": 64
     },
 
+    "resources":[        
+        "res01"
+    ],
+
     "run": {
-        "onIdle": "bash -c ./onIdle.sh",
-        "onGoingActive": "bash -c ./onGoingActive.sh",
-        "onActive": "bash -c ./onActive.sh"
+        "onIdle": "bash -c \"./onIdle.sh '${r}'\"",
+        "onGoingActive": "bash -c \"./onGoingActive.sh '${r}'\"",
+        "onActive": "bash -c \"./onActive.sh '${r}'\""
     },
 
     "timing": {

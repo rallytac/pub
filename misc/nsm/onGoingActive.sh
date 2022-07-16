@@ -1,2 +1,2 @@
 #!/bin/bash
-echo onGoingActive
+echo "-------> onGoingActive, resource='${1}'"

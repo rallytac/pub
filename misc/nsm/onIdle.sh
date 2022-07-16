@@ -1,2 +1,2 @@
 #!/bin/bash
-echo onIdle
+echo "-------> onIdle, resource='${1}'"
