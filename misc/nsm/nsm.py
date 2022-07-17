@@ -17,6 +17,9 @@ import random
 import signal
 import uuid
 import argparse
+import colorama
+
+RX_INTERVAL_SECS = 1
 
 LOG_FATAL = 0
 LOG_ERROR = 1
@@ -37,6 +40,91 @@ global mutex
 global configuration
 global trackers
 global fixedToken
+global packetsTx
+global bytesTx
+global packetsRx
+global bytesRx
+global errorsRx
+global maxRunSecs
+
+try:
+    import colorama
+    haveColorama = True
+except ImportError as e:
+    haveColorama = False
+    pass
+
+if haveColorama:
+    colorama.init()
+    pos = lambda y, x: colorama.Cursor.POS(x, y)
+
+mutex = Lock()
+packetsTx = 0
+bytesTx = 0
+packetsRx = 0
+bytesRx = 0
+errorsRx = 0
+running = False
+maxRunSecs = 0
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
+parser.add_argument('--id', type=str, help='Override the ID for this instance')
+parser.add_argument('--log-level', type=int, help='Override the logging level in the configuration file')
+parser.add_argument('--fixed-token', type=int, help='The global voting token to use (default is random per resource)')
+parser.add_argument('--max-run-secs', type=int, help='Maximum number of seconds to run (generally only useful for testing')
+args = parser.parse_args()
+
+# --------------------------------------------------------------------------
+def colorNone():
+    if haveColorama:
+        return colorama.Style.RESET_ALL
+    else:
+        return ''
+
+
+# --------------------------------------------------------------------------
+def colorRed():
+    if haveColorama:
+        return colorama.Fore.RED
+    else:
+        return ''
+
+
+# --------------------------------------------------------------------------
+def colorYellow():
+    if haveColorama:
+        return colorama.Fore.YELLOW
+    else:
+        return ''
+
+
+# --------------------------------------------------------------------------
+def colorGreen():
+    if haveColorama:
+        return colorama.Fore.GREEN
+    else:
+        return ''
+
+
+# --------------------------------------------------------------------------
+def setCursor(r, c):
+    if haveColorama:
+        print('%s' % pos(r, c))
+
+
+# --------------------------------------------------------------------------
+def clearScreen():
+    if haveColorama:
+        print(colorama.ansi.clear_screen())
+        setCursor(0, 0)
+
+    else:
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+
 
 # ---------------------------------------------------------------
 def generateToken():
@@ -50,19 +138,20 @@ def generateToken():
 
 # ---------------------------------------------------------------
 def logThis(lvl, msg):
-        if lvl <= configuration['logging']['level']:
-                if lvl == LOG_FATAL:
-                        t = 'F'
-                elif lvl == LOG_ERROR:
-                        t = 'E'
-                elif lvl == LOG_WARN:
-                        t = 'W'
-                elif lvl == LOG_INFO:
-                        t = 'I'
-                elif lvl == LOG_DEBUG:
-                        t = 'D'
+        if not configuration['logging']['dashboard']:
+                if lvl <= configuration['logging']['level']:
+                        if lvl == LOG_FATAL:
+                                t = 'F'
+                        elif lvl == LOG_ERROR:
+                                t = 'E'
+                        elif lvl == LOG_WARN:
+                                t = 'W'
+                        elif lvl == LOG_INFO:
+                                t = 'I'
+                        elif lvl == LOG_DEBUG:
+                                t = 'D'
 
-                print(str(datetime.now()) + ' ' + t + ' : ' + msg)
+                        print(str(datetime.now()) + ' ' + t + ' : ' + msg)
 
 
 # ---------------------------------------------------------------
@@ -72,12 +161,16 @@ def printErrorAndExit(msg):
 
 
 # ---------------------------------------------------------------
-def printTrackers():
-        global trackers
+def setDefaultConfigurationValue(key, value, subkey=None, subvalue=None):
+        global configuration
 
-        for res in trackers:
-                print("%20s : %s @ %s t=%d" % (res, stateDesc(trackers[res]['state']), trackers[res]['goActiveTime'], trackers[res]['token']))
-        
+        if not key in configuration:
+                configuration[key] = value
+
+        if subkey != None:
+                if not subkey in configuration[key]:
+                        configuration[key][subkey] = subvalue
+
 
 # ---------------------------------------------------------------
 def loadConfiguration(path):
@@ -89,12 +182,39 @@ def loadConfiguration(path):
         with open(path) as f:
                 configuration = json.load(f)
 
+        setDefaultConfigurationValue('id', '')
+
+        setDefaultConfigurationValue('networking', {})
+        setDefaultConfigurationValue('networking', {}, 'interfaceName', '')
+        setDefaultConfigurationValue('networking', {}, 'address', '')
+        setDefaultConfigurationValue('networking', {}, 'port', 0)
+        setDefaultConfigurationValue('networking', {}, 'ttl', 0)
+        setDefaultConfigurationValue('networking', {}, 'txOversend', 0)
+        setDefaultConfigurationValue('networking', {}, 'rxLossPercentage', 0)
+        setDefaultConfigurationValue('networking', {}, 'txLossPercentage', 0)
+
+        setDefaultConfigurationValue('resources', [])
+
+        setDefaultConfigurationValue('run', {})
+        setDefaultConfigurationValue('run', {}, 'onIdle', '')
+        setDefaultConfigurationValue('run', {}, 'onGoingActive', '')
+        setDefaultConfigurationValue('run', {}, 'onActive', '')
+
+        setDefaultConfigurationValue('timing', {})
+        setDefaultConfigurationValue('timing', {}, 'txIntervalSecs', 1)
+        setDefaultConfigurationValue('timing', {}, 'transitionWaitSecs', 5)
+
+        setDefaultConfigurationValue('logging', {})
+        setDefaultConfigurationValue('logging', {}, 'level', 4)
+        setDefaultConfigurationValue('logging', {}, 'dashboard', False)
+
         for key in configuration['resources']:
                 trackers[key] = {}
                 trackers[key]['res'] = key
                 trackers[key]['state'] = ST_NONE
                 trackers[key]['token'] = 0
                 trackers[key]['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
+                trackers[key]['owner'] = ''
 
 
 # ---------------------------------------------------------------
@@ -142,17 +262,14 @@ def checkConfiguration():
         if configuration['run']['onActive'] == '':
                 printErrorAndExit('no run.onActive defined')
 
-        if configuration['timing']['rxIntervalSecs'] <= 0:
-                printErrorAndExit('invalid timing.rxIntervalSecs')
-
         if configuration['timing']['txIntervalSecs'] <= 0:
                 printErrorAndExit('invalid timing.txIntervalSecs')
 
         if configuration['timing']['transitionWaitSecs'] <= 0:
                 printErrorAndExit('invalid timing.transitionWaitSecs')
 
-        if configuration['timing']['transitionWaitSecs'] <= (configuration['timing']['rxIntervalSecs'] * 3):
-                printErrorAndExit('timing.transitionWaitSecs cannot be less than timing.rxIntervalSecs * 3')                
+        if configuration['timing']['transitionWaitSecs'] <= (RX_INTERVAL_SECS * 3):
+                printErrorAndExit('timing.transitionWaitSecs cannot be less than ' + str(RX_INTERVAL_SECS * 3))
 
         if configuration['logging']['level'] < 0 or configuration['logging']['level'] > 4:
                 printErrorAndExit('invalid logging.level')
@@ -226,6 +343,9 @@ def getState(res):
 # ---------------------------------------------------------------
 def rxThread():
         global configuration
+        global packetsRx
+        global bytesRx
+        global errorsRx
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -241,12 +361,24 @@ def rxThread():
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
         while running:
-                ready = select.select([sock], [], [], configuration['timing']['rxIntervalSecs'])
+                ready = select.select([sock], [], [], RX_INTERVAL_SECS)
 
                 if ready[0]:
                         data = sock.recv(10240)
-                        obj = json.loads(data)
-                        processRx(obj)
+                        try:
+                                obj = json.loads(data)
+
+                                if obj['i'] != configuration['id']:
+                                        packetsRx = packetsRx + 1
+                                        bytesRx = bytesRx + len(data)
+
+                                if (configuration['networking']['rxLossPercentage'] == 0 or configuration['networking']['rxLossPercentage'] <= random.randint(1, 100)):
+                                        processRx(obj)
+                                else:
+                                        processRx(None)
+                        except:
+                                errorsRx = errorsRx + 1
+                                processRx(None)
 
                 else:
                         processRx(None)
@@ -256,6 +388,8 @@ def rxThread():
 def txThread():
         global configuration
         global trackers
+        global packetsTx
+        global bytesTx
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, configuration['networking']['ttl'])
@@ -295,9 +429,12 @@ def txThread():
 
                 msg += ']}'
 
-                if sendTheMsg:
-                        logThis(LOG_DEBUG, 'sending ' + msg)
-                        sock.sendto(msg.encode(), (configuration['networking']['address'], configuration['networking']['port']))
+                if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
+                        for x in range(0, (configuration['networking']['txOversend'] + 1)):
+                                logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
+                                sock.sendto(msg.encode(), (configuration['networking']['address'], configuration['networking']['port']))
+                                packetsTx = packetsTx + 1
+                                bytesTx = bytesTx + len(msg)
 
 
 # ---------------------------------------------------------------
@@ -322,15 +459,18 @@ def processRx(obj):
                                 if remoteTracker != None:
                                         if remoteTracker['s'] == ST_ACTIVE:
                                                 tracker['goActiveTime'] = datetime.max
+                                                tracker['owner'] = remoteId
                                                 logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
                                                 stateChange(tracker, ST_IDLE)
 
                                         elif remoteTracker['s'] == ST_GOING_ACTIVE:
                                                 if remoteTracker['t'] > tracker['token']:
                                                         tracker['goActiveTime'] = datetime.max
+                                                        tracker['owner'] = remoteId
                                                         logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
                                                         stateChange(tracker, ST_IDLE)
                                                 else:
+                                                        tracker['owner'] = ''
                                                         logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
 
         for res in trackers:
@@ -393,20 +533,56 @@ def runCmd(tracker, cmd):
 
 
 # ---------------------------------------------------------------
-if __name__ == "__main__":
+def showDashboard():
+        global trackers
+        global packetsTx
+        global bytesTx
+        global packetsRx
+        global bytesRx
+        global errorsRx
+        global maxRunSecs
+
+        clearScreen()
+        printHeadline()
+
+        if maxRunSecs > 0:
+                print('%sLIMITED RUN TIME: %d SECONDS REMAINING%s' % (colorRed(), maxRunSecs, colorNone()))
+
+        print('')
+        print('ID: ' + configuration['id'])
+        print('TX: %d packets (%d bytes)' % (packetsTx, bytesTx))
+        print('RX: %d packets (%d bytes), [%d errors]' % (packetsRx, bytesRx, errorsRx))
+        print('')
+
+        print('%-20s %-18s %-20s' % ('Resource', 'Local State', 'Owner'))
+        print('-------------------- ------------------ ------------------------------------')
+
+        for res in trackers:
+                tracker = trackers[res]
+                if tracker['state'] == ST_IDLE:
+                        clr = colorNone()
+                elif tracker['state'] == ST_GOING_ACTIVE:
+                        clr = colorYellow()
+                elif tracker['state'] == ST_ACTIVE:
+                        clr = colorGreen()
+
+                if tracker['state'] == ST_IDLE:
+                        print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), tracker['owner'], colorNone()))
+                else:
+                        print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '(self)', colorNone()))
+
+
+# ---------------------------------------------------------------
+def printHeadline():
         print('-----------------------------------------------------------------------------------')
         print('nsm v0.1')
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
 
-        mutex = Lock()
 
-        parser = argparse.ArgumentParser(description='')
-        parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
-        parser.add_argument('--id', type=str, help='Override the ID for this instance')
-        parser.add_argument('--log-level', type=int, help='Override the logging level in the configuration file')
-        parser.add_argument('--fixed-token', type=int, help='The global voting token to use (default is random per resource)')
-        args = parser.parse_args()
+# ---------------------------------------------------------------
+if __name__ == "__main__":
+        printHeadline()
 
         if args.config_file == None:
                 loadConfiguration('nsm_conf.json')
@@ -435,8 +611,23 @@ if __name__ == "__main__":
 
         startRxTx()
 
+        if args.max_run_secs != None:
+                maxRunSecs = args.max_run_secs
+        else:
+                maxRunSecs = 0
+
         while running:
+                if configuration['logging']['dashboard']:
+                        showDashboard()
+
                 time.sleep(1)
+
+                if maxRunSecs > 0:
+                        maxRunSecs = maxRunSecs - 1
+                        if maxRunSecs <= 0:
+                                running = False
+                                break
+                
 
         logThis(LOG_INFO, 'stopping...')
         stopRxTx()

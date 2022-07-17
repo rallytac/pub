@@ -5,10 +5,17 @@
         "interfaceName": "en0",
         "address": "239.17.18.19",
         "port": 8513,
-        "ttl": 64
+        "ttl": 64,
+        "txOversend": 0,
+        "rxLossPercentage": 0,
+        "txLossPercentage": 0
     },
 
     "resources":[        
+        "res01",
+        "res02",
+        "res03",
+        "res04",
         "res01"
     ],
 
@@ -19,12 +26,12 @@
     },
 
     "timing": {
-        "rxIntervalSecs": 1,
         "txIntervalSecs": 1,
         "transitionWaitSecs": 5
     },
 
     "logging":{
-        "level": 4
+        "level": 4,
+        "dashboard": true
     }
 }
