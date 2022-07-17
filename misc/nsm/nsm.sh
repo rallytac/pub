@@ -7,12 +7,12 @@ while [ true ]
 do
     if [[ "${NSM_MAX_RUN_SECS}" == "" ]]; then
         ./onIdle.sh ''
-        python3 nsm.py --log-level 4 ${1} ${2} ${3} ${4} ${5} ${6}
+        python3 _nsm.py ${1} ${2} ${3} ${4} ${5} ${6}
         ./onIdle.sh ''
         break
     else
         ./onIdle.sh ''
-        python3 nsm.py --max-run-secs $(( $RANDOM % ${NSM_MAX_RUN_SECS} + ${NSM_MAX_RUN_SECS} )) --log-level 4 ${1} ${2} ${3} ${4} ${5} ${6}
+        python3 _nsm.py --max-run-secs $(( $RANDOM % ${NSM_MAX_RUN_SECS} + ${NSM_MAX_RUN_SECS} )) ${1} ${2} ${3} ${4} ${5} ${6}
         ./onIdle.sh ''
     fi
 done
