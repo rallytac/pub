@@ -18,6 +18,9 @@ import signal
 import uuid
 import argparse
 import colorama
+from cryptography.fernet import Fernet
+import base64
+import hashlib
 
 RX_INTERVAL_SECS = 1
 
@@ -46,6 +49,8 @@ global packetsRx
 global bytesRx
 global errorsRx
 global maxRunSecs
+global startTs
+global cryptoInstance
 
 try:
     import colorama
@@ -66,6 +71,8 @@ bytesRx = 0
 errorsRx = 0
 running = False
 maxRunSecs = 0
+cryptoInstance = None
+startTs = datetime.now()
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
@@ -133,7 +140,12 @@ def generateToken():
         if fixedToken >= 0:
                 return fixedToken
         else:
-                return random.randint(1, 100000)
+                if configuration['favorUptime']:
+                        fv = (((datetime.now() - startTs).seconds % 14) + (2**32))
+                else:
+                        fv = 0
+
+                return (fv + (random.randint(1, 1000000) + (2**32)))
 
 
 # ---------------------------------------------------------------
@@ -183,7 +195,8 @@ def loadConfiguration(path):
                 configuration = json.load(f)
 
         setDefaultConfigurationValue('id', '')
-
+        setDefaultConfigurationValue('favorUptime', True)
+        
         setDefaultConfigurationValue('networking', {})
         setDefaultConfigurationValue('networking', {}, 'interfaceName', '')
         setDefaultConfigurationValue('networking', {}, 'address', '')
@@ -192,6 +205,7 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('networking', {}, 'txOversend', 0)
         setDefaultConfigurationValue('networking', {}, 'rxLossPercentage', 0)
         setDefaultConfigurationValue('networking', {}, 'txLossPercentage', 0)
+        setDefaultConfigurationValue('networking', {}, 'cryptoPassword', '')
 
         setDefaultConfigurationValue('resources', [])
 
@@ -205,8 +219,8 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('timing', {}, 'transitionWaitSecs', 5)
 
         setDefaultConfigurationValue('logging', {})
-        setDefaultConfigurationValue('logging', {}, 'level', 4)
-        setDefaultConfigurationValue('logging', {}, 'dashboard', False)
+        setDefaultConfigurationValue('logging', {}, 'level', 3)
+        setDefaultConfigurationValue('logging', {}, 'dashboard', True)
 
         for key in configuration['resources']:
                 trackers[key] = {}
@@ -273,6 +287,32 @@ def checkConfiguration():
 
         if configuration['logging']['level'] < 0 or configuration['logging']['level'] > 4:
                 printErrorAndExit('invalid logging.level')
+
+
+# ---------------------------------------------------------------
+def initCrypto():
+        global cryptoInstance
+
+        if configuration['networking']['cryptoPassword'] != None:
+                kdfBytes = hashlib.pbkdf2_hmac('sha256', str.encode(configuration['networking']['cryptoPassword']), b'04DBAA5900D5421D9CCB25A54ED4FA56', 10000, 32)
+                key = base64.urlsafe_b64encode(kdfBytes)
+                cryptoInstance = Fernet(key)
+
+
+# ---------------------------------------------------------------
+def encryptString(s):
+        if cryptoInstance != None:
+                return cryptoInstance.encrypt(str.encode(s))
+        else:
+                return str.encode(s)
+
+
+# ---------------------------------------------------------------
+def decryptBuffer(b):
+        if cryptoInstance != None:
+                return cryptoInstance.decrypt(b).decode()
+        else:
+                return b.decode()
 
 
 # ---------------------------------------------------------------
@@ -364,13 +404,14 @@ def rxThread():
                 ready = select.select([sock], [], [], RX_INTERVAL_SECS)
 
                 if ready[0]:
-                        data = sock.recv(10240)
+                        wireMsg = sock.recv(10240)
                         try:
-                                obj = json.loads(data)
+                                toRecv = decryptBuffer(wireMsg)
+                                obj = json.loads(toRecv)
 
                                 if obj['i'] != configuration['id']:
                                         packetsRx = packetsRx + 1
-                                        bytesRx = bytesRx + len(data)
+                                        bytesRx = bytesRx + len(wireMsg)
 
                                 if (configuration['networking']['rxLossPercentage'] == 0 or configuration['networking']['rxLossPercentage'] <= random.randint(1, 100)):
                                         processRx(obj)
@@ -432,9 +473,10 @@ def txThread():
                 if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
                         for x in range(0, (configuration['networking']['txOversend'] + 1)):
                                 logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
-                                sock.sendto(msg.encode(), (configuration['networking']['address'], configuration['networking']['port']))
+                                wireMsg = encryptString(msg)
+                                sock.sendto(wireMsg, (configuration['networking']['address'], configuration['networking']['port']))
                                 packetsTx = packetsTx + 1
-                                bytesTx = bytesTx + len(msg)
+                                bytesTx = bytesTx + len(wireMsg)
 
 
 # ---------------------------------------------------------------
@@ -541,6 +583,7 @@ def showDashboard():
         global bytesRx
         global errorsRx
         global maxRunSecs
+        global cryptoInstance
 
         clearScreen()
         printHeadline()
@@ -548,12 +591,26 @@ def showDashboard():
         if maxRunSecs > 0:
                 print('%sLIMITED RUN TIME: %d SECONDS REMAINING%s' % (colorRed(), maxRunSecs, colorNone()))
 
-        print('')
-        print('ID: ' + configuration['id'])
-        print('TX: %d packets (%d bytes)' % (packetsTx, bytesTx))
-        print('RX: %d packets (%d bytes), [%d errors]' % (packetsRx, bytesRx, errorsRx))
-        print('')
+        uptime = (datetime.now() - startTs).seconds
+        if uptime > 0:
+                txKbps = (((bytesTx * 8) / uptime) / 1000)
+                rxKbps = (((bytesRx * 8) / uptime) / 1000)
+        else:
+                txKbps = 0
+                rxKbps = 0
 
+        print('')
+        print('ID : ' + configuration['id'])
+
+        print('UP : ' + str(uptime) + ' seconds')
+
+        print('')        
+        print('NET: %s:%d %s' % (configuration['networking']['address'], configuration['networking']['port'], ('*ENCRYPTED*' if cryptoInstance != None else '*CLEAR*')))
+        print('TX : %d packets, %d bytes, %.2f Kbps' % (packetsTx, bytesTx, txKbps))
+                
+        print('RX : %d packets, %d bytes, %.2f Kbps, [%d errors]' % (packetsRx, bytesRx, rxKbps, errorsRx))
+
+        print('')
         print('%-20s %-18s %-20s' % ('Resource', 'Local State', 'Owner'))
         print('-------------------- ------------------ ------------------------------------')
 
@@ -601,6 +658,7 @@ if __name__ == "__main__":
                 configuration['logging']['level'] = args.log_level
 
         checkConfiguration()
+        initCrypto()
 
         signal.signal(signal.SIGINT, ctrlcHandler)        
 

@@ -1,5 +1,6 @@
 {
     "id": "",
+    "favorUptime": true,
 
     "networking": {
         "interfaceName": "en0",
@@ -8,7 +9,8 @@
         "ttl": 64,
         "txOversend": 0,
         "rxLossPercentage": 0,
-        "txLossPercentage": 0
+        "txLossPercentage": 0,
+        "cryptoPassword": "just a default password"
     },
 
     "resources":[        
