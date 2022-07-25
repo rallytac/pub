@@ -38,6 +38,7 @@ def colorNone():
     else:
         return ''
 
+
 # --------------------------------------------------------------------------
 def colorError():
     if haveColorama:
@@ -52,10 +53,12 @@ def colorWarning():
     else:
         return ''
 
+
 # --------------------------------------------------------------------------
 def loadInput():
     with open(statusFile) as f:
         return json.load(f)
+
 
 # --------------------------------------------------------------------------
 def peerType(s):
@@ -65,6 +68,7 @@ def peerType(s):
     }
 
     return switcher.get(s, 'Unknown')
+
 
 # --------------------------------------------------------------------------
 def peerState(s):
@@ -77,15 +81,18 @@ def peerState(s):
 
     return switcher.get(s, 'Unknown')
 
+
 # --------------------------------------------------------------------------
 def setColor(c):
     if haveColorama:
         print(c, end = '')
 
+
 # --------------------------------------------------------------------------
 def setCursor(r, c):
     if haveColorama:
         print('%s' % pos(r, c))
+
 
 # --------------------------------------------------------------------------
 def clearScreen():
@@ -97,6 +104,7 @@ def clearScreen():
             os.system('cls')
         else:
             os.system('clear')
+
 
 # --------------------------------------------------------------------------
 def timeDesc(seconds):
@@ -128,6 +136,7 @@ def timeDesc(seconds):
     
     return rc
 
+
 # --------------------------------------------------------------------------
 def printHeadline(db):
     tsdelta = int(time.time() - db['ts'])
@@ -146,67 +155,20 @@ def printHeadline(db):
     print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
     print('')
     print('Monitoring %s at %d second intervals' % (statusFile, interval))
-    print('Last check at %s %s uptime %s %s updated %s ago' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
+    print('Last check at %s %s uptime %s %s updated %s ago,' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
     print('')
-    print('Streams: %10s, RX: %10s packets, TX: %10s packets' % (db['routing']['streams'], db['rx']['packets'], db['tx']['packets']))
+    print('Basics-----------------------------------------------------------------------------------------------------------------------------------------')
+    print('System-Wide CPU: %7s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %10s packets %s TX: %10s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
 
     print('')
     print('Peers------------------------------------------------------------------------------------------------------------------------------------------')
     print('%30s %30s %5s %15s' % ('ID', 'Address', 'Type', 'State'))
     print('-----------------------------------------------------------------------------------------------------------------------------------------------')
     for peer in db['links']['peers']['list']:
-        print('%30s %30s %5s %15s' % (peer['id'], peer['address'], peerType(peer['type']), peerState(peer['state'])))
+        print('%30s %30s %5s %15s' % (peer['id'], peer.get('address', '?'), peerType(peer['type']), peerState(peer['state'])))
 
-    print('-----------------------------------------------------------------------------------------------------------------------------------------------')
-    print('                                                                                                        ------ Packets ------ ------- Bytes -------')
-    print('%38s %12s %38s %12s %10s %10s %10s %10s' % ('Bridge ID', 'State', 'Group ID', 'State', 'RX', 'TX', 'RX', 'TX'))
-    print('-------------------------------------- ------------ -------------------------------------- ------------ ---------- ---------- ---------- ----------')
     print(colorNone(), end = '')
 
-# --------------------------------------------------------------------------
-def printBridges(db):
-    bridges = db['bridges']
-    
-    for bridgeDetail in db['bridges']['detail']:
-        firstLine = 1
-
-        for groupId in bridgeDetail['groups']:
-            groupInfo = getGroup(db, groupId)
-
-            if bridgeDetail['state'] == 1 and groupInfo['state'] == 1:
-                clr = colorNone()
-            else:
-                if bridgeDetail['state'] == -1 or groupInfo['state'] == -1:
-                    clr = colorError()
-                else:
-                    clr = colorWarning()
-
-            setColor(clr)
-
-            if firstLine:
-                print('%38s %12s %38s %12s %10s %10s %10s %10s' % 
-                        (bridgeDetail['id'], 
-                        bridgeState(bridgeDetail['state']), 
-                        groupInfo['name'], 
-                        groupState(groupInfo['state']), 
-                        groupInfo['rxTraffic']['packets'], 
-                        groupInfo['txTraffic']['packets'],
-                        groupInfo['rxTraffic']['bytes'], 
-                        groupInfo['txTraffic']['bytes']))
-            else:
-                print('%51s %38s %12s %10s %10s %10s %10s' % (' ', 
-                        groupInfo['name'], 
-                        groupState(groupInfo['state']), 
-                        groupInfo['rxTraffic']['packets'], 
-                        groupInfo['txTraffic']['packets'],
-                        groupInfo['rxTraffic']['bytes'], 
-                        groupInfo['txTraffic']['bytes']))
-
-            setColor(colorNone())
-
-            firstLine = 0
-        
-        print(' ')
 
 # --------------------------------------------------------------------------
 def showSyntax():
@@ -218,20 +180,22 @@ def ctrlcHandler(sig, frame):
     print('... exiting')
     sys.exit(0)
 
+
 # --------------------------------------------------------------------------
 def main():
     while 1:
         try:
             db = loadInput()
             clearScreen()
-            printHeadline(db)
-            
-            #if len(db['bridges']) > 0:
-            #    printBridges(db)            
-            #else:
-            #    print('No bridges')
 
-            time.sleep(interval)
+            try:
+                printHeadline(db)            
+                time.sleep(interval)
+            except Exception as ie:
+                print('error encountered - will retry shortly')
+                time.sleep(interval * 2)
+                pass
+
         except Exception as e:
             print(e)
             showSyntax()
@@ -239,6 +203,7 @@ def main():
 
     if haveColorama:
         colorama.deinit()
+
 
 # --------------------------------------------------------------------------
 if __name__ == '__main__':
