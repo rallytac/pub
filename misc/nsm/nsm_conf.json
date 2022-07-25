@@ -22,14 +22,21 @@
     ],
 
     "run": {
-        "onIdle": "bash -c \"./onIdle.sh '${r}'\"",
-        "onGoingActive": "bash -c \"./onGoingActive.sh '${r}'\"",
-        "onActive": "bash -c \"./onActive.sh '${r}'\""
+        "onIdle": "./onIdle.sh",
+        "beforeGoingActive": "./beforeGoingActive.sh",
+        "onGoingActive": "./onGoingActive.sh",
+        "beforeActive": "./beforeActive.sh",
+        "onActive": "./onActive.sh"
     },
 
     "timing": {
         "txIntervalSecs": 1,
         "transitionWaitSecs": 5
+    },
+
+    "electionToken": {
+        "start": 1000000,
+        "end": 2000000
     },
 
     "logging":{

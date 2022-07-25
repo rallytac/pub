@@ -21,6 +21,7 @@ import colorama
 from cryptography.fernet import Fernet
 import base64
 import hashlib
+import subprocess
 
 RX_INTERVAL_SECS = 1
 
@@ -134,7 +135,7 @@ def clearScreen():
 
 
 # ---------------------------------------------------------------
-def generateToken():
+def generateToken(tokenStart, tokenEnd):
         global fixedToken
 
         if fixedToken >= 0:
@@ -145,7 +146,7 @@ def generateToken():
                 else:
                         fv = 0
 
-                return (fv + (random.randint(1, 1000000) + (2**32)))
+                return (fv + (random.randint(tokenStart, tokenEnd) + (2**32)))
 
 
 # ---------------------------------------------------------------
@@ -153,17 +154,23 @@ def logThis(lvl, msg):
         if not configuration['logging']['dashboard']:
                 if lvl <= configuration['logging']['level']:
                         if lvl == LOG_FATAL:
+                                clr = colorRed()
                                 t = 'F'
                         elif lvl == LOG_ERROR:
+                                clr = colorRed()
                                 t = 'E'
                         elif lvl == LOG_WARN:
+                                clr = colorYellow()
                                 t = 'W'
                         elif lvl == LOG_INFO:
+                                clr = colorGreen()
                                 t = 'I'
                         elif lvl == LOG_DEBUG:
+                                clr = colorNone()
                                 t = 'D'
 
-                        print(str(datetime.now()) + ' ' + t + ' : ' + msg)
+                        print('%s%s %s : %s%s' % (clr, str(datetime.now()), t, msg, colorNone()))
+
 
 
 # ---------------------------------------------------------------
@@ -211,12 +218,18 @@ def loadConfiguration(path):
 
         setDefaultConfigurationValue('run', {})
         setDefaultConfigurationValue('run', {}, 'onIdle', '')
+        setDefaultConfigurationValue('run', {}, 'beforeGoingActive', '')
         setDefaultConfigurationValue('run', {}, 'onGoingActive', '')
+        setDefaultConfigurationValue('run', {}, 'beforeActive', '')
         setDefaultConfigurationValue('run', {}, 'onActive', '')
 
         setDefaultConfigurationValue('timing', {})
         setDefaultConfigurationValue('timing', {}, 'txIntervalSecs', 1)
         setDefaultConfigurationValue('timing', {}, 'transitionWaitSecs', 5)
+
+        setDefaultConfigurationValue('electionToken', {})
+        setDefaultConfigurationValue('electionToken', {}, 'start', 1000000)
+        setDefaultConfigurationValue('electionToken', {}, 'end', 2000000)        
 
         setDefaultConfigurationValue('logging', {})
         setDefaultConfigurationValue('logging', {}, 'level', 3)
@@ -229,6 +242,7 @@ def loadConfiguration(path):
                 trackers[key]['token'] = 0
                 trackers[key]['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
                 trackers[key]['owner'] = ''
+                trackers[key]['stunSecs'] = 0
 
 
 # ---------------------------------------------------------------
@@ -243,6 +257,7 @@ def getIpAddressForInterface(nm):
 
 # ---------------------------------------------------------------
 def checkConfiguration():
+        global RX_INTERVAL_SECS
         global configuration
         
         if configuration['id'] == '':
@@ -285,6 +300,15 @@ def checkConfiguration():
         if configuration['timing']['transitionWaitSecs'] <= (RX_INTERVAL_SECS * 3):
                 printErrorAndExit('timing.transitionWaitSecs cannot be less than ' + str(RX_INTERVAL_SECS * 3))
 
+        if configuration['electionToken']['start'] <= 0:
+                printErrorAndExit('electionToken.start cannot be 0 or negative')
+
+        if (configuration['electionToken']['end'] <= configuration['electionToken']['start']):
+                printErrorAndExit('electionToken.end must be greater than electionToken.start')
+
+        if (configuration['electionToken']['end'] - configuration['electionToken']['start']) < 1000:
+                printErrorAndExit('electionToken.start and electionToken.end must have a range of 1000 or more')
+
         if configuration['logging']['level'] < 0 or configuration['logging']['level'] > 4:
                 printErrorAndExit('invalid logging.level')
 
@@ -293,22 +317,26 @@ def checkConfiguration():
 def initCrypto():
         global cryptoInstance
 
-        if configuration['networking']['cryptoPassword'] != None:
+        if configuration['networking']['cryptoPassword'] != None and configuration['networking']['cryptoPassword'] != '':
                 kdfBytes = hashlib.pbkdf2_hmac('sha256', str.encode(configuration['networking']['cryptoPassword']), b'04DBAA5900D5421D9CCB25A54ED4FA56', 10000, 32)
                 key = base64.urlsafe_b64encode(kdfBytes)
                 cryptoInstance = Fernet(key)
-
+                
 
 # ---------------------------------------------------------------
-def encryptString(s):
+def wireMsgFromString(s):
+        global cryptoInstance
+
         if cryptoInstance != None:
                 return cryptoInstance.encrypt(str.encode(s))
         else:
-                return str.encode(s)
+                return s.encode()
 
 
 # ---------------------------------------------------------------
-def decryptBuffer(b):
+def stringFromWireMsg(b):
+        global cryptoInstance
+
         if cryptoInstance != None:
                 return cryptoInstance.decrypt(b).decode()
         else:
@@ -338,7 +366,7 @@ def stateDesc(s):
 
 
 # ---------------------------------------------------------------
-def stateChange(tracker, newState):
+def stateChange(tracker, newState, tokenRange=None):
         global configuration
         global state
         global trackers
@@ -354,7 +382,7 @@ def stateChange(tracker, newState):
                 elif newState == ST_GOING_ACTIVE:
                         logThis(LOG_DEBUG, 'going active ' + goActiveDesc(tracker['goActiveTime']))
                         cmdToRun = configuration['run']['onGoingActive']
-                        tracker['token'] = generateToken()
+                        tracker['token'] = generateToken(tokenRange[0], tokenRange[1])
 
                 elif newState == ST_ACTIVE:
                         logThis(LOG_DEBUG, 'active ' + goActiveDesc(tracker['goActiveTime']))
@@ -377,6 +405,57 @@ def getState(res):
         mutex.acquire()
         rc = trackers[res]['state']
         mutex.release()
+        return rc
+
+
+# ---------------------------------------------------------------
+def getExternalTokenRange(tracker):
+        global DEFAULT_TOKEN_RANGE
+        global configuration
+
+        if configuration['run']['beforeGoingActive'] != '':
+                try:
+                        s = runCmd(tracker, configuration['run']['beforeGoingActive'])
+                        s = s.replace('\n', '')
+                        ars = s.split('-')
+                        if len(ars) != 2:
+                                raise Exception()
+                        
+                        if int(ars[0]) <= 0 or int(ars[1]) <= 0:
+                                logThis(LOG_ERROR, configuration['run']['beforeGoingActive'] + ' returned invalid token range values (zero or negative)')
+                                raise Exception()
+
+                        if int(ars[0]) >= int(ars[1]):
+                                logThis(LOG_ERROR, configuration['run']['beforeGoingActive'] + ' returned invalid token range values (start and end reversed)')
+                                raise Exception()
+
+                        if int(ars[1]) - int(ars[0]) < 1000:
+                                logThis(LOG_ERROR, configuration['run']['beforeGoingActive'] + ' returned an invalid token range')
+                                raise Exception()
+
+                        rc = [int(ars[0]), int(ars[1])]
+                except:
+                        rc = None
+        else:
+                rc = [configuration['electionToken']['start'], configuration['electionToken']['end']]
+        
+        return rc
+
+
+# ---------------------------------------------------------------
+def getExternalConfirmation(tracker):
+        global configuration
+
+        if configuration['run']['beforeActive'] != '':
+                try:
+                        s = runCmd(tracker, configuration['run']['beforeActive'])
+                        s = s.replace('\n', '')
+                        rc = (int(s) == 1)
+                except:
+                        rc = False
+        else:
+                rc = True
+        
         return rc
 
 
@@ -406,7 +485,7 @@ def rxThread():
                 if ready[0]:
                         wireMsg = sock.recv(10240)
                         try:
-                                toRecv = decryptBuffer(wireMsg)
+                                toRecv = stringFromWireMsg(wireMsg)
                                 obj = json.loads(toRecv)
 
                                 if obj['i'] != configuration['id']:
@@ -473,7 +552,7 @@ def txThread():
                 if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
                         for x in range(0, (configuration['networking']['txOversend'] + 1)):
                                 logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
-                                wireMsg = encryptString(msg)
+                                wireMsg = wireMsgFromString(msg)
                                 sock.sendto(wireMsg, (configuration['networking']['address'], configuration['networking']['port']))
                                 packetsTx = packetsTx + 1
                                 bytesTx = bytesTx + len(wireMsg)
@@ -525,16 +604,29 @@ def processRx(obj):
                         if tracker['goActiveTime'] != datetime.max:
                                 if datetime.now() >= tracker['goActiveTime'] :
                                         if tracker['state'] == ST_IDLE:
-                                                tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
-                                                stateChange(tracker, ST_GOING_ACTIVE)
+                                                tokenRange = getExternalTokenRange(tracker,)
+                                                if tokenRange != None:
+                                                        tracker['goActiveTime'] = datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))                                                        
+                                                        logThis(LOG_DEBUG, res + ' is going active with a token range of ' + str(tokenRange[0]) + '-' + str(tokenRange[1]))
+                                                        stateChange(tracker, ST_GOING_ACTIVE, tokenRange)
+                                                else:
+                                                        logThis(LOG_DEBUG, res + ' is denied going active - remaining idle')
 
                                         elif tracker['state'] == ST_GOING_ACTIVE:
-                                                tracker['goActiveTime'] = datetime.max
-                                                stateChange(tracker, ST_ACTIVE)
+                                                if getExternalConfirmation(tracker) == True:
+                                                        tracker['goActiveTime'] = datetime.max
+                                                        tracker['stunSecs'] = 0
+                                                        stateChange(tracker, ST_ACTIVE)
+                                                else:
+                                                        logThis(LOG_WARN, res + ' is denied active - going idle and stunning for ' + str(configuration['timing']['transitionWaitSecs'] * 5) + ' seconds')
+                                                        tracker['goActiveTime'] = datetime.max
+                                                        tracker['stunSecs'] = (configuration['timing']['transitionWaitSecs'] * 5)
+                                                        stateChange(tracker, ST_IDLE)
 
                         else:
                                 if tracker['state'] == ST_IDLE:
-                                        tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))
+                                        tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs'] + tracker['stunSecs'])))
+                                        tracker['stunSecs'] = 0
 
         mutex.release()
 
@@ -569,9 +661,9 @@ def ctrlcHandler(sig, frame):
 
 # ---------------------------------------------------------------
 def runCmd(tracker, cmd):
-        finalCmd = cmd.replace('${r}', tracker['res'])
-        logThis(LOG_INFO, 'running "' + finalCmd + '"')
-        os.system(finalCmd)
+        logThis(LOG_INFO, 'running "' + cmd + '" for ' + tracker['res'])
+        res = subprocess.run([cmd, tracker['res']], stdout=subprocess.PIPE)
+        return res.stdout.decode('utf-8')
 
 
 # ---------------------------------------------------------------
