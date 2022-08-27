@@ -25,6 +25,7 @@ except:
 
 appVersion = '0.2'
 statusFile = ''
+routeFile = ''
 interval = 5
 
 if haveColorama:
@@ -55,8 +56,8 @@ def colorWarning():
 
 
 # --------------------------------------------------------------------------
-def loadInput():
-    with open(statusFile) as f:
+def loadInput(fn):
+    with open(fn) as f:
         return json.load(f)
 
 
@@ -138,7 +139,7 @@ def timeDesc(seconds):
 
 
 # --------------------------------------------------------------------------
-def printHeadline(db):
+def printIt(db, routes):
     tsdelta = int(time.time() - db['ts'])
     if tsdelta > (interval * 2):
         clr = colorError()
@@ -154,21 +155,31 @@ def printHeadline(db):
     print('Rallypoint Monitor v%s' % (appVersion))
     print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
     print('')
-    print('Monitoring %s at %d second intervals' % (statusFile, interval))
+    print('Monitoring \'%s\' and \'%s\' at %d second intervals' % (statusFile, routeFile, interval))
     print('Last check at %s %s uptime %s %s updated %s ago,' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
     print('')
     print('Basics-----------------------------------------------------------------------------------------------------------------------------------------')
-    print('System-Wide CPU: %7s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %10s packets %s TX: %10s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
+    print('System-Wide CPU: %9s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %10s packets %s TX: %10s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
+    
+    print('')
+    print('Throughput kbps: %10s (EMA: %s)' % (round(db['throughput']["rate"] / 1000, 3), round(db['throughput']["rateEma"] / 1000, 3)))
+
 
     print('')
     print('Peers------------------------------------------------------------------------------------------------------------------------------------------')
-    print('%30s %30s %5s %15s' % ('ID', 'Address', 'Type', 'State'))
+    print('%30s %30s %5s %15s %10s' % ('ID', 'Address', 'Type', 'State', 'Fails'))
     print('-----------------------------------------------------------------------------------------------------------------------------------------------')
     for peer in db['links']['peers']['list']:
-        print('%30s %30s %5s %15s' % (peer['id'], peer.get('address', '?'), peerType(peer['type']), peerState(peer['state'])))
+        print('%30s %30s %5s %15s %10s' % (peer['id'], peer.get('address', '?'), peerType(peer['type']), peerState(peer['state']), peer['failedConnections']))
+
+    print('')
+    print('Routes-----------------------------------------------------------------------------------------------------------------------------------------')
+    print('%42s %7s %7s %10s %10s %10s %10s' % ('ID', 'Clients', 'Peers', 'RX Blobs', 'RX Bytes', 'TX Blobs', 'TX Bytes'))
+    print('-----------------------------------------------------------------------------------------------------------------------------------------------')
+    for rme in routes['routeMap']:
+        print('%42s %7s %7s %10s %10s %10s %10s' % (rme['id'], rme['clients'], rme['peers'], rme['rxTraffic']['blobs'], rme['rxTraffic']['bytes'], rme['txTraffic']['blobs'], rme['txTraffic']['bytes']))
 
     print(colorNone(), end = '')
-
 
 # --------------------------------------------------------------------------
 def showSyntax():
@@ -185,11 +196,12 @@ def ctrlcHandler(sig, frame):
 def main():
     while 1:
         try:
-            db = loadInput()
+            db = loadInput(statusFile)
+            routes = loadInput(routeFile)
             clearScreen()
 
             try:
-                printHeadline(db)            
+                printIt(db, routes)
                 time.sleep(interval)
             except Exception as ie:
                 print('error encountered - will retry shortly')
@@ -222,4 +234,5 @@ if __name__ == '__main__':
     
     signal.signal(signal.SIGINT, ctrlcHandler)
     statusFile = sys.argv[1]
+    routeFile = sys.argv[2]
     main()
