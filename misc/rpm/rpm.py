@@ -116,25 +116,37 @@ def timeDesc(seconds):
     rc = ''
 
     if(d > 0):
-        rc = str(d) + ' days'
+        if d == 1:
+            rc = str(d) + ' day'
+        else:
+            rc = str(d) + ' days'
 
     if(h > 0 or len(rc) > 0):
         if(len(rc) > 0):
             rc += ', '
 
-        rc += '{0:d} hours'.format(h)
+        if h == 1:
+            rc += '{0:d} hour'.format(h)
+        else:
+            rc += '{0:d} hours'.format(h)
 
     if(m > 0 or len(rc) > 0):
         if(len(rc) > 0):
             rc += ', '
 
-        rc += '{0:d} minutes'.format(m)
+        if m == 1:
+            rc += '{0:d} minute'.format(m)
+        else:
+            rc += '{0:d} minutes'.format(m)
 
     if(len(rc) > 0):
         rc += ', '
 
-    rc += '{0:d} seconds'.format(s)
-    
+    if s == 1:
+        rc += '{0:d} second'.format(s)
+    else:
+        rc += '{0:d} seconds'.format(s)
+
     return rc
 
 
