@@ -71,7 +71,7 @@
                 "engage:gc"
             ],
             "address": {
-                "address": "239.255.255.250",
+                "address": "255.255.255.255",
                 "port": 1900
             },
             "advertising":{
