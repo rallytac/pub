@@ -1360,7 +1360,7 @@ public class ActiveConfiguration
                     {
                         JSONObject address = new JSONObject();
 
-                        address.put(Engine.JsonFields.Address.address, "239.255.255.250");
+                        address.put(Engine.JsonFields.Address.address, "255.255.255.255");
                         address.put(Engine.JsonFields.Address.port, 1900);
 
                         ssdp.put(Engine.JsonFields.Address.objectName, address);
