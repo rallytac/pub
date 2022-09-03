@@ -72,11 +72,16 @@ int main(int argc, char *argv[])
     unsigned long bytesSent = 0;
     unsigned long pktsFiltered = 0;
     unsigned long bytesFiltered = 0;
+    const char *dstAddr = nullptr;
 
-    while ((opt = getopt(argc, argv, "i:bls:c:r:t:f:g:")) != -1)
+    while ((opt = getopt(argc, argv, "i:bls:c:r:t:f:g:a:")) != -1)
     {
         switch (opt)
         {
+            case 'a':
+                dstAddr = optarg;
+                break;
+
             case 'i':
                 ifindex = if_nametoindex(optarg);
                 if (ifindex == 0)
@@ -159,7 +164,7 @@ int main(int argc, char *argv[])
                 << "udpreplay 1.0.0 © 2020 Erik Rigtorp <erik@rigtorp.se> "
                 "https://github.com/rigtorp/udpreplay\n"
                 "usage: udpreplay [-i iface] [-l] [-s speed] [-c millisec] [-r "
-                "repeat] [-t ttl] [-f port] [-g port] "
+                "repeat] [-t ttl] [-f port] [-g port] [-a addr] "
                 "pcap_file\n"
                 "\n"
                 "  -i iface    interface to send packets through\n"
@@ -170,7 +175,8 @@ int main(int argc, char *argv[])
                 "  -t ttl      packet ttl\n"
                 "  -f port     from port\n"
                 "  -g port     going to port\n"
-                "  -b          enable broadcast (SO_BROADCAST)"
+                "  -a          going to address\n"
+                "  -b          enable broadcast (SO_BROADCAST)"                
                 << std::endl;
         
         return 1;
@@ -386,6 +392,11 @@ int main(int argc, char *argv[])
                 addr.sin_port = udp->uh_dport;
             #endif
             addr.sin_addr = {ip->ip_dst};
+            if( dstAddr != nullptr )
+            {
+                inet_pton(AF_INET, dstAddr, &addr.sin_addr.s_addr);
+            }
+
             auto n = sendto(fd, d, len, 0, reinterpret_cast<sockaddr *>(&addr), sizeof(addr));
             if (n != len)
             {
