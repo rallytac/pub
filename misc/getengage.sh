@@ -67,19 +67,6 @@ function fetchVersionFiles()
 	# $1 ... version
 	# #2 ... platform
 	# $3 ... file name
-	function fetchBintrayFile()
-	{	
-		echo "Fetching ${3} from ${1}/${2} ..."
-		rm -rf ${3}
-
-		getFileFromUrl "${3}" "https://bintray.com/rallytac/pub/download_file?file_path=${1}/${2}/${3}"
-		if [[ $? != "0" ]]; then
-			rm -rf ${3}
-			echo "ERROR: Error while downloading ${3}"
-			exit 1
-		fi
-	}
-
 	function fetchArtifactsFile()
 	{	
 		echo "Fetching ${3} from ${1}/${2} ..."
@@ -138,14 +125,14 @@ function determineLatestEngageVersion()
 	rm -rf "${TMP_FILE}"
 	getFileFromUrl "${TMP_FILE}" "http://artifacts.rallytac.com/artifacts/builds"
 	if [[ $? != "0" ]]; then
-                ERROR_ENCOUNTERED=1
-        fi
-
+        ERROR_ENCOUNTERED=1
+	else
         if [[ ! -f "${TMP_FILE}" ]]; then
                 ERROR_ENCOUNTERED=1
+		else
+			DESIRED_VERSION=`(cat "${TMP_FILE}" | grep "[DIR]" | tail -1 | awk -F'href="' '{print $2}' | awk -F'/' '{print $1}')`
         fi
-
-	DESIRED_VERSION=`(cat "${TMP_FILE}" | grep -o '"latest_version":"[^"]*' | cut -d'"' -f4)`
+    fi
 
 	rm -rf "${TMP_FILE}"
 }
@@ -159,5 +146,6 @@ if [[ "${DESIRED_VERSION}" != "" ]]; then
 
 	fetchVersionFiles
 	exit 0
+else
+	echo "No version specified or determined"
 fi
-
