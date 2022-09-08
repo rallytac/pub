@@ -15,7 +15,30 @@ logMsg("Copyright (c) 2020 Rally Tactical Systems, Inc.");
 logMsg("=================================================================");
 
 // Our global Engage object - its "methods" closely match the API calls in the Engine
-let engage = require("engage-engine");
+// Normally, we'd use "engage-engine" which Node would look for in node_modules.  But if
+// we're developing or testing, we may want to override that and point to a specific
+// location.  We'll do that with an environment variable named "ENGAGE_NODEJS_MODULE".
+var engageModule = ""
+
+try
+{
+        engageModule = process.env.ENGAGE_NODEJS_MODULE;        
+}
+catch
+{
+        engageModule = "engage-engine";
+}
+
+console.log(engageModule)
+
+if(engageModule == undefined || engageModule == "")
+{
+    engageModule = "engage-engine";
+}
+
+console.log("engageModule=" + engageModule);
+
+let engage = require(engageModule);
 
 // Our TX priority and flags
 var txPriority = 0;
@@ -27,16 +50,13 @@ var enginePolicy = require("./sample_engine_policy.json");
 // This is the user identity that we'll use for the Engine
 var userIdentity = require("./sample_user_identity.json");
 
+var restartOnStopped = false;
+
 // TODO !!!
 // What we should do here it to either generate or retrieve a previously-generated UUID 
 // to identify this node and plug that into the userIdentity object.  If we don't do this, 
 // the Engine will create a new node ID every time and we will show up as a new node everywhere 
 // each time the Engine is started.
-
-// Fire up the Engine
-fireUpTheEngine();
-
-// Load the mission package ...
 
 // *****************************************************************************
 // For simplicity's sake, we'll just load a multicast or unicast mission package
@@ -49,11 +69,8 @@ var groups = missionPackage["groups"];
 
 logMsg("Loaded mission '" + missionPackage.name + "'");
 
-// Create all the groups here (because we do it often when testing)
-createAllGroups();
-
-// Join all the groups here (because we do it often when testing)
-joinAllGroups();
+// Fire up the Engine
+fireUpTheEngine();
 
 // Start up our little CLI - we'll go round and round here until "q"
 // is entered.
@@ -71,9 +88,7 @@ stdin.addListener("data", function(d) {
     }
     else if(input == "q")
     {
-        engage.disableCallbacks()
-        shutdownTheEngine();        
-        process.exit();  
+        engage.stop();
     }
     else if(input.startsWith("c"))
     {
@@ -171,6 +186,32 @@ stdin.addListener("data", function(d) {
             engage.unmuteGroupRx(groups[parseInt(p)].id, txPriority, txFlags);
         }        
     }
+
+    else if(input.startsWith("y"))
+    {
+        var p = input.substring(1);
+        if(p == "a")
+        {
+            muteTxOnAllGroups();
+        }
+        else
+        {
+            engage.muteGroupTx(groups[parseInt(p)].id, txPriority, txFlags);
+        }        
+    }
+    else if(input.startsWith("k"))
+    {
+        var p = input.substring(1);
+        if(p == "a")
+        {
+            unmuteTxOnAllGroups();
+        }
+        else
+        {
+            engage.unmuteGroupTx(groups[parseInt(p)].id, txPriority, txFlags);
+        }        
+    }
+
     else if(input.startsWith("gm"))
     {
         var params = input.substring(2);
@@ -193,6 +234,12 @@ stdin.addListener("data", function(d) {
             console.log(json);
         }
     }
+
+    else if(input.startsWith("r"))
+    {
+        restartTheEngine();
+    }
+
     else
     {
         if( input != "" )
@@ -208,6 +255,7 @@ function showHelp()
 {
     console.log("?................... help");
     console.log("q................... quit");
+    console.log("r................... restart");
     console.log("tc.................. test crypto");
     console.log("ca||c<n>............ create all groups || group n");
     console.log("da||d<n>............ delete all groups || group n");
@@ -217,6 +265,8 @@ function showHelp()
     console.log("ea||e<n>............ end tx on all groups || group n");
     console.log("ma||m<n>............ mute rx on all groups || group n");
     console.log("ua||m<n>............ unmute rx on all groups || group n");
+    console.log("ya||m<n>............ mute tx on all groups || group n");
+    console.log("ka||m<n>............ unmute tx on all groups || group n");
     console.log("gm pp,gc,rp,mn...... generate mission for passphrase 'pp', with 'gc' groups, 'rp' rallypoint, named 'mn'");
 }
 
@@ -229,16 +279,35 @@ function fireUpTheEngine()
     engage.start();    
 }
 
+function restartTheEngine()
+{
+    restartOnStopped = true;
+    engage.stop();
+}
+
 //--------------------------------------------------------
 function setupEventHandlers()
 {
     // Engine events
     engage.on("engineStarted", function(eventExtraJson) {
         logMsg("engineStarted" + ", x='" + eventExtraJson + "'");
+        createAllGroups();
+        joinAllGroups();
     });
 
     engage.on("engineStopped", function(eventExtraJson) {
         logMsg("engineStopped" + ", x='" + eventExtraJson + "'");
+        engage.shutdown();
+
+        if( restartOnStopped )
+        {
+            restartOnStopped = false;
+            fireUpTheEngine();
+        }
+        else
+        {
+            process.exit();
+        }
     });
 
     
@@ -411,15 +480,7 @@ function logMsg(msg)
     var m = new Date();
     var dateString = m.getUTCFullYear() +"/"+ (m.getUTCMonth()+1) +"/"+ m.getUTCDate() + " " + m.getUTCHours() + ":" + m.getUTCMinutes() + ":" + m.getUTCSeconds();
 
-    console.log(chalk.magenta(dateString + "....." + msg));
-}
-
-//--------------------------------------------------------
-function shutdownTheEngine()
-{
-    deleteAllGroups();
-    engage.stop();
-    engage.shutdown();
+    console.log(chalk.gray("Nodejs-" + dateString + "....." + msg));
 }
 
 //--------------------------------------------------------
@@ -506,6 +567,24 @@ function unmuteRxOnAllGroups()
     for(var groupIndex in groups)
     {
         engage.unmuteGroupRx(groups[groupIndex].id);
+    }    
+}
+
+//--------------------------------------------------------
+function muteTxOnAllGroups()
+{
+    for(var groupIndex in groups)
+    {
+        engage.muteGroupTx(groups[groupIndex].id);
+    }    
+}
+
+//--------------------------------------------------------
+function unmuteTxOnAllGroups()
+{
+    for(var groupIndex in groups)
+    {
+        engage.unmuteGroupTx(groups[groupIndex].id);
     }    
 }
 
