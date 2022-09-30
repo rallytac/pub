@@ -190,38 +190,39 @@ def printBridges(db):
         for groupId in bridgeDetail['groups']:
             groupInfo = getGroup(db, groupId)
 
-            if bridgeDetail['state'] == 1 and groupInfo['state'] == 1:
-                clr = colorNone()
-            else:
-                if bridgeDetail['state'] == -1 or groupInfo['state'] == -1:
-                    clr = colorError()
+            if groupInfo != None:
+                if bridgeDetail['state'] == 1 and groupInfo['state'] == 1:
+                    clr = colorNone()
                 else:
-                    clr = colorWarning()
+                    if bridgeDetail['state'] == -1 or groupInfo['state'] == -1:
+                        clr = colorError()
+                    else:
+                        clr = colorWarning()
 
-            setColor(clr)
+                setColor(clr)
 
-            if firstLine:
-                print('%38s %12s %38s %12s %10s %10s %10s %10s' % 
-                        (bridgeDetail['id'], 
-                        bridgeState(bridgeDetail['state']), 
-                        groupInfo['name'], 
-                        groupState(groupInfo['state']), 
-                        groupInfo['rxTraffic']['packets'], 
-                        groupInfo['txTraffic']['packets'],
-                        groupInfo['rxTraffic']['bytes'], 
-                        groupInfo['txTraffic']['bytes']))
-            else:
-                print('%51s %38s %12s %10s %10s %10s %10s' % (' ', 
-                        groupInfo['name'], 
-                        groupState(groupInfo['state']), 
-                        groupInfo['rxTraffic']['packets'], 
-                        groupInfo['txTraffic']['packets'],
-                        groupInfo['rxTraffic']['bytes'], 
-                        groupInfo['txTraffic']['bytes']))
+                if firstLine:
+                    print('%38s %12s %38s %12s %10s %10s %10s %10s' % 
+                            (bridgeDetail['id'], 
+                            bridgeState(bridgeDetail['state']), 
+                            groupInfo['name'], 
+                            groupState(groupInfo['state']), 
+                            groupInfo['rxTraffic']['packets'], 
+                            groupInfo['txTraffic']['packets'],
+                            groupInfo['rxTraffic']['bytes'], 
+                            groupInfo['txTraffic']['bytes']))
+                else:
+                    print('%51s %38s %12s %10s %10s %10s %10s' % (' ', 
+                            groupInfo['name'], 
+                            groupState(groupInfo['state']), 
+                            groupInfo['rxTraffic']['packets'], 
+                            groupInfo['txTraffic']['packets'],
+                            groupInfo['rxTraffic']['bytes'], 
+                            groupInfo['txTraffic']['bytes']))
 
-            setColor(colorNone())
+                setColor(colorNone())
 
-            firstLine = 0
+                firstLine = 0
         
         print(' ')
 
