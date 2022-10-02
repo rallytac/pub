@@ -17,7 +17,6 @@ import random
 import signal
 import uuid
 import argparse
-import colorama
 from cryptography.fernet import Fernet
 import base64
 import hashlib
@@ -52,6 +51,7 @@ global errorsRx
 global maxRunSecs
 global startTs
 global cryptoInstance
+global netError
 
 try:
     import colorama
@@ -74,6 +74,7 @@ running = False
 maxRunSecs = 0
 cryptoInstance = None
 startTs = datetime.now()
+netError = False
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
@@ -81,6 +82,7 @@ parser.add_argument('--id', type=str, help='Override the ID for this instance')
 parser.add_argument('--log-level', type=int, help='Override the logging level in the configuration file')
 parser.add_argument('--fixed-token', type=int, help='The global voting token to use (default is random per resource)')
 parser.add_argument('--max-run-secs', type=int, help='Maximum number of seconds to run (generally only useful for testing')
+parser.add_argument('--log-cmds', type=bool, help='Log command output(s)')
 args = parser.parse_args()
 
 # --------------------------------------------------------------------------
@@ -234,6 +236,7 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('logging', {})
         setDefaultConfigurationValue('logging', {}, 'level', 3)
         setDefaultConfigurationValue('logging', {}, 'dashboard', True)
+        setDefaultConfigurationValue('logging', {}, 'logCommandOutput', False)        
 
         for key in configuration['resources']:
                 trackers[key] = {}
@@ -265,10 +268,6 @@ def checkConfiguration():
 
         if configuration['networking']['interfaceName'] == '':
                 printErrorAndExit('no networking.interfaceName defined')
-
-        configuration['networking']['interfaceAddress'] = getIpAddressForInterface(configuration['networking']['interfaceName'])
-        if configuration['networking']['interfaceAddress'] == '':
-                printErrorAndExit('cannot determine ip address for "' + configuration['networking']['interfaceName'] + '"')                        
 
         if configuration['networking']['address'] == '':
                 printErrorAndExit('no networking.address defined')
@@ -395,7 +394,9 @@ def stateChange(tracker, newState, tokenRange=None):
                 tracker['state'] = newState
 
         if cmdToRun != '':
-                runCmd(tracker, cmdToRun)
+                outputString = runCmd(tracker, cmdToRun)
+                if configuration['logging']['logCommandOutput']:
+                        print(outputString)
 
 
 # ---------------------------------------------------------------
@@ -465,6 +466,7 @@ def rxThread():
         global packetsRx
         global bytesRx
         global errorsRx
+        global netError
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -479,7 +481,7 @@ def rxThread():
         mreq = struct.pack('=4s4s', socket.inet_aton(configuration['networking']['address']), socket.inet_aton(configuration['networking']['interfaceAddress']))
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        while running:
+        while running and not netError:
                 ready = select.select([sock], [], [], RX_INTERVAL_SECS)
 
                 if ready[0]:
@@ -510,6 +512,7 @@ def txThread():
         global trackers
         global packetsTx
         global bytesTx
+        global netError
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, configuration['networking']['ttl'])
@@ -517,45 +520,48 @@ def txThread():
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         sock.bind((configuration['networking']['interfaceAddress'], configuration['networking']['port']))
 
-        while running:
-                time.sleep(configuration['timing']['txIntervalSecs'])
+        while running and not netError:
+                try:
+                        time.sleep(configuration['timing']['txIntervalSecs'])
 
-                sendTheMsg = False
+                        sendTheMsg = False
 
-                msg = '{'
-                msg += '"i":"' + configuration['id'] + '"'
-                msg += ',"r":['
+                        msg = '{'
+                        msg += '"i":"' + configuration['id'] + '"'
+                        msg += ',"r":['
 
-                cnt = 0
+                        cnt = 0
 
-                mutex.acquire()
+                        mutex.acquire()
 
-                for res in trackers:
-                        st = trackers[res]['state']
+                        for res in trackers:
+                                st = trackers[res]['state']
 
-                        if st == ST_GOING_ACTIVE or st == ST_ACTIVE:
-                                sendTheMsg = True
-                                cnt = cnt + 1
-                                if cnt > 1:
-                                        msg += ','
+                                if st == ST_GOING_ACTIVE or st == ST_ACTIVE:
+                                        sendTheMsg = True
+                                        cnt = cnt + 1
+                                        if cnt > 1:
+                                                msg += ','
 
-                                msg += '{'
-                                msg += '"r":"' + str(res) + '"'
-                                msg += ',"t":' + str(trackers[res]['token'])
-                                msg += ',"s":' + str(st)
-                                msg += '}'
+                                        msg += '{'
+                                        msg += '"r":"' + str(res) + '"'
+                                        msg += ',"t":' + str(trackers[res]['token'])
+                                        msg += ',"s":' + str(st)
+                                        msg += '}'
 
-                mutex.release()                                
+                        mutex.release()                                
 
-                msg += ']}'
+                        msg += ']}'
 
-                if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
-                        for x in range(0, (configuration['networking']['txOversend'] + 1)):
-                                logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
-                                wireMsg = wireMsgFromString(msg)
-                                sock.sendto(wireMsg, (configuration['networking']['address'], configuration['networking']['port']))
-                                packetsTx = packetsTx + 1
-                                bytesTx = bytesTx + len(wireMsg)
+                        if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
+                                for x in range(0, (configuration['networking']['txOversend'] + 1)):
+                                        logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
+                                        wireMsg = wireMsgFromString(msg)
+                                        sock.sendto(wireMsg, (configuration['networking']['address'], configuration['networking']['port']))
+                                        packetsTx = packetsTx + 1
+                                        bytesTx = bytesTx + len(wireMsg)
+                except:
+                        netError = True
 
 
 # ---------------------------------------------------------------
@@ -714,8 +720,14 @@ def showDashboard():
                         clr = colorYellow()
                 elif tracker['state'] == ST_ACTIVE:
                         clr = colorGreen()
+                elif tracker['state'] == ST_NONE:
+                        clr = colorYellow()
+                else:
+                        clr = colorNone()
 
-                if tracker['state'] == ST_IDLE:
+                if tracker['state'] == ST_NONE:
+                        print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '?', colorNone()))
+                elif tracker['state'] == ST_IDLE:
                         print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), tracker['owner'], colorNone()))
                 else:
                         print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '(self)', colorNone()))
@@ -727,6 +739,17 @@ def printHeadline():
         print('nsm v0.1')
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
+
+
+# ---------------------------------------------------------------
+def determineIpAddressOfInterface():
+        global configuration
+
+        configuration['networking']['interfaceAddress'] = getIpAddressForInterface(configuration['networking']['interfaceName'])
+        if configuration['networking']['interfaceAddress'] == '':
+                return False
+        else:
+                return True
 
 
 # ---------------------------------------------------------------
@@ -747,42 +770,53 @@ if __name__ == "__main__":
                 fixedToken = -1
 
         if args.log_level != None and args.log_level >= 0:
-                configuration['logging']['level'] = args.log_level
+                configuration['logging']['level'] = args.log_level        
 
         checkConfiguration()
         initCrypto()
 
-        signal.signal(signal.SIGINT, ctrlcHandler)        
-
-        logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
-
         running = True
-        processRx(None)
-
-        startRxTx()
-
-        if args.max_run_secs != None:
-                maxRunSecs = args.max_run_secs
-        else:
-                maxRunSecs = 0
+        signal.signal(signal.SIGINT, ctrlcHandler)    
 
         while running:
                 if configuration['logging']['dashboard']:
                         showDashboard()
 
-                time.sleep(1)
+                netError = False
 
-                if maxRunSecs > 0:
-                        maxRunSecs = maxRunSecs - 1
-                        if maxRunSecs <= 0:
-                                running = False
-                                break
-                
+                if not determineIpAddressOfInterface():
+                        logThis(LOG_INFO, 'waiting to determine IP address for interface ' + configuration['networking']['interfaceName'])
+                        time.sleep(1)
+                        continue                        
 
-        logThis(LOG_INFO, 'stopping...')
-        stopRxTx()
+                logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
 
-        for res in trackers:
-                stateChange(trackers[res], ST_IDLE)
+                processRx(None)
+
+                startRxTx()
+
+                if args.max_run_secs != None:
+                        maxRunSecs = args.max_run_secs
+                else:
+                        maxRunSecs = 0
+
+                while running and not netError:
+                        if configuration['logging']['dashboard']:
+                                showDashboard()
+
+                        time.sleep(1)
+
+                        if maxRunSecs > 0:
+                                maxRunSecs = maxRunSecs - 1
+                                if maxRunSecs <= 0:
+                                        running = False
+                                        break
+                        
+
+                logThis(LOG_INFO, 'stopping...')
+                stopRxTx()
+
+                for res in trackers:
+                        stateChange(trackers[res], ST_IDLE)
 
         print('done!')
