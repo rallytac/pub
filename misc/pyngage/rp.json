@@ -1,0 +1,16 @@
+{
+    "host":
+    {
+        "address":"127.0.0.1",
+        "port":7443
+    },
+
+    "verifyPeer":true,
+    "allowSelfSignedCertificate":false,
+    "transactionTimeoutMs":30000,
+    "caCertificates":
+    [
+        "@certstore://rtsCA"
+    ]
+}
+
