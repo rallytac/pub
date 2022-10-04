@@ -1,0 +1,26 @@
+{
+   "id": "mission",
+   "name": "mi",
+   "description": "",
+   "groups": [
+      {
+         "id": "g1",
+         "type": 1,
+         "name": "g1",
+         "txAudio": {
+            "encoder": 5,
+            "fdx": false,
+            "framingMs": 20,
+            "noHdrExt": true
+         },
+         "tx": {
+            "address": "192.168.0.183",
+            "port": 22302
+         },
+         "rx": {
+            "address": "192.168.0.107",
+            "port": 22302
+         }
+      }
+   ]
+}

@@ -1,0 +1,33 @@
+{
+        "dataDirectory": "./data/${node_id}",
+
+	"internals":{
+		"maxTxSecs":86400
+	},
+
+        "timelines": {
+                "enabled": false,
+                "storageRoot": "",
+                "maxStorageQuotaMb": 20,
+                "maxEventAgeSecs": 86400,
+                "maxEvents": 1000,
+                "ephemeral": false
+        },
+
+        "licensing": {
+                "entitlement": "",
+                "key": "",
+                "activationCode": "",
+                "manufacturerId": ""
+        },
+
+        "networking": {
+                "defaultNic": "",
+                "preventMulticastFailover": true
+        },
+
+        "audio": {
+                "internalRate": 8000,
+                "internalChannels": 1
+        }
+}
