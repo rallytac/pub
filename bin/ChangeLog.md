@@ -1,6 +1,34 @@
 # Change Log
 
-## June 6 - 1.228.9068
+## October 14, 2022 - 1.232.9072
+- Adds correct thread name for Sys:SignalListener.
+- Adds correct thread name for Sys:ProcessMonitor.
+- Adds correct thread name for PeriodicTimer.
+- Adds Rallypoint peer roundtrip requests as a method to perform application-level keepalives.
+- Adds Windows setup packages for RP, EBS, and EAR.
+- Adds whitelisting/blacklisting of streams registered by RP peers.
+- Adds engageGetDeviceId() to the non-C interfaces.
+- Adds the product version number to the RP, EBS, and EAR status reports.
+- Adds support for alias specializers and, through that, group cross-mute support.
+- Adds missing thread names in logging.
+- Adds optional production of the RP route map in JSON format.
+- Adds the ability to ignore traffic from designated sources on a group-by-group basis.
+- Adds an optional application-provided audio interface for Java-based platforms.
+- Adds file protection safeguards to prevent simultaneous reading/writing of dynamic configuration files.
+- Adds the engageSetCertStore() API call that allows for setting the certstore buffer directly instead of loading from a file.
+- Adds support for linear PCM (i.e. uncompressed) as a RTP payload.
+- Adds the getDeviceId API call to the Node.js interface layer.
+- Changes the MELPe default block count from 3 to 1 to simplify interoperability with systems that do not support MELPe superframes.
+- Standardizes default configuration location of "\ProgramData\Rally Tactical Systems" for RP, EBS, and EAR.
+- Corrects an issue in Rallypoints related to an outbound mesh leaf not being properly recognized.
+- Corrects a bug in ecstool that prevented operation on Windows.
+- Corrects an issue with microphone handling on Android after an audio file is played to a group.
+- Corrects a number of issues with the wolfSSL library on Windows for FIPS140-2 support.
+- Corrects an issue with EBS when operating on codecs that are framed in blocks rather than milliseconds.
+- Corrects an issue with RTP timestamps for Opus-encoded payloads.
+- Corrects an issue when processing dynamic configuration files that change more than once in one second.
+
+## June 6, 2022 - 1.228.9068
 - Adds a security classification level setting to group definitions that allows implementors to determine communication types appropriate for a group.
 - Adds "--version" command-line parameter to engage-cmd, rallypointd, engagebridged, and eard.
 - Corrects a race-condition bug on shutdown that caused periodic memory corruption.
@@ -8,7 +36,7 @@
 - Corrects a hung operation on engageStop.
 - Corrects a bug causing random crashes when packets are sent on a group that has failed over to multicast.
 
-## May 28, 2022, - 1.226.9066
+## May 28, 2022 - 1.226.9066
 - Adds connection timeout settings for Rallypoint connections to better handle high-latency transports.
 - Adds preliminary detection of traffic loops on Rallypoint meshes.
 - Adds support for 3rd-party FIPS 140-2 cryptographic engines to be loaded at runtime.
