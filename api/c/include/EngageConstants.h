@@ -35,6 +35,10 @@ static const int ENGAGE_RESULT_NOT_STARTED = -5;
 static const int ENGAGE_RESULT_ALREADY_STARTED = -6;
 /** @brief Insufficient space in destination */
 static const int ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE = -7;
+/** @brief Initialization of the crypto module failed */
+static const int ENGAGE_RESULT_CRYPTO_MODULE_INITIALIZATION_FAILED = -8;
+/** @brief An application high resolution timer is already defined */
+static const int ENGAGE_RESULT_HIGH_RES_TIMER_ALREADY_EXISTS = -9;
 /** @} */
 
 
@@ -119,18 +123,24 @@ static const int ENGAGE_NOTIFICATIONS_DISABLE = 0;
  * @see engageBeginGroupTx(), engageBeginGroupTxAdvanced()
  *  @{
  */
+
 /** @brief Sets the EMERGENCY flag in the transmitted stream */
-static const uint8_t ENGAGE_TXFLAG_EMERGENCY           = 0x0001;
+static const uint8_t ENGAGE_TXFLAG_EMERGENCY                = 0x0001;
+
 /** @brief Indicates that the transmission has concluded */
-static const uint8_t ENGAGE_TXFLAG_TX_END              = 0x0002;                    // READ-ONLY!!
+static const uint8_t ENGAGE_TXFLAG_TX_END                   = 0x0002;                    // READ-ONLY!!
+
 /** @brief Indicates that the transmission is coming from an automated system */
-static const uint8_t ENGAGE_TXFLAG_AUTOMATED_SYSTEM    = 0x0004;
+static const uint8_t ENGAGE_TXFLAG_AUTOMATED_SYSTEM         = 0x0004;
+
 /** @brief Indicates a "sticky" transmission ID (if non-zero) */
-static const uint8_t ENGAGE_TXFLAG_STICKY_TID          = 0x0008;
+static const uint8_t ENGAGE_TXFLAG_STICKY_TID               = 0x0008;
+
 /** @brief Indicates that the transmission ID is no longer valid */
-static const uint8_t ENGAGE_TXFLAG_TID_INVALIDATED     = 0x0010;                    // READ-ONLY!!
+static const uint8_t ENGAGE_TXFLAG_TID_INVALIDATED          = 0x0010;                    // READ-ONLY!!
+
+/** @brief Indicates that the receiver should auto-mute using the alias specializer if receiver has that specializer present */
+static const uint8_t ENGAGE_TXFLAG_MUTE_RX_FOR_SPECIALIZER  = 0x0020;                    // READ-ONLY!!
 /** @} */
-
-
 
 #endif // EngageConstants_h

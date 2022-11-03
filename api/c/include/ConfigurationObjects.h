@@ -248,31 +248,45 @@ namespace AppConfigurationObjects
         \
         std::string serialize(const int indent = -1) \
         { \
-            nlohmann::json j; \
-            to_json(j, *this); \
-            return j.dump(indent); \
+            try \
+            { \
+                nlohmann::json j; \
+                to_json(j, *this); \
+                return j.dump(indent); \
+            } \
+            catch(...) \
+            { \
+                return std::string("{}"); \
+            } \
         }
 
     #define IMPLEMENT_WRAPPED_JSON_SERIALIZATION(_cn) \
         public: \
         std::string serializeWrapped(const int indent = -1) \
         { \
-            nlohmann::json j; \
-            to_json(j, *this); \
-            \
-            std::string rc; \
-            char firstChar[2]; \
-            firstChar[0] = #_cn[0]; \
-            firstChar[1] = 0; \
-            firstChar[0] = tolower(firstChar[0]); \
-            rc.assign("{\""); \
-            rc.append(firstChar); \
-            rc.append((#_cn) + 1); \
-            rc.append("\":"); \
-            rc.append(j.dump(indent)); \
-            rc.append("}"); \
-            \
-            return rc; \
+            try \
+            { \
+                nlohmann::json j; \
+                to_json(j, *this); \
+                \
+                std::string rc; \
+                char firstChar[2]; \
+                firstChar[0] = #_cn[0]; \
+                firstChar[1] = 0; \
+                firstChar[0] = tolower(firstChar[0]); \
+                rc.assign("{\""); \
+                rc.append(firstChar); \
+                rc.append((#_cn) + 1); \
+                rc.append("\":"); \
+                rc.append(j.dump(indent)); \
+                rc.append("}"); \
+                \
+                return rc; \
+            } \
+            catch(...) \
+            { \
+                return std::string("{}"); \
+            } \
         }
 
     #define TOJSON_IMPL(__var) \
@@ -398,6 +412,56 @@ namespace AppConfigurationObjects
         bool _documenting;
     };
 
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(FipsCryptoSettings)
+    class FipsCryptoSettings : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(FipsCryptoSettings)
+
+    public:
+        /** @brief [Optional, Default false] If true, requires FIPS140-2 crypto operation. */
+        bool                        enabled;
+
+        /** @brief Path where the crypto engine module is located  */
+        std::string                 path;
+
+        /** @brief [Optional, Default false] If true, requests the crypto engine module to run in debugging mode. */
+        bool                        debug;
+
+        FipsCryptoSettings()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            enabled = false;
+            path.clear();
+            debug = false;
+        }
+
+        virtual void initForDocumenting()
+        {
+            clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const FipsCryptoSettings& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(path),
+            TOJSON_IMPL(debug)
+        };
+    }
+    static void from_json(const nlohmann::json& j, FipsCryptoSettings& p)
+    {
+        p.clear();
+        FROMJSON_IMPL_SIMPLE(enabled);
+        FROMJSON_IMPL_SIMPLE(path);
+        FROMJSON_IMPL_SIMPLE(debug);
+    }
 
 
     //-----------------------------------------------------------
@@ -1143,6 +1207,12 @@ namespace AppConfigurationObjects
         /** @brief [Optional] A URI to stream from instead of the audio input device */
         TxAudioUri      audioUri;        
 
+        /** @brief [Optional, Default: 0] Defines a numeric affinity value to be included in the transmission.  If defined, 3 bytes of the transmitted alias will be truncated. */
+        uint16_t        aliasSpecializer;
+
+        /** @brief [Optional, Default: false] Indicates that the aliasSpecializer must cause receivers to mute this transmission if they have an affinity for the specializer.. */
+        bool            receiverRxMuteForAliasSpecializer;
+
         AdvancedTxParams()
         {
             clear();
@@ -1158,6 +1228,8 @@ namespace AppConfigurationObjects
             muted = false;
             txId = 0;
             audioUri.clear();
+            aliasSpecializer = 0;
+            receiverRxMuteForAliasSpecializer = false;
         }
 
         virtual void initForDocumenting()
@@ -1175,7 +1247,9 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(alias),
             TOJSON_IMPL(muted),
             TOJSON_IMPL(txId),
-            TOJSON_IMPL(audioUri)
+            TOJSON_IMPL(audioUri),
+            TOJSON_IMPL(aliasSpecializer),
+            TOJSON_IMPL(receiverRxMuteForAliasSpecializer)
         };
     }
     static void from_json(const nlohmann::json& j, AdvancedTxParams& p)
@@ -1189,6 +1263,8 @@ namespace AppConfigurationObjects
         getOptional<bool>("muted", p.muted, j, false);
         getOptional<uint32_t>("txId", p.txId, j, 0);
         getOptional<TxAudioUri>("audioUri", p.audioUri, j);
+        getOptional<uint16_t>("aliasSpecializer", p.aliasSpecializer, j, 0);
+        getOptional<bool>("receiverRxMuteForAliasSpecializer", p.receiverRxMuteForAliasSpecializer, j, false);
     }
 
     //-----------------------------------------------------------
@@ -1210,7 +1286,6 @@ namespace AppConfigurationObjects
         IMPLEMENT_JSON_DOCUMENTATION(Identity)
 
     public:
-
         /**
          * @brief [Optional, Default: Auto Generated] This is the Node ID to use to represent instance on the network.
          *
@@ -2449,7 +2524,7 @@ namespace AppConfigurationObjects
         {
             char buff[2048];
 
-            sprintf_s(buff, sizeof(buff), "deviceId=%d, name=%s, manufacturer=%s, model=%s, hardwareId=%s, serialNumber=%s, type=%s, extra=%s",
+            snprintf(buff, sizeof(buff), "deviceId=%d, name=%s, manufacturer=%s, model=%s, hardwareId=%s, serialNumber=%s, type=%s, extra=%s",
                         deviceId,
                         name.c_str(),
                         manufacturer.c_str(),
@@ -2487,6 +2562,55 @@ namespace AppConfigurationObjects
         getOptional("serialNumber", p.serialNumber, j);
         getOptional("type", p.type, j);
         getOptional("extra", p.extra, j);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TransportImpairment)
+    /**
+     * @brief Description of a transport impairment
+     *
+     * Helper C++ class to serialize and de-serialize TransportImpairment JSON.
+     *
+     * Example: @include[doc] examples/TransportImpairment.json
+     *
+     */
+    class TransportImpairment : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(NetworkDeviceDescriptor)
+
+    public:
+        int     applicationPercentage;
+        int     jitterMs;
+        int     lossPercentage;
+
+        TransportImpairment()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            applicationPercentage = 0;
+            jitterMs = 0;
+            lossPercentage = 0;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TransportImpairment& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(applicationPercentage),
+            TOJSON_IMPL(jitterMs),
+            TOJSON_IMPL(lossPercentage)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TransportImpairment& p)
+    {
+        p.clear();
+        getOptional<int>("applicationPercentage", p.applicationPercentage, j, 0);
+        getOptional<int>("jitterMs", p.jitterMs, j, 0);
+        getOptional<int>("lossPercentage", p.lossPercentage, j, 0);
     }
 
     //-----------------------------------------------------------
@@ -2725,6 +2849,9 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default: false] Support discontinuous transmission on those CODECs that allow it */
         bool                dtx;
 
+        /** @brief [Optional, Default: 0] Hang timer for ongoing TX - only applicable if enableSmoothing is true */
+        int                 smoothedHangTimeMs;
+
         TxAudio()
         {
             clear();
@@ -2747,6 +2874,7 @@ namespace AppConfigurationObjects
             resetRtpOnTx = true;
             enableSmoothing = true;
             dtx = false;
+            smoothedHangTimeMs = 0;            
         }
     };
 
@@ -2766,7 +2894,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(customRtpPayloadType),
             TOJSON_IMPL(resetRtpOnTx),
             TOJSON_IMPL(enableSmoothing),
-            TOJSON_IMPL(dtx)
+            TOJSON_IMPL(dtx),
+            TOJSON_IMPL(smoothedHangTimeMs)            
         };
 
         // internalKey is not serialized
@@ -2788,6 +2917,7 @@ namespace AppConfigurationObjects
         getOptional("resetRtpOnTx", p.resetRtpOnTx, j, true);
         getOptional("enableSmoothing", p.enableSmoothing, j, true);
         getOptional("dtx", p.dtx, j, false);
+        getOptional("smoothedHangTimeMs", p.smoothedHangTimeMs, j, 0);
 
         // internalKey is not serialized   
     }
@@ -2918,7 +3048,7 @@ namespace AppConfigurationObjects
         {
             char buff[2048];
 
-            sprintf_s(buff, sizeof(buff), "deviceId=%d, samplingRate=%d, channels=%d, direction=%d, boostPercentage=%d, isAdad=%d, name=%s, manufacturer=%s, model=%s, hardwareId=%s, serialNumber=%s, isDefault=%d, type=%s, present=%d, extra=%s",
+            snprintf(buff, sizeof(buff), "deviceId=%d, samplingRate=%d, channels=%d, direction=%d, boostPercentage=%d, isAdad=%d, name=%s, manufacturer=%s, model=%s, hardwareId=%s, serialNumber=%s, isDefault=%d, type=%s, present=%d, extra=%s",
                         deviceId,
                         samplingRate,
                         channels,
@@ -3132,6 +3262,12 @@ namespace AppConfigurationObjects
         /** @brief Number of duplicates detected. */
         int         duplicateCount;
 
+        /** @brief The numeric specializer (if any) associated with the alias. */
+        uint16_t    aliasSpecializer;
+
+        /** @brief Indicates if RX is muted for this talker. */
+        bool        rxMuted;
+
         TalkerInformation()
         {
             clear();
@@ -3145,6 +3281,8 @@ namespace AppConfigurationObjects
             txPriority = 0;
             txId = 0;
             duplicateCount = 0;
+            aliasSpecializer = 0;
+            rxMuted = false;
         }
     };
 
@@ -3156,7 +3294,9 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(rxFlags),
             TOJSON_IMPL(txPriority),
             TOJSON_IMPL(txId),
-            TOJSON_IMPL(duplicateCount)
+            TOJSON_IMPL(duplicateCount),
+            TOJSON_IMPL(aliasSpecializer),
+            TOJSON_IMPL(rxMuted)
         };
     }
     static void from_json(const nlohmann::json& j, TalkerInformation& p)
@@ -3167,7 +3307,9 @@ namespace AppConfigurationObjects
         getOptional<uint16_t>("rxFlags", p.rxFlags, j, 0);
         getOptional<int>("txPriority", p.txPriority, j, 0);
         getOptional<uint32_t>("txId", p.txId, j, 0);
-        getOptional<int>("duplicateCount", p.duplicateCount, j, 0);        
+        getOptional<int>("duplicateCount", p.duplicateCount, j, 0);
+        getOptional<uint16_t>("aliasSpecializer", p.aliasSpecializer, j, 0);
+        getOptional<bool>("rxMuted", p.rxMuted, j, false);
     }
 
     //-----------------------------------------------------------
@@ -3504,6 +3646,8 @@ namespace AppConfigurationObjects
     ENGAGE_IGNORE_COMPILER_UNUSED_WARNING static const char *GROUP_DISCONNECTED_REASON_UNREGISTERED = "Unregistered";
     /** @brief The Rallypoint is not accepting registration for the group at this time **/
     ENGAGE_IGNORE_COMPILER_UNUSED_WARNING static const char *GROUP_DISCONNECTED_REASON_NOT_ALLOWED = "NotAllowed";
+    /** @brief The Rallypoint has denied the registration because the registration is for a security level not allowed on the RP **/
+    ENGAGE_IGNORE_COMPILER_UNUSED_WARNING static const char *GROUP_DISCONNECTED_REASON_SECURITY_CLASSIFICATION_LEVEL_TOO_HIGH = "SecurityClassificationLevelTooHigh";
     /** @brief The Rallypoint has denied the registration for no specific reason **/
     ENGAGE_IGNORE_COMPILER_UNUSED_WARNING static const char *GROUP_DISCONNECTED_REASON_GENERAL_DENIAL = "GeneralDenial";
     /** @} */
@@ -3778,6 +3922,192 @@ namespace AppConfigurationObjects
         FROMJSON_IMPL(signalledInboundProcessorInactivityMs, int, (p.inboundProcessorInactivityMs * 4));
     }
 
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(Tls)
+    /**
+    * @brief TODO: Transport Security Layer (TLS) settings
+    *
+    * Helper C++ class to serialize and de-serialize Tls JSON
+    *
+    * Example: @include[doc] examples/Tls.json
+    *
+    * @see RallypointServer
+    */
+    class Tls : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(Tls)
+
+    public:
+
+        /** @brief [Optional, Default: true] When true, checks the far-end certificate validity and Engage-specific TLS setup procedure. */
+        bool                        verifyPeers;
+
+        /** @brief [Optional, Default: false] When true, accepts far-end certificates that are self-signed. */
+        bool                        allowSelfSignedCertificates;
+
+        /** @brief [Optional] Array of CA certificates (PEM or "@" file/certstore references) to be used to validate far-end certificates. */
+        std::vector<std::string>    caCertificates;
+
+        /** @brief [NOT USED AT THIS TIME] */
+        StringRestrictionList       subjectRestrictions;
+
+        /** @brief [NOT USED AT THIS TIME] */
+        StringRestrictionList       issuerRestrictions;
+
+        Tls()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            verifyPeers = true;
+            allowSelfSignedCertificates = false;
+            caCertificates.clear();
+            subjectRestrictions.clear();
+            issuerRestrictions.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const Tls& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(verifyPeers),
+            TOJSON_IMPL(allowSelfSignedCertificates),
+            TOJSON_IMPL(caCertificates),
+            TOJSON_IMPL(subjectRestrictions),
+            TOJSON_IMPL(issuerRestrictions)
+        };
+    }
+    static void from_json(const nlohmann::json& j, Tls& p)
+    {
+        p.clear();
+        getOptional<bool>("verifyPeers", p.verifyPeers, j, true);
+        getOptional<bool>("allowSelfSignedCertificates", p.allowSelfSignedCertificates, j, false);
+        getOptional<std::vector<std::string>>("caCertificates", p.caCertificates, j);
+        getOptional<StringRestrictionList>("subjectRestrictions", p.subjectRestrictions, j);
+        getOptional<StringRestrictionList>("issuerRestrictions", p.issuerRestrictions, j);
+    }
+    
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RangerPackets)
+    /**
+     * @brief Options for Ranger packets
+     *
+     *  Helper C++ class to serialize and de-serialize RangerPackets JSON
+     *
+     *  TODO: Complete this Class
+     *
+     *  Example: @include[doc] examples/RangerPackets.json
+     *
+     *  @see Group
+     */
+    class RangerPackets : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RangerPackets)
+
+    public:
+        /** @brief [Optional, Default: -1] Number of seconds since last packet transmission before 'count' packets are sent */
+        int             hangTimerSecs;
+
+        /** @brief [Optional, Default: 5] Number of ranger packets to send when a new interval starts */
+        int             count;
+
+        RangerPackets()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            hangTimerSecs = -1;
+            count = 5;
+        }
+
+        virtual void initForDocumenting()
+        {
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RangerPackets& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(hangTimerSecs),
+            TOJSON_IMPL(count)
+        };
+    }
+    static void from_json(const nlohmann::json& j, RangerPackets& p)
+    {
+        p.clear();
+        getOptional<int>("hangTimerSecs", p.hangTimerSecs, j, 11);
+        getOptional<int>("count", p.count, j, 5);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(Source)
+    /**
+     * @brief Options for Source
+     *
+     *  Helper C++ class to serialize and de-serialize Source JSON
+     *
+     *  TODO: Complete this Class
+     *
+     *  Example: @include[doc] examples/Source.json
+     *
+     *  @see Group
+     */
+    class Source : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(Source)
+
+    public:
+        /** @brief [Optional] A node ID */
+        std::string             nodeId;
+
+        /* NOTE: Not serialized ! */
+        uint8_t                 _internal_binary_nodeId[MAX_NODE_ID_SIZE];
+
+        /** @brief [Optional] An alias */
+        std::string             alias;
+        
+        /* NOTE: Not serialized ! */
+        uint8_t                 _internal_binary_alias[MAX_ALIAS_SIZE];
+
+        Source()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            nodeId.clear();
+            memset(_internal_binary_nodeId, 0, sizeof(_internal_binary_nodeId));
+            
+            alias.clear();
+            memset(_internal_binary_alias, 0, sizeof(_internal_binary_alias));
+        }
+
+        virtual void initForDocumenting()
+        {
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const Source& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(nodeId),
+            TOJSON_IMPL(alias)
+        };
+    }
+    static void from_json(const nlohmann::json& j, Source& p)
+    {
+        p.clear();
+        FROMJSON_IMPL_SIMPLE(nodeId);
+        FROMJSON_IMPL_SIMPLE(alias);
+    }
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(Group)
@@ -3824,7 +4154,10 @@ namespace AppConfigurationObjects
             bomPayloadTransformation    = 1,
 
             /** @brief Audio payloads are mixed - output is anonymous (i.e. no metadata) if if the target group(s) allow header extensions */
-            bomAnonymousMixing          = 2
+            bomAnonymousMixing          = 2,
+
+            /** @brief The bridge performs language translations between groups */
+            bomLanguageTranslation      = 3
         } BridgingOpMode_t;
 
         /** @brief Specifies the group type (see @ref Type_t). */
@@ -3843,6 +4176,9 @@ namespace AppConfigurationObjects
 
         /** @brief The human readable name for the group. */
         std::string                             name;
+
+        /** @brief The group name as spoken - typically by a text-to-speech system  */
+        std::string                             spokenName;
 
         /** @brief The name of the network interface to use for multicasting for this group.  If not provided, the Engine's default multicast NIC is used. */
         std::string                             interfaceName;
@@ -3949,9 +4285,31 @@ namespace AppConfigurationObjects
 
         /** @brief [Optional] RTP profile the group  */
         RtpProfile                              rtpProfile;
+
+        /** @brief [Optional] Ranger packet options  */
+        RangerPackets                           rangerPackets;
         
         /** @brief [Internal - not serialized  */
         bool                                    _wasDeserialized_rtpProfile;
+
+        /** @brief [Optional] The TX impairment to apply */
+        TransportImpairment                     txImpairment;
+
+        /** @brief [Optional] The RX impairment to apply */
+        TransportImpairment                     rxImpairment;
+
+        /** @brief List of specializer IDs that the local node has an affinity for/member of */
+        std::vector<uint16_t>                   specializerAffinities;
+
+        /** @brief [Optional, Default: 0] The security classification level of the group. */
+        uint32_t                                securityLevel;
+
+        /** @brief [Optional] List of sources to ignore for this group */
+        std::vector<Source>                     ignoreSources;
+
+        /** @brief ISO 639-2 lanuguage code for the group  */
+        std::string                             languageCode;
+
 
         Group()
         {
@@ -3964,6 +4322,7 @@ namespace AppConfigurationObjects
             bom = bomRaw;
             id.clear();
             name.clear();
+            spokenName.clear();
             interfaceName.clear();
             rx.clear();
             tx.clear();
@@ -4010,7 +4369,20 @@ namespace AppConfigurationObjects
             allowLoopback = false;
 
             rtpProfile.clear();
+            rangerPackets.clear();
+
             _wasDeserialized_rtpProfile = false;
+
+            txImpairment.clear();
+            rxImpairment.clear();
+
+            specializerAffinities.clear();
+
+            securityLevel = 0;
+
+            ignoreSources.clear();
+
+            languageCode.clear();
         }
     };
 
@@ -4021,6 +4393,7 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(bom),
             TOJSON_IMPL(id),
             TOJSON_IMPL(name),
+            TOJSON_IMPL(spokenName),
             TOJSON_IMPL(interfaceName),
             TOJSON_IMPL(rx),
             TOJSON_IMPL(tx),
@@ -4055,7 +4428,19 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(satPaq),
             TOJSON_IMPL(lynqPro),
             TOJSON_IMPL(transportName),
-            TOJSON_IMPL(allowLoopback)
+            TOJSON_IMPL(allowLoopback),
+            TOJSON_IMPL(rangerPackets),
+
+            TOJSON_IMPL(txImpairment),
+            TOJSON_IMPL(rxImpairment),
+
+            TOJSON_IMPL(specializerAffinities),
+
+            TOJSON_IMPL(securityLevel),
+
+            TOJSON_IMPL(ignoreSources),
+
+            TOJSON_IMPL(languageCode)
         };
 
         // TODO: need a better way to indicate whether rtpProfile is present
@@ -4089,6 +4474,7 @@ namespace AppConfigurationObjects
         getOptional<Group::BridgingOpMode_t>("bom", p.bom, j, Group::BridgingOpMode_t::bomRaw);
         j.at("id").get_to(p.id);
         getOptional<std::string>("name", p.name, j);
+        getOptional<std::string>("spokenName", p.spokenName, j);
         getOptional<std::string>("interfaceName", p.interfaceName, j);
         getOptional<NetworkAddress>("rx", p.rx, j);
         getOptional<NetworkAddress>("tx", p.tx, j);
@@ -4121,6 +4507,13 @@ namespace AppConfigurationObjects
         getOptional<std::string>("transportName", p.transportName, j);
         getOptional<bool>("allowLoopback", p.allowLoopback, j, false);
         getOptionalWithIndicator<RtpProfile>("rtpProfile", p.rtpProfile, j, &p._wasDeserialized_rtpProfile);
+        getOptional<RangerPackets>("rangerPackets", p.rangerPackets, j);
+        getOptional<TransportImpairment>("txImpairment", p.txImpairment, j);
+        getOptional<TransportImpairment>("rxImpairment", p.rxImpairment, j);
+        getOptional<std::vector<uint16_t>>("specializerAffinities", p.specializerAffinities, j);
+        getOptional<uint32_t>("securityLevel", p.securityLevel, j, 0);
+        getOptional<std::vector<Source>>("ignoreSources", p.ignoreSources, j);
+        getOptional<std::string>("languageCode", p.languageCode, j);
     }
 
 
@@ -4362,9 +4755,6 @@ namespace AppConfigurationObjects
         /** @brief [Optional, false] Enables UDP streaming if the RP supports it */
         bool                                enabled;
 
-        /** @brief [Optional, false] Allows for clear-packet streaming */
-        bool                                allowClear;
-
         /** @brief [Optional, EnginePolicyNetworking::defaultNic] Name of NIC to bind to - uses Engine defaultNic if empty */
         std::string                         nic;
 
@@ -4388,7 +4778,6 @@ namespace AppConfigurationObjects
         void clear()
         {
             enabled = false;
-            allowClear = false;
             nic.clear();
             keepAliveIntervalSecs = 10;
             priority = NetworkTxOptions::priVoice;
@@ -4404,7 +4793,6 @@ namespace AppConfigurationObjects
     {
         j = nlohmann::json{
             TOJSON_IMPL(enabled),
-            TOJSON_IMPL(allowClear),
             TOJSON_IMPL(nic),
             TOJSON_IMPL(port),
             TOJSON_IMPL(keepAliveIntervalSecs),
@@ -4416,7 +4804,6 @@ namespace AppConfigurationObjects
     {
         p.clear();
         getOptional<bool>("enabled", p.enabled, j, false);
-        getOptional<bool>("allowClear", p.allowClear, j, false);
         getOptional<std::string>("nic", p.nic, j, EMPTY_STRING);
         getOptional<int>("port", p.port, j, 0);
         getOptional<int>("keepAliveIntervalSecs", p.keepAliveIntervalSecs, j, 10);
@@ -4688,6 +5075,9 @@ namespace AppConfigurationObjects
         /** @brief List of group IDs to be included in the session */
         std::vector<std::string>    groups;
 
+        /** @brief [Optional, Default: true] Enable the bridge */
+        bool                        enabled;
+
         Bridge()
         {
             clear();
@@ -4698,6 +5088,7 @@ namespace AppConfigurationObjects
             id.clear();
             name.clear();
             groups.clear();
+            enabled = true;
         }
     };
 
@@ -4706,7 +5097,8 @@ namespace AppConfigurationObjects
         j = nlohmann::json{
             TOJSON_IMPL(id),
             TOJSON_IMPL(name),
-            TOJSON_IMPL(groups)
+            TOJSON_IMPL(groups),
+            TOJSON_IMPL(enabled)
         };
     }
     static void from_json(const nlohmann::json& j, Bridge& p)
@@ -4715,6 +5107,7 @@ namespace AppConfigurationObjects
         FROMJSON_IMPL(id, std::string, EMPTY_STRING);
         FROMJSON_IMPL(name, std::string, EMPTY_STRING);
         getOptional<std::vector<std::string>>("groups", p.groups, j);
+        FROMJSON_IMPL(enabled, bool, true);
     }
 
     //-----------------------------------------------------------
@@ -4782,6 +5175,10 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default INVALID_SESSION_ID] A session ID from the Android AudioManager */
         int                 sessionId;
 
+        /** @brief [Optional, Default 0] 0=use legacy low-level APIs, 1=use high-level Android APIs */
+        int                 engineMode;
+
+
         AndroidAudio()
         {
             clear();
@@ -4796,6 +5193,7 @@ namespace AppConfigurationObjects
             contentType = 1;
             inputPreset = 7;
             sessionId = AndroidAudio::INVALID_SESSION_ID;
+            engineMode = 0;
         }
     };
 
@@ -4808,7 +5206,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(usage),
             TOJSON_IMPL(contentType),
             TOJSON_IMPL(inputPreset),
-            TOJSON_IMPL(sessionId)
+            TOJSON_IMPL(sessionId),
+            TOJSON_IMPL(engineMode)
         };
     }
     static void from_json(const nlohmann::json& j, AndroidAudio& p)
@@ -4820,7 +5219,8 @@ namespace AppConfigurationObjects
         FROMJSON_IMPL(usage, int, 2);
         FROMJSON_IMPL(contentType, int, 1);
         FROMJSON_IMPL(inputPreset, int, 7);
-        FROMJSON_IMPL(inputPreset, int, AndroidAudio::INVALID_SESSION_ID);
+        FROMJSON_IMPL(sessionId, int, AndroidAudio::INVALID_SESSION_ID);
+        FROMJSON_IMPL(engineMode, int, 0);
     }    
     
     //-----------------------------------------------------------
@@ -5352,11 +5752,17 @@ namespace AppConfigurationObjects
 
     public:
 
-        /** [Optional, Default false] Enable Trellisware discovery. */
+        /** [Optional, Default false] Enable Magellan discovery. */
         bool                                    enabled;
+
+        /** @brief [Optional, Default: default system interface] The network interface to bind to for discovery packets.  */
+        std::string                             interfaceName;
 
         /** [Optional if disabled] X.509 certificate information for interrogation */
         SecurityCertificate                     security;
+
+        /** @brief [Optional] Details concerning Transport Layer Security.  @see Tls */
+        Tls                                         tls;
 
         DiscoveryMagellan()
         {
@@ -5366,7 +5772,9 @@ namespace AppConfigurationObjects
         void clear()
         {
             enabled = false;
-            security.clear();            
+            interfaceName.clear();
+            security.clear();
+            tls.clear();
         }
     };
 
@@ -5374,14 +5782,18 @@ namespace AppConfigurationObjects
     {
         j = nlohmann::json{
             TOJSON_IMPL(enabled),
-            TOJSON_IMPL(security)
+            TOJSON_IMPL(interfaceName),
+            TOJSON_IMPL(security),
+            TOJSON_IMPL(tls)
         };
     }
     static void from_json(const nlohmann::json& j, DiscoveryMagellan& p)
     {
         p.clear();
         getOptional("enabled", p.enabled, j, false);
+        getOptional<Tls>("tls", p.tls, j);
         getOptional<SecurityCertificate>("security", p.security, j);
+        FROMJSON_IMPL(interfaceName, std::string, EMPTY_STRING);
     }
 
     //-----------------------------------------------------------
@@ -6153,7 +6565,7 @@ namespace AppConfigurationObjects
         std::string                 dataDirectory;
 
         /** @brief Licensing settings */
-        Licensing       licensing;
+        Licensing                   licensing;
 
         /** @brief Security settings */
         EnginePolicySecurity        security;
@@ -6178,12 +6590,6 @@ namespace AppConfigurationObjects
 
         /** @brief Database settings */
         EnginePolicyDatabase        database;
-
-        /** @brief Path to the certificate store */
-        std::string                 certStoreFileName;
-
-        /** @brief Hex password for the certificate store (if any) */
-        std::string                 certStorePasswordHex;
 
         /** @brief Optional feature set */
         Featureset                  featureset;
@@ -6214,8 +6620,6 @@ namespace AppConfigurationObjects
             internals.clear();
             timelines.clear();
             database.clear();
-            certStoreFileName.clear();
-            certStorePasswordHex.clear();
             featureset.clear();
             namedAudioDevices.clear();
             externalCodecs.clear();
@@ -6236,8 +6640,6 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(internals),
             TOJSON_IMPL(timelines),
             TOJSON_IMPL(database),
-            TOJSON_IMPL(certStoreFileName),
-            TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(featureset),
             TOJSON_IMPL(namedAudioDevices),
             TOJSON_IMPL(externalCodecs),
@@ -6257,8 +6659,6 @@ namespace AppConfigurationObjects
         FROMJSON_IMPL_SIMPLE(internals);
         FROMJSON_IMPL_SIMPLE(timelines);
         FROMJSON_IMPL_SIMPLE(database);
-        FROMJSON_IMPL_SIMPLE(certStoreFileName);
-        FROMJSON_IMPL_SIMPLE(certStorePasswordHex);
         FROMJSON_IMPL_SIMPLE(featureset);
         FROMJSON_IMPL_SIMPLE(namedAudioDevices);
         FROMJSON_IMPL_SIMPLE(externalCodecs);
@@ -6404,6 +6804,9 @@ namespace AppConfigurationObjects
         /** @brief Internal certificate detail. */
         SecurityCertificate     certificate;
 
+        /** @brief [Optional, Default: 0 - OS platform default] Connection timeout in seconds to the peer */
+        int                      connectionTimeoutSecs;
+
         RallypointPeer()
         {
             clear();
@@ -6415,6 +6818,7 @@ namespace AppConfigurationObjects
             enabled = true;
             host.clear();
             certificate.clear();
+            connectionTimeoutSecs = 0;
         }
     };
 
@@ -6424,7 +6828,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(id),
             TOJSON_IMPL(enabled),
             TOJSON_IMPL(host),
-            TOJSON_IMPL(certificate)
+            TOJSON_IMPL(certificate),
+            TOJSON_IMPL(connectionTimeoutSecs)
         };
     }
     static void from_json(const nlohmann::json& j, RallypointPeer& p)
@@ -6434,6 +6839,7 @@ namespace AppConfigurationObjects
         getOptional<bool>("enabled", p.enabled, j, true);
         getOptional<NetworkAddress>("host", p.host, j);
         getOptional<SecurityCertificate>("certificate", p.certificate, j);
+        getOptional<int>("connectionTimeoutSecs", p.connectionTimeoutSecs, j, 0);
     }
 
     //-----------------------------------------------------------
@@ -6726,6 +7132,59 @@ namespace AppConfigurationObjects
         getOptional<std::string>("runCmd", p.runCmd, j);
     }
 
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RallypointServerRouteMap)
+    class RallypointServerRouteMap : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RallypointServerRouteMap)
+
+    public:
+        /** File name to use for the route map report. */
+        std::string                     fileName;
+
+        /** [Optional, Default: 5] Minimum update time for updates. */
+        int                             minRefreshSecs;
+
+        /** [Optional, Default: false] Indicates if reporting is enabled. */
+        bool                            enabled;
+
+        /** [Optional, Default: null] Command to be executed every time the report is produced. */
+        std::string                     runCmd;
+
+        RallypointServerRouteMap()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            fileName.clear();
+            minRefreshSecs = 5;
+            enabled = false;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RallypointServerRouteMap& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(fileName),
+            TOJSON_IMPL(minRefreshSecs),
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(runCmd)
+        };
+    }
+    static void from_json(const nlohmann::json& j, RallypointServerRouteMap& p)
+    {
+        p.clear();
+        getOptional<std::string>("fileName", p.fileName, j);
+        getOptional<int>("minRefreshSecs", p.minRefreshSecs, j, 5);
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<std::string>("runCmd", p.runCmd, j);
+    }
+
+
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(ExternalHealthCheckResponder)
     /**
@@ -6776,74 +7235,6 @@ namespace AppConfigurationObjects
         getOptional<bool>("immediateClose", p.immediateClose, j, true);
     }
 
-
-    //-----------------------------------------------------------
-    JSON_SERIALIZED_CLASS(Tls)
-    /**
-    * @brief TODO: Transport Security Layer (TLS) settings
-    *
-    * Helper C++ class to serialize and de-serialize Tls JSON
-    *
-    * Example: @include[doc] examples/Tls.json
-    *
-    * @see RallypointServer
-    */
-    class Tls : public ConfigurationObjectBase
-    {
-        IMPLEMENT_JSON_SERIALIZATION()
-        IMPLEMENT_JSON_DOCUMENTATION(Tls)
-
-    public:
-
-        /** @brief [Optional, Default: true] When true, checks the far-end certificate validity and Engage-specific TLS setup procedure. */
-        bool                        verifyPeers;
-
-        /** @brief [Optional, Default: false] When true, accepts far-end certificates that are self-signed. */
-        bool                        allowSelfSignedCertificates;
-
-        /** @brief [Optional] Array of CA certificates (PEM or "@" file/certstore references) to be used to validate far-end certificates. */
-        std::vector<std::string>    caCertificates;
-
-        /** @brief [NOT USED AT THIS TIME] */
-        StringRestrictionList       subjectRestrictions;
-
-        /** @brief [NOT USED AT THIS TIME] */
-        StringRestrictionList       issuerRestrictions;
-
-        Tls()
-        {
-            clear();
-        }
-
-        void clear()
-        {
-            verifyPeers = true;
-            allowSelfSignedCertificates = false;
-            caCertificates.clear();
-            subjectRestrictions.clear();
-            issuerRestrictions.clear();
-        }
-    };
-
-    static void to_json(nlohmann::json& j, const Tls& p)
-    {
-        j = nlohmann::json{
-            TOJSON_IMPL(verifyPeers),
-            TOJSON_IMPL(allowSelfSignedCertificates),
-            TOJSON_IMPL(caCertificates),
-            TOJSON_IMPL(subjectRestrictions),
-            TOJSON_IMPL(issuerRestrictions)
-        };
-    }
-    static void from_json(const nlohmann::json& j, Tls& p)
-    {
-        p.clear();
-        getOptional<bool>("verifyPeers", p.verifyPeers, j, true);
-        getOptional<bool>("allowSelfSignedCertificates", p.allowSelfSignedCertificates, j, false);
-        getOptional<std::vector<std::string>>("caCertificates", p.caCertificates, j);
-        getOptional<StringRestrictionList>("subjectRestrictions", p.subjectRestrictions, j);
-        getOptional<StringRestrictionList>("issuerRestrictions", p.issuerRestrictions, j);
-    }
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(PeeringConfiguration)
@@ -7046,14 +7437,8 @@ namespace AppConfigurationObjects
             /** @brief Unknown */
             etUnknown,
 
-            /** @brief No encryption */
-            etClear,
-
             /** @brief Shared-key encryption */
-            etSharedKey,
-
-            /** @brief DTLS encryption*/
-            etDtls
+            etSharedKey
         } EnvelopeType_t;
 
         /** @brief Specifies the streaming mode type (see @ref EnvelopeType_t). */
@@ -7095,6 +7480,77 @@ namespace AppConfigurationObjects
     }    
 
     //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RallypointRpRtTimingBehavior)
+    /**
+     * @brief Defines a behavior for a Rallypoint peer roundtrip time
+     *
+     * Example: @include[doc] examples/RallypointRpRtTimingBehavior.json
+     *
+     */
+    class RallypointRpRtTimingBehavior : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RallypointRpRtTimingBehavior)
+
+    public:
+        /** @brief Enum describing behavior types. */
+        typedef enum
+        {
+            /** @brief Unknown */
+            btNone,
+
+            /** @brief Report at level info */
+            btReportInfo,
+
+            /** @brief Report at level warning */
+            btReportWarn,
+
+            /** @brief Report at level error */
+            btReportError,  
+
+            /** @brief Report at level fatal and drop connection */
+            btDrop = 99        
+        } BehaviorType_t;
+
+        /** @brief Specifies the streaming mode type (see @ref BehaviorType_t). */
+        BehaviorType_t                          behavior;
+
+        /** @brief Network address for listening */
+        uint32_t                                atOrAboveMs;
+
+        /** [Optional, Default: null] Command to be executed. */
+        std::string                             runCmd;
+
+        RallypointRpRtTimingBehavior()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            behavior = btNone;
+            atOrAboveMs = 0;
+            runCmd.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RallypointRpRtTimingBehavior& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(behavior),
+            TOJSON_IMPL(atOrAboveMs),
+            TOJSON_IMPL(runCmd)
+        };
+    }
+    static void from_json(const nlohmann::json& j, RallypointRpRtTimingBehavior& p)
+    {
+        p.clear();
+        getOptional<RallypointRpRtTimingBehavior::BehaviorType_t>("behavior", p.behavior, j, RallypointRpRtTimingBehavior::BehaviorType_t::btNone);
+        getOptional<uint32_t>("atOrAboveMs", p.atOrAboveMs, j, 0);
+        getOptional<std::string>("runCmd", p.runCmd, j);
+    }
+
+    //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(RallypointServer)
     /**
     * @brief Configuration for the Rallypoint server
@@ -7110,6 +7566,9 @@ namespace AppConfigurationObjects
         IMPLEMENT_JSON_DOCUMENTATION(RallypointServer)
 
     public:
+        /** @brief [Optional] Settings for the FIPS crypto. */
+        FipsCryptoSettings                         fipsCrypto;
+    
         /** @brief [Optional] Settings for the Rallypoint's watchdog. */
         WatchdogSettings                            watchdog;
 
@@ -7121,9 +7580,6 @@ namespace AppConfigurationObjects
 
         /** @brief Name of the NIC to bind to for listening for incoming TCP connections. */
         std::string                                 interfaceName;
-
-        /** @brief Indicate whether FIPS140-2 mode is required for security. */
-        bool                                        requireFips;
 
         /** @brief X.509 certificate and private key that identifies the Rallypoint.  @see SecurityCertificate*/
         SecurityCertificate                         certificate;
@@ -7227,6 +7683,23 @@ namespace AppConfigurationObjects
         /** @brief If enabled, causes a mesh leaf to reverse-subscribe to a core node upon the core subscribing and a reflector having been setup */
         bool                                        enableLeafReflectionReverseSubscription;
 
+        /** @brief If true, turns off loop detection. */
+        bool                                        disableLoopDetection;
+
+        /** @brief [Optional, Default 0] Sets the maximum item security level that can be registered with the RP */
+        uint32_t                                    maxSecurityLevel;
+
+        /** @brief Details for producing a report containing the route map. @see RallypointServerRouteMap */
+        RallypointServerRouteMap                    routeMap;
+
+        /** @brief [Optional, Default 15] Sets the delta value for the maximum number of seconds to delay when attempting outbound peer connections */
+        uint32_t                                    maxOutboundPeerConnectionIntervalDeltaSecs;
+
+        /** @brief [Optional, Default: 60000] Milliseconds between sending round-trip test requests to peers */
+        int                                         peerRtTestIntervalMs;
+
+        /** @brief [Optional] Array of behaviors for roundtrip times to peers */
+        std::vector<RallypointRpRtTimingBehavior>   peerRtBehaviors;
 
         RallypointServer()
         {
@@ -7235,11 +7708,11 @@ namespace AppConfigurationObjects
 
         void clear()
         {
+            fipsCrypto.clear();
             watchdog.clear();
             id.clear();
             listenPort = 7443;
             interfaceName.clear();
-            requireFips = false;
             certificate.clear();
             allowMulticastForwarding = false;
             peeringConfiguration.clear();
@@ -7274,17 +7747,23 @@ namespace AppConfigurationObjects
             sysFlags = 0;
             normalTaskQueueBias = 0;
             enableLeafReflectionReverseSubscription = false;
+            disableLoopDetection = false;
+            maxSecurityLevel = 0;
+            routeMap.clear();
+            maxOutboundPeerConnectionIntervalDeltaSecs = 15;
+            peerRtTestIntervalMs = 60000;
+            peerRtBehaviors.clear();
         }
     };
 
     static void to_json(nlohmann::json& j, const RallypointServer& p)
     {
-        j = nlohmann::json{
+        j = nlohmann::json{            
+            TOJSON_IMPL(fipsCrypto),
             TOJSON_IMPL(watchdog),
             TOJSON_IMPL(id),
             TOJSON_IMPL(listenPort),
             TOJSON_IMPL(interfaceName),
-            TOJSON_IMPL(requireFips),
             TOJSON_IMPL(certificate),
             TOJSON_IMPL(allowMulticastForwarding),
             // TOJSON_IMPL(peeringConfiguration),               // NOTE: Not serialized!
@@ -7318,16 +7797,22 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(udpStreaming),
             TOJSON_IMPL(sysFlags),
             TOJSON_IMPL(normalTaskQueueBias),
-            TOJSON_IMPL(enableLeafReflectionReverseSubscription)
+            TOJSON_IMPL(enableLeafReflectionReverseSubscription),
+            TOJSON_IMPL(disableLoopDetection),
+            TOJSON_IMPL(maxSecurityLevel),
+            TOJSON_IMPL(routeMap),
+            TOJSON_IMPL(maxOutboundPeerConnectionIntervalDeltaSecs),
+            TOJSON_IMPL(peerRtTestIntervalMs),
+            TOJSON_IMPL(peerRtBehaviors)
         };
     }
     static void from_json(const nlohmann::json& j, RallypointServer& p)
     {
         p.clear();
+        getOptional<FipsCryptoSettings>("fipsCrypto", p.fipsCrypto, j);
         getOptional<WatchdogSettings>("watchdog", p.watchdog, j);
         getOptional<std::string>("id", p.id, j);
         getOptional<SecurityCertificate>("certificate", p.certificate, j);
-        getOptional<bool>("requireFips", p.requireFips, j, false);
         getOptional<std::string>("interfaceName", p.interfaceName, j);
         getOptional<int>("listenPort", p.listenPort, j, 7443);
         getOptional<bool>("allowMulticastForwarding", p.allowMulticastForwarding, j, false);
@@ -7362,9 +7847,14 @@ namespace AppConfigurationObjects
         getOptional<RallypointUdpStreaming>("udpStreaming", p.udpStreaming, j);
         getOptional<uint32_t>("sysFlags", p.sysFlags, j, 0);
         getOptional<uint32_t>("normalTaskQueueBias", p.normalTaskQueueBias, j, 0);
-        getOptional<bool>("enableLeafReflectionReverseSubscription", p.enableLeafReflectionReverseSubscription, j, false);        
+        getOptional<bool>("enableLeafReflectionReverseSubscription", p.enableLeafReflectionReverseSubscription, j, false);
+        getOptional<bool>("disableLoopDetection", p.disableLoopDetection, j, false);
+        getOptional<uint32_t>("maxSecurityLevel", p.maxSecurityLevel, j, 0);
+        getOptional<RallypointServerRouteMap>("routeMap", p.routeMap, j);
+        getOptional<uint32_t>("maxOutboundPeerConnectionIntervalDeltaSecs", p.maxOutboundPeerConnectionIntervalDeltaSecs, j, 15);        
+        getOptional<int>("peerRtTestIntervalMs", p.peerRtTestIntervalMs, j, 60000);
+        getOptional<std::vector<RallypointRpRtTimingBehavior>>("peerRtBehaviors", p.peerRtBehaviors, j);
     }
-
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(PlatformDiscoveredService)
@@ -8678,6 +9168,360 @@ namespace AppConfigurationObjects
         getOptional<uint64_t>("msToNextConnectionAttempt", p.msToNextConnectionAttempt, j, 0);
     }
 
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TranslationSession)
+    /**
+    * @brief Translation session settings
+    *
+    * Helper C++ class to serialize and de-serialize TranslationSession JSON
+    *
+    * Example: @include[doc] examples/TranslationSession.json
+    *
+    * @see TODO: ConfigurationObjects::TranslationSession
+    */
+    class TranslationSession : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TranslationSession)
+
+    public:
+        /** @brief ID */
+        std::string                 id;
+
+        /** @brief Name */
+        std::string                 name;
+
+        /** @brief List of group IDs to be included in the session */
+        std::vector<std::string>    groups;
+
+        /** @brief [Optional, Default: true] Enable the session */
+        bool                        enabled;
+
+        TranslationSession()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            id.clear();
+            name.clear();
+            groups.clear();
+            enabled = true;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TranslationSession& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(id),
+            TOJSON_IMPL(name),
+            TOJSON_IMPL(groups),
+            TOJSON_IMPL(enabled)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TranslationSession& p)
+    {
+        p.clear();
+        FROMJSON_IMPL(id, std::string, EMPTY_STRING);
+        FROMJSON_IMPL(name, std::string, EMPTY_STRING);
+        getOptional<std::vector<std::string>>("groups", p.groups, j);
+        FROMJSON_IMPL(enabled, bool, true);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TranslationConfiguration)
+    /**
+    * @brief Translation configuration
+    *
+    * Helper C++ class to serialize and de-serialize TranslationConfiguration JSON
+    *
+    * Example: @include[doc] examples/TranslationConfiguration.json
+    *
+    * @see TODO: ConfigurationObjects::TranslationConfiguration
+    */
+    class TranslationConfiguration : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TranslationConfiguration)
+
+    public:
+        /** @brief Array of sessions in the configuration */
+        std::vector<TranslationSession>         sessions;
+
+        /** @brief Array of groups in the configuration */
+        std::vector<Group>                      groups;
+
+        TranslationConfiguration()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            sessions.clear();
+            groups.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TranslationConfiguration& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(sessions),
+            TOJSON_IMPL(groups)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TranslationConfiguration& p)
+    {
+        p.clear();
+        getOptional<std::vector<TranslationSession>>("sessions", p.sessions, j);
+        getOptional<std::vector<Group>>("groups", p.groups, j);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TranslatorServerStatusReportConfiguration)
+    /**
+    * @brief TODO: Configuration for the translation server status report file
+    *
+    * Helper C++ class to serialize and de-serialize TranslatorServerStatusReportConfiguration JSON
+    *
+    * Example: @include[doc] examples/TranslatorServerStatusReportConfiguration.json
+    *
+    * @see RallypointServer
+    */
+    class TranslatorServerStatusReportConfiguration : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerStatusReportConfiguration)
+
+    public:
+        /** File name to use for the status report. */
+        std::string                     fileName;
+
+        /** [Optional, Default: 30] The interval at which to write out the status report to file. */
+        int                             intervalSecs;
+
+        /** [Optional, Default: false] Indicates if status reporting is enabled. */
+        bool                            enabled;
+
+        /** [Optional, Default: null] Command to be executed every time the status report is produced. */
+        std::string                     runCmd;
+
+        /** [Optional, Default: false] Indicates whether to include details of each group. */
+        bool                            includeGroupDetail;
+
+        /** [Optional, Default: false] Indicates whether to include details of each session. */
+        bool                            includeSessionDetail;
+
+        /** [Optional, Default: false] Indicates whether to include details of each group in each session. */
+        bool                            includeSessionGroupDetail;
+
+        TranslatorServerStatusReportConfiguration()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            fileName.clear();
+            intervalSecs = 60;
+            enabled = false;
+            includeGroupDetail = false;
+            includeSessionDetail = false;
+            includeSessionGroupDetail = false;
+            runCmd.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TranslatorServerStatusReportConfiguration& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(fileName),
+            TOJSON_IMPL(intervalSecs),
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(includeGroupDetail),
+            TOJSON_IMPL(includeSessionDetail),
+            TOJSON_IMPL(includeSessionGroupDetail),
+            TOJSON_IMPL(runCmd)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TranslatorServerStatusReportConfiguration& p)
+    {
+        p.clear();
+        getOptional<std::string>("fileName", p.fileName, j);
+        getOptional<int>("intervalSecs", p.intervalSecs, j, 60);
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<std::string>("runCmd", p.runCmd, j);
+        getOptional<bool>("includeGroupDetail", p.includeGroupDetail, j, false);
+        getOptional<bool>("includeSessionDetail", p.includeSessionDetail, j, false);
+        getOptional<bool>("includeSessionGroupDetail", p.includeSessionGroupDetail, j, false);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TranslatorServerInternals)
+    /**
+    * @brief Internal translator server settings
+    *
+    * These settings are used to configure internal parameters.
+    *
+    * Helper C++ class to serialize and de-serialize TranslatorServerInternals JSON
+    *
+    * Example: @include[doc] examples/TranslatorServerInternals.json
+    *
+    * @see engageInitialize, ConfigurationObjects::TranslatorServerConfiguration
+    */
+    class TranslatorServerInternals : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerInternals)
+
+    public:
+        /** @brief [Optional] Settings for the watchdog. */
+        WatchdogSettings    watchdog;
+
+        /** @brief [Optional, Default: 1000] Interval at which to run the housekeeper thread. */
+        int                 housekeeperIntervalMs;
+
+        TranslatorServerInternals()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            watchdog.clear();
+            housekeeperIntervalMs = 1000;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TranslatorServerInternals& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(watchdog),
+            TOJSON_IMPL(housekeeperIntervalMs)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TranslatorServerInternals& p)
+    {
+        p.clear();
+        getOptional<WatchdogSettings>("watchdog", p.watchdog, j);
+        getOptional<int>("housekeeperIntervalMs", p.housekeeperIntervalMs, j, 1000);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TranslatorServerConfiguration)
+    /**
+    * @brief Configuration for the translation server
+    *
+    * Helper C++ class to serialize and de-serialize TranslatorServerConfiguration JSON
+    *
+    * Example: @include[doc] examples/TranslatorServerConfiguration.json
+    *
+    */
+    class TranslatorServerConfiguration : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerConfiguration)
+
+    public:
+        /** @brief A unqiue identifier for the translation server */
+        std::string                                 id;
+
+        /** @brief Number of seconds between checks to see if the service configuration has been updated.  Default is 60.*/
+        int                                         serviceConfigurationFileCheckSecs;
+        
+        /** @brief Name of a file containing the translation configuration. */
+        std::string                                 translationConfigurationFileName;
+
+        /** @brief Command-line to execute that returns a translation configuration */
+        std::string                                 translationConfigurationFileCommand;
+
+        /** @brief Number of seconds between checks to see if the translation configuration has been updated.  Default is 60.*/
+        int                                         translationConfigurationFileCheckSecs;
+
+        /** @brief Details for producing a status report. @see TranslatorServerStatusReportConfiguration */
+        TranslatorServerStatusReportConfiguration   statusReport;
+
+        /** @brief Details concerning the server's interaction with an external health-checker such as a load-balancer.  @see ExternalHealthCheckResponder */
+        ExternalHealthCheckResponder                 externalHealthCheckResponder;
+
+        /** @brief Internal settings */
+        TranslatorServerInternals                   internals;
+
+        /** @brief Path to the certificate store */
+        std::string                                 certStoreFileName;
+
+        /** @brief Hex password for the certificate store (if any) */
+        std::string                                 certStorePasswordHex;
+
+        /** @brief The policy to be used for the underlying Engage Engine */
+        EnginePolicy                                enginePolicy;
+
+        /** @brief Name to use for signalling a configuration check */
+        std::string                                 configurationCheckSignalName;
+
+        /** @brief [Optional] Settings for the FIPS crypto. */
+        FipsCryptoSettings                         fipsCrypto;
+
+        TranslatorServerConfiguration()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            id.clear();
+            serviceConfigurationFileCheckSecs = 60;
+            translationConfigurationFileName.clear();
+            translationConfigurationFileCommand.clear();
+            translationConfigurationFileCheckSecs = 60;
+            statusReport.clear();
+            externalHealthCheckResponder.clear();
+            internals.clear();
+            certStoreFileName.clear();
+            certStorePasswordHex.clear();
+            enginePolicy.clear();
+            configurationCheckSignalName = "rts.6cc0651.${id}";
+            fipsCrypto.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TranslatorServerConfiguration& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(id),
+            TOJSON_IMPL(serviceConfigurationFileCheckSecs),
+            TOJSON_IMPL(translationConfigurationFileName),
+            TOJSON_IMPL(translationConfigurationFileCommand),
+            TOJSON_IMPL(translationConfigurationFileCheckSecs),
+            TOJSON_IMPL(statusReport),
+            TOJSON_IMPL(externalHealthCheckResponder),
+            TOJSON_IMPL(internals),
+            TOJSON_IMPL(certStoreFileName),
+            TOJSON_IMPL(certStorePasswordHex),
+            TOJSON_IMPL(enginePolicy),
+            TOJSON_IMPL(configurationCheckSignalName),
+            TOJSON_IMPL(fipsCrypto)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TranslatorServerConfiguration& p)
+    {
+        p.clear();
+        getOptional<std::string>("id", p.id, j);
+        getOptional<int>("serviceConfigurationFileCheckSecs", p.serviceConfigurationFileCheckSecs, j, 60);
+        getOptional<std::string>("translationConfigurationFileName", p.translationConfigurationFileName, j);
+        getOptional<std::string>("translationConfigurationFileCommand", p.translationConfigurationFileCommand, j);
+        getOptional<int>("translationConfigurationFileCheckSecs", p.translationConfigurationFileCheckSecs, j, 60);
+        getOptional<TranslatorServerStatusReportConfiguration>("statusReport", p.statusReport, j);
+        getOptional<ExternalHealthCheckResponder>("externalHealthCheckResponder", p.externalHealthCheckResponder, j);
+        getOptional<TranslatorServerInternals>("internals", p.internals, j);
+        getOptional<std::string>("certStoreFileName", p.certStoreFileName, j);
+        getOptional<std::string>("certStorePasswordHex", p.certStorePasswordHex, j);
+        j.at("enginePolicy").get_to(p.enginePolicy);
+        getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.6cc0651.${id}");
+        getOptional<FipsCryptoSettings>("fipsCrypo", p.fipsCrypto, j);
+    }
+
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(BridgingConfiguration)
@@ -8826,7 +9670,7 @@ namespace AppConfigurationObjects
         IMPLEMENT_JSON_DOCUMENTATION(BridgingServerInternals)
 
     public:
-        /** @brief [Optional] Settings for the EAR's watchdog. */
+        /** @brief [Optional] Settings for the watchdog. */
         WatchdogSettings    watchdog;
 
         /** @brief [Optional, Default: 1000] Interval at which to run the housekeeper thread. */
@@ -8884,7 +9728,10 @@ namespace AppConfigurationObjects
             omPayloadTransformation     = 1,
 
             /** @brief Audio payloads are mixed - output is anonymous (i.e. no metadata) if if the target group(s) allow header extensions */
-            omAnonymousMixing           = 2
+            omAnonymousMixing           = 2,
+
+            /** @brief Audio payloads are translated between group-specific languages */
+            omLanguageTranslation       = 3
         } OpMode_t;
 
         /** @brief A unqiue identifier for the bridge server */
@@ -8926,6 +9773,9 @@ namespace AppConfigurationObjects
         /** @brief Name to use for signalling a configuration check */
         std::string                                 configurationCheckSignalName;
 
+        /** @brief [Optional] Settings for the FIPS crypto. */
+        FipsCryptoSettings                         fipsCrypto;
+
         BridgingServerConfiguration()
         {
             clear();
@@ -8946,6 +9796,7 @@ namespace AppConfigurationObjects
             certStorePasswordHex.clear();
             enginePolicy.clear();
             configurationCheckSignalName = "rts.6cc0651.${id}";
+            fipsCrypto.clear();
         }
     };
 
@@ -8964,7 +9815,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(certStoreFileName),
             TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(enginePolicy),
-            TOJSON_IMPL(configurationCheckSignalName)
+            TOJSON_IMPL(configurationCheckSignalName),
+            TOJSON_IMPL(fipsCrypto)
         };
     }
     static void from_json(const nlohmann::json& j, BridgingServerConfiguration& p)
@@ -8983,6 +9835,7 @@ namespace AppConfigurationObjects
         getOptional<std::string>("certStorePasswordHex", p.certStorePasswordHex, j);
         j.at("enginePolicy").get_to(p.enginePolicy);
         getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.6cc0651.${id}");
+        getOptional<FipsCryptoSettings>("fipsCrypto", p.fipsCrypto, j);
     }
 
 
@@ -9200,6 +10053,9 @@ namespace AppConfigurationObjects
         /** @brief Name to use for signalling a configuration check */
         std::string                                 configurationCheckSignalName;
 
+        /** @brief [Optional] Settings for the FIPS crypto. */
+        FipsCryptoSettings                          fipsCrypto;
+
         EarServerConfiguration()
         {
             clear();
@@ -9219,6 +10075,7 @@ namespace AppConfigurationObjects
             certStorePasswordHex.clear();
             enginePolicy.clear();
             configurationCheckSignalName = "rts.9a164fa.${id}";
+            fipsCrypto.clear();
         }
     };
 
@@ -9236,7 +10093,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(certStoreFileName),
             TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(enginePolicy),
-            TOJSON_IMPL(configurationCheckSignalName)
+            TOJSON_IMPL(configurationCheckSignalName),
+            TOJSON_IMPL(fipsCrypto)
         };
     }
     static void from_json(const nlohmann::json& j, EarServerConfiguration& p)
@@ -9366,6 +10224,8 @@ namespace AppConfigurationObjects
         EarServerStatusReportConfiguration::document();
         EarServerInternals::document();
         EarServerConfiguration::document();
+        RangerPackets::document();
+        TransportImpairment::document();
     }
 }
 
