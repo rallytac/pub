@@ -74,6 +74,12 @@ PLATFORM_API void PlatformOnThreadEnded();
 PLATFORM_API void PlatformSetThreadName(const char *nm);
 PLATFORM_API void PlatformGetThreadName(char *buff, size_t buffSize);
 PLATFORM_API void PlatformOnPlatformChangeNotification(const char *notification);
+PLATFORM_API bool PlatformStoreSecret(const char *key, const char *val);
+PLATFORM_API bool PlatformDeleteSecret(const char *key);
+PLATFORM_API bool PlatformGetSecret(const char *key, char **retval);
+PLATFORM_API void PlatformEnableAec(intptr_t p1, intptr_t p2, intptr_t p3, intptr_t p4);
+PLATFORM_API void PlatformDisableAec(intptr_t p1, intptr_t p2, intptr_t p3, intptr_t p4);
+PLATFORM_API void PlatformAbort();
 
 #ifdef __cplusplus
 }
