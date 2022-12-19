@@ -17,10 +17,10 @@ import random
 import signal
 import uuid
 import argparse
-from cryptography.fernet import Fernet
 import base64
 import hashlib
 import subprocess
+import ipaddress
 
 RX_INTERVAL_SECS = 1
 
@@ -52,13 +52,21 @@ global maxRunSecs
 global startTs
 global cryptoInstance
 global netError
+global dashboardToken
 
 try:
-    import colorama
-    haveColorama = True
+        from cryptography.fernet import Fernet
+        haveCrypto = True
 except ImportError as e:
-    haveColorama = False
-    pass
+        haveCrypto = False
+        pass
+        
+try:
+        import colorama
+        haveColorama = True
+except ImportError as e:
+        haveColorama = False
+        pass
 
 if haveColorama:
     colorama.init()
@@ -75,6 +83,7 @@ maxRunSecs = 0
 cryptoInstance = None
 startTs = datetime.now()
 netError = False
+dashboardToken = False
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
@@ -83,6 +92,7 @@ parser.add_argument('--log-level', type=int, help='Override the logging level in
 parser.add_argument('--fixed-token', type=int, help='The global voting token to use (default is random per resource)')
 parser.add_argument('--max-run-secs', type=int, help='Maximum number of seconds to run (generally only useful for testing')
 parser.add_argument('--log-cmds', type=bool, help='Log command output(s)')
+parser.add_argument('--dashboard-token', action=argparse.BooleanOptionalAction, help='Show the resource token in the dashboard')
 args = parser.parse_args()
 
 # --------------------------------------------------------------------------
@@ -211,9 +221,12 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('networking', {}, 'address', '')
         setDefaultConfigurationValue('networking', {}, 'port', 0)
         setDefaultConfigurationValue('networking', {}, 'ttl', 0)
+        setDefaultConfigurationValue('networking', {}, 'tos', 0)
         setDefaultConfigurationValue('networking', {}, 'txOversend', 0)
         setDefaultConfigurationValue('networking', {}, 'rxLossPercentage', 0)
+        setDefaultConfigurationValue('networking', {}, 'rxErrorPercentage', 0)
         setDefaultConfigurationValue('networking', {}, 'txLossPercentage', 0)
+        setDefaultConfigurationValue('networking', {}, 'txErrorPercentage', 0)
         setDefaultConfigurationValue('networking', {}, 'cryptoPassword', '')
 
         setDefaultConfigurationValue('resources', [])
@@ -226,6 +239,7 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('run', {}, 'onActive', '')
 
         setDefaultConfigurationValue('timing', {})
+        setDefaultConfigurationValue('timing', {}, 'internalMultiplier', 1)
         setDefaultConfigurationValue('timing', {}, 'txIntervalSecs', 1)
         setDefaultConfigurationValue('timing', {}, 'transitionWaitSecs', 5)
 
@@ -272,11 +286,21 @@ def checkConfiguration():
         if configuration['networking']['address'] == '':
                 printErrorAndExit('no networking.address defined')
 
+        if isIpMulticast(configuration['networking']['address']):
+                configuration['networking']['type'] = 'mc'
+        elif isIpBroadcast(configuration['networking']['address']):
+                configuration['networking']['type'] = 'bc'
+        else:
+                printErrorAndExit('networking.address specifies an unsupported address type')
+
         if configuration['networking']['port'] <= 0:
                 printErrorAndExit('invalid networking.port')
 
         if configuration['networking']['ttl'] <= 0:
                 printErrorAndExit('invalid networking.ttl')
+
+        if configuration['networking']['tos'] < 0:
+                printErrorAndExit('invalid networking.tos')
 
         if len(configuration['resources']) == 0:
                 printErrorAndExit('no resources defined')
@@ -290,14 +314,20 @@ def checkConfiguration():
         if configuration['run']['onActive'] == '':
                 printErrorAndExit('no run.onActive defined')
 
+        if configuration['timing']['internalMultiplier'] <= 0:
+                printErrorAndExit('invalid timing.internalMultiplier')                
+
         if configuration['timing']['txIntervalSecs'] <= 0:
-                printErrorAndExit('invalid timing.txIntervalSecs')
+                printErrorAndExit('invalid timing.txIntervalSecs')        
 
         if configuration['timing']['transitionWaitSecs'] <= 0:
-                printErrorAndExit('invalid timing.transitionWaitSecs')
+                printErrorAndExit('invalid timing.transitionWaitSecs')        
 
-        if configuration['timing']['transitionWaitSecs'] <= (RX_INTERVAL_SECS * 3):
+        if configuration['timing']['transitionWaitSecs'] < (RX_INTERVAL_SECS * 3):
                 printErrorAndExit('timing.transitionWaitSecs cannot be less than ' + str(RX_INTERVAL_SECS * 3))
+
+        configuration['timing']['txIntervalSecs'] = configuration['timing']['txIntervalSecs'] * configuration['timing']['internalMultiplier']
+        configuration['timing']['transitionWaitSecs'] = configuration['timing']['transitionWaitSecs'] * configuration['timing']['internalMultiplier']
 
         if configuration['electionToken']['start'] <= 0:
                 printErrorAndExit('electionToken.start cannot be 0 or negative')
@@ -316,10 +346,11 @@ def checkConfiguration():
 def initCrypto():
         global cryptoInstance
 
-        if configuration['networking']['cryptoPassword'] != None and configuration['networking']['cryptoPassword'] != '':
-                kdfBytes = hashlib.pbkdf2_hmac('sha256', str.encode(configuration['networking']['cryptoPassword']), b'04DBAA5900D5421D9CCB25A54ED4FA56', 10000, 32)
-                key = base64.urlsafe_b64encode(kdfBytes)
-                cryptoInstance = Fernet(key)
+        if haveCrypto:
+                if configuration['networking']['cryptoPassword'] != None and configuration['networking']['cryptoPassword'] != '':
+                        kdfBytes = hashlib.pbkdf2_hmac('sha256', str.encode(configuration['networking']['cryptoPassword']), b'04DBAA5900D5421D9CCB25A54ED4FA56', 10000, 32)
+                        key = base64.urlsafe_b64encode(kdfBytes)
+                        cryptoInstance = Fernet(key)
                 
 
 # ---------------------------------------------------------------
@@ -471,18 +502,24 @@ def rxThread():
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+
+        if configuration['networking']['type'] == 'mc':
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+        elif configuration['networking']['type'] == 'bc':
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
         sock.setblocking(False)
 
         #sock.bind((configuration['networking']['interfaceAddress'], configuration['networking']['port']))
         sock.bind(('', configuration['networking']['port']))
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(configuration['networking']['interfaceAddress']))
 
-        mreq = struct.pack('=4s4s', socket.inet_aton(configuration['networking']['address']), socket.inet_aton(configuration['networking']['interfaceAddress']))
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        if configuration['networking']['type'] == 'mc':
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(configuration['networking']['interfaceAddress']))
+                mreq = struct.pack('=4s4s', socket.inet_aton(configuration['networking']['address']), socket.inet_aton(configuration['networking']['interfaceAddress']))
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
         while running and not netError:
-                ready = select.select([sock], [], [], RX_INTERVAL_SECS)
+                ready = select.select([sock], [], [], (RX_INTERVAL_SECS * configuration['timing']['internalMultiplier']))
 
                 if ready[0]:
                         wireMsg = sock.recv(10240)
@@ -494,10 +531,13 @@ def rxThread():
                                         packetsRx = packetsRx + 1
                                         bytesRx = bytesRx + len(wireMsg)
 
-                                if (configuration['networking']['rxLossPercentage'] == 0 or configuration['networking']['rxLossPercentage'] <= random.randint(1, 100)):
-                                        processRx(obj)
+                                if (configuration['networking']['rxErrorPercentage'] == 0 or configuration['networking']['rxErrorPercentage'] <= random.randint(1, 100)):
+                                        if (configuration['networking']['rxLossPercentage'] == 0 or configuration['networking']['rxLossPercentage'] <= random.randint(1, 100)):
+                                                processRx(obj)
+                                        else:
+                                                processRx(None)
                                 else:
-                                        processRx(None)
+                                        raise Exception('forced rxError!')
                         except:
                                 errorsRx = errorsRx + 1
                                 processRx(None)
@@ -515,7 +555,14 @@ def txThread():
         global netError
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, configuration['networking']['ttl'])
+
+        if configuration['networking']['type'] == 'mc':
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, configuration['networking']['ttl'])
+        elif configuration['networking']['type'] == 'bc':
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, configuration['networking']['ttl'])
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_TOS, configuration['networking']['tos'])
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         sock.bind((configuration['networking']['interfaceAddress'], configuration['networking']['port']))
@@ -579,9 +626,14 @@ def processRx(obj):
                         for res in trackers:
                                 tracker = trackers[res]
                                 remoteTracker = None
+                                remoteFound = False
                                 for remoteTracker in remoteTrackers:
                                         if remoteTracker['r'] == res:
+                                                remoteFound = True
                                                 break
+
+                                if not remoteFound:
+                                        remoteTracker = None
 
                                 if remoteTracker != None:
                                         if remoteTracker['s'] == ST_ACTIVE:
@@ -612,6 +664,10 @@ def processRx(obj):
                                         if tracker['state'] == ST_IDLE:
                                                 tokenRange = getExternalTokenRange(tracker,)
                                                 if tokenRange != None:
+                                                        n = datetime.now()
+                                                        n1 = n + timedelta(seconds=5)
+                                                        n2 = n + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))
+
                                                         tracker['goActiveTime'] = datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))                                                        
                                                         logThis(LOG_DEBUG, res + ' is going active with a token range of ' + str(tokenRange[0]) + '-' + str(tokenRange[1]))
                                                         stateChange(tracker, ST_GOING_ACTIVE, tokenRange)
@@ -659,7 +715,7 @@ def stopRxTx():
 
 
 # ---------------------------------------------------------------
-def ctrlcHandler(sig, frame):
+def sigHandler(sig, frame):
         global running
 
         running = False
@@ -704,13 +760,31 @@ def showDashboard():
 
         print('')        
         print('NET: %s:%d %s' % (configuration['networking']['address'], configuration['networking']['port'], ('*ENCRYPTED*' if cryptoInstance != None else '*CLEAR*')))
-        print('TX : %d packets, %d bytes, %.2f Kbps' % (packetsTx, bytesTx, txKbps))
+        
+        if configuration['networking']['txLossPercentage'] > 0:
+                extraInfo = ' [' + str(configuration['networking']['txLossPercentage']) + '% forced TX loss]'
+        else:
+                extraInfo = ''
+
+        if configuration['networking']['txOversend'] > 0:
+                extraInfo = extraInfo + ' [' + str(configuration['networking']['txOversend']) + 'X oversend]'
+
+        print('TX : %d packets, %d bytes, %.2f Kbps%s' % (packetsTx, bytesTx, txKbps, extraInfo))
                 
-        print('RX : %d packets, %d bytes, %.2f Kbps, [%d errors]' % (packetsRx, bytesRx, rxKbps, errorsRx))
+        if configuration['networking']['rxLossPercentage'] > 0:
+                extraInfo = ' [' + str(configuration['networking']['rxLossPercentage']) + '% forced RX loss]'
+        else:
+                extraInfo = ''
+
+        print('RX : %d packets, %d bytes, %.2f Kbps, [%d errors]%s' % (packetsRx, bytesRx, rxKbps, errorsRx, extraInfo))
 
         print('')
-        print('%-20s %-18s %-20s' % ('Resource', 'Local State', 'Owner'))
-        print('-------------------- ------------------ ------------------------------------')
+        if dashboardToken:
+                print('%-20s %-18s %-36s %-12s' % ('Resource', 'Local State', 'Owner', 'Token'))
+                print('-------------------- ------------------ ------------------------------------ ------------')
+        else:
+                print('%-20s %-18s %-20s' % ('Resource', 'Local State', 'Owner'))
+                print('-------------------- ------------------ ------------------------------------')
 
         for res in trackers:
                 tracker = trackers[res]
@@ -725,18 +799,23 @@ def showDashboard():
                 else:
                         clr = colorNone()
 
+                if dashboardToken:
+                        token = ' ' + str(tracker['token'])
+                else:
+                        token = ''
+
                 if tracker['state'] == ST_NONE:
                         print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '?', colorNone()))
                 elif tracker['state'] == ST_IDLE:
-                        print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), tracker['owner'], colorNone()))
+                        print('%s%-20s %-18s %-36s%s%s' % (clr, res, stateDesc(tracker['state']), tracker['owner'], token, colorNone()))
                 else:
-                        print('%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '(self)', colorNone()))
+                        print('%s%-20s %-18s %-36s%s%s' % (clr, res, stateDesc(tracker['state']), '(self)', token, colorNone()))
 
 
 # ---------------------------------------------------------------
 def printHeadline():
         print('-----------------------------------------------------------------------------------')
-        print('nsm v0.1')
+        print('nsm v0.3')
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
 
@@ -750,6 +829,19 @@ def determineIpAddressOfInterface():
                 return False
         else:
                 return True
+
+
+# ---------------------------------------------------------------
+def isIpMulticast(ip):
+        try:
+                return ipaddress.ip_address(ip).is_multicast
+        except:
+                return False
+
+
+# ---------------------------------------------------------------
+def isIpBroadcast(ip):
+        return ip == '255.255.255.255'
 
 
 # ---------------------------------------------------------------
@@ -770,13 +862,19 @@ if __name__ == "__main__":
                 fixedToken = -1
 
         if args.log_level != None and args.log_level >= 0:
-                configuration['logging']['level'] = args.log_level        
+                configuration['logging']['level'] = args.log_level
+                
+
+        if args.dashboard_token:
+                dashboardToken = True
 
         checkConfiguration()
         initCrypto()
 
         running = True
-        signal.signal(signal.SIGINT, ctrlcHandler)    
+        signal.signal(signal.SIGINT, sigHandler)
+        signal.signal(signal.SIGTERM, sigHandler)
+        signal.signal(signal.SIGHUP, sigHandler)
 
         while running:
                 if configuration['logging']['dashboard']:
@@ -803,15 +901,15 @@ if __name__ == "__main__":
                 while running and not netError:
                         if configuration['logging']['dashboard']:
                                 showDashboard()
-
-                        time.sleep(1)
+                                time.sleep(1 * configuration['timing']['internalMultiplier'])
+                        else:
+                                time.sleep(1)
 
                         if maxRunSecs > 0:
-                                maxRunSecs = maxRunSecs - 1
+                                maxRunSecs = maxRunSecs - (1 * configuration['timing']['internalMultiplier'])
                                 if maxRunSecs <= 0:
                                         running = False
-                                        break
-                        
+                                        break                        
 
                 logThis(LOG_INFO, 'stopping...')
                 stopRxTx()
