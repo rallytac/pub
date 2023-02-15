@@ -655,7 +655,8 @@ def processRx(obj):
                                 if remoteTracker != None:
                                         if remoteTracker['s'] == ST_ACTIVE:
                                                 if configuration['priority'] > tokenPriority(remoteTracker['t']):
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active with a lower priority token, i will ignore it')
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active with a lower priority token, i will ignore it and accelerate my interval')
+                                                        tracker['goActiveTime'] = datetime.now()
                                                 else:
                                                         tracker['goActiveTime'] = datetime.max
                                                         tracker['owner'] = remoteId
@@ -664,7 +665,8 @@ def processRx(obj):
 
                                         elif remoteTracker['s'] == ST_GOING_ACTIVE:
                                                 if configuration['priority'] > tokenPriority(remoteTracker['t']):
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower priority token, i will ignore it')
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower priority token, i will ignore it and accelerate my interval')
+                                                        tracker['goActiveTime'] = datetime.now()
                                                 else:
                                                         if remoteTracker['t'] > tracker['token']:
                                                                 tracker['goActiveTime'] = datetime.max
@@ -687,10 +689,6 @@ def processRx(obj):
                                         if tracker['state'] == ST_IDLE:
                                                 tokenRange = getExternalTokenRange(tracker,)
                                                 if tokenRange != None:
-                                                        n = datetime.now()
-                                                        n1 = n + timedelta(seconds=5)
-                                                        n2 = n + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))
-
                                                         tracker['goActiveTime'] = datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))                                                        
                                                         logThis(LOG_DEBUG, res + ' is going active with a token range of ' + str(tokenRange[0]) + '-' + str(tokenRange[1]))
                                                         stateChange(tracker, ST_GOING_ACTIVE, tokenRange)
