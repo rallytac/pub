@@ -1,6 +1,6 @@
 {
         "id": "nsm-green",
-        "favorUptime": true,
+        "priority": 0,
         "networking": {
                 "interfaceName": "en0",
                 "xxx_address": "239.17.18.19",

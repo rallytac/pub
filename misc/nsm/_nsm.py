@@ -147,18 +147,35 @@ def clearScreen():
 
 
 # ---------------------------------------------------------------
+def acquireMutex(msg):
+        global mutex
+        mutex.acquire()
+
+
+# ---------------------------------------------------------------
+def releaseMutex(msg):
+        global mutex
+        mutex.release()
+
+
+# ---------------------------------------------------------------
+def tokenPriority(token):
+        return ((token & 0xff000000) >> 24)
+
+
+# ---------------------------------------------------------------
+def tokenRnd(token):
+        return (token & 0x00ffffff)
+
+
+# ---------------------------------------------------------------
 def generateToken(tokenStart, tokenEnd):
         global fixedToken
 
         if fixedToken >= 0:
                 return fixedToken
         else:
-                if configuration['favorUptime']:
-                        fv = (((datetime.now() - startTs).seconds % 14) + (2**32))
-                else:
-                        fv = 0
-
-                return (fv + (random.randint(tokenStart, tokenEnd) + (2**32)))
+                return (configuration['priority'] << 24) + (random.randint(tokenStart, tokenEnd))
 
 
 # ---------------------------------------------------------------
@@ -214,7 +231,7 @@ def loadConfiguration(path):
                 configuration = json.load(f)
 
         setDefaultConfigurationValue('id', '')
-        setDefaultConfigurationValue('favorUptime', True)
+        setDefaultConfigurationValue('priority', 0)
         
         setDefaultConfigurationValue('networking', {})
         setDefaultConfigurationValue('networking', {}, 'interfaceName', '')
@@ -434,9 +451,9 @@ def stateChange(tracker, newState, tokenRange=None):
 def getState(res):
         global trackers
 
-        mutex.acquire()
+        acquireMutex('getState')
         rc = trackers[res]['state']
-        mutex.release()
+        releaseMutex('getState')
         return rc
 
 
@@ -579,7 +596,7 @@ def txThread():
 
                         cnt = 0
 
-                        mutex.acquire()
+                        acquireMutex('txThread')
 
                         for res in trackers:
                                 st = trackers[res]['state']
@@ -596,7 +613,7 @@ def txThread():
                                         msg += ',"s":' + str(st)
                                         msg += '}'
 
-                        mutex.release()                                
+                        releaseMutex('txThread')
 
                         msg += ']}'
 
@@ -615,7 +632,7 @@ def txThread():
 def processRx(obj):
         global trackers
 
-        mutex.acquire()
+        acquireMutex('processRx')
 
         if obj != None:
                 remoteId = obj['i']
@@ -637,20 +654,26 @@ def processRx(obj):
 
                                 if remoteTracker != None:
                                         if remoteTracker['s'] == ST_ACTIVE:
-                                                tracker['goActiveTime'] = datetime.max
-                                                tracker['owner'] = remoteId
-                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
-                                                stateChange(tracker, ST_IDLE)
-
-                                        elif remoteTracker['s'] == ST_GOING_ACTIVE:
-                                                if remoteTracker['t'] > tracker['token']:
+                                                if configuration['priority'] > tokenPriority(remoteTracker['t']):
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active with a lower priority token, i will ignore it')
+                                                else:
                                                         tracker['goActiveTime'] = datetime.max
                                                         tracker['owner'] = remoteId
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
                                                         stateChange(tracker, ST_IDLE)
+
+                                        elif remoteTracker['s'] == ST_GOING_ACTIVE:
+                                                if configuration['priority'] > tokenPriority(remoteTracker['t']):
+                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower priority token, i will ignore it')
                                                 else:
-                                                        tracker['owner'] = ''
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
+                                                        if remoteTracker['t'] > tracker['token']:
+                                                                tracker['goActiveTime'] = datetime.max
+                                                                tracker['owner'] = remoteId
+                                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
+                                                                stateChange(tracker, ST_IDLE)
+                                                        else:
+                                                                tracker['owner'] = ''
+                                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
 
         for res in trackers:
                 tracker = trackers[res]
@@ -690,7 +713,7 @@ def processRx(obj):
                                         tracker['goActiveTime'] = (datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs'] + tracker['stunSecs'])))
                                         tracker['stunSecs'] = 0
 
-        mutex.release()
+        releaseMutex('processRx')
 
 
 # ---------------------------------------------------------------
@@ -754,9 +777,10 @@ def showDashboard():
                 rxKbps = 0
 
         print('')
-        print('ID : ' + configuration['id'])
+        print('ID  : ' + configuration['id'])
+        print('PRI : ' + str(configuration['priority']))
 
-        print('UP : ' + str(uptime) + ' seconds')
+        print('UP  : ' + str(uptime) + ' seconds')
 
         print('')        
         print('NET: %s:%d %s' % (configuration['networking']['address'], configuration['networking']['port'], ('*ENCRYPTED*' if cryptoInstance != None else '*CLEAR*')))
@@ -800,7 +824,7 @@ def showDashboard():
                         clr = colorNone()
 
                 if dashboardToken:
-                        token = ' ' + str(tracker['token'])
+                        token = ' ' + format(tracker['token'], "08x")
                 else:
                         token = ''
 
@@ -815,7 +839,7 @@ def showDashboard():
 # ---------------------------------------------------------------
 def printHeadline():
         print('-----------------------------------------------------------------------------------')
-        print('nsm v0.3')
+        print('nsm v0.4')
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
 
