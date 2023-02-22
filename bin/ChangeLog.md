@@ -1,5 +1,9 @@
 # Change Log
 
+## January 19, 2023 - 1.234.9074
+- Adds the new Engage Linguistics Service (ELS).
+- Corrects an issue whereby groups not associated with an output audio device print debug messages every second after RX has concluded.
+
 ## October 14, 2022 - 1.232.9072
 - Adds correct thread name for Sys:SignalListener.
 - Adds correct thread name for Sys:ProcessMonitor.
@@ -27,6 +31,7 @@
 - Corrects an issue with EBS when operating on codecs that are framed in blocks rather than milliseconds.
 - Corrects an issue with RTP timestamps for Opus-encoded payloads.
 - Corrects an issue when processing dynamic configuration files that change more than once in one second.
+- Corrects an delay in notification of group RX ended for transmissions shorter than the jitter buffer hang time.
 
 ## June 6, 2022 - 1.228.9068
 - Adds a security classification level setting to group definitions that allows implementors to determine communication types appropriate for a group.
