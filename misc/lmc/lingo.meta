@@ -1,0 +1,40 @@
+#------------------------------------------------------------------------------------------
+# Copyright (c) 2023 Rally Tactical Systems, Inc.
+#
+# This is an example meta file for Engage Linguistics Service defining voice-to-voice 
+# sessions.
+#
+# A line starting with '+' denotes a session identifier which must be a unique string.
+#  e.g.
+#    +session1
+#    +myownsession
+#    +ABC-1-2-3
+#
+# Lines starting with '-' denote an Engage group/channel within the preceding
+# session and are formatted as follows:
+#
+#   <group_id>:<language_code>[:<crypto_password>]
+#
+#   Both <group_id> and <language_code> are required.  The <crypo_password> value is only
+#   needed if the group is encrypted.  As with all Engage group identifiers, the ID must
+#   simply be a unique string, so use whatever group IDs your system is configured for.
+#------------------------------------------------------------------------------------------
+
+#--------- Session 1
++1cfa1dea-b378-485b-829c-ab27afb35dd4
+	-group1:en-US
+	-group2:fr-FR:10EEED2674C24EEA9F94F94638E42C6F
+
+#--------- Session 2			
++{dc0032cb-5d6b-4f4b-8412-9c208c15a23f}
+	-fe1b9dc2-4d79-4164-ad63-7f2cd425b035:en-US
+	-4014994e-2c1e-4653-bbf8-fddc7c1e17f9:uk-UA
+	-a_human_readable_group_id:zh-CN
+
+
+#--------- Session 3
++this-is-also-a-valid-session-identifier
+	-AMERICAN-01:en-US
+	-UKRAINIAN-01:uk-UA:E4627DC9-1CC6-4E5E-A743-C217B38B7D9D
+	-GERMAN-06:de-DE
+
