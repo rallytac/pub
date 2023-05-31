@@ -19,17 +19,29 @@ using namespace std;
 using namespace Nan;
 using namespace v8;
 
+// Makes a binding
 #define ENGAGE_BINDING(_nm) \
     Nan::Set(target, \
         New<String>(#_nm).ToLocalChecked(), \
         GetFunction(New<FunctionTemplate>(_nm)).ToLocalChecked());
 
+// Gets inbound string parameter @ _infoIndex
 #define STRVAL(_infoIndex) \
     *Nan::Utf8String(info[_infoIndex]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()))
 
+// Gets inbound integer parameter @ _infoIndex
 #define INTVAL(_index) \
     info[_index]->Int32Value(Nan::GetCurrentContext()).FromJust()
 
+// Return an integer
+#define NANRETI(_expr) \
+    info.GetReturnValue().Set(_expr);
+
+// Return a string
+#define NANRETS(_expr) \
+    info.GetReturnValue().Set(New(_expr).ToLocalChecked());
+
+// Defines a callback with no parameters
 #define ENGAGE_CB_NO_PARAMS(_ename) \
     void on_ ## _ename(const char *eventExtraJson) \
     { \
@@ -42,6 +54,7 @@ using namespace v8;
         cbw->RELEASE_OBJECT_REFERENCE(); \
     }
 
+// Defines a callback with a string parameter
 #define ENGAGE_CB_STR_PARAM(_ename) \
     void on_ ## _ename(const char *str, const char *eventExtraJson) \
     { \
@@ -54,6 +67,7 @@ using namespace v8;
         cbw->RELEASE_OBJECT_REFERENCE(); \
     }
 
+// Defines a callback with an ID (a string parameter)
 #define ENGAGE_CB_ID_PARAM(_ename) \
     void on_ ## _ename(const char *id, const char *eventExtraJson) \
     { \
@@ -66,6 +80,7 @@ using namespace v8;
         cbw->RELEASE_OBJECT_REFERENCE(); \
     }
 
+// Defines a callback with an ID (a string parameter) plus 1 strnig
 #define ENGAGE_CB_ID_PLUS_ONE_STRING_PARAM(_ename) \
     void on_ ## _ename(const char *id, const char *s, const char *eventExtraJson) \
     { \
@@ -78,6 +93,7 @@ using namespace v8;
         cbw->RELEASE_OBJECT_REFERENCE(); \
     }
 
+// A callback table entry
 #define ENGAGE_CB_TABLE_ENTRY(_pfn, _ename) \
     g_eventCallbacks._pfn = on_ ## _ename;
 
@@ -559,9 +575,11 @@ NAN_METHOD(on)
 //--------------------------------------------------------
 NAN_METHOD(initialize)
 {
+    /*
     #if defined(WIN32)
         engageWin32LibraryInit();
     #endif
+    */
 
     memset(&g_eventCallbacks, 0, sizeof(g_eventCallbacks));
 
@@ -645,149 +663,153 @@ NAN_METHOD(initialize)
 
     engageRegisterEventCallbacks(&g_eventCallbacks);
 
-    engageInitialize(STRVAL(0), STRVAL(1), STRVAL(2));
+    NANRETI(engageInitialize(STRVAL(0), STRVAL(1), STRVAL(2)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(enableCallbacks)
 {
     g_wantCallbacks = true;
+    NANRETI((int)ENGAGE_RESULT_OK);
 }
 
 //--------------------------------------------------------
 NAN_METHOD(disableCallbacks)
 {
     g_wantCallbacks = false;
+    NANRETI((int)ENGAGE_RESULT_OK);
 }
 
 //--------------------------------------------------------
 NAN_METHOD(setLogLevel)
 {
-    engageSetLogLevel(INTVAL(0));
+    NANRETI(engageSetLogLevel(INTVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(setLogTagExtension)
 {
-    engageSetLogTagExtension(STRVAL(0));
+    NANRETI(engageSetLogTagExtension(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(engageEnableSyslog)
 {
-    engageEnableSyslog(INTVAL(0) == 1 ? ENGAGE_SYSLOG_ENABLE : ENGAGE_SYSLOG_DISABLE);
+    NANRETI(engageEnableSyslog(INTVAL(0) == 1 ? ENGAGE_SYSLOG_ENABLE : ENGAGE_SYSLOG_DISABLE));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(engageEnableWatchdog)
 {
-    engageEnableWatchdog(INTVAL(0) == 1 ? ENGAGE_WATCHDOG_ENABLE : ENGAGE_WATCHDOG_DISABLE);
+    NANRETI(engageEnableWatchdog(INTVAL(0) == 1 ? ENGAGE_WATCHDOG_ENABLE : ENGAGE_WATCHDOG_DISABLE));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(shutdown)
 {
-    engageShutdown();
+    NANRETI(engageShutdown());
 
+    /*
     #if defined(WIN32)
         engageWin32LibraryDeinit();
     #endif
+    */
 }
 
 //--------------------------------------------------------
 NAN_METHOD(start)
 {
-    engageStart();
+    NANRETI(engageStart());
 }
 
 //--------------------------------------------------------
 NAN_METHOD(stop)
 {
-    engageStop();
+    NANRETI(engageStop());
 }
 
 //--------------------------------------------------------
 NAN_METHOD(createGroup)
 {
-    engageCreateGroup(STRVAL(0));
+    NANRETI(engageCreateGroup(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(deleteGroup)
 {
-    engageDeleteGroup(STRVAL(0));
+    NANRETI(engageDeleteGroup(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(joinGroup)
 {
-    engageJoinGroup(STRVAL(0));
+    NANRETI(engageJoinGroup(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(leaveGroup)
 {
-    engageLeaveGroup(STRVAL(0));
+    NANRETI(engageLeaveGroup(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(beginGroupTx)
 {
-    engageBeginGroupTx(STRVAL(0), INTVAL(1), INTVAL(2));
+    NANRETI(engageBeginGroupTx(STRVAL(0), INTVAL(1), INTVAL(2)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(beginGroupTxAdvanced)
 {
-    engageBeginGroupTxAdvanced(STRVAL(0), STRVAL(1));
+    NANRETI(engageBeginGroupTxAdvanced(STRVAL(0), STRVAL(1)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(endGroupTx)
 {
-    engageEndGroupTx(STRVAL(0));
+    NANRETI(engageEndGroupTx(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(setGroupRxTag)
 {
-    engageSetGroupRxTag(STRVAL(0), INTVAL(1));
+    NANRETI(engageSetGroupRxTag(STRVAL(0), INTVAL(1)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(muteGroupRx)
 {
-    engageMuteGroupRx(STRVAL(0));
+    NANRETI(engageMuteGroupRx(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(unmuteGroupRx)
 {
-    engageUnmuteGroupRx(STRVAL(0));
+    NANRETI(engageUnmuteGroupRx(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(muteGroupTx)
 {
-    engageMuteGroupTx(STRVAL(0));
+    NANRETI(engageMuteGroupTx(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(unmuteGroupTx)
 {
-    engageUnmuteGroupTx(STRVAL(0));
+    NANRETI(engageUnmuteGroupTx(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(setGroupRxVolume)
 {
-    engageSetGroupRxVolume(STRVAL(0), INTVAL(1), INTVAL(2));
+    NANRETI(engageSetGroupRxVolume(STRVAL(0), INTVAL(1), INTVAL(2)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(updatePresenceDescriptor)
 {
-    engageUpdatePresenceDescriptor(STRVAL(0), STRVAL(1), INTVAL(0));
+    NANRETI(engageUpdatePresenceDescriptor(STRVAL(0), STRVAL(1), INTVAL(0)));
 }
 
 //--------------------------------------------------------
@@ -801,7 +823,7 @@ NAN_METHOD(encrypt)
     // Our output is going to contain encrypted data padded to 16 bytes + another 16 bytes of IV
     uint8_t *outputBytes = new uint8_t[inputLen + 16 * 2];
 
-    int bytesInOutput =  engageEncrypt(inputBytes + inputOfs, inputLen, outputBytes, STRVAL(3));
+    int bytesInOutput = engageEncrypt(inputBytes + inputOfs, inputLen, outputBytes, STRVAL(3));
 
     if(bytesInOutput > 0)
     {
@@ -842,7 +864,7 @@ NAN_METHOD(getVersion)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -855,7 +877,7 @@ NAN_METHOD(getHardwareReport)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -868,7 +890,7 @@ NAN_METHOD(getActiveLicenseDescriptor)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -881,13 +903,13 @@ NAN_METHOD(getLicenseDescriptor)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
 NAN_METHOD(updateLicense)
 {
-    engageUpdateLicense(STRVAL(0), STRVAL(1), STRVAL(2), STRVAL(3));
+    NANRETI(engageUpdateLicense(STRVAL(0), STRVAL(1), STRVAL(2), STRVAL(3)));
 }
 
 // TODO: engageSendGroupRtp
@@ -902,19 +924,19 @@ NAN_METHOD(updateLicense)
 //--------------------------------------------------------
 NAN_METHOD(queryGroupTimeline)
 {
-    engageQueryGroupTimeline(STRVAL(0), STRVAL(1));
+    NANRETI(engageQueryGroupTimeline(STRVAL(0), STRVAL(1)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(queryGroupHealth)
 {
-    engageQueryGroupHealth(STRVAL(0));
+    NANRETI(engageQueryGroupHealth(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(queryGroupStats)
 {
-    engageQueryGroupStats(STRVAL(0));
+    NANRETI(engageQueryGroupStats(STRVAL(0)));
 }
 
 //--------------------------------------------------------
@@ -927,7 +949,7 @@ NAN_METHOD(getNetworkInterfaceDevices)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -940,7 +962,7 @@ NAN_METHOD(getAudioDevices)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -953,7 +975,7 @@ NAN_METHOD(generateMission)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
@@ -966,45 +988,107 @@ NAN_METHOD(generateMissionUsingCertStore)
         rc = "";
     }
 
-    info.GetReturnValue().Set(New(rc).ToLocalChecked());
+    NANRETS(rc);
 }
 
 //--------------------------------------------------------
 NAN_METHOD(setMissionId)
 {
-    engageSetMissionId(STRVAL(0));
+    NANRETI(engageSetMissionId(STRVAL(0)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(openCertStore)
 {
-    engageOpenCertStore(STRVAL(0), STRVAL(1));
+    NANRETI(engageOpenCertStore(STRVAL(0), STRVAL(1)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(closeCertStore)
 {
-    engageCloseCertStore();
+    NANRETI(engageCloseCertStore());
 }
 
-// TODO: engageSetCertStoreCertificatePem
-// TODO: engageSetCertStoreCertificatePem
-// TODO: engageSetCertStoreCertificateP12
-// TODO: engageDeleteCertStoreCertificate
-// TODO: engageGetCertStoreCertificatePem
-// TODO: engageGetCertificateDescriptorFromPem
-// TODO: engageImportCertStoreElementFromCertStore
+//--------------------------------------------------------
+NAN_METHOD(setCertStoreCertificatePem)
+{
+    NANRETI(engageSetCertStoreCertificatePem(STRVAL(0), STRVAL(1), STRVAL(2), STRVAL(3)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(setCertStoreCertificateP12)
+{
+    NANRETI(engageSetCertStoreCertificateP12(STRVAL(0), (uint8_t*) node::Buffer::Data(info[1]), INTVAL(2), STRVAL(3), STRVAL(4)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(deleteCertStoreCertificate)
+{
+    NANRETI(engageDeleteCertStoreCertificate(STRVAL(0)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(getCertStoreCertificatePem)
+{
+    const char *rc = engageGetCertStoreCertificatePem(STRVAL(0));
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    NANRETS(rc);
+}
+
+//--------------------------------------------------------
+NAN_METHOD(getCertificateDescriptorFromPem)
+{
+    const char *rc = engageGetCertificateDescriptorFromPem(STRVAL(0));
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    NANRETS(rc);
+}
+
+//--------------------------------------------------------
+NAN_METHOD(importCertStoreElementFromCertStore)
+{
+    NANRETI(engageImportCertStoreElementFromCertStore(STRVAL(0), STRVAL(1), STRVAL(2), STRVAL(3), STRVAL(4)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(queryCertStoreContents)
+{
+    const char *rc = engageQueryCertStoreContents(STRVAL(0), STRVAL(1));
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    NANRETS(rc);
+}
+
+//--------------------------------------------------------
+NAN_METHOD(setCertStoreCertificateTags)
+{
+    NANRETI(engageSetCertStoreCertificateTags(STRVAL(0), STRVAL(1)));
+}
+
 
 //--------------------------------------------------------
 NAN_METHOD(logMsg)
 {
-    engageLogMsg(INTVAL(0), STRVAL(1), STRVAL(2));
+    NANRETI(engageLogMsg(INTVAL(0), STRVAL(1), STRVAL(2)));
 }
 
 //--------------------------------------------------------
 NAN_METHOD(platformNotifyChanges)
 {
-    engagePlatformNotifyChanges(STRVAL(0));
+    NANRETI(engagePlatformNotifyChanges(STRVAL(0)));
 }
 
 //--------------------------------------------------------
@@ -1030,6 +1114,7 @@ static void internalEngageLoggingHook(int level, const char *tag, const char *me
     cbw->RELEASE_OBJECT_REFERENCE();
 }
 
+//--------------------------------------------------------
 NAN_METHOD(hookEngineLogging)
 {
     g_loggingHookFn = STRVAL(0);
@@ -1043,6 +1128,59 @@ NAN_METHOD(hookEngineLogging)
         engageSetLoggingOutputOverride(nullptr);
     }
 }
+
+//--------------------------------------------------------
+NAN_METHOD(setFipsCrypto)
+{
+    NANRETI(engageSetFipsCrypto(STRVAL(0)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(isCryptoFipsValidated)
+{
+    NANRETI(engageIsCryptoFipsValidated());
+}
+
+//--------------------------------------------------------
+NAN_METHOD(setCertStore)
+{
+    NANRETI(engageSetCertStore((uint8_t*) node::Buffer::Data(info[0]), INTVAL(1), STRVAL(2)));
+}
+
+//--------------------------------------------------------
+NAN_METHOD(getDeviceId)
+{
+    const char *rc = engageGetDeviceId();
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    NANRETS(rc);
+}
+
+
+//--------------------------------------------------------
+NAN_METHOD(verifyRiff)
+{
+    NANRETI(engageVerifyRiff(STRVAL(0)));
+}
+
+
+//--------------------------------------------------------
+NAN_METHOD(getRiffDescriptor)
+{
+    const char *rc = engageGetRiffDescriptor(STRVAL(0));
+
+    if(rc == nullptr)
+    {
+        rc = "";
+    }
+
+    NANRETS(rc);
+}
+
 
 //--------------------------------------------------------
 NAN_MODULE_INIT(Init)
@@ -1096,6 +1234,15 @@ NAN_MODULE_INIT(Init)
 
     ENGAGE_BINDING(openCertStore);
     ENGAGE_BINDING(closeCertStore);
+    ENGAGE_BINDING(setCertStore);
+    ENGAGE_BINDING(setCertStoreCertificatePem);
+    ENGAGE_BINDING(setCertStoreCertificateP12);
+    ENGAGE_BINDING(deleteCertStoreCertificate);
+    ENGAGE_BINDING(getCertStoreCertificatePem);
+    ENGAGE_BINDING(getCertificateDescriptorFromPem);
+    ENGAGE_BINDING(importCertStoreElementFromCertStore);
+    ENGAGE_BINDING(queryCertStoreContents);
+    ENGAGE_BINDING(setCertStoreCertificateTags);
 
     ENGAGE_BINDING(generateMission);
     ENGAGE_BINDING(generateMissionUsingCertStore);    
@@ -1105,6 +1252,14 @@ NAN_MODULE_INIT(Init)
 
     ENGAGE_BINDING(logMsg);
     ENGAGE_BINDING(hookEngineLogging);
+
+    ENGAGE_BINDING(setFipsCrypto);
+    ENGAGE_BINDING(isCryptoFipsValidated);
+
+    ENGAGE_BINDING(getDeviceId);
+
+    ENGAGE_BINDING(verifyRiff);
+    ENGAGE_BINDING(getRiffDescriptor);    
 }
 
 NODE_MODULE(engage, Init)

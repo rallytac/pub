@@ -24,21 +24,33 @@
     #endif
 #endif
 
-#include "Constants.h"
-
 #ifdef WIN32
     #define strncasecmp                             _strnicmp
     #define strcasecmp                              _stricmp
     #define PATH_MAX                                MAX_PATH
     #define pid_t                                   int
+    #define SHUT_RDWR                               SD_BOTH
+	#ifdef _WIN64
+		#define ssize_t		                        __int64
+	#else
+		#define ssize_t		                        __int32
+	#endif
+
 #else
+    static const int INVALID_SOCKET = -1;
+
     #define strtok_s                                strtok_r
     #define strcpy_s(__dst, __sz, __src)            strcpy(__dst, __src)
     #define strncpy_s(__dst, __sz, __src, __mx)     strncpy(__dst, __src, __mx)
     #define strcat_s(__dst, __sz, __src)            strcat(__dst, __src)
-    #define sprintf_s(__dst, __sz, __fmt, ...)      sprintf(__dst, __fmt, __VA_ARGS__)
+    #if defined(RTS_HAVE_SNPRINTF)
+        #define sprintf_s(__dst, __sz, __fmt, ...)      snprintf(__dst, __sz, __fmt, __VA_ARGS__)
+    #else
+        #define sprintf_s(__dst, __sz, __fmt, ...)      sprintf(__dst, __fmt, __VA_ARGS__)
+    #endif
     #define SOCKET                                  int
     #define sscanf_s                                sscanf
+    #define closesocket                             close
 #endif
 
 #if !defined(htonll)

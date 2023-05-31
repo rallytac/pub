@@ -152,7 +152,9 @@ public class Engage
     public const int ENGAGE_RESULT_GENERAL_FAILURE = -4;
     public const int ENGAGE_RESULT_NOT_STARTED = -5;
     public const int ENGAGE_RESULT_ALREADY_STARTED = -6;
-    public const int ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE = -7;    
+    public const int ENGAGE_RESULT_INSUFFICIENT_DESTINATION_SPACE = -7;
+    public const int ENGAGE_RESULT_CRYPTO_MODULE_INITIALIZATION_FAILURE = -8;    
+    public const int ENGAGE_RESULT_HIGH_RES_TIMER_ALREADY_EXISTS = -9;
 
     // Jitter Buffer Latency types
     public enum JitterBufferLatency : int
@@ -198,7 +200,8 @@ public class Engage
         ERR_INVALID_EXPIRATION_DATE = -6,
         ERR_GENERAL_FAILURE = -7,
         ERR_NOT_INITIALIZED = -8,
-        ERR_REQUIRES_ACTIVATION = -9
+        ERR_REQUIRES_ACTIVATION = -9,
+        ERR_LICENSE_NOT_SUITED_FOR_ACTIVATION = -10
     }
 
     // Logging levels
@@ -263,6 +266,23 @@ public class Engage
 
     public class JsonFields
     {
+        public class FipsCryptoSettings
+        {
+            public static String objectName = "fipsCrypto";
+            public static String enabled = "enabled";
+            public static String path = "path";
+        }
+
+        public class Tls
+        {
+            public static String objectName = "tls";
+            public static String verifyPeers = "verifyPeers";
+            public static String allowSelfSignedCertificates = "allowSelfSignedCertificates";
+            public static String caCertificates = "caCertificates";
+            public static String subjectRestrictions = "subjectRestrictions";
+            public static String issuerRestrictions = "issuerRestrictions";
+        }
+
         public class WatchdogSettings
         {
             public static String objectName = "watchdog";
@@ -384,7 +404,9 @@ public class Engage
             public static String alias = "alias";
             public static String muted = "muted";
             public static String txId = "txId";
-
+            public static String aliasSpecializer = "aliasSpecializer";
+            public static String receiverRxMuteForAliasSpecializer = "receiverRxMuteForAliasSpecializer";
+            
             public class AudioUri
             {
                 public static String objectName = "audioUri";
@@ -414,6 +436,8 @@ public class Engage
             public static String rxFlags = "rxFlags";
             public static String txPriority = "txPriority";
             public static String txId = "txId";
+            public static String aliasSpecializer = "aliasSpecializer";
+            public static String rxMuted = "rxMuted";
         }
 
         public class GroupTalkers
@@ -570,6 +594,12 @@ public class Engage
             {
                 public static String objectName = "discovery";
 
+                public class Magellan
+                {
+                    public static String objectName = "magellan";
+                    public static String enabled = "enabled";
+                }
+
                 public class Ssdp
                 {
                     public static String objectName = "ssdp";
@@ -649,12 +679,20 @@ public class Engage
             public static String port = "port";
         }
 
+        public class RangerPackets
+        {
+            public static String objectName = "rangerPackets";
+            public static String hangTimerSecs = "hangTimerSecs";
+            public static String count = "count";
+        }
+
         public class Group
         {
             public static String objectName = "group";
             public static String arrayName = "groups";
             public static String id = "id";
             public static String name = "name";
+            public static String spokenName = "spokenName";
             public static String type = "type";
             public static String source = "source";
             public static String cryptoPassword = "cryptoPassword";
@@ -665,7 +703,10 @@ public class Engage
             public static String interfaceName = "interfaceName";
             public static String anonymousAlias = "anonymousAlias";
             public static String lbCrypto = "lbCrypto";
-
+            public static String rtpProfile = "rtpProfile";
+            public static String specializerAffinities = "specializerAffinities";
+            public static String languageCode = "languageCode";
+            
             public class Timeline
             {
                 public static String objectName = "timeline";
@@ -792,6 +833,18 @@ public class Engage
             public static String payloadType = "payloadType";
             public static String blobSize = "size";
             public static String rtpHeader = "rtpHeader";
+        }
+
+        public class RiffDescriptor
+        {
+            public static String objectName = "descriptor";
+            public static String file = "file";
+            public static String verified = "verified";
+            public static String channels = "channels";
+            public static String sampleCount = "sampleCount";
+            public static String meta = "meta";
+            public static String certificate = "certificate";
+            public static String signature = "signature";
         }
 
         public class TimelineEvent
@@ -1240,6 +1293,24 @@ public class Engage
 
     //[DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
     //private static extern int engageDecompress(IntPtr src, int srcSize, IntPtr dst, int maxDstSize);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageSetFipsCrypto(string jsonParams);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageIsCryptoFipsValidated();
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr engageGetDeviceId();
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageSetCertStore(IntPtr buff, int size, string passwordHexByteString);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int engageVerifyRiff(string fn);
+
+    [DllImport(ENGAGE_DLL, CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr engageGetRiffDescriptor(string fn);
 
     #endregion
 
@@ -2913,6 +2984,16 @@ public class Engage
     {
         return engageUpdatePresenceDescriptor(id, jsonDescriptor, (forceBeacon ? 1 : 0));
     }
+
+    public int setFipsCrypto(string jsonParams)
+    {
+        return engageSetFipsCrypto(jsonParams);
+    }
+
+    public bool isCryptoFipsValidated()
+    {
+        return (engageIsCryptoFipsValidated() == 1 ? true : false);
+    }
     #endregion
 
     #region Helpers
@@ -3031,6 +3112,39 @@ public class Engage
     public int platformNotifyChanges(string jsonChangesArray)
     {
         return engagePlatformNotifyChanges(jsonChangesArray);
+    }
+
+    public String getDeviceId()
+    {
+        IntPtr ptr = engageGetDeviceId();
+
+        if (ptr == IntPtr.Zero)
+        {
+            return null;
+        }
+        else
+        {
+            return Marshal.PtrToStringAnsi(ptr);
+        }
+    }
+
+    public int verifyRiff(string fn)
+    {
+        return engageVerifyRiff(fn);
+    }
+
+    public String getRiffDescriptor(string fn)
+    {
+        IntPtr ptr = engageGetRiffDescriptor(fn);
+
+        if (ptr == IntPtr.Zero)
+        {
+            return null;
+        }
+        else
+        {
+            return Marshal.PtrToStringAnsi(ptr);
+        }
     }
 
     #endregion
