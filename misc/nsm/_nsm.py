@@ -231,7 +231,7 @@ def loadConfiguration(path):
                 configuration = json.load(f)
 
         setDefaultConfigurationValue('id', '')
-        setDefaultConfigurationValue('priority', 0)
+        setDefaultConfigurationValue('defaultPriority', 0)
         
         setDefaultConfigurationValue('networking', {})
         setDefaultConfigurationValue('networking', {}, 'interfaceName', '')
@@ -269,9 +269,17 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('logging', {}, 'dashboard', True)
         setDefaultConfigurationValue('logging', {}, 'logCommandOutput', False)        
 
-        for key in configuration['resources']:
+        for item in configuration['resources']:
+                key = item['id']
+
+                try:
+                        priority = item['priority']
+                except:
+                        priority = configuration['defaultPriority']
+
                 trackers[key] = {}
                 trackers[key]['res'] = key
+                trackers[key]['priority'] = priority
                 trackers[key]['state'] = ST_NONE
                 trackers[key]['token'] = 0
                 trackers[key]['goActiveTime'] = (datetime.now() + timedelta(seconds=configuration['timing']['transitionWaitSecs']))

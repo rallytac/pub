@@ -14,5 +14,6 @@ do
         ./onIdle.sh ''
         python3 _nsm.py --max-run-secs $(( ($RANDOM % ${NSM_RUN_SECS}) + ${NSM_RUN_SECS} )) ${1} ${2} ${3} ${4} ${5} ${6}
         ./onIdle.sh ''
+        sleep ${NSM_RUN_SECS}
     fi
 done
