@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
             
             if(recordsProcessed % 1 == 0)
             {
-                std::cout << "." << std::flush;
+                //std::cout << "." << std::flush;
             }
             
             if (start.tv_nsec == -1)
@@ -275,6 +275,7 @@ int main(int argc, char *argv[])
 
             if (header.len != header.caplen)
             {
+                std::cout << "h" << std::flush;
                 continue;
             }
 
@@ -289,16 +290,19 @@ int main(int argc, char *argv[])
 
             if (ntohs(eth->ether_type) != ETHERTYPE_IP)
             {
+                std::cout << "e" << std::flush;
                 continue;
             }
 
             auto ip = reinterpret_cast<const struct ip *>(p + sizeof(ether_header));
             if (ip->ip_v != 4)
             {
+                std::cout << "i" << std::flush;
                 continue;
             }
             if (ip->ip_p != IPPROTO_UDP)
             {
+                std::cout << "u" << std::flush;
                 continue;
             }
 
@@ -316,6 +320,7 @@ int main(int argc, char *argv[])
                 {
                     pktsFiltered++;
                     bytesFiltered += len;
+                    std::cout << "s" << std::flush;
                     continue;
                 }
             }
@@ -326,6 +331,7 @@ int main(int argc, char *argv[])
                 {
                     pktsFiltered++;
                     bytesFiltered += len;
+                    std::cout << "d" << std::flush;
                     continue;
                 }
             }
@@ -403,6 +409,9 @@ int main(int argc, char *argv[])
                 std::cerr << "sendto: " << strerror(errno) << std::endl;
                 return 1;
             }
+
+            //std::cout << "send " << std::endl;
+            std::cout << "." << std::flush;
             
             pktsSent++;
             bytesSent += len;
