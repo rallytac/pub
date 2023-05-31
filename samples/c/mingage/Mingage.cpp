@@ -25,7 +25,7 @@ static const char* RP_FILE_NAME = "cfg/active_rallypoint.json";
 
 static const size_t MAX_CMD_BUFF_SIZE = 4096;
 
-typedef struct
+typedef struct _tagStateTracker_t
 {
     int currentChannel = 1;
     int g_groupsCreated = 0;
