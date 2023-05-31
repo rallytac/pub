@@ -2,7 +2,6 @@
 # Engage Provisioning Tool
 # Copyright (c) 2022 Rally Tactical Systems, Inc.
 #
-
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, padding
@@ -75,12 +74,16 @@ if __name__ == '__main__':
         parser.add_argument('-pwd', required=True, metavar='password', help='password for provisioning file')
         parser.add_argument('-i', required=True, metavar='input_file', help='input file')
         parser.add_argument('-o', required=True, metavar='output_file', help='output file')
+        parser.add_argument('-identity', required=False, metavar='identity', help='identity file')
 
         args = parser.parse_args()
 
     except:
         parser.print_help()
         exit()
+
+    if not args.identity is None:
+        print(args.identity)
 
     if args.pack:
         with open(args.i, 'rb') as f:
@@ -90,26 +93,43 @@ if __name__ == '__main__':
             print(args.i + ' is not a valid inout file')
             exit()
 
+        if not args.identity is None:
+            inputJson['engageProvisioning'].pop('identities', None)
+            inputJson['engageProvisioning']['identities'] = ['@as://engage.identity:' +  args.identity]
+
         if 'policies' in inputJson['engageProvisioning']:
             for x in range(0, len(inputJson['engageProvisioning']['policies'])):
                 s = inputJson['engageProvisioning']['policies'][x]
                 if s.startswith('@file://'):
                     with open(s[8:], 'rt') as f:
-                        inputJson['engageProvisioning']['policies'][x] = {'file': os.path.basename(f.name), 'content': json.load(f)}
+                        inputJson['engageProvisioning']['policies'][x] = {'container': os.path.basename(f.name), 'content': json.load(f)}
 
         if 'identities' in inputJson['engageProvisioning']:
             for x in range(0, len(inputJson['engageProvisioning']['identities'])):
                 s = inputJson['engageProvisioning']['identities'][x]
-                if s.startswith('@file://'):
-                    with open(s[8:], 'rt') as f:
-                        inputJson['engageProvisioning']['identities'][x] = {'file': os.path.basename(f.name), 'content': json.load(f)}
+                cn = 'engage.identity'
+
+                if s.startswith('@as://engage.identity:'):
+                    fn = s[22:]
+                elif s.startswith('@file://'):
+                    fn = s[8:]
+
+                with open(fn, 'rt') as f:
+                    inputJson['engageProvisioning']['identities'][x] = {'container': cn, 'content': json.load(f)}
 
         if 'missions' in inputJson['engageProvisioning']:
             for x in range(0, len(inputJson['engageProvisioning']['missions'])):
                 s = inputJson['engageProvisioning']['missions'][x]
                 if s.startswith('@file://'):
                     with open(s[8:], 'rt') as f:
-                        inputJson['engageProvisioning']['missions'][x] = {'file': os.path.basename(f.name), 'content': json.load(f)}
+                        inputJson['engageProvisioning']['missions'][x] = {'container': os.path.basename(f.name), 'content': json.load(f)}
+
+        if 'apps' in inputJson['engageProvisioning']:
+            for x in range(0, len(inputJson['engageProvisioning']['apps'])):
+                s = inputJson['engageProvisioning']['apps'][x]
+                if s.startswith('@file://'):
+                    with open(s[8:], 'rt') as f:
+                        inputJson['engageProvisioning']['apps'][x] = {'container': os.path.basename(f.name), 'content': json.load(f)}
 
         if 'certStores' in inputJson['engageProvisioning']:
             for x in range(0, len(inputJson['engageProvisioning']['certStores'])):
@@ -118,9 +138,10 @@ if __name__ == '__main__':
                     with open(s[8:], 'rb') as f:
                         csContent = f.read(-1)
                         csContent = base64.b64encode(csContent).decode(STR_ENCODING)
-                        inputJson['engageProvisioning']['certStores'][x] = {'file': os.path.basename(f.name), 'content': csContent}
+                        inputJson['engageProvisioning']['certStores'][x] = {'container': os.path.basename(f.name), 'content': csContent}
         
         inputData = json.dumps(inputJson, separators=(',', ':')).encode(STR_ENCODING)
+        print(inputData)
         outputData = EP_HEADER + encryptToBase64String(args.pwd, inputData)       
 
     else:
