@@ -1,5 +1,22 @@
 # Change Log
 
+## May 30, 2023 - 1.236.9076
+- Adds support for Web Assembly (WASM), allowing Engage to run at near native speed inside modern web browsers.
+- Adds MELPe support under iOS.
+- Adds support for "_attached" element in Group configuration objects.
+- Adds the ability to capture RX/TX packets in WireShark PCAP format directly inside the Engine.
+- Adds developer-level optional debugging of low-level packet details.
+- Adds simulated RX impairment on a group-by-group basis.
+- Adds Web Socket support to Rallypoints.
+- Improves performance of low-level Engage-managed object pools.
+- Improves support for deployment of Engage-based software inside Docker containers.
+- Corrects an issue with FIP140-2 support on some OS platforms.
+- Corrects an issue with Alias Specializers in RTP headers.
+- Corrects an issue regarding invalid entitlement keys.
+- Corrects an error related to end-of-rx detection.
+- Corrects an issue related to silence appending when streaming to Microft Azure Cognitive Services.
+- Corrects an issue related to the creation of temporary files on some OS platforms.
+
 ## January 19, 2023 - 1.234.9074
 - Adds the new Engage Linguistics Service (ELS).
 - Corrects an issue whereby groups not associated with an output audio device print debug messages every second after RX has concluded.
