@@ -8,7 +8,7 @@ echo "==========================================================================
 THIS_ROOT=`pwd`
 BUILD_ROOT=${THIS_ROOT}/.build
 API_ROOT=${THIS_ROOT}/../
-BIN_ROOT=${THIS_ROOT}/../../bin
+BIN_ROOT=${THIS_ROOT}/../../.build/debug
 REDIST_ROOT=${THIS_ROOT}/../../.cache/redist
 WINDOWS_REDIST_ROOT=${THIS_ROOT}/../../.cache/redist/windows
 WINDOWS_REDIST_URL=https://github.com/rallytac/etc/raw/master/windows/redist
@@ -89,10 +89,10 @@ function publish_it()
     cp -r "${WINDOWS_REDIST_ROOT}/ia32/"* lib/win32.ia32
 
     npm version ${SRC_BIN_VERSION}${VERSION_EXTENSION}
-    npm publish
+    #npm publish
 
     cd ${CURRDIR}
-    rm -rf ${BUILD_ROOT}
+    #rm -rf ${BUILD_ROOT}
 }
 
 #determine_SRC_bin_version

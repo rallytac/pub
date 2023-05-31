@@ -8,6 +8,69 @@
 
 #include <stdint.h>
 
+#if 1
+#include <cstddef>
+#include <cstdint>
+
+#ifdef WIN32
+    #include <winsock2.h>
+	#include <windows.h>
+    #include <ws2tcpip.h>
+#else
+    #include <netinet/in.h>
+#endif
+
+static const int ENGAGE_INVALID_IP_ADDRESS_FAMILY = -1;
+
+static const size_t ENGAGE_MAX_RTP_OUTPUT_QUEUE_PACKETS = 100;
+
+static const size_t ENGAGE_MAX_IP_ADDR_SIZE = sizeof(struct sockaddr_in6);
+static const size_t ENGAGE_MAX_ALIAS_SIZE = 16;
+static const size_t ENGAGE_MAX_NODE_ID_SIZE = 16;
+
+static const size_t ENGAGE_BLOB_PACKET_BUFFER_ALLOCATION_EXTRA_BYTES = 512;
+
+static const int16_t ENGAGE_PCM_MIN_VALUE = -32768;
+static const int16_t ENGAGE_PCM_MAX_VALUE = 32767;
+
+static const uint16_t ENGAGE_SELECT_FUNCTION_TIMEOUT_SECS = 1;
+static const uint16_t ENGAGE_MULTICAST_REJOIN_SECS = 8;
+
+static const size_t ENGAGE_MAX_DATAGRAM_SIZE = 4096;
+static const long ENGAGE_MAX_RECONNECT_PAUSE_MS = 30000;
+static const long ENGAGE_RECONNECT_FAILURE_PAUSE_INCREMENT_MS = 1500;
+
+static const size_t ENGAGE_BASE_RTP_HEADER_SIZE = 12;
+static const uint16_t ENGAGE_ACCEPTED_RTP_VERSION = 2;
+static const size_t ENGAGE_MAX_RTP_SAMPLES_THAT_CAN_BE_DECODED = (8000 * 5);
+
+static const size_t ENGAGE_PCM_SAMPLE_COUNT_PER_MS = 8;
+static const size_t ENGAGE_PCM_10_MS_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 10);
+
+#if defined(__APPLE__)
+    static const size_t ENGAGE_PCM_MIN_PLATFORM_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 40);
+#elif defined(__ANDROID__)
+    static const size_t ENGAGE_PCM_MIN_PLATFORM_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 250);
+#elif defined(__linux__)
+    static const size_t ENGAGE_PCM_MIN_PLATFORM_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 250);
+#elif defined(WIN32)
+	static const size_t ENGAGE_PCM_MIN_PLATFORM_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 250);
+#elif defined(__EMSCRIPTEN__)
+	static const size_t ENGAGE_PCM_MIN_PLATFORM_SAMPLE_COUNT = (ENGAGE_PCM_SAMPLE_COUNT_PER_MS * 250);
+#endif
+
+static const long ENGAGE_TLS_CONNECTION_KEY_MATERIAL_SIZE = 32;
+static const uint64_t ENGAGE_RTP_RESET_AFTER_IDLE_MS = (1000 * 30);
+
+#if defined(RTS_DEBUG_BUILD)
+static const uint64_t ENGAGE_GROUP_HEALTH_ERROR_ERROR_NOTIFICATION_INTERVAL_MS = (1000 * 10);
+#else
+static const uint64_t ENGAGE_GROUP_HEALTH_ERROR_ERROR_NOTIFICATION_INTERVAL_MS = (1000 * 30);
+#endif
+
+static const size_t ENGAGE_MAX_GROUPS_PER_BRIDGE = 128;
+#endif
+
 /** @addtogroup resultCodes Engage Engine Result Codes
  *
  * Result codes are returned by calls to the API functions and most often are related to

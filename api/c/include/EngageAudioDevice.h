@@ -11,6 +11,8 @@
 #ifndef EngageAudioDevice_h
 #define EngageAudioDevice_h
 
+#include <stdint.h>
+
 
 #ifdef __cplusplus
 extern "C"

@@ -53,6 +53,8 @@ namespace ConfigurationObjects
 namespace AppConfigurationObjects
 #endif
 {
+    static const char *ENGAGE_CONFIGURATION_OBJECT_ATTACHED_OBJECT = "_attached";
+
     //-----------------------------------------------------------
     #pragma pack(push, 1)
         typedef struct _DataSeriesHeader_t
@@ -298,6 +300,12 @@ namespace AppConfigurationObjects
     #define FROMJSON_IMPL(__var, __type, __default) \
         getOptional<__type>(#__var, p.__var, j, __default)
 
+    #define TOJSON_BASE_IMPL() \
+        to_json(j, (ConfigurationObjectBase&)p)
+
+    #define FROMJSON_BASE_IMPL() \
+        from_json(j, (ConfigurationObjectBase&)p);
+
 
     //-----------------------------------------------------------
     static std::string EMPTY_STRING;
@@ -408,9 +416,39 @@ namespace AppConfigurationObjects
             return _documenting;
         }
 
+        nlohmann::json      _attached;
+
     protected:
-        bool _documenting;
+        bool                _documenting;
     };
+
+    static void to_json(nlohmann::json& j, const ConfigurationObjectBase& p)
+    {
+        try
+        {
+            if(p._attached != nullptr)
+            {
+                j[ENGAGE_CONFIGURATION_OBJECT_ATTACHED_OBJECT] = p._attached;
+            }
+        }
+        catch(...)
+        {
+        }
+    }
+    static void from_json(const nlohmann::json& j, ConfigurationObjectBase& p)
+    {
+        try
+        {
+            if(j.contains(ENGAGE_CONFIGURATION_OBJECT_ATTACHED_OBJECT))
+            {
+                p._attached = j.at(ENGAGE_CONFIGURATION_OBJECT_ATTACHED_OBJECT);
+            }
+        }
+        catch(...)
+        {
+        }
+    }
+
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(FipsCryptoSettings)
@@ -2189,6 +2227,246 @@ namespace AppConfigurationObjects
 
 
     //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(PacketCapturer)
+    /**
+     * @brief Description of a packet capturer
+     *
+     * Helper C++ class to serialize and de-serialize PacketCapturer JSON.
+     *
+     * Example: @include[doc] examples/PacketCapturer.json
+     *
+     */
+    class PacketCapturer : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(PacketCapturer)
+
+    public:
+        bool            enabled;
+        uint32_t        maxMb;
+        std::string     filePrefix;
+
+        PacketCapturer()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            enabled = false;
+            maxMb = 10;
+            filePrefix.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const PacketCapturer& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(maxMb),
+            TOJSON_IMPL(filePrefix)
+        };
+    }
+    static void from_json(const nlohmann::json& j, PacketCapturer& p)
+    {
+        p.clear();
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<uint32_t>("maxMb", p.maxMb, j, 10);
+        getOptional<std::string>("filePrefix", p.filePrefix, j, EMPTY_STRING);
+    }
+
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(TransportImpairment)
+    /**
+     * @brief Description of a transport impairment
+     *
+     * Helper C++ class to serialize and de-serialize TransportImpairment JSON.
+     *
+     * Example: @include[doc] examples/TransportImpairment.json
+     *
+     */
+    class TransportImpairment : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(TransportImpairment)
+
+    public:
+        int     applicationPercentage;
+        int     jitterMs;
+        int     lossPercentage;
+
+        TransportImpairment()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            applicationPercentage = 0;
+            jitterMs = 0;
+            lossPercentage = 0;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const TransportImpairment& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(applicationPercentage),
+            TOJSON_IMPL(jitterMs),
+            TOJSON_IMPL(lossPercentage)
+        };
+    }
+    static void from_json(const nlohmann::json& j, TransportImpairment& p)
+    {
+        p.clear();
+        getOptional<int>("applicationPercentage", p.applicationPercentage, j, 0);
+        getOptional<int>("jitterMs", p.jitterMs, j, 0);
+        getOptional<int>("lossPercentage", p.lossPercentage, j, 0);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(NsmNetworking)
+    /**
+     * @brief NsmNetworking
+     *
+     * Helper C++ class to serialize and de-serialize NsmNetworking JSON
+     * 
+     * Example: @include[doc] examples/NsmNetworking.json
+     *
+     */
+    class NsmNetworking : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(NsmNetworking)
+
+    public:        
+        std::string                         interfaceName;
+        NetworkAddress                      address;
+        int                                 ttl;
+        int                                 tos;
+        int                                 txOversend;
+        TransportImpairment                 rxImpairment;
+        TransportImpairment                 txImpairment;
+        std::string                         cryptoPassword;
+
+        NsmNetworking()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            interfaceName.clear();
+            address.clear();
+            ttl = 1;
+            tos = 56;
+            txOversend = 0;
+            rxImpairment.clear();
+            txImpairment.clear();
+            cryptoPassword.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const NsmNetworking& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(interfaceName),
+            TOJSON_IMPL(address),
+            TOJSON_IMPL(ttl),
+            TOJSON_IMPL(tos),
+            TOJSON_IMPL(txOversend),
+            TOJSON_IMPL(rxImpairment),
+            TOJSON_IMPL(txImpairment),
+            TOJSON_IMPL(cryptoPassword)
+        };
+    }
+    static void from_json(const nlohmann::json& j, NsmNetworking& p)
+    {
+        p.clear();
+        getOptional("interfaceName", p.interfaceName, j, EMPTY_STRING);
+        getOptional<NetworkAddress>("address", p.address, j);
+        getOptional<int>("ttl", p.ttl, j, 1);
+        getOptional<int>("tos", p.tos, j, 56);
+        getOptional<int>("txOversend", p.txOversend, j, 0);
+        getOptional<TransportImpairment>("rxImpairment", p.rxImpairment, j);
+        getOptional<TransportImpairment>("txImpairment", p.txImpairment, j);
+        getOptional("cryptoPassword", p.cryptoPassword, j, EMPTY_STRING);
+    }
+
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(NsmConfiguration)
+    /**
+     * @brief NsmConfiguration
+     *
+     * Helper C++ class to serialize and de-serialize NsmConfiguration JSON
+     * 
+     * Example: @include[doc] examples/NsmConfiguration.json
+     *
+     */
+    class NsmConfiguration : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(NsmConfiguration)
+
+    public:
+
+        std::string                         id;
+        bool                                favorUptime;
+        NsmNetworking                       networking;
+        std::vector<std::string>            resources;
+        int                                 tokenStart;
+        int                                 tokenEnd;
+        int                                 intervalSecs;
+        int                                 transitionSecsFactor;
+
+        NsmConfiguration()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            id.clear();
+            favorUptime = false;
+            networking.clear();
+            resources.clear();
+            tokenStart = 1000000;
+            tokenEnd = 2000000;
+            intervalSecs = 1;
+            transitionSecsFactor = 3;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const NsmConfiguration& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(id),
+            TOJSON_IMPL(favorUptime),
+            TOJSON_IMPL(networking),
+            TOJSON_IMPL(resources),
+            TOJSON_IMPL(tokenStart),
+            TOJSON_IMPL(tokenEnd),
+            TOJSON_IMPL(intervalSecs),
+            TOJSON_IMPL(transitionSecsFactor)
+        };
+    }
+    static void from_json(const nlohmann::json& j, NsmConfiguration& p)
+    {
+        p.clear();
+        getOptional("id", p.id, j);
+        getOptional<bool>("favorUptime", p.favorUptime, j, false);
+        getOptional<NsmNetworking>("networking", p.networking, j);
+        getOptional<std::vector<std::string>>("resources", p.resources, j);
+        getOptional<int>("tokenStart", p.tokenStart, j, 1000000);
+        getOptional<int>("tokenEnd", p.tokenEnd, j, 2000000);
+        getOptional<int>("intervalSecs", p.intervalSecs, j, 1);
+        getOptional<int>("transitionSecsFactor", p.transitionSecsFactor, j, 3);
+    }
+
+
+    //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(Rallypoint)
     /**
      * @brief Rallypoint
@@ -2565,55 +2843,6 @@ namespace AppConfigurationObjects
     }
 
     //-----------------------------------------------------------
-    JSON_SERIALIZED_CLASS(TransportImpairment)
-    /**
-     * @brief Description of a transport impairment
-     *
-     * Helper C++ class to serialize and de-serialize TransportImpairment JSON.
-     *
-     * Example: @include[doc] examples/TransportImpairment.json
-     *
-     */
-    class TransportImpairment : public ConfigurationObjectBase
-    {
-        IMPLEMENT_JSON_SERIALIZATION()
-        IMPLEMENT_JSON_DOCUMENTATION(NetworkDeviceDescriptor)
-
-    public:
-        int     applicationPercentage;
-        int     jitterMs;
-        int     lossPercentage;
-
-        TransportImpairment()
-        {
-            clear();
-        }
-
-        void clear()
-        {
-            applicationPercentage = 0;
-            jitterMs = 0;
-            lossPercentage = 0;
-        }
-    };
-
-    static void to_json(nlohmann::json& j, const TransportImpairment& p)
-    {
-        j = nlohmann::json{
-            TOJSON_IMPL(applicationPercentage),
-            TOJSON_IMPL(jitterMs),
-            TOJSON_IMPL(lossPercentage)
-        };
-    }
-    static void from_json(const nlohmann::json& j, TransportImpairment& p)
-    {
-        p.clear();
-        getOptional<int>("applicationPercentage", p.applicationPercentage, j, 0);
-        getOptional<int>("jitterMs", p.jitterMs, j, 0);
-        getOptional<int>("lossPercentage", p.lossPercentage, j, 0);
-    }
-
-    //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(TxAudio)
     /**
      * @brief Configuration for the audio transmit properties for a group
@@ -2665,7 +2894,7 @@ namespace AppConfigurationObjects
 
 
             /* PCM */
-            /** @brief PCM </a> */
+            /** @brief PCM */
             ctPcm           = 5,
 
             // AMR Narrowband */
@@ -4068,13 +4297,13 @@ namespace AppConfigurationObjects
         std::string             nodeId;
 
         /* NOTE: Not serialized ! */
-        uint8_t                 _internal_binary_nodeId[MAX_NODE_ID_SIZE];
+        uint8_t                 _internal_binary_nodeId[ENGAGE_MAX_NODE_ID_SIZE];
 
         /** @brief [Optional] An alias */
         std::string             alias;
         
         /* NOTE: Not serialized ! */
-        uint8_t                 _internal_binary_alias[MAX_ALIAS_SIZE];
+        uint8_t                 _internal_binary_alias[ENGAGE_MAX_ALIAS_SIZE];
 
         Source()
         {
@@ -4307,9 +4536,17 @@ namespace AppConfigurationObjects
         /** @brief [Optional] List of sources to ignore for this group */
         std::vector<Source>                     ignoreSources;
 
-        /** @brief ISO 639-2 lanuguage code for the group  */
+        /** @brief ISO 639-2 language code for the group  */
         std::string                             languageCode;
 
+        /** @brief Name of the synthesis voice to use for the group  */
+        std::string                             synVoice;
+
+        /** @brief Details for capture of received packets  */
+        PacketCapturer                          rxCapture;
+
+        /** @brief Details for capture of transmitted packets  */
+        PacketCapturer                          txCapture;
 
         Group()
         {
@@ -4383,6 +4620,10 @@ namespace AppConfigurationObjects
             ignoreSources.clear();
 
             languageCode.clear();
+            synVoice.clear();
+
+            rxCapture.clear();
+            txCapture.clear();
         }
     };
 
@@ -4440,8 +4681,14 @@ namespace AppConfigurationObjects
 
             TOJSON_IMPL(ignoreSources),
 
-            TOJSON_IMPL(languageCode)
+            TOJSON_IMPL(languageCode),
+            TOJSON_IMPL(synVoice),
+
+            TOJSON_IMPL(rxCapture),
+            TOJSON_IMPL(txCapture)
         };
+
+        TOJSON_BASE_IMPL();
 
         // TODO: need a better way to indicate whether rtpProfile is present
         if(p._wasDeserialized_rtpProfile || p.isDocumenting())
@@ -4514,6 +4761,12 @@ namespace AppConfigurationObjects
         getOptional<uint32_t>("securityLevel", p.securityLevel, j, 0);
         getOptional<std::vector<Source>>("ignoreSources", p.ignoreSources, j);
         getOptional<std::string>("languageCode", p.languageCode, j);
+        getOptional<std::string>("synVoice", p.synVoice, j);        
+
+        getOptional<PacketCapturer>("rxCapture", p.rxCapture, j);
+        getOptional<PacketCapturer>("txCapture", p.txCapture, j);
+
+        FROMJSON_BASE_IMPL();
     }
 
 
@@ -4700,7 +4953,8 @@ namespace AppConfigurationObjects
     static void to_json(nlohmann::json& j, const LicenseDescriptor& p)
     {
         j = nlohmann::json{
-            TOJSON_IMPL(entitlement),
+            //TOJSON_IMPL(entitlement),
+            {"entitlement", "*entitlement*"},
             TOJSON_IMPL(key),
             TOJSON_IMPL(activationCode),
             TOJSON_IMPL(type),
@@ -4709,7 +4963,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(flags),
             TOJSON_IMPL(deviceId),
             TOJSON_IMPL(status),
-            TOJSON_IMPL(manufacturerId),
+            //TOJSON_IMPL(manufacturerId),
+            {"manufacturerId", "*manufacturerId*"},
             TOJSON_IMPL(cargo),
             TOJSON_IMPL(cargoFlags)
         };
@@ -7550,6 +7805,145 @@ namespace AppConfigurationObjects
         getOptional<std::string>("runCmd", p.runCmd, j);
     }
 
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RallypointWebsocketSettings)
+    /**
+     * @brief Defines settings for Rallypoint websockets functionality
+     *
+     * Example: @include[doc] examples/RallypointWebsocketSettings.json
+     *
+     */
+    class RallypointWebsocketSettings : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RallypointWebsocketSettings)
+
+    public:
+        /** @brief [Default: false] Websocket is enabled */
+        bool                                    enabled;
+
+        /** @brief Listen port (TCP).  Default is 8443 */
+        int                                     listenPort;
+
+        /** @brief Certificate to be used for WebSockets */
+        SecurityCertificate                     certificate;
+
+        RallypointWebsocketSettings()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            enabled = false;
+            listenPort = 8443;
+            certificate.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RallypointWebsocketSettings& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(listenPort),
+            TOJSON_IMPL(certificate)
+        };
+    }
+    static void from_json(const nlohmann::json& j, RallypointWebsocketSettings& p)
+    {
+        p.clear();
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<int>("listenPort", p.listenPort, j, 8443);
+        getOptional<SecurityCertificate>("certificate", p.certificate, j);
+    }
+
+
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RallypointAdvertisingSettings)
+    /**
+     * @brief Defines settings for Rallypoint advertising
+     *
+     * Example: @include[doc] examples/RallypointAdvertisingSettings.json
+     *
+     */
+    class RallypointAdvertisingSettings : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RallypointAdvertisingSettings)
+
+    public:
+        /** @brief [Default: false] Advertising is enabled */
+        bool                                    enabled;
+
+        /** @brief [Optional] This Rallypoint's mesh name */
+        std::string                             meshName;
+
+        /** @brief [Optional] This Rallypoint's DNS-SD host name */
+        std::string                             hostName;
+
+        /** @brief [Optional, Default "_rallypoint._tcp.local."] The service name */
+        std::string                             serviceName;
+
+        /** @brief The multicast network interface for mDNS */
+        std::string                             interfaceName;
+
+        /** @brief [Default: RP port] The multicast network interface for mDNS */
+        int                                     port;
+
+        /** @brief [Default: 60] TTL for service TTL */
+        int                                     ttl;
+
+        /** @brief [Optional] List of additional meshes that can be reached via this RP */
+        std::vector<std::string>                extraMeshes;
+
+
+        RallypointAdvertisingSettings()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            enabled = false;
+            meshName.clear();
+            hostName.clear();
+            serviceName = "_rallypoint._tcp.local.";
+            interfaceName.clear();
+            port = 0;
+            ttl = 60;
+            extraMeshes.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RallypointAdvertisingSettings& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(enabled),
+            TOJSON_IMPL(meshName),
+            TOJSON_IMPL(hostName),
+            TOJSON_IMPL(serviceName),
+            TOJSON_IMPL(interfaceName),
+            TOJSON_IMPL(port),
+            TOJSON_IMPL(ttl),
+            TOJSON_IMPL(extraMeshes)
+        };
+    }
+    static void from_json(const nlohmann::json& j, RallypointAdvertisingSettings& p)
+    {
+        p.clear();
+        getOptional<bool>("enabled", p.enabled, j, false);
+        getOptional<std::string>("meshName", p.meshName, j);
+        getOptional<std::string>("hostName", p.hostName, j);
+        getOptional<std::string>("serviceName", p.serviceName, j, "_rallypoint._tcp.local.");
+        getOptional<std::string>("interfaceName", p.interfaceName, j);
+
+        getOptional<int>("port", p.port, j, 0);
+        getOptional<int>("ttl", p.ttl, j, 60);
+        getOptional<std::vector<std::string>>("extraMeshes", p.extraMeshes, j);
+    }
+
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(RallypointServer)
     /**
@@ -7567,7 +7961,7 @@ namespace AppConfigurationObjects
 
     public:
         /** @brief [Optional] Settings for the FIPS crypto. */
-        FipsCryptoSettings                         fipsCrypto;
+        FipsCryptoSettings                          fipsCrypto;
     
         /** @brief [Optional] Settings for the Rallypoint's watchdog. */
         WatchdogSettings                            watchdog;
@@ -7701,6 +8095,15 @@ namespace AppConfigurationObjects
         /** @brief [Optional] Array of behaviors for roundtrip times to peers */
         std::vector<RallypointRpRtTimingBehavior>   peerRtBehaviors;
 
+        /** @brief [Optional] Settings for websocket operation */
+        RallypointWebsocketSettings                 websocket;
+
+        /** @brief [Optional] Settings for NSM. */
+        NsmConfiguration                            nsm;
+
+        /** @brief [Optional] Settings for advertising. */
+        RallypointAdvertisingSettings               advertising;
+
         RallypointServer()
         {
             clear();
@@ -7753,6 +8156,9 @@ namespace AppConfigurationObjects
             maxOutboundPeerConnectionIntervalDeltaSecs = 15;
             peerRtTestIntervalMs = 60000;
             peerRtBehaviors.clear();
+            websocket.clear();
+            nsm.clear();
+            advertising.clear();
         }
     };
 
@@ -7803,7 +8209,10 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(routeMap),
             TOJSON_IMPL(maxOutboundPeerConnectionIntervalDeltaSecs),
             TOJSON_IMPL(peerRtTestIntervalMs),
-            TOJSON_IMPL(peerRtBehaviors)
+            TOJSON_IMPL(peerRtBehaviors),
+            TOJSON_IMPL(websocket),
+            TOJSON_IMPL(nsm),
+            TOJSON_IMPL(advertising)
         };
     }
     static void from_json(const nlohmann::json& j, RallypointServer& p)
@@ -7854,6 +8263,9 @@ namespace AppConfigurationObjects
         getOptional<uint32_t>("maxOutboundPeerConnectionIntervalDeltaSecs", p.maxOutboundPeerConnectionIntervalDeltaSecs, j, 15);        
         getOptional<int>("peerRtTestIntervalMs", p.peerRtTestIntervalMs, j, 60000);
         getOptional<std::vector<RallypointRpRtTimingBehavior>>("peerRtBehaviors", p.peerRtBehaviors, j);
+        getOptional<RallypointWebsocketSettings>("websocket", p.websocket, j);
+        getOptional<NsmConfiguration>("nsm", p.nsm, j);
+        getOptional<RallypointAdvertisingSettings>("advertising", p.advertising, j);
     }
 
     //-----------------------------------------------------------
@@ -7929,6 +8341,7 @@ namespace AppConfigurationObjects
         getOptional<std::string>("uri", p.uri, j);
         getOptional<uint32_t>("configurationVersion", p.configurationVersion, j, 0);
     }
+
 
     //-----------------------------------------------------------
     class TimelineEvent
@@ -8371,6 +8784,94 @@ namespace AppConfigurationObjects
         getOptional<std::string>("serial", p.serial, j, EMPTY_STRING);
         getOptional<std::string>("fingerprint", p.fingerprint, j, EMPTY_STRING);
     }
+
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(RiffDescriptor)
+    /**
+    * @brief Helper class for serializing and deserializing the RiffDescriptor JSON
+    *
+    * Helper C++ class to serialize and de-serialize RiffDescriptor JSON
+    *
+    * Example: @include[doc] examples/RiffDescriptor.json
+    *
+    * @see TODO: engageGetRiffDescriptor
+    */
+    class RiffDescriptor : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(RiffDescriptor)
+
+    public:
+        /** @brief Name of the RIFF file. */
+        std::string                             file;
+
+        /** @brief True if the ECDSA signature is verified. */
+        bool                                    verified;
+
+        /** @brief Number of audio channels */
+        int                                     channels;
+
+        /** @brief Number of audio samples */
+        int                                     sampleCount;
+
+        /** @brief [Optional] Meta data associated with the file - typically a stringified JSON object. */
+        std::string                             meta;
+
+        /** @brief [Optional] X.509 certificate in PEM format used to sign the RIFF file. */
+        std::string                             certPem;
+
+        /** @brief [Optional] X.509 certificate parsed into a CertificateDescriptor object. */
+        CertificateDescriptor                   certDescriptor;
+
+        /** @brief [Optional] ECDSA signature */
+        std::string                             signature;
+
+        RiffDescriptor()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            file.clear();
+            verified = false;
+            channels = 0;
+            sampleCount = 0;
+            meta.clear();
+            certPem.clear();
+            certDescriptor.clear();
+            signature.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const RiffDescriptor& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(file),
+            TOJSON_IMPL(verified),
+            TOJSON_IMPL(channels),
+            TOJSON_IMPL(sampleCount),
+            TOJSON_IMPL(meta),
+            TOJSON_IMPL(certPem),
+            TOJSON_IMPL(certDescriptor),
+            TOJSON_IMPL(signature)
+        };
+    }
+
+    static void from_json(const nlohmann::json& j, RiffDescriptor& p)
+    {
+        p.clear();
+        FROMJSON_IMPL(file, std::string, EMPTY_STRING);
+        FROMJSON_IMPL(verified, bool, false);
+        FROMJSON_IMPL(channels, int, 0);
+        FROMJSON_IMPL(sampleCount, int, 0);
+        FROMJSON_IMPL(meta, std::string, EMPTY_STRING);
+        FROMJSON_IMPL(certPem, std::string, EMPTY_STRING);
+        getOptional<CertificateDescriptor>("certDescriptor", p.certDescriptor, j);
+        FROMJSON_IMPL(signature, std::string, EMPTY_STRING);
+    }
+
 
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(BridgeCreationDetail)
@@ -9279,20 +9780,20 @@ namespace AppConfigurationObjects
     }
 
     //-----------------------------------------------------------
-    JSON_SERIALIZED_CLASS(TranslatorServerStatusReportConfiguration)
+    JSON_SERIALIZED_CLASS(LingoServerStatusReportConfiguration)
     /**
     * @brief TODO: Configuration for the translation server status report file
     *
-    * Helper C++ class to serialize and de-serialize TranslatorServerStatusReportConfiguration JSON
+    * Helper C++ class to serialize and de-serialize LingoServerStatusReportConfiguration JSON
     *
-    * Example: @include[doc] examples/TranslatorServerStatusReportConfiguration.json
+    * Example: @include[doc] examples/LingoServerStatusReportConfiguration.json
     *
     * @see RallypointServer
     */
-    class TranslatorServerStatusReportConfiguration : public ConfigurationObjectBase
+    class LingoServerStatusReportConfiguration : public ConfigurationObjectBase
     {
         IMPLEMENT_JSON_SERIALIZATION()
-        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerStatusReportConfiguration)
+        IMPLEMENT_JSON_DOCUMENTATION(LingoServerStatusReportConfiguration)
 
     public:
         /** File name to use for the status report. */
@@ -9316,7 +9817,7 @@ namespace AppConfigurationObjects
         /** [Optional, Default: false] Indicates whether to include details of each group in each session. */
         bool                            includeSessionGroupDetail;
 
-        TranslatorServerStatusReportConfiguration()
+        LingoServerStatusReportConfiguration()
         {
             clear();
         }
@@ -9333,7 +9834,7 @@ namespace AppConfigurationObjects
         }
     };
 
-    static void to_json(nlohmann::json& j, const TranslatorServerStatusReportConfiguration& p)
+    static void to_json(nlohmann::json& j, const LingoServerStatusReportConfiguration& p)
     {
         j = nlohmann::json{
             TOJSON_IMPL(fileName),
@@ -9345,7 +9846,7 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(runCmd)
         };
     }
-    static void from_json(const nlohmann::json& j, TranslatorServerStatusReportConfiguration& p)
+    static void from_json(const nlohmann::json& j, LingoServerStatusReportConfiguration& p)
     {
         p.clear();
         getOptional<std::string>("fileName", p.fileName, j);
@@ -9358,22 +9859,22 @@ namespace AppConfigurationObjects
     }
 
     //-----------------------------------------------------------
-    JSON_SERIALIZED_CLASS(TranslatorServerInternals)
+    JSON_SERIALIZED_CLASS(LingoServerInternals)
     /**
     * @brief Internal translator server settings
     *
     * These settings are used to configure internal parameters.
     *
-    * Helper C++ class to serialize and de-serialize TranslatorServerInternals JSON
+    * Helper C++ class to serialize and de-serialize LingoServerInternals JSON
     *
-    * Example: @include[doc] examples/TranslatorServerInternals.json
+    * Example: @include[doc] examples/LingoServerInternals.json
     *
-    * @see engageInitialize, ConfigurationObjects::TranslatorServerConfiguration
+    * @see engageInitialize, ConfigurationObjects::LingoServerConfiguration
     */
-    class TranslatorServerInternals : public ConfigurationObjectBase
+    class LingoServerInternals : public ConfigurationObjectBase
     {
         IMPLEMENT_JSON_SERIALIZATION()
-        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerInternals)
+        IMPLEMENT_JSON_DOCUMENTATION(LingoServerInternals)
 
     public:
         /** @brief [Optional] Settings for the watchdog. */
@@ -9382,7 +9883,7 @@ namespace AppConfigurationObjects
         /** @brief [Optional, Default: 1000] Interval at which to run the housekeeper thread. */
         int                 housekeeperIntervalMs;
 
-        TranslatorServerInternals()
+        LingoServerInternals()
         {
             clear();
         }
@@ -9394,14 +9895,14 @@ namespace AppConfigurationObjects
         }
     };
 
-    static void to_json(nlohmann::json& j, const TranslatorServerInternals& p)
+    static void to_json(nlohmann::json& j, const LingoServerInternals& p)
     {
         j = nlohmann::json{
             TOJSON_IMPL(watchdog),
             TOJSON_IMPL(housekeeperIntervalMs)
         };
     }
-    static void from_json(const nlohmann::json& j, TranslatorServerInternals& p)
+    static void from_json(const nlohmann::json& j, LingoServerInternals& p)
     {
         p.clear();
         getOptional<WatchdogSettings>("watchdog", p.watchdog, j);
@@ -9409,44 +9910,44 @@ namespace AppConfigurationObjects
     }
 
     //-----------------------------------------------------------
-    JSON_SERIALIZED_CLASS(TranslatorServerConfiguration)
+    JSON_SERIALIZED_CLASS(LingoServerConfiguration)
     /**
-    * @brief Configuration for the translation server
+    * @brief Configuration for the linguistics server
     *
-    * Helper C++ class to serialize and de-serialize TranslatorServerConfiguration JSON
+    * Helper C++ class to serialize and de-serialize LingoServerConfiguration JSON
     *
-    * Example: @include[doc] examples/TranslatorServerConfiguration.json
+    * Example: @include[doc] examples/LingoServerConfiguration.json
     *
     */
-    class TranslatorServerConfiguration : public ConfigurationObjectBase
+    class LingoServerConfiguration : public ConfigurationObjectBase
     {
         IMPLEMENT_JSON_SERIALIZATION()
-        IMPLEMENT_JSON_DOCUMENTATION(TranslatorServerConfiguration)
+        IMPLEMENT_JSON_DOCUMENTATION(LingoServerConfiguration)
 
     public:
-        /** @brief A unqiue identifier for the translation server */
+        /** @brief A unqiue identifier for the linguistics server */
         std::string                                 id;
 
         /** @brief Number of seconds between checks to see if the service configuration has been updated.  Default is 60.*/
         int                                         serviceConfigurationFileCheckSecs;
         
-        /** @brief Name of a file containing the translation configuration. */
-        std::string                                 translationConfigurationFileName;
+        /** @brief Name of a file containing the linguistics configuration. */
+        std::string                                 lingoConfigurationFileName;
 
-        /** @brief Command-line to execute that returns a translation configuration */
-        std::string                                 translationConfigurationFileCommand;
+        /** @brief Command-line to execute that returns a linguistics configuration */
+        std::string                                 lingoConfigurationFileCommand;
 
-        /** @brief Number of seconds between checks to see if the translation configuration has been updated.  Default is 60.*/
-        int                                         translationConfigurationFileCheckSecs;
+        /** @brief Number of seconds between checks to see if the linguistics configuration has been updated.  Default is 60.*/
+        int                                         lingoConfigurationFileCheckSecs;
 
-        /** @brief Details for producing a status report. @see TranslatorServerStatusReportConfiguration */
-        TranslatorServerStatusReportConfiguration   statusReport;
+        /** @brief Details for producing a status report. @see LingoServerStatusReportConfiguration */
+        LingoServerStatusReportConfiguration        statusReport;
 
         /** @brief Details concerning the server's interaction with an external health-checker such as a load-balancer.  @see ExternalHealthCheckResponder */
-        ExternalHealthCheckResponder                 externalHealthCheckResponder;
+        ExternalHealthCheckResponder                externalHealthCheckResponder;
 
         /** @brief Internal settings */
-        TranslatorServerInternals                   internals;
+        LingoServerInternals                        internals;
 
         /** @brief Path to the certificate store */
         std::string                                 certStoreFileName;
@@ -9461,9 +9962,15 @@ namespace AppConfigurationObjects
         std::string                                 configurationCheckSignalName;
 
         /** @brief [Optional] Settings for the FIPS crypto. */
-        FipsCryptoSettings                         fipsCrypto;
+        FipsCryptoSettings                          fipsCrypto;
 
-        TranslatorServerConfiguration()
+        /** @brief Address and port of the proxy */
+        NetworkAddress                              proxy;
+
+        /** @brief [Optional] Settings for NSM. */
+        NsmConfiguration                            nsm;
+
+        LingoServerConfiguration()
         {
             clear();
         }
@@ -9472,28 +9979,30 @@ namespace AppConfigurationObjects
         {
             id.clear();
             serviceConfigurationFileCheckSecs = 60;
-            translationConfigurationFileName.clear();
-            translationConfigurationFileCommand.clear();
-            translationConfigurationFileCheckSecs = 60;
+            lingoConfigurationFileName.clear();
+            lingoConfigurationFileCommand.clear();
+            lingoConfigurationFileCheckSecs = 60;
             statusReport.clear();
             externalHealthCheckResponder.clear();
             internals.clear();
             certStoreFileName.clear();
             certStorePasswordHex.clear();
             enginePolicy.clear();
-            configurationCheckSignalName = "rts.6cc0651.${id}";
+            configurationCheckSignalName = "rts.22f4ec3.${id}";
             fipsCrypto.clear();
+            proxy.clear();
+            nsm.clear();
         }
     };
 
-    static void to_json(nlohmann::json& j, const TranslatorServerConfiguration& p)
+    static void to_json(nlohmann::json& j, const LingoServerConfiguration& p)
     {
         j = nlohmann::json{
             TOJSON_IMPL(id),
             TOJSON_IMPL(serviceConfigurationFileCheckSecs),
-            TOJSON_IMPL(translationConfigurationFileName),
-            TOJSON_IMPL(translationConfigurationFileCommand),
-            TOJSON_IMPL(translationConfigurationFileCheckSecs),
+            TOJSON_IMPL(lingoConfigurationFileName),
+            TOJSON_IMPL(lingoConfigurationFileCommand),
+            TOJSON_IMPL(lingoConfigurationFileCheckSecs),
             TOJSON_IMPL(statusReport),
             TOJSON_IMPL(externalHealthCheckResponder),
             TOJSON_IMPL(internals),
@@ -9501,28 +10010,142 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(enginePolicy),
             TOJSON_IMPL(configurationCheckSignalName),
-            TOJSON_IMPL(fipsCrypto)
+            TOJSON_IMPL(fipsCrypto),
+            TOJSON_IMPL(proxy),
+            TOJSON_IMPL(nsm)
         };
     }
-    static void from_json(const nlohmann::json& j, TranslatorServerConfiguration& p)
+    static void from_json(const nlohmann::json& j, LingoServerConfiguration& p)
     {
         p.clear();
         getOptional<std::string>("id", p.id, j);
         getOptional<int>("serviceConfigurationFileCheckSecs", p.serviceConfigurationFileCheckSecs, j, 60);
-        getOptional<std::string>("translationConfigurationFileName", p.translationConfigurationFileName, j);
-        getOptional<std::string>("translationConfigurationFileCommand", p.translationConfigurationFileCommand, j);
-        getOptional<int>("translationConfigurationFileCheckSecs", p.translationConfigurationFileCheckSecs, j, 60);
-        getOptional<TranslatorServerStatusReportConfiguration>("statusReport", p.statusReport, j);
+        getOptional<std::string>("lingoConfigurationFileName", p.lingoConfigurationFileName, j);
+        getOptional<std::string>("lingoConfigurationFileCommand", p.lingoConfigurationFileCommand, j);
+        getOptional<int>("lingoConfigurationFileCheckSecs", p.lingoConfigurationFileCheckSecs, j, 60);
+        getOptional<LingoServerStatusReportConfiguration>("statusReport", p.statusReport, j);
         getOptional<ExternalHealthCheckResponder>("externalHealthCheckResponder", p.externalHealthCheckResponder, j);
-        getOptional<TranslatorServerInternals>("internals", p.internals, j);
+        getOptional<LingoServerInternals>("internals", p.internals, j);
         getOptional<std::string>("certStoreFileName", p.certStoreFileName, j);
         getOptional<std::string>("certStorePasswordHex", p.certStorePasswordHex, j);
         j.at("enginePolicy").get_to(p.enginePolicy);
-        getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.6cc0651.${id}");
+        getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.22f4ec3.${id}");
         getOptional<FipsCryptoSettings>("fipsCrypo", p.fipsCrypto, j);
+        getOptional<NetworkAddress>("proxy", p.proxy, j);
+        getOptional<NsmConfiguration>("nsm", p.nsm, j);
     }
 
 
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(VoiceToVoiceSession)
+    /**
+    * @brief Voice to voice session settings
+    *
+    * Helper C++ class to serialize and de-serialize VoiceToVoiceSession JSON
+    *
+    * Example: @include[doc] examples/VoiceToVoiceSession.json
+    *
+    * @see TODO: ConfigurationObjects::VoiceToVoiceSession
+    */
+    class VoiceToVoiceSession : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(VoiceToVoiceSession)
+
+    public:
+        /** @brief ID */
+        std::string                 id;
+
+        /** @brief Name */
+        std::string                 name;
+
+        /** @brief List of group IDs to be included in the session */
+        std::vector<std::string>    groups;
+
+        /** @brief [Optional, Default: true] Enable the session */
+        bool                        enabled;
+
+        VoiceToVoiceSession()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            id.clear();
+            name.clear();
+            groups.clear();
+            enabled = true;
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const VoiceToVoiceSession& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(id),
+            TOJSON_IMPL(name),
+            TOJSON_IMPL(groups),
+            TOJSON_IMPL(enabled)
+        };
+    }
+    static void from_json(const nlohmann::json& j, VoiceToVoiceSession& p)
+    {
+        p.clear();
+        FROMJSON_IMPL(id, std::string, EMPTY_STRING);
+        FROMJSON_IMPL(name, std::string, EMPTY_STRING);
+        getOptional<std::vector<std::string>>("groups", p.groups, j);
+        FROMJSON_IMPL(enabled, bool, true);
+    }
+
+    //-----------------------------------------------------------
+    JSON_SERIALIZED_CLASS(LingoConfiguration)
+    /**
+    * @brief Lingo configuration
+    *
+    * Helper C++ class to serialize and de-serialize LingoConfiguration JSON
+    *
+    * Example: @include[doc] examples/LingoConfiguration.json
+    *
+    * @see TODO: ConfigurationObjects::LingoConfiguration
+    */
+    class LingoConfiguration : public ConfigurationObjectBase
+    {
+        IMPLEMENT_JSON_SERIALIZATION()
+        IMPLEMENT_JSON_DOCUMENTATION(LingoConfiguration)
+
+    public:
+        /** @brief Array of voiceToVoice sessions in the configuration */
+        std::vector<VoiceToVoiceSession>         voiceToVoiceSessions;
+
+        /** @brief Array of groups in the configuration */
+        std::vector<Group>                       groups;
+
+        LingoConfiguration()
+        {
+            clear();
+        }
+
+        void clear()
+        {
+            voiceToVoiceSessions.clear();
+            groups.clear();
+        }
+    };
+
+    static void to_json(nlohmann::json& j, const LingoConfiguration& p)
+    {
+        j = nlohmann::json{
+            TOJSON_IMPL(voiceToVoiceSessions),
+            TOJSON_IMPL(groups)
+        };
+    }
+    static void from_json(const nlohmann::json& j, LingoConfiguration& p)
+    {
+        p.clear();
+        getOptional<std::vector<VoiceToVoiceSession>>("voiceToVoiceSessions", p.voiceToVoiceSessions, j);
+        getOptional<std::vector<Group>>("groups", p.groups, j);
+    }
+    
     //-----------------------------------------------------------
     JSON_SERIALIZED_CLASS(BridgingConfiguration)
     /**
@@ -9774,7 +10397,10 @@ namespace AppConfigurationObjects
         std::string                                 configurationCheckSignalName;
 
         /** @brief [Optional] Settings for the FIPS crypto. */
-        FipsCryptoSettings                         fipsCrypto;
+        FipsCryptoSettings                          fipsCrypto;
+
+        /** @brief [Optional] Settings for NSM. */
+        NsmConfiguration                            nsm;
 
         BridgingServerConfiguration()
         {
@@ -9797,6 +10423,7 @@ namespace AppConfigurationObjects
             enginePolicy.clear();
             configurationCheckSignalName = "rts.6cc0651.${id}";
             fipsCrypto.clear();
+            nsm.clear();
         }
     };
 
@@ -9816,7 +10443,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(enginePolicy),
             TOJSON_IMPL(configurationCheckSignalName),
-            TOJSON_IMPL(fipsCrypto)
+            TOJSON_IMPL(fipsCrypto),
+            TOJSON_IMPL(nsm)
         };
     }
     static void from_json(const nlohmann::json& j, BridgingServerConfiguration& p)
@@ -9836,6 +10464,7 @@ namespace AppConfigurationObjects
         j.at("enginePolicy").get_to(p.enginePolicy);
         getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.6cc0651.${id}");
         getOptional<FipsCryptoSettings>("fipsCrypto", p.fipsCrypto, j);
+        getOptional<NsmConfiguration>("nsm", p.nsm, j);
     }
 
 
@@ -10056,6 +10685,9 @@ namespace AppConfigurationObjects
         /** @brief [Optional] Settings for the FIPS crypto. */
         FipsCryptoSettings                          fipsCrypto;
 
+        /** @brief [Optional] Settings for NSM. */
+        NsmConfiguration                            nsm;
+
         EarServerConfiguration()
         {
             clear();
@@ -10076,6 +10708,7 @@ namespace AppConfigurationObjects
             enginePolicy.clear();
             configurationCheckSignalName = "rts.9a164fa.${id}";
             fipsCrypto.clear();
+            nsm.clear();
         }
     };
 
@@ -10094,7 +10727,8 @@ namespace AppConfigurationObjects
             TOJSON_IMPL(certStorePasswordHex),
             TOJSON_IMPL(enginePolicy),
             TOJSON_IMPL(configurationCheckSignalName),
-            TOJSON_IMPL(fipsCrypto)
+            TOJSON_IMPL(fipsCrypto),
+            TOJSON_IMPL(nsm)
         };
     }
     static void from_json(const nlohmann::json& j, EarServerConfiguration& p)
@@ -10111,7 +10745,9 @@ namespace AppConfigurationObjects
         getOptional<std::string>("certStoreFileName", p.certStoreFileName, j);
         getOptional<std::string>("certStorePasswordHex", p.certStorePasswordHex, j);
         j.at("enginePolicy").get_to(p.enginePolicy);
-        getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.6cc0651.${id}");
+        getOptional<std::string>("configurationCheckSignalName", p.configurationCheckSignalName, j, "rts.9a164fa.${id}");
+        getOptional<FipsCryptoSettings>("fipsCrypto", p.fipsCrypto, j);
+        getOptional<NsmConfiguration>("nsm", p.nsm, j);
     }
 
     //-----------------------------------------------------------
