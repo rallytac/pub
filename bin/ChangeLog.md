@@ -1,5 +1,16 @@
 # Change Log
 
+## July 29, 2023 - 1.238.9078
+- Adds group-level firewalling capability in Rallypoints based on X.509 certificates.
+- Adds Docker containers for RP, EBS, EAR, and ELS published to Docker Hub.
+- Enhances logging for inbound RTP packet processing. 
+- Enhances logging in the Android thunking layer.
+- Updates NPM-publishing information and versioning.
+- Corrects a featureset-related licensing issue.
+- Corrects multi-threading issues with Android audio capture and playout.
+- Corrects a directory processing bug in the timeline manager.
+- Corrects an XCode-related compilation issue for iOS.
+
 ## May 30, 2023 - 1.236.9076
 - Adds support for Web Assembly (WASM), allowing Engage to run at near native speed inside modern web browsers.
 - Adds MELPe support under iOS.
