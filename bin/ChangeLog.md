@@ -1,5 +1,41 @@
 # Change Log
 
+##  - 1.240.9080
+- Adds support for multi-element X.509 PEM files, certificate bundles, and intermediate issuer certificates.
+- Adds support for G.729 Annex A audio encoding/decoding.
+- Adds support for IPv6.
+- Adds UDP streaming between Engage Engines & Rallypoints.
+- Adds support for the ChaCha20 encryption algorithm.
+- Adds checks for Cisco LMR gateway presence packets.
+- Adds dynamic alias generation based on SSRC for anonymous RTP streams.
+- Adds checking for valid crypto passwords.
+- Adds standard Docker containers for AMD64, ARM64, and ARM32 architectures.
+- Adds display of certificate descriptor JSON in ecstool.
+- Adds engageGenerateSignature() and engageVerifySignature() API calls.
+- Adds the ability to explicity disable audio transmission on a group.
+- Adds naming of the Linux ALSA audio device from environment variables.
+- Adds forcing of a Rallypoint peer to leaf status at an upstream Rallypoint.
+- Adds display of unknown RTP payload type in error logging.
+- Adds a payload type of "mime" for group blob packets.
+- Adds support for sovereign Azure clouds for Speech and Translation services.
+- Adds transcription metadata for transcribed audio streams.
+- Adds accompanying metadata for translation target audio streams.
+- Adds reporting of Azure Cognitive Services usage in CSV format for Engage Linguistics Service.
+- Adds transcription-only sessions to Engage Linguistics Service.
+- Adds customizable execution timeouts to the Azure Cognitive Services ELS proxy.
+- Adds the ability to disable probing and/or use of the local machine's audio hardware.
+- Re-enables Rallypoint mesh loop detection.
+- Improves performance and reliability of the Android OS-level audio layer.
+- Replaces OpenSSL 1.1.1f with OpenSSL 3.0.8 and it's support for FIPS 140-2.
+- Removes dependency on the wolfSSL FIPS 140-2 cryptography engine.
+- Increases the logger's queue size to accomodate heavy load situations losing messages.
+- Corrects a state-related problem with multiple talkers on a group.
+- Corrects a Linux ALSA problem related to automatic switch to the default device.
+- Corrects a problem with Rallypoints not reliably setting priority or TTL for transmitted packets.
+- Corrects a problem with random failures to verify signed requests to a Rallypoint.
+- Corrects a problem with the Rallypoint's link graph for host names containing spaces.
+- Corrects an issue in ELS that randomly caused the process to not properly initialize.
+
 ## July 29, 2023 - 1.238.9078
 - Adds group-level firewalling capability in Rallypoints based on X.509 certificates.
 - Adds Docker containers for RP, EBS, EAR, and ELS published to Docker Hub.
