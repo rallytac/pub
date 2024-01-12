@@ -1,13 +1,59 @@
 ## Docker Images
-Prebuilt Docker images are obtained from Docker Hub.
+Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/orgs/rallytac/repositories](https://hub.docker.com/orgs/rallytac/repositories).
 
-- [Rallypoint (rallypointd)](https://hub.docker.com/r/rallytac/rallypointd)
-- [Engage Bridging Service (engagebridged)](https://hub.docker.com/r/rallytac/engagebridged)
-- [Engage Activity Recorder (eard)](https://hub.docker.com/r/rallytac/eard)
-- [Engage Linguistics Service (engagelingod)](https://hub.docker.com/r/rallytac/engagelingod)
-- [ELS Proxy for Microsoft Azure Cognitive Services (elsproxyazured)](https://hub.docker.com/r/rallytac/elsproxyazured)
+<details>
+<summary>Rallypoint (RP)</summary>
 
-Versioned Artifacts are obtained from our artifact repository at [https://artifacts.rallytac.com/artifacts/](https://artifacts.rallytac.com/artifacts/).
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-amd64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-arm64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-arm)
+</details>
+
+---
+<details>
+<summary>Engage Bridging Service (EBS)</summary>
+
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-amd64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-arm64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-arm)
+</details>
+
+---
+<details>
+<summary>Engage Activity Recorder Service (EAR)</summary>
+
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/eard-amd64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/eard-arm64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/eard-arm)
+</details>
+
+---
+<details>
+<summary>Engage Linguistics Service (ELS)</summary>
+
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-amd64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-arm64)
+- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-arm)
+</details>
+
+---
+<details>
+<summary>Engage Linguistics Service Proxy for Azure Cognitive Services (ELS Proxy Azure)</summary>
+
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/elsproxyazured-amd64)
+</details>
+
+---
+<details>
+<summary>RTS Configuration Container</summary>
+
+- [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/rts-config-amd64)
+- [ARM 64-bit](https://hub.docker.com/repository/docker/rallytac/rts-config-arm64)
+</details>
+
+
+## Individual Artifiacts
+ Versioned Artifacts are obtained from our artifact repository at [https://artifacts.rallytac.com/artifacts/](https://artifacts.rallytac.com/artifacts/).
 
 Here are links to individual files grouped by version.
 <details>
