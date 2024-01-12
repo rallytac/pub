@@ -5,7 +5,7 @@ Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/o
 <summary>Rallypoint (RP)</summary>
 
 - [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-amd64)
-- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-arm64)
+- [ARM 64-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-arm64)
 - [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/rallypointd-arm)
 </details>
 
@@ -14,7 +14,7 @@ Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/o
 <summary>Engage Bridging Service (EBS)</summary>
 
 - [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-amd64)
-- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-arm64)
+- [ARM 64-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-arm64)
 - [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagebridged-arm)
 </details>
 
@@ -23,7 +23,7 @@ Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/o
 <summary>Engage Activity Recorder Service (EAR)</summary>
 
 - [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/eard-amd64)
-- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/eard-arm64)
+- [ARM 64-bit](https://hub.docker.com/repository/docker/rallytac/eard-arm64)
 - [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/eard-arm)
 </details>
 
@@ -32,7 +32,7 @@ Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/o
 <summary>Engage Linguistics Service (ELS)</summary>
 
 - [Intel 64-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-amd64)
-- [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-arm64)
+- [ARM 64-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-arm64)
 - [ARM 32-bit](https://hub.docker.com/repository/docker/rallytac/engagelingod-arm)
 </details>
 
