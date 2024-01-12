@@ -7,7 +7,9 @@ Prebuilt Docker images are obtained from Docker Hub.
 - [Engage Linguistics Service (engagelingod)](https://hub.docker.com/r/rallytac/engagelingod)
 - [ELS Proxy for Microsoft Azure Cognitive Services (elsproxyazured)](https://hub.docker.com/r/rallytac/elsproxyazured)
 
-Versioned Artifacts are obtained from our artifact repository.
+Versioned Artifacts are obtained from our artifact repository at [https://artifacts.rallytac.com/artifacts/](https://artifacts.rallytac.com/artifacts/).
+
+Here are links to individual files grouped by version.
 <details>
 <summary>1.240.9080</summary>
 
