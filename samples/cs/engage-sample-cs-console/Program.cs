@@ -6,6 +6,9 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Threading;
+using System.Collections.Generic;
+using System.Text;
 
 namespace engage_sample_cs_console
 {
@@ -13,21 +16,117 @@ namespace engage_sample_cs_console
                     Engage.IRallypointNotifications, 
                     Engage.IGroupNotifications,
                     Engage.ILicenseNotifications,
-                    Engage.ILoggingNotifications
+                    Engage.ILoggingNotifications,
+                    Engage.IAudioDeviceControlNotifications
     {
+        public class Adad
+        {
+            static public int SAMPLING_RATE = 8000;
+            static public int CHANNELS = 1;
+            static public int MS_PER_FRAME = 10;
+            static public int SAMPLES_PER_FRAME = (((SAMPLING_RATE / 1000) * MS_PER_FRAME) * CHANNELS);
+
+            static private int _nextAdadInstanceId = 0;
+
+            public Adad()
+            {
+                _nextAdadInstanceId++;
+                isRunning = false;
+                direction = Engage.AdadDirection.UNDEFINED;
+                instanceId = _nextAdadInstanceId;
+                engageDeviceId = 0;
+            }
+
+            public bool isRunning;
+            public Engage.AdadDirection direction;
+            public int instanceId;
+            public int engageDeviceId;
+        }
+
+
         private class GroupDescriptor
         {
-            public string jsonConfiguration;
+            public JObject baseObject;
             public string id;
+            public int type;
             public string name;
             public bool isEncrypted;
             public bool allowsFullduplex;
+            public Adad speakerAdad;
+            public Adad microphoneAdad;
+            public Engage.AdadAudioTransferProxy adadAudioTransferProxy;
+            public Int16[] speakerAudioBuffer;
+            public Int16[] microphoneAudioBuffer;
+
+            public GroupDescriptor()
+            {
+                type = 0;
+                isEncrypted = false;
+                allowsFullduplex = false;
+                speakerAdad = null;
+                microphoneAdad = null;
+                adadAudioTransferProxy = null;
+                speakerAudioBuffer = null;
+                microphoneAudioBuffer = null;
+            }
+
+            public string finalizeCreationJson()
+            {
+                if (speakerAdad != null && speakerAdad.engageDeviceId != 0)
+                {
+                    if(!baseObject.ContainsKey("audio"))
+                    {
+                        baseObject["audio"] = new JObject();
+                    }
+
+                    baseObject["audio"]["outputId"] = speakerAdad.engageDeviceId;
+                }
+                else
+                {
+                    try
+                    {
+                        baseObject["audio"]["outputId"].Remove();
+                    }
+                    catch(Exception)
+                    {
+                    }                    
+                }
+
+                if (microphoneAdad != null && microphoneAdad.engageDeviceId != 0)
+                {
+                    if (!baseObject.ContainsKey("audio"))
+                    {
+                        baseObject["audio"] = new JObject();
+                    }
+
+                    baseObject["audio"]["inputId"] = microphoneAdad.engageDeviceId;
+                }
+                else
+                {
+                    try
+                    {
+                        baseObject["audio"]["inputId"].Remove();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                return baseObject.ToString();
+            }
         }
 
         private Engage _engage = new Engage();
         private GroupDescriptor[] _groups = null;
         private int _txPriority = 0;
         private int _txFlags = 0;
+        private bool _useAdad = false;
+        private bool _autoCreateAndJoin = false;
+
+        private bool _runAdadSpeakerThread = false;
+        private Thread _adadSpeakerThreadHandle = null;
+        private bool _runAdadMicrophoneThread = false;
+        private Thread _adadMicrophoneThreadHandle = null;
 
         bool loadPolicy(string fn, ref JObject policy)
         {
@@ -56,17 +155,29 @@ namespace engage_sample_cs_console
             return rc;
         }
 
-        bool loadMission(string fn, ref JObject mission)
+        bool loadMission(string missionFn, string rpFn, ref JObject mission)
         {
             bool rc = false;
 
             try
             {
                 String jsonData;
+                JObject rp = null;
 
-                using (StreamReader sr = new StreamReader(fn))
+                using (StreamReader sr = new StreamReader(missionFn))
                 {
                     jsonData = sr.ReadToEnd();                    
+                }
+
+                if(rpFn != null)
+                {
+                    String rpJsonData;
+                    using (StreamReader sr = new StreamReader(rpFn))
+                    {
+                        rpJsonData = sr.ReadToEnd();
+                    }
+
+                    rp = JObject.Parse(rpJsonData);
                 }
 
                 mission = JObject.Parse(jsonData);
@@ -88,8 +199,21 @@ namespace engage_sample_cs_console
                         string tmp;
 
                         GroupDescriptor gd = new GroupDescriptor();
-                        gd.jsonConfiguration = group.ToString();
+
+                        if(rp != null)
+                        {
+                            if(group.ContainsKey("rallypoints"))
+                            {
+                                group.Remove("rallypoints");
+                            }
+
+                            group["rallypoints"] = new JArray();
+                            ((JArray)group["rallypoints"]).Add(rp);
+                        }
+
+                        gd.baseObject = group;                        
                         gd.id = (string)group["id"];
+                        gd.type = (int)group["type"];
                         gd.name = (string)group["name"];
 
                         opt = group["cryptoPassword"];
@@ -110,12 +234,12 @@ namespace engage_sample_cs_console
             {
                 _groups = null;
                 rc = false;
-                Console.WriteLine("The file '" + fn + "' could not be read or parsed: ");
                 Console.WriteLine(e.Message);
             }
 
             return rc;
         }
+
 
         void showHelp()
         {
@@ -146,6 +270,7 @@ namespace engage_sample_cs_console
             foreach(GroupDescriptor gd in _groups)
             {
                 Console.WriteLine("index=" + x
+                          + ", type=" + gd.type
                           + ", id=" + gd.id
                           + ", name=" + gd.name
                           + ", encrypted=" + (gd.isEncrypted ? "yes" : "no")
@@ -158,7 +283,164 @@ namespace engage_sample_cs_console
 
         void showUsage()
         {
-            Console.WriteLine("usage: engage-sample-cs-console -ep:<policy_file> -mission:<mission_file> [-cs:<cert_store_file> [-csp:<cert_store_password_hex>]]");
+            Console.WriteLine("usage: engage-sample-cs-console -ep:<policy_file> -mi:<mission_file> [-rp:<rp_file>] [-cs:<cert_store_file> [-csp:<cert_store_password_hex>]] [-fcpath:<full_path_to_fips_crypto_module>] -useadad");
+        }
+
+        void doCreateGroup(int idx)
+        {
+            int rc = Engage.ENGAGE_RESULT_GENERAL_FAILURE;
+
+            if (idx == -1)
+            {
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    rc = _engage.createGroup(gd.finalizeCreationJson());
+                    if (rc != Engage.ENGAGE_RESULT_OK)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                rc = _engage.createGroup(_groups[idx].finalizeCreationJson());
+            }
+
+            if (rc != Engage.ENGAGE_RESULT_OK)
+            {
+                Console.WriteLine("request failed");
+            }
+        }
+
+        void doDeleteGroup(int idx)
+        {
+            int rc = Engage.ENGAGE_RESULT_GENERAL_FAILURE;
+
+            if (idx == -1)
+            {
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    rc = _engage.deleteGroup(gd.id);
+                    if (rc != Engage.ENGAGE_RESULT_OK)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                rc = _engage.deleteGroup(_groups[idx].id);
+            }
+
+            if (rc != Engage.ENGAGE_RESULT_OK)
+            {
+                Console.WriteLine("request failed");
+            }
+        }
+
+        void doJoinGroup(int idx)
+        {
+            int rc = Engage.ENGAGE_RESULT_GENERAL_FAILURE;
+
+            if (idx == -1)
+            {
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    rc = _engage.joinGroup(gd.id);
+                    if (rc != Engage.ENGAGE_RESULT_OK)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                rc = _engage.joinGroup(_groups[idx].id);
+            }
+
+            if (rc != Engage.ENGAGE_RESULT_OK)
+            {
+                Console.WriteLine("request failed");
+            }
+        }
+
+        void doLeaveGroup(int idx)
+        {
+            int rc = Engage.ENGAGE_RESULT_GENERAL_FAILURE;
+
+            if (idx == -1)
+            {
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    rc = _engage.leaveGroup(gd.id);
+                    if (rc != Engage.ENGAGE_RESULT_OK)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                rc = _engage.leaveGroup(_groups[idx].id);
+            }
+
+            if (rc != Engage.ENGAGE_RESULT_OK)
+            {
+                Console.WriteLine("request failed");
+            }
+        }
+
+        private GroupDescriptor getGroupDescriptorForEngageDeviceIdd(int deviceId)
+        {
+            foreach (GroupDescriptor gd in _groups)
+            {
+                if (gd.speakerAdad != null && gd.speakerAdad.engageDeviceId == deviceId)
+                {
+                    return gd;
+                }
+                else if (gd.microphoneAdad != null && gd.microphoneAdad.engageDeviceId == deviceId)
+                {
+                    return gd;
+                }
+            }
+
+            return null;
+        }
+
+        private Adad getAdadForEngageDeviceId(int deviceId)
+        {
+            GroupDescriptor gd = getGroupDescriptorForEngageDeviceIdd(deviceId);
+            if (gd != null)
+            {
+                if (gd.speakerAdad != null && gd.speakerAdad.engageDeviceId == deviceId)
+                {
+                    return gd.speakerAdad;
+                }
+                else if (gd.microphoneAdad != null && gd.microphoneAdad.engageDeviceId == deviceId)
+                {
+                    return gd.microphoneAdad;
+                }
+            }
+
+            return null;
+        }
+
+        private void devTest1()
+        {
+            Console.WriteLine("devtest1");
+
+            byte[] rawBuffer = new byte[32];
+            for(int x = 0; x < rawBuffer.Length; x++)
+            {
+                rawBuffer[x] = (byte)x;
+            }
+
+            _engage.sendGroupRaw("g2", rawBuffer, rawBuffer.Length, "");
+        }
+
+        private void devTest2()
+        {
+            Console.WriteLine("devtest2");
         }
 
         void run(string[] args)
@@ -167,12 +449,18 @@ namespace engage_sample_cs_console
             string missionFile = null;
             string certStoreFile = null;
             string certStorePwd = null;
+            string rpFile = null;
+            string fipsPath = null;
 
             for (int x = 0; x < args.Length; x++)
             {
                 if(args[x].StartsWith("-mission:"))
                 {
                     missionFile = args[x].Substring(9);
+                }
+                if (args[x].StartsWith("-mi:"))
+                {
+                    missionFile = args[x].Substring(4);
                 }
                 else if (args[x].StartsWith("-ep:"))
                 {
@@ -186,6 +474,22 @@ namespace engage_sample_cs_console
                 {
                     certStorePwd = args[x].Substring(5);
                 }
+                else if (args[x].StartsWith("-rp:"))
+                {
+                    rpFile = args[x].Substring(4);
+                }
+                else if (args[x].Equals("-useadad"))
+                {
+                    _useAdad = true;
+                }
+                else if (args[x].Equals("-acj"))
+                {
+                    _autoCreateAndJoin = true;
+                }
+                else if (args[x].StartsWith("-fcpath:"))
+                {
+                    fipsPath = args[x].Substring(8);
+                }                
             }
 
             if (policyFile == null || missionFile == null)
@@ -194,7 +498,21 @@ namespace engage_sample_cs_console
                 return;
             }
 
-            if(certStoreFile != null)
+            if(fipsPath != null)
+            {
+                JObject fipsCryptoSettings = new JObject();
+                fipsCryptoSettings["enabled"] = true;
+                fipsCryptoSettings["path"] = fipsPath;
+                fipsCryptoSettings["debug"] = false;
+
+                if(_engage.setFipsCrypto(fipsCryptoSettings.ToString()) != Engage.ENGAGE_RESULT_OK)
+                {
+                    showUsage();
+                    return;
+                }
+            }
+
+            if (certStoreFile != null)
             {
                 if(certStorePwd == null)
                 {
@@ -213,7 +531,7 @@ namespace engage_sample_cs_console
                 return;
             }
 
-            if (!loadMission(missionFile, ref mission))
+            if (!loadMission(missionFile, rpFile, ref mission))
             {
                 return;
             }
@@ -241,6 +559,7 @@ namespace engage_sample_cs_console
             _engage.subscribe((Engage.IRallypointNotifications)this);
             _engage.subscribe((Engage.IGroupNotifications)this);
             _engage.subscribe((Engage.ILicenseNotifications)this);
+            _engage.subscribe((Engage.IAudioDeviceControlNotifications)this);
 
             rc = _engage.initialize(policy.ToString(), "{}", null);
             if (rc != Engage.ENGAGE_RESULT_OK)
@@ -254,6 +573,32 @@ namespace engage_sample_cs_console
             {
                 Console.WriteLine("start failed");
                 return;
+            }
+
+            // Are we using ADADs?
+            if(_useAdad)
+            {
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    gd.adadAudioTransferProxy = new Engage.AdadAudioTransferProxy();
+                    gd.speakerAudioBuffer = new Int16[Adad.SAMPLES_PER_FRAME];
+                    gd.microphoneAudioBuffer = new Int16[Adad.SAMPLES_PER_FRAME];
+
+                    gd.speakerAdad = new Adad();
+                    gd.speakerAdad.direction = Engage.AdadDirection.OUTPUT;
+                    gd.speakerAdad.engageDeviceId = _engage.audioDeviceRegister(gd.speakerAdad.direction, Adad.SAMPLING_RATE, Adad.CHANNELS);
+
+                    gd.microphoneAdad = new Adad();
+                    gd.microphoneAdad.direction = Engage.AdadDirection.INPUT;
+                    gd.microphoneAdad.engageDeviceId = _engage.audioDeviceRegister(gd.microphoneAdad.direction, Adad.SAMPLING_RATE, Adad.CHANNELS);
+                }
+            }
+
+            // Auto create & join?
+            if(_autoCreateAndJoin)
+            {
+                doCreateGroup(-1);
+                doJoinGroup(-1);
             }
 
             #region Command processor
@@ -273,32 +618,35 @@ namespace engage_sample_cs_console
                 {
                     showGroups();
                 }
+                else if (s.StartsWith("`"))
+                {
+                    try
+                    {
+                        int idx = s.Substring(1) == "`" ? -1 : Int32.Parse(s.Substring(1));
+                        if(idx == 1)
+                        {
+                            devTest1();
+                        }
+                        else if (idx == 2)
+                        {
+                            devTest2();
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("invalid command");
+                    }
+                }
                 else if (s.StartsWith("c"))
                 {
                     try
                     {
                         int idx = s.Substring(1) == "a" ? -1 : Int32.Parse(s.Substring(1));
-                        if(idx == -1)
-                        {
-                            foreach(GroupDescriptor gd in _groups)
-                            {
-                                rc = _engage.createGroup(gd.jsonConfiguration);
-                                if(rc != Engage.ENGAGE_RESULT_OK)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            rc = _engage.createGroup(_groups[idx].jsonConfiguration);
-                        }
-                        
-                        if (rc != Engage.ENGAGE_RESULT_OK)
-                        {
-                            Console.WriteLine("request failed");
-                        }
-
+                        doCreateGroup(idx);
                     }
                     catch (Exception)
                     {
@@ -310,27 +658,7 @@ namespace engage_sample_cs_console
                     try
                     {
                         int idx = s.Substring(1) == "a" ? -1 : Int32.Parse(s.Substring(1));
-                        if (idx == -1)
-                        {
-                            foreach (GroupDescriptor gd in _groups)
-                            {
-                                rc = _engage.deleteGroup(gd.id);
-                                if (rc != Engage.ENGAGE_RESULT_OK)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            rc = _engage.deleteGroup(_groups[idx].id);
-                        }
-
-                        if (rc != Engage.ENGAGE_RESULT_OK)
-                        {
-                            Console.WriteLine("request failed");
-                        }
-
+                        doDeleteGroup(idx);
                     }
                     catch (Exception)
                     {
@@ -342,27 +670,7 @@ namespace engage_sample_cs_console
                     try
                     {
                         int idx = s.Substring(1) == "a" ? -1 : Int32.Parse(s.Substring(1));
-                        if (idx == -1)
-                        {
-                            foreach (GroupDescriptor gd in _groups)
-                            {
-                                rc = _engage.joinGroup(gd.id);
-                                if (rc != Engage.ENGAGE_RESULT_OK)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            rc = _engage.joinGroup(_groups[idx].id);
-                        }
-
-                        if (rc != Engage.ENGAGE_RESULT_OK)
-                        {
-                            Console.WriteLine("request failed");
-                        }
-
+                        doJoinGroup(idx);
                     }
                     catch (Exception)
                     {
@@ -374,27 +682,7 @@ namespace engage_sample_cs_console
                     try
                     {
                         int idx = s.Substring(1) == "a" ? -1 : Int32.Parse(s.Substring(1));
-                        if (idx == -1)
-                        {
-                            foreach (GroupDescriptor gd in _groups)
-                            {
-                                rc = _engage.leaveGroup(gd.id);
-                                if (rc != Engage.ENGAGE_RESULT_OK)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            rc = _engage.leaveGroup(_groups[idx].id);
-                        }
-
-                        if (rc != Engage.ENGAGE_RESULT_OK)
-                        {
-                            Console.WriteLine("request failed");
-                        }
-
+                        doLeaveGroup(idx);
                     }
                     catch (Exception)
                     {
@@ -557,6 +845,191 @@ namespace engage_sample_cs_console
             new Program().run(args);
         }
 
+        private string hexStringOf(byte[] buffer, int size, string sep)
+        {
+            StringBuilder hex = new StringBuilder(buffer.Length * 2);
+
+            foreach (byte b in buffer)
+            {
+                if(sep != null)
+                {
+                    if (hex.Length > 0)
+                    {
+                        hex.Append(sep);
+                    }
+                }
+
+                hex.AppendFormat("{0:x2}", b);
+            }
+
+            return hex.ToString();
+        }
+
+        private void adadSpeakerThread()
+        {
+            while (_runAdadSpeakerThread)
+            {
+                Thread.Sleep(10);
+
+                if (!_runAdadSpeakerThread)
+                {
+                    break;
+                }
+
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    if (gd.speakerAdad.engageDeviceId != 0)
+                    {
+                        if (gd.speakerAdad.isRunning)
+                        {
+                            if (gd.adadAudioTransferProxy != null)
+                            {
+                                int samplesRead = gd.adadAudioTransferProxy.readSpeakerAudio(ref gd.speakerAudioBuffer, Adad.SAMPLES_PER_FRAME, gd.speakerAdad.engageDeviceId, gd.speakerAdad.instanceId);
+                                if (samplesRead > 0)
+                                {
+                                    bool isPureSilence = true;
+                                    double d = 0;
+                                    for (int x = 0; x < samplesRead; x++)
+                                    {
+                                        // NOTE: This is a hackey piece of logic.  The Engine will keep the speaker going for a little while
+                                        // even after all audio RX has completed.  This is to allow for jitter buffer drainage as well as keep 
+                                        // the speaker "warm" in case a new transmission comes in within a second or two.  A better strategy
+                                        // is to track whether the group still has RX going and, when it stops, prevent the code below from 
+                                        // processing potentially silent audio.
+
+                                        d += gd.speakerAudioBuffer[x];
+                                        if(gd.speakerAudioBuffer[x] != 0)
+                                        {                                            
+                                            isPureSilence = false;
+                                        }
+                                    }
+
+                                    if (!isPureSilence)
+                                    {
+                                        Console.WriteLine("adadSpeakerThread(" + gd.id + "): samplesRead=" + samplesRead + ", avg=" + (d / 80.0));
+
+                                        // TODO: do something with the speaker audio ...
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void adadMicrophoneThread()
+        {
+            Random rnd = new Random();
+
+            while (_runAdadMicrophoneThread)
+            {
+                Thread.Sleep(10);
+
+                if (!_runAdadMicrophoneThread)
+                {
+                    break;
+                }
+
+                foreach (GroupDescriptor gd in _groups)
+                {
+                    if (gd.microphoneAdad.engageDeviceId != 0)
+                    {
+                        if (gd.microphoneAdad.isRunning)
+                        {
+                            if (gd.adadAudioTransferProxy != null)
+                            {
+                                // NOTE: The real audio for the ADAD needs to be in gd.microphoneAudioBuffer
+
+                                // For our demo purposes, we'll just create some random noise in our microphone buffer
+                                for (int x = 0; x < Adad.SAMPLES_PER_FRAME; x++)
+                                {
+                                    gd.microphoneAudioBuffer[x] = (short)rnd.Next(-32000, 32000);
+                                }
+
+                                gd.adadAudioTransferProxy.writeMicrophoneAudio(gd.microphoneAudioBuffer, Adad.SAMPLES_PER_FRAME, gd.microphoneAdad.engageDeviceId, gd.microphoneAdad.instanceId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void determineIfAdadThreadsAreNeeded()
+        {
+            determineIfAdadSpeakerThread();
+            determineIfAdadMicrophoneThread();
+        }
+
+        private void determineIfAdadSpeakerThread()
+        {
+            bool isNeeded = false;
+
+            foreach (GroupDescriptor gd in _groups)
+            {
+                if (gd.speakerAdad != null && gd.speakerAdad.isRunning)
+                {
+                    isNeeded = true;
+                    break;
+                }
+            }
+
+            if (isNeeded)
+            {
+                if (_adadSpeakerThreadHandle == null)
+                {
+                    Console.WriteLine("one or more speaker adads have gone active - starting thread");
+                    _runAdadSpeakerThread = true;
+                    _adadSpeakerThreadHandle = new Thread(new ThreadStart(adadSpeakerThread));
+                    _adadSpeakerThreadHandle.Start();
+                }
+            }
+            else
+            {
+                if (_adadSpeakerThreadHandle != null)
+                {
+                    Console.WriteLine("all speaker adads have gone inactive - stopping thread");
+                    _runAdadSpeakerThread = false;
+                    _adadSpeakerThreadHandle.Join();
+                    _adadSpeakerThreadHandle = null;
+                }
+            }
+        }
+
+        private void determineIfAdadMicrophoneThread()
+        {
+            bool isNeeded = false;
+
+            foreach (GroupDescriptor gd in _groups)
+            {
+                if (gd.microphoneAdad != null && gd.microphoneAdad.isRunning)
+                {
+                    isNeeded = true;
+                    break;
+                }
+            }
+
+            if (isNeeded)
+            {
+                if (_adadMicrophoneThreadHandle == null)
+                {
+                    Console.WriteLine("one or more microphone adads have gone active - starting thread");
+                    _runAdadMicrophoneThread = true;
+                    _adadMicrophoneThreadHandle = new Thread(new ThreadStart(adadMicrophoneThread));
+                    _adadMicrophoneThreadHandle.Start();
+                }
+            }
+            else
+            {
+                if (_adadMicrophoneThreadHandle != null)
+                {
+                    Console.WriteLine("all microphone adads have gone inactive - stopping thread");
+                    _runAdadMicrophoneThread = false;
+                    _adadMicrophoneThreadHandle.Join();
+                    _adadMicrophoneThreadHandle = null;
+                }
+            }
+        }
         #region Notification handlers
         void Engage.IEngineNotifications.onEngineStarted(string eventExtraJson)
         {
@@ -764,8 +1237,16 @@ namespace engage_sample_cs_console
         }
 
         void Engage.IGroupNotifications.onGroupRawReceived(string id, byte[] raw, int rawSize, string eventExtraJson)
-        {  
-            Console.WriteLine("C#: onGroupRawReceived: " + id);          
+        {
+            int sizeToDisplay = rawSize;
+            if (sizeToDisplay > 64)
+            {
+                sizeToDisplay = 64;
+            }
+
+            string hexString = hexStringOf(raw, sizeToDisplay, ":");
+
+            Console.WriteLine("C#: onGroupRawReceived: " + id + ", displaying " + sizeToDisplay + " of " + rawSize + " bytes\n[" + hexString + "]");
         }
 
         void Engage.IGroupNotifications.onGroupReconfigured(string id, string eventExtraJson)
@@ -886,6 +1367,126 @@ namespace engage_sample_cs_console
         public void onGroupAudioRecordingEnded(string id, string eventExtraJson)
         {
             Console.WriteLine("C#: onGroupAudioRecordingEnded: " + id + ", " + eventExtraJson);
+        }
+
+        public int onAudioDeviceCreateInstance(int deviceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceCreateInstance: " + deviceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if(adad != null)
+            {
+                return adad.instanceId;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_DEVICE_ID;
+        }
+
+        public int onAudioDeviceDestroyInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceDestroyInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDeviceStartInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceStartInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = true;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDeviceStopInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceStopInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = false;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDevicePauseInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDevicePauseInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = false;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDeviceResumeInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceResumeInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = true;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDeviceRestartInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceRestartInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = false;
+                determineIfAdadThreadsAreNeeded();
+                adad.isRunning = true;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
+        }
+
+        public int onAudioDeviceResetInstance(int deviceId, int instanceId)
+        {
+            Console.WriteLine("C#: onAudioDeviceResetInstance: " + deviceId + ", " + instanceId);
+
+            Adad adad = getAdadForEngageDeviceId(deviceId);
+            if (adad != null)
+            {
+                adad.isRunning = false;
+                determineIfAdadThreadsAreNeeded();
+                adad.isRunning = true;
+                determineIfAdadThreadsAreNeeded();
+                return Engage.ENGAGE_AUDIO_DEVICE_RESULT_OK;
+            }
+
+            return Engage.ENGAGE_AUDIO_DEVICE_INVALID_OPERATION;
         }
         #endregion
     }
