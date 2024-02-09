@@ -11,6 +11,8 @@ public class TalkerDescriptor
     public String nodeId;
     public long rxFlags;
     public int txPriority;
+    public long aliasSpecializer;
+    public boolean rxMuted;
 
     @Override
     public String toString()
@@ -21,6 +23,8 @@ public class TalkerDescriptor
         sb.append(", nodeId=" + nodeId);
         sb.append(", rxFlags=" + rxFlags);
         sb.append(", txPriority=" + txPriority);
+        sb.append(", aliasSpecializer=" + aliasSpecializer);
+        sb.append(", rxMuted=" + rxMuted);
 
         return sb.toString();
     }

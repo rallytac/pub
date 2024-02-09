@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_active_audio_device_handset"
+        android:title="Handset"
+        android:checkable="true"/>
+
+    <item
+        android:id="@+id/action_active_audio_device_speakerphone"
+        android:title="Speakerphone"
+        android:checkable="true"/>
+
+    <item
+        android:id="@+id/action_active_audio_device_wired_headset"
+        android:title="Wired Headset"
+        android:checkable="true"/>
+
+    <item
+        android:id="@+id/action_active_audio_device_bluetooth_headset"
+        android:title="Bluetooth Headset"
+        android:checkable="true"/>
+</menu>

@@ -257,8 +257,8 @@
     <string name="set_aec_enable">Activer</string>
     <string name="set_aec_enable_cng">Activer la génération de bruit de confort</string>
     <string name="set_aec_speaker_tail_ms">Haut-parleur Tail Milliseconds</string>
-    <string name="set_audio_bluetooth_device">Appareil Bluetooth</string>
-    <string name="set_audio_use_bluetooth_device">Utilisez un appareil Bluetooth</string>
+    <string name="set_bluetooth_ptt_device">Appareil Bluetooth</string>
+    <string name="set_use_bluetooth_ptt_device">Utilisez un appareil Bluetooth</string>
     <string name="set_biometrics_blood_hydro_level">Niveau d\'hydratation du sang</string>
     <string name="set_biometrics_blood_oxy_perc">Pourcentage d\'oxygénation du sang</string>
     <string name="set_biometrics_core_temp">Température à cœur</string>
@@ -292,8 +292,8 @@
     <string name="set_hdr_tone_levels">Niveaux de tonalité</string>
     <string name="set_hdr_user_interface">Interface utilisateur</string>
     <string name="set_identity_display_name">Afficher un nom</string>
-    <string name="set_identity_email_address">L\'adresse e-mail est recommandée</string>
-    <string name="set_identity_transmission_alias">Alias de transmission</string>
+    <string name="set_identity_email_address_hint">L\'adresse e-mail est recommandée</string>
+    <string name="set_identity_transmission_alias_hint">Alias de transmission</string>
     <string name="set_location_accuracy">Précision</string>
     <string name="set_location_displacement_trigger">Déclencheur de déplacement</string>
     <string name="set_location_share_my_location">Partager ma position</string>

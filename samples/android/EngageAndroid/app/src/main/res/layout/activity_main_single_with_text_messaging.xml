@@ -24,7 +24,7 @@
         android:onClick="onClickNotificationBar"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"
@@ -99,7 +99,7 @@
             android:onClick="onClickMenuIcon"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            app:srcCompat="@drawable/ic_main_screen_menu"
+            app:srcCompat="@drawable/ic_app_logo"
             android:layout_weight="1"/>
     </LinearLayout>
 
@@ -150,7 +150,7 @@
         android:onClick="onClickLicensingBar"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"

@@ -33,6 +33,7 @@ public class PreferenceKeys
     public static String USER_ID = "user_id";//NON-NLS
     public static String USER_DISPLAY_NAME = "user_displayName";//NON-NLS
     public static String USER_ALIAS_ID = "user_Alias";//NON-NLS
+    public static String USER_CROSS_MUTE_LOCATION_ID = "user_xmute_location_id";//NON-NLS
 
     public static String USER_TONE_LEVEL_PTT = "user_toneLevel.ptt";//NON-NLS
     public static String USER_TONE_LEVEL_ERROR = "user_toneLevel.error";//NON-NLS
@@ -51,6 +52,7 @@ public class PreferenceKeys
     public static String USER_AUDIO_ANDROID_AUDIO_USAGE = "user_audio.android.usage";//NON-NLS
     public static String USER_AUDIO_ANDROID_AUDIO_CONTENT_TYPE = "user_audio.android.contentType";//NON-NLS
     public static String USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET = "user_audio.android.inputPreset";//NON-NLS
+    public static String USER_AUDIO_ENGINE_MODE = "user_audio.android.engineMode";//NON-NLS
 
     public static String USER_AUDIO_ENGINE_INTERNAL_AUDIO = "user_audio.engine.internal.audio";//NON-NLS
 
@@ -87,6 +89,8 @@ public class PreferenceKeys
     public static String USER_NOTIFY_NETWORK_ERROR = "user_notify.networkError";//NON-NLS
     public static String USER_NOTIFY_VIBRATIONS = "user_notify.vibrations";//NON-NLS
     public static String USER_NOTIFY_PTT_EVERY_TIME = "user_notify.ptt_everyTime";//NON-NLS
+    public static String USER_NOTIFY_SPOKEN_PROMPTS = "user_notify.spoken_prompts";//NON-NLS
+
 
 
     public static String USER_EXPERIMENT_ENABLE_TX_SMOOTHING = "user_experiment.tx.smoothing.enable";//NON-NLS
@@ -116,8 +120,9 @@ public class PreferenceKeys
 
     public static String CONFIGHUB_BASE_URL = "confighub.baseUrl";//NON-NLS
 
-    public static String USER_BT_DEVICE_USE = "user_bt.use";//NON-NLS
-    public static String USER_BT_DEVICE_ADDRESS = "user_bt.deviceAddress";//NON-NLS
+    public static String USER_BT_MICROPHONE_USE = "user_bt_microphone.use";//NON-NLS
+    public static String USER_BT_PTT_USE = "user_bt_ptt.use";//NON-NLS
+    public static String USER_BT_PTT_ADDRESS = "user_bt_ptt.deviceAddress";//NON-NLS
 
     public static String USER_AUDIO_INPUT_DEVICE = "user_audio.inputDevice";//NON-NLS
     public static String USER_AUDIO_OUTPUT_DEVICE = "user_audio.outputDevice";//NON-NLS
@@ -130,6 +135,7 @@ public class PreferenceKeys
     public static String DEVELOPER_MODE_ACTIVE = "developer_modeActive";//NON-NLS
     public static String DEVELOPER_USE_DEV_LICENSING_SYSTEM = "developer_useDevLicensingSystem";//NON-NLS
     public static String ADVANCED_MODE_ACTIVE = "advanced_modeActive";//NON-NLS
+    public static String DEVELOPER_USE_LOW_LEVEL_ANDROID_AUDIO_INTERFACE = "developer_useLowLevelAndroidAudioInterface";//NON-NLS
 
     public static String USER_CERT_STORE_FILE_NAME = "user_activeCertStoreFileName";//NON-NLS
     public static String USER_CERT_STORE_PASSWORD_SET = "user_certStore.passwordSet";//NON-NLS

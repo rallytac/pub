@@ -15,11 +15,16 @@
     <string name="opt_sample_mission_fixed_id" translatable="false"></string>
     <bool name="opt_supports_text_messaging">false</bool>
     <bool name="opt_allow_animations">true</bool>
+    <bool name="opt_allow_mission_edit">true</bool>
+    <bool name="opt_allow_main_menu_missions">true</bool>
+    <bool name="opt_allow_main_menu_security">true</bool>
+    <bool name="opt_locked_licensing">false</bool>
 
     <bool name="opt_allow_multiple_channel_view">true</bool>
     <integer name="opt_lock_orientation">-1</integer>
-    <bool name="opt_ptt_latching">false</bool>
-    <bool name="opt_experimental_general_enabled">false</bool>
+    <bool name="opt_ptt_latching_enforced_on_initial_run">false</bool>
+    <bool name="opt_ptt_latching">true</bool>
+    <bool name="opt_experimental_general_enabled">true</bool>
     <bool name="opt_experimental_human_biometrics_enabled">false</bool>
     <bool name="opt_firebase_analytics_enabled">false</bool>
     <integer name="opt_max_groups_allowed">4</integer>

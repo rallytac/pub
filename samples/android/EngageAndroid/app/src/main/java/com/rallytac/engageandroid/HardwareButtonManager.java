@@ -10,6 +10,7 @@ import android.content.Context;
 import android.os.Build;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HardwareButtonManager implements IPushToTalkRequestHandler,
                                               BluetoothManager.IBtNotification,
@@ -20,6 +21,7 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
     private Context _ctx;
     private IPushToTalkRequestHandler _handler;
     private SonimBroadcastReceiver _sonimBroadcastReceiver = null;
+    private HardwarePttKeyEventIntentBroadcastReceiver _hardwarePttKeyEventIntentBroadcastReceiver = null;
 
     private String pttOn = "+PTT=P";//NON-NLS
     private String pttOff = "+PTT=R";//NON-NLS
@@ -44,22 +46,33 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
 
     public void start()
     {
-        if(Build.MANUFACTURER.toUpperCase().contains("SONIM"))//NON-NLS
+        String filterActionName = FlavorSpecific.getHardwarePttKeyEventIntentFilterActionName();
+        if(!Utils.isEmptyString(filterActionName))
         {
-            _sonimBroadcastReceiver = new SonimBroadcastReceiver(_ctx, this);
-            _sonimBroadcastReceiver.start();
+            _hardwarePttKeyEventIntentBroadcastReceiver = new HardwarePttKeyEventIntentBroadcastReceiver(_ctx, this, filterActionName);
+            _hardwarePttKeyEventIntentBroadcastReceiver.start();
+        }
+        else
+        {
+            if(Build.MANUFACTURER.toUpperCase().contains("SONIM"))//NON-NLS
+            {
+                _sonimBroadcastReceiver = new SonimBroadcastReceiver(_ctx, this);
+                _sonimBroadcastReceiver.start();
+            }
         }
 
-        boolean useBt = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_DEVICE_USE, false);
+        /*
+        boolean useBt = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_PTT_USE, false);
         if(useBt)
         {
-            String btDeviceAddress = Globals.getSharedPreferences().getString(PreferenceKeys.USER_BT_DEVICE_ADDRESS, null);
+            String btDeviceAddress = Globals.getSharedPreferences().getString(PreferenceKeys.USER_BT_PTT_ADDRESS, null);
             if (!Utils.isEmptyString(btDeviceAddress))
             {
                 _btm = new BluetoothManager(_ctx, this, this);
                 _btm.start(btDeviceAddress, pttOn, pttOff);
             }
         }
+        */
 
         // TODO: This is dreadful!  Need a cleaner and more generic way to support BTLE buttons
         if(Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_support_pryme_btle_ptt_button))
@@ -98,12 +111,17 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
             _btm = null;
         }
 
+        if(_hardwarePttKeyEventIntentBroadcastReceiver != null)
+        {
+            _hardwarePttKeyEventIntentBroadcastReceiver.stop();
+            _hardwarePttKeyEventIntentBroadcastReceiver = null;
+        }
+
         if(_sonimBroadcastReceiver != null)
         {
             _sonimBroadcastReceiver.stop();
             _sonimBroadcastReceiver = null;
         }
-
     }
 
     @Override
@@ -160,11 +178,11 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
         Globals.getLogger().d(TAG, "onBleDataReceived: " + device.getName() + ", data=[" + Utils.toHexString(data) + "]");
         if(data != null && data.length >= 1)
         {
-            if(byteArrayMatch(data, BT_PTT_ON))
+            if(Arrays.equals(data, BT_PTT_ON))
             {
                 requestPttOn(0, 0);
             }
-            else if(byteArrayMatch(data, BT_PTT_OFF))
+            else if(Arrays.equals(data, BT_PTT_OFF))
             {
                 requestPttOff();
             }
@@ -173,24 +191,5 @@ public class HardwareButtonManager implements IPushToTalkRequestHandler,
                 Globals.getLogger().w(TAG, "unhandled data received from BLE device " + device.getName() + ", data=[" + Utils.toHexString(data) + "]");
             }
         }
-    }
-
-    private boolean byteArrayMatch(byte[] a1, byte[] a2)
-    {
-        if(a1 != null && a2 != null &&
-            a1.length == a2.length)
-        {
-            for(int x = 0; x < a1.length; x++)
-            {
-                if(a1[x] != a2[x])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
     }
 }

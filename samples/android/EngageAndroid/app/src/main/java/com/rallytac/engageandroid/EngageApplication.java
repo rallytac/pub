@@ -8,6 +8,10 @@ package com.rallytac.engageandroid;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.location.Location;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -34,8 +39,10 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 
+import android.speech.tts.TextToSpeech;
 import android.system.Os;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,16 +62,18 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.NetworkInterface;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -82,12 +91,474 @@ public class EngageApplication
                                     Engine.ILicenseListener,
                                     Engine.ILoggingListener,
                                     Engine.IAppNetworkDeviceListener,
-                                    LocationManager.ILocationUpdateNotifications,
+                                    MyLocationManager.ILocationUpdateNotifications,
                                     IPushToTalkRequestHandler,
                                     BluetoothManager.IBtNotification,
                                     LicenseActivationTask.ITaskCompletionNotification
 {
     private static String TAG = EngageApplication.class.getSimpleName();
+
+    public enum ActiveAudioDevice {aadHandset, aadSpeakerphone, aadWired, aadBluetooth};
+
+    private class MyAudioDeviceManager extends BroadcastReceiver
+    {
+        private Context _ctx = null;
+        private AudioManager _am = null;
+        private boolean _wiredConnected = false;
+        private boolean _btHeadsetConnected = false;
+        private boolean _btScoConnected = false;
+        private BluetoothAdapter _btAdapter = null;
+        private BluetoothProfile.ServiceListener _btProfileListener = null;
+
+        public MyAudioDeviceManager(Context ctx, AudioManager am)
+        {
+            _ctx = ctx;
+            _am = am;
+        }
+
+        public void start()
+        {
+            if( Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_MICROPHONE_USE, true) )
+            {
+                _btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+                if(_btAdapter != null)
+                {
+                    _btProfileListener = new BluetoothProfile.ServiceListener() {
+                        @Override
+                        public void onServiceConnected(int profile, BluetoothProfile proxy)
+                        {
+                            Log.d(TAG, "onServiceConnected:" + profile);
+
+                            if(profile == BluetoothProfile.HEADSET)
+                            {
+                                List<BluetoothDevice> devices = proxy.getConnectedDevices();
+                                if(devices != null && devices.size() > 0)
+                                {
+                                    _btHeadsetConnected = true;
+                                    for (BluetoothDevice device : devices)
+                                    {
+                                        Log.d(TAG, "   --->" + device.getName());
+                                        break;
+                                    }
+
+                                    processAudioDevicesStates();
+                                }
+                                else
+                                {
+                                    Log.d(TAG, "   --->no devices");
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onServiceDisconnected(int profile)
+                        {
+                            Log.d(TAG, "onServiceDisconnected: " + profile);
+
+                            if(profile == BluetoothProfile.HEADSET)
+                            {
+                                _btHeadsetConnected = false;
+                                processAudioDevicesStates();
+                            }
+                        }
+                    };
+
+                    _btAdapter.getProfileProxy(_ctx, _btProfileListener, BluetoothProfile.HEADSET);
+                }
+            }
+
+            processAudioDevicesStates();
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+            intentFilter.addAction(AudioManager.ACTION_HDMI_AUDIO_PLUG);
+            intentFilter.addAction(AudioManager.ACTION_HEADSET_PLUG);
+            intentFilter.addAction(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED);
+            intentFilter.addAction(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED);
+
+            if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_MICROPHONE_USE, true))
+            {
+                intentFilter.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
+                intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+                intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
+            }
+
+            registerReceiver(this, intentFilter);
+        }
+
+        public void stop()
+        {
+            unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            handleBroadcastReceive(context, intent);
+        }
+
+        private void handle_AudioManager_ACTION_AUDIO_BECOMING_NOISY(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_AUDIO_BECOMING_NOISY " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+        }
+
+        private void handle_AudioManager_ACTION_HDMI_AUDIO_PLUG(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_HDMI_AUDIO_PLUG " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+        }
+
+        private void handle_AudioManager_ACTION_HEADSET_PLUG(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_HEADSET_PLUG " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+
+            int rc;
+
+            rc = intent.getIntExtra("state", -1);
+            if(rc == 0)
+            {
+                _wiredConnected = false;
+                processAudioDevicesStates();
+            }
+            else if(rc == 1)
+            {
+                _wiredConnected = true;
+                processAudioDevicesStates();
+            }
+        }
+
+        private void handle_AudioManager_ACTION_MICROPHONE_MUTE_CHANGED(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_MICROPHONE_MUTE_CHANGED " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+        }
+
+        private void handle_AudioManager_ACTION_SCO_AUDIO_STATE_UPDATED(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_SCO_AUDIO_STATE_UPDATED " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+
+            final int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE, AudioManager.SCO_AUDIO_STATE_ERROR);
+
+            switch (state)
+            {
+                case AudioManager.SCO_AUDIO_STATE_CONNECTED:
+                    Globals.getLogger().d(TAG, "AudioManager.SCO_AUDIO_STATE_CONNECTED");
+                    _btScoConnected = true;
+                    processAudioDevicesStates();
+                    break;
+
+                case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
+                    Globals.getLogger().d(TAG, "AudioManager.SCO_AUDIO_STATE_DISCONNECTED");
+                    //_btHeadsetConnected = false;
+                    _btScoConnected = false;
+                    processAudioDevicesStates();
+                    break;
+
+                case AudioManager.SCO_AUDIO_STATE_CONNECTING:
+                    Globals.getLogger().d(TAG, "AudioManager.SCO_AUDIO_STATE_CONNECTING");
+                    _btScoConnected = false;
+                    processAudioDevicesStates();
+                    break;
+
+                case AudioManager.SCO_AUDIO_STATE_ERROR:
+                    Globals.getLogger().e(TAG, "AudioManager.SCO_AUDIO_STATE_ERROR");
+                    //_btHeadsetConnected = false;
+                    _btScoConnected = false;
+                    processAudioDevicesStates();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void handle_AudioManager_ACTION_SPEAKERPHONE_STATE_CHANGED(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_AudioManager_ACTION_SPEAKERPHONE_STATE_CHANGED " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+        }
+
+        private void handle_BluetoothHeadset_ACTION_AUDIO_STATE_CHANGED(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_BluetoothHeadset_ACTION_AUDIO_STATE_CHANGED " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+
+            final int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
+
+            if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED)
+            {
+                _btHeadsetConnected = true;
+                processAudioDevicesStates();
+            }
+            else if (state == BluetoothHeadset.STATE_AUDIO_CONNECTING)
+            {
+                // No action needed.
+            }
+            else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED)
+            {
+                _btHeadsetConnected = false;
+                processAudioDevicesStates();
+            }
+        }
+
+        private void handle_BluetoothHeadset_ACTION_CONNECTION_STATE_CHANGED(Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handle_BluetoothHeadset_ACTION_CONNECTION_STATE_CHANGED " + intent.toString());
+            //Utils.logIntentExtras("   ", intent);
+
+            final int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, BluetoothHeadset.STATE_DISCONNECTED);
+
+            if (state == BluetoothHeadset.STATE_CONNECTED)
+            {
+                Globals.getLogger().d(TAG, "BluetoothHeadset.STATE_CONNECTED, bluetooth headset is connected");
+                _btHeadsetConnected = true;
+                processAudioDevicesStates();
+            }
+            else if (state == BluetoothHeadset.STATE_CONNECTING)
+            {
+                Globals.getLogger().d(TAG, "BluetoothHeadset.STATE_CONNECTING");
+                // No action needed.
+            }
+            else if (state == BluetoothHeadset.STATE_DISCONNECTING)
+            {
+                Globals.getLogger().d(TAG, "BluetoothHeadset.STATE_DISCONNECTING");
+                // No action needed.
+            }
+            else if (state == BluetoothHeadset.STATE_DISCONNECTED)
+            {
+                Globals.getLogger().d(TAG, "BluetoothHeadset.STATE_DISCONNECTED, bluetooth headset is disconnected");
+                _btHeadsetConnected = false;
+                processAudioDevicesStates();
+            }
+            else
+            {
+                Globals.getLogger().e(TAG, "handle_BluetoothHeadset_ACTION_CONNECTION_STATE_CHANGED unhandled state");
+            }
+        }
+
+        private void handleBroadcastReceive(Context context, Intent intent)
+        {
+            Globals.getLogger().d(TAG, "handleBroadcastReceive " + intent.toString());
+
+            final String action = intent.getAction();
+            if(action != null)
+            {
+                if(action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
+                {
+                    handle_AudioManager_ACTION_AUDIO_BECOMING_NOISY(intent);
+                }
+                else if(action.equals(AudioManager.ACTION_HDMI_AUDIO_PLUG))
+                {
+                    handle_AudioManager_ACTION_HDMI_AUDIO_PLUG(intent);
+                }
+                else if(action.equals(AudioManager.ACTION_HEADSET_PLUG))
+                {
+                    handle_AudioManager_ACTION_HEADSET_PLUG(intent);
+                }
+                else if(action.equals(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED))
+                {
+                    handle_AudioManager_ACTION_MICROPHONE_MUTE_CHANGED(intent);
+                }
+                else if(action.equals(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED))
+                {
+                    handle_AudioManager_ACTION_SCO_AUDIO_STATE_UPDATED(intent);
+                }
+                else if(action.equals(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED))
+                {
+                    handle_AudioManager_ACTION_SPEAKERPHONE_STATE_CHANGED(intent);
+                }
+                else if(action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED))
+                {
+                    handle_BluetoothHeadset_ACTION_AUDIO_STATE_CHANGED(intent);
+                }
+                else if(action.equals(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED))
+                {
+                    handle_BluetoothHeadset_ACTION_CONNECTION_STATE_CHANGED(intent);
+                }
+                else
+                {
+                    Globals.getLogger().w(TAG, "unhandled broadcast intent action : " + intent.toString());
+                }
+            }
+        }
+
+        public ActiveAudioDevice getActiveDevice()
+        {
+            if(_am.isSpeakerphoneOn())
+            {
+                return ActiveAudioDevice.aadSpeakerphone;
+            }
+            else
+            {
+                if(_btHeadsetConnected && _btScoConnected)
+                {
+                    return ActiveAudioDevice.aadBluetooth;
+                }
+                else if(_wiredConnected)
+                {
+                    return ActiveAudioDevice.aadWired;
+                }
+                else
+                {
+                    return ActiveAudioDevice.aadHandset;
+                }
+            }
+        }
+
+        public boolean isBluetoothHeadsetAvailable()
+        {
+            return _btHeadsetConnected;
+        }
+
+        public boolean isWiredHeadsetAvailable()
+        {
+            return _wiredConnected;
+        }
+
+        public void changeActiveAudioDeviceToHandset()
+        {
+            _am.setSpeakerphoneOn(false);
+            _am.setBluetoothScoOn(false);
+            _am.stopBluetoothSco();
+            onActiveAudioDeviceChanged(getActiveDevice());
+        }
+
+        public void changeActiveAudioDeviceToSpeakerPhone()
+        {
+            _am.setSpeakerphoneOn(true);
+            _am.setBluetoothScoOn(false);
+            _am.stopBluetoothSco();
+            onActiveAudioDeviceChanged(getActiveDevice());
+        }
+
+        public void changeActiveAudioDeviceToWiredHeadset()
+        {
+            _am.setSpeakerphoneOn(false);
+            _am.setBluetoothScoOn(false);
+            _am.stopBluetoothSco();
+            onActiveAudioDeviceChanged(getActiveDevice());
+        }
+
+        public void changeActiveAudioDeviceToBluetoothHeadset()
+        {
+            _am.setSpeakerphoneOn(false);
+            _am.setBluetoothScoOn(true);
+            _am.startBluetoothSco();
+            onActiveAudioDeviceChanged(getActiveDevice());
+        }
+
+        private void processAudioDevicesStates()
+        {
+            if(_btHeadsetConnected)
+            {
+                Globals.getLogger().d(TAG, "processAudioDevicesStates: _btConnected");
+                _am.setSpeakerphoneOn(false);
+                _am.setBluetoothScoOn(true);
+                _am.startBluetoothSco();
+
+                if(_btScoConnected)
+                {
+                    onActiveAudioDeviceChanged(getActiveDevice());
+                }
+            }
+            else if(_wiredConnected)
+            {
+                Globals.getLogger().d(TAG, "processAudioDevicesStates: _wiredConnected");
+                _am.setSpeakerphoneOn(false);
+                _am.setBluetoothScoOn(false);
+                _am.stopBluetoothSco();
+                onActiveAudioDeviceChanged(getActiveDevice());
+            }
+            else
+            {
+                Globals.getLogger().i(TAG, "processAudioDevicesStates: something else, going to speakerphone");
+                _am.setSpeakerphoneOn(true);
+                _am.setBluetoothScoOn(false);
+                _am.stopBluetoothSco();
+                onActiveAudioDeviceChanged(getActiveDevice());
+            }
+        }
+    }
+
+    private void notifyRegistrantsOfActiveAudioDeviceChange(ActiveAudioDevice dev)
+    {
+        synchronized (_audioDeviceListeners)
+        {
+            for (IAudioDeviceListener listener : _audioDeviceListeners)
+            {
+                listener.onActiveAudioDeviceChanged(dev);
+            }
+        }
+    }
+
+    private void onActiveAudioDeviceChanged(ActiveAudioDevice dev)
+    {
+        if(dev == ActiveAudioDevice.aadWired)
+        {
+            Globals.getLogger().i(TAG, "Using wired headset");
+        }
+        else if(dev == ActiveAudioDevice.aadBluetooth)
+        {
+            Globals.getLogger().i(TAG, "Using Bluetooth headset");
+        }
+        else
+        {
+            Globals.getLogger().i(TAG, "Using speakerphone");
+        }
+
+        notifyRegistrantsOfActiveAudioDeviceChange(dev);
+    }
+
+    public ActiveAudioDevice getActiveAudioDevice()
+    {
+        if(_madm != null)
+        {
+            return _madm.getActiveDevice();
+        }
+        else
+        {
+            return ActiveAudioDevice.aadHandset;
+        }
+    }
+
+    public boolean isBluetoothHeadsetAvailable()
+    {
+        return _madm.isBluetoothHeadsetAvailable();
+    }
+
+    public boolean isWiredHeadsetAvailable()
+    {
+        return _madm.isWiredHeadsetAvailable();
+    }
+
+    public void changeActiveAudioDeviceToHandset()
+    {
+        _madm.changeActiveAudioDeviceToHandset();
+    }
+
+    public void changeActiveAudioDeviceToSpeakerPhone()
+    {
+        _madm.changeActiveAudioDeviceToSpeakerPhone();
+    }
+
+    public void changeActiveAudioDeviceToWiredHeadset()
+    {
+        _madm.changeActiveAudioDeviceToWiredHeadset();
+    }
+
+    public void changeActiveAudioDeviceToBluetoothHeadset()
+    {
+        _madm.changeActiveAudioDeviceToBluetoothHeadset();
+    }
+
+    public interface IAudioDeviceListener
+    {
+        void onActiveAudioDeviceChanged(ActiveAudioDevice dev);
+    }
 
     public interface IGroupTextMessageListener
     {
@@ -154,7 +625,7 @@ public class EngageApplication
     private boolean _engineRunning = false;
     private ActiveConfiguration _activeConfiguration = null;
     private boolean _missionChangedStatus = false;
-    private LocationManager _locationManager = null;
+    private MyLocationManager _locationManager = null;
 
     private HashSet<IPresenceChangeListener> _presenceChangeListeners = new HashSet<>();
     private HashSet<IUiUpdateListener> _uiUpdateListeners = new HashSet<>();
@@ -163,7 +634,7 @@ public class EngageApplication
     private HashSet<ILicenseChangeListener> _licenseChangeListeners = new HashSet<>();
     private HashSet<IGroupTimelineListener> _groupTimelineListeners = new HashSet<>();
     private HashSet<IGroupTextMessageListener> _groupTextMessageListeners = new HashSet<>();
-
+    private HashSet<IAudioDeviceListener> _audioDeviceListeners = new HashSet<>();
 
     private long _lastAudioActivity = 0;
     private long _lastTxActivity = 0;
@@ -205,6 +676,8 @@ public class EngageApplication
     private boolean _enableDevicePowerMonitor = false;
     private boolean _enableDeviceConnectivityMonitor = false;
 
+    private MyAudioDeviceManager _madm = null;
+
     private MyApplicationIntentReceiver _appIntentReceiver = null;
 	
 	private FirebaseAnalytics _firebaseAnalytics = null;
@@ -221,11 +694,29 @@ public class EngageApplication
     private HashMap<String, PresenceDescriptor> _nodes = new HashMap<String, PresenceDescriptor>();
     private AudioManager _audioManager = null;
     private int _audioSessionId = 0;
+    private boolean _sampleMissionCreatedAndInUse = false;
+    private MyAudioProvider _myAudioProvider = null;
 
     //private ArrayList<JSONObject> _certificateStoreCache = new ArrayList<JSONObject>();
 
+    private String _lastSpokenText = null;
+    private long _lastSpokenTs = 0;
+    private final static long REPETITIVE_SPOKEN_TEXT_MS = 3000;
+    private TextToSpeech _tts = null;
+    private AudioManager _am = null;
+    private boolean _ttsIsReady = false;
+    private ArrayList<String> _ttsQueue = null;
+    private SimpleUiMainActivity _simpleUiMainActivity = null;
+
+    public void setMainActivity(SimpleUiMainActivity activity)
+    {
+        _simpleUiMainActivity = activity;
+    }
+
     private EngageAppPermission[] _appPermissions =
             {
+                    new EngageAppPermission(Manifest.permission.BLUETOOTH, false),
+                    new EngageAppPermission("android.permission.BLUETOOTH_CONNECT", false),
                     new EngageAppPermission(Manifest.permission.RECORD_AUDIO, false),
                     new EngageAppPermission(Manifest.permission.READ_EXTERNAL_STORAGE, false),
                     new EngageAppPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, false),
@@ -278,14 +769,21 @@ public class EngageApplication
         return isPermissionGranted(Manifest.permission.RECORD_AUDIO);
     }
 
-    public AudioManager getAudioManager()
+    public boolean wasSampleMissionCreatedAndInUse()
     {
-        return _audioManager;
+        return _sampleMissionCreatedAndInUse;
     }
 
-    public int getAudioSessionId()
+    public AudioManager getAudioManager()
     {
-        return _audioSessionId;
+        if(_myAudioProvider != null)
+        {
+            return _myAudioProvider.getManager();
+        }
+        else
+        {
+            return _audioManager;
+        }
     }
 
     public void setSpeakerphone(boolean onOrOff)
@@ -293,25 +791,6 @@ public class EngageApplication
         try
         {
             getAudioManager().setSpeakerphoneOn(onOrOff);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void toggleSpeakerPhone()
-    {
-        try
-        {
-            if(getAudioManager().isSpeakerphoneOn())
-            {
-                setSpeakerphoneOff();
-            }
-            else
-            {
-                setSpeakerphoneOff();
-            }
         }
         catch (Exception e)
         {
@@ -493,12 +972,18 @@ public class EngageApplication
         {
             IntentFilter filter = new IntentFilter();
 
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_ptt_on));
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_ptt_off));
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_next_group));
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_prev_group));
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_mute_group));
-            filter.addAction(BuildConfig.APPLICATION_ID + "." + getString(R.string.app_intent_unmute_group));
+            String precede = getString(R.string.app_intent_fixed_precede);
+            if(Utils.isEmptyString(precede))
+            {
+                precede = BuildConfig.APPLICATION_ID;
+            }
+
+            filter.addAction(precede + "." + getString(R.string.app_intent_ptt_on));
+            filter.addAction(precede + "." + getString(R.string.app_intent_ptt_off));
+            filter.addAction(precede + "." + getString(R.string.app_intent_next_group));
+            filter.addAction(precede + "." + getString(R.string.app_intent_prev_group));
+            filter.addAction(precede + "." + getString(R.string.app_intent_mute_group));
+            filter.addAction(precede + "." + getString(R.string.app_intent_unmute_group));
 
             registerReceiver(this, filter);
         }
@@ -535,6 +1020,20 @@ public class EngageApplication
             else if(action.compareTo(getString(R.string.app_intent_ptt_off)) == 0)
             {
                 endTx();
+            }
+            else if(action.compareTo(getString(R.string.app_intent_next_group)) == 0)
+            {
+                if(_simpleUiMainActivity != null)
+                {
+                    _simpleUiMainActivity.switchToNextIdInList(false);
+                }
+            }
+            else if(action.compareTo(getString(R.string.app_intent_prev_group)) == 0)
+            {
+                if(_simpleUiMainActivity != null)
+                {
+                    _simpleUiMainActivity.switchToNextIdInList(true);
+                }
             }
         }
     }
@@ -847,12 +1346,34 @@ public class EngageApplication
         }
         */
 
+        try
+        {
+            //Os.setenv("ENGAGE_OSSL_TRACE", "Y", true);
+            //Os.setenv("ENGAGE_SYS_FLAGS_0", "1", true);
+        }
+        catch (Exception e)
+        {
+            Globals.getLogger().e(TAG, e.getMessage());
+        }
+
         _instance = this;
 
         super.onCreate();
 
         // Its important to set this stuff as soon as possible!
         Engine.setApplicationContext(this.getApplicationContext());
+
+        if(true)
+        {
+            _audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            Engine.setApplicationAudioManager(_audioManager);
+        }
+        else
+        {
+            _myAudioProvider = new MyAudioProvider();
+            Engine.setApplicationAudioProvider(_myAudioProvider);
+        }
+
         Globals.setEngageApplication(this);
         Globals.setContext(getApplicationContext());
         Globals.setSharedPreferences(PreferenceManager.getDefaultSharedPreferences(this));
@@ -862,11 +1383,43 @@ public class EngageApplication
 
         Globals.getLogger().d(TAG, "onCreate");
 
-        _audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        _audioSessionId = _audioManager.generateAudioSessionId();
-
         _engine = new Engine();
         _engine.initialize();
+
+        try
+        {
+            String path = Globals.getContext().getApplicationInfo().nativeLibraryDir;
+            Log.d("Files", "Path: " + path);
+            File directory = new File(path);
+            File[] files = directory.listFiles();
+            Log.d("Files", "Size: "+ files.length);
+            for (int i = 0; i < files.length; i++)
+            {
+                Log.d("Files", "FileName:" + files[i].getName());
+            }
+
+            //System.loadLibrary(Globals.getContext().getApplicationInfo().nativeLibraryDir + "/rts-fips");
+
+            JSONObject obj = new JSONObject();
+            obj.put(Engine.JsonFields.FipsCryptoSettings.enabled, true);
+            obj.put(Engine.JsonFields.FipsCryptoSettings.path, Globals.getContext().getApplicationInfo().nativeLibraryDir + "/rts-fips");
+            getEngine().engageSetFipsCrypto(obj.toString());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        if(getEngine().engageIsCryptoFipsValidated() == 1)
+        {
+            Globals.getLogger().i(TAG, "crypto engine is FIPS validated");
+        }
+        else
+        {
+            Globals.getLogger().i(TAG, "crypto engine is NOT FIPS validated");
+        }
+
+        String devId = _engine.engageGetDeviceId();
 
         // Check for an invalid left-over activation key (bug from prior versions)
         {
@@ -941,12 +1494,25 @@ public class EngageApplication
 
         startDeviceMonitor();
         startAppIntentReceiver();
+
+        _tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    _tts.setLanguage(Locale.US);
+                    _ttsIsReady = true;
+                    flushTtsQueue();
+                }
+            }
+        });
+
     }
 
     @Override
     public void onTerminate()
     {
         Globals.getLogger().d(TAG, "onTerminate");
+        stopAudioDeviceManager();
         stopDeviceMonitor();
         stopAppIntentReceiver();
 
@@ -1253,6 +1819,24 @@ public class EngageApplication
         stopDeviceMonitor();
     }
 
+    private void startAudioDeviceManager()
+    {
+        if(_madm == null)
+        {
+            _madm = new MyAudioDeviceManager(this.getApplicationContext(), getAudioManager());
+            _madm.start();
+        }
+    }
+
+    private void stopAudioDeviceManager()
+    {
+        if(_madm != null)
+        {
+            _madm.stop();
+            _madm = null;
+        }
+    }
+
     private void startDeviceMonitor()
     {
         if(_deviceMonitor == null)
@@ -1303,6 +1887,7 @@ public class EngageApplication
         cancelObtainingActivationCode();
         stopAppIntentReceiver();
         stopDeviceMonitor();
+        stopAudioDeviceManager();
 
         // Clear out the text messaging database so that we don't have cached stuff hanging around
         wipeTextMessageDatabase();
@@ -1462,6 +2047,22 @@ public class EngageApplication
         }
     }
 
+    public void addAudioDeviceListener(IAudioDeviceListener listener)
+    {
+        synchronized (_audioDeviceListeners)
+        {
+            _audioDeviceListeners.add(listener);
+        }
+    }
+
+    public void removeAudioDeviceListener(IAudioDeviceListener listener)
+    {
+        synchronized (_audioDeviceListeners)
+        {
+            _audioDeviceListeners.remove(listener);
+        }
+    }
+
     public void startHardwareButtonManager()
     {
         Globals.getLogger().d(TAG, "startHardwareButtonManager");
@@ -1486,7 +2087,7 @@ public class EngageApplication
         ActiveConfiguration.LocationConfiguration lc = getActiveConfiguration().getLocationConfiguration();
         if(lc != null && lc.enabled)
         {
-            _locationManager = new LocationManager(this,
+            _locationManager = new MyLocationManager(this,
                     this,
                     lc.accuracy,
                     lc.intervalMs,
@@ -1622,7 +2223,7 @@ public class EngageApplication
         return null;
     }
 
-    private String buildAdvancedTxJson(int priority, int flags, int subchannelTag, boolean includeNodeId, String alias, String audioUri)
+    private String buildAdvancedTxJson(int priority, int flags, int subchannelTag, boolean includeNodeId, String alias, String audioUri, int crossMuteLocationId)
     {
         String rc;
 
@@ -1648,6 +2249,12 @@ public class EngageApplication
             if(!Utils.isEmptyString(alias))
             {
                 obj.put("alias", alias);
+            }
+
+            if(crossMuteLocationId > 0)
+            {
+                obj.put(Engine.JsonFields.AdvancedTxParams.aliasSpecializer, crossMuteLocationId);
+                obj.put(Engine.JsonFields.AdvancedTxParams.receiverRxMuteForAliasSpecializer, true);
             }
 
             rc = obj.toString();
@@ -1814,6 +2421,15 @@ public class EngageApplication
 
                 timeline.put(Engine.JsonFields.Group.Timeline.enabled, true);
                 group.put(Engine.JsonFields.Group.Timeline.objectName, timeline);
+            }
+
+            if(_activeConfiguration.getCrossMuteLocationId() > 0)
+            {
+                JSONArray specializerAffinities = new JSONArray();
+
+                specializerAffinities.put(_activeConfiguration.getCrossMuteLocationId());
+                group.put(Engine.JsonFields.Group.specializerAffinities, specializerAffinities);
+
             }
 
             rc = group.toString();
@@ -2410,19 +3026,10 @@ public class EngageApplication
                 }
             }
 
-            String fn = getActiveCertStoreFileName();
-
-            File fd = new File(fn);
-            fd.deleteOnExit();
-
-            FileOutputStream fos = new FileOutputStream(fd);
-            fos.write(certStoreContent);
-            fos.close();
-
             Set<String> passwords = getCertificateStoresPasswords();
             for(String pwd : passwords)
             {
-                if(getEngine().engageOpenCertStore(fn, pwd) == 0)
+                if(getEngine().engageSetCertStore(certStoreContent, certStoreContent.length, pwd) == 0)
                 {
                     rc = true;
                     break;
@@ -2700,6 +3307,7 @@ public class EngageApplication
             ActiveConfiguration.installMissionJson(null, missionJson, true);
         }
 
+        getEngine().engageShutdown();
         getEngine().deinitialize();
 
         return resultingMissionId;
@@ -2727,6 +3335,15 @@ public class EngageApplication
 
     public boolean startEngine()
     {
+        /* START DEV TESTING
+        getEngine().engageSetLogLevel(4);
+        String v = getEngine().engageGetVersion();
+        String d = getEngine().engageGetLicenseDescriptor("", "", null, null);
+        getEngine().engageShutdown();
+
+        return false;
+        */
+
         Globals.getLogger().d(TAG, "startEngine");
         boolean rc = false;
 
@@ -2746,6 +3363,7 @@ public class EngageApplication
                 if(Globals.getContext().getResources().getBoolean(R.bool.opt_auto_generate_sample_mission))
                 {
                     createSampleConfiguration();
+                    _sampleMissionCreatedAndInUse = true;
                 }
                 else
                 {
@@ -2769,12 +3387,17 @@ public class EngageApplication
                     identityJson,
                     "");
 
-            //if(initRc  == 0)
+            if(initRc  == 0)
             {
                 getEngine().engageStart();
+                startAudioDeviceManager();
 
                 _hasEngineBeenInitialized = true;
                 rc = true;
+            }
+            else
+            {
+                Globals.getLogger().f(TAG, "engageInitialize failed with error code " + initRc);
             }
         }
         catch (Exception e)
@@ -2792,6 +3415,8 @@ public class EngageApplication
         {
             leaveAllGroups();
             stopLocationUpdates();
+            stopAudioDeviceManager();
+
             _engineRunning = false;
             if(Engine.EngageResult.fromInt(getEngine().engageStop()) != Engine.EngageResult.ok)
             {
@@ -3039,9 +3664,7 @@ public class EngageApplication
 
         if(_activeConfiguration != null)
         {
-            if (!_activeConfiguration.getDiscoverSsdpAssets()
-                    && !_activeConfiguration.getDiscoverCistechGv1Assets()
-                    && !_activeConfiguration.getDiscoverTrelliswareAssets())
+            if (_activeConfiguration.getDiscoverMagellanAssets())
             {
                 if (!_dynamicGroups.isEmpty())
                 {
@@ -3106,10 +3729,13 @@ public class EngageApplication
 
         String val;
 
-        // Do we want to enforce PTT latching
+        String burntInLicense = getString(R.string.license_key);
+        String storedLicense = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_KEY, null);
+
         if(!wasRunPreviously)
         {
-            Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Globals.getContext().getResources().getBoolean(R.bool.opt_ptt_latching));
+            // Enforce PTT latching based on flavor
+            Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Globals.getContext().getResources().getBoolean(R.bool.opt_ptt_latching_enforced_on_initial_run));
             Globals.getSharedPreferencesEditor().apply();
 
             // Install a burnt-in license if we have one and we don't already have one scanned in
@@ -3313,11 +3939,6 @@ public class EngageApplication
                         // Start TX - in TX muted mode!!
                         synchronized (_groupsSelectedForTx)
                         {
-                            if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_DEVICE_USE, false))
-                            {
-                                BluetoothManager.enableBluetoothRecording(Globals.getContext());
-                            }
-
                             if(!_groupsSelectedForTx.isEmpty())
                             {
                                 if(_groupsSelectedForTx.size() == 1)
@@ -3360,7 +3981,8 @@ public class EngageApplication
                                                 0,
                                                 true,
                                                 _activeConfiguration.getUserAlias(),
-                                                audioFileUri));
+                                                audioFileUri,
+                                                getActiveConfiguration().getCrossMuteLocationId()));
                                     }
                                 }
                             }
@@ -3517,11 +4139,6 @@ public class EngageApplication
 
                     if (!anyStillActive)
                     {
-                        if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_BT_DEVICE_USE, false))
-                        {
-                            BluetoothManager.disableBluetoothRecording(Globals.getContext());
-                        }
-
                         synchronized (_uiUpdateListeners)
                         {
                             for (IUiUpdateListener listener : _uiUpdateListeners)
@@ -4200,6 +4817,15 @@ public class EngageApplication
 
                 Globals.getLogger().d(TAG, "onGroupConnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
 
+                // Only speak the group name for media groups - and then only in single view mode
+                if(_activeConfiguration.getUiMode() == Constants.UiMode.vSingle)
+                {
+                    if (gd.type == GroupDescriptor.Type.gtAudio)
+                    {
+                        sayThis(gd.getSpokenName());
+                    }
+                }
+
                 try
                 {
                     if (!Utils.isEmptyString(eventExtraJson))
@@ -4630,6 +5256,8 @@ public class EngageApplication
                                 td.nodeId = obj.optString(Engine.JsonFields.TalkerInformation.nodeId);
                                 td.rxFlags = obj.optLong(Engine.JsonFields.TalkerInformation.rxFlags, 0);
                                 td.txPriority = obj.optInt(Engine.JsonFields.TalkerInformation.txPriority, 0);
+                                td.aliasSpecializer = obj.optLong(Engine.JsonFields.TalkerInformation.aliasSpecializer, 0);
+                                td.rxMuted = obj.optBoolean(Engine.JsonFields.TalkerInformation.rxMuted, false);
 
                                 Globals.getLogger().d(TAG, "onGroupRxSpeakersChanged: " + td.toString());
 
@@ -4670,8 +5298,6 @@ public class EngageApplication
             @Override
             public void run()
             {
-                logEvent(Analytics.GROUP_RX_MUTED);
-
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
@@ -4679,11 +5305,18 @@ public class EngageApplication
                     return;
                 }
 
-                Globals.getLogger().d(TAG, "onGroupRxMuted: id='" + id + "', n='" + gd.name + "'");
+                if(Utils.isEmptyString(eventExtraJson))
+                {
+                    Globals.getLogger().d(TAG, "onGroupRxMuted: id='" + id + "', n='" + gd.name + "'");
 
-                gd.rxMuted = true;
-
-                notifyGroupUiListeners(gd);
+                    logEvent(Analytics.GROUP_RX_MUTED);
+                    gd.rxMuted = true;
+                    notifyGroupUiListeners(gd);
+                }
+                else
+                {
+                    Globals.getLogger().d(TAG, "onGroupRxMuted: id='" + id + "', n='" + gd.name + "', IGNORED! - eej=" + eventExtraJson);
+                }
             }
         });
     }
@@ -4696,8 +5329,6 @@ public class EngageApplication
             @Override
             public void run()
             {
-                logEvent(Analytics.GROUP_RX_UNMUTED);
-
                 GroupDescriptor gd = getGroup(id);
                 if (gd == null)
                 {
@@ -4705,11 +5336,18 @@ public class EngageApplication
                     return;
                 }
 
-                Globals.getLogger().d(TAG, "onGroupRxUnmuted: id='" + id + "', n='" + gd.name + "'");
+                if(Utils.isEmptyString(eventExtraJson))
+                {
+                    logEvent(Analytics.GROUP_RX_UNMUTED);
 
-                gd.rxMuted = false;
-
-                notifyGroupUiListeners(gd);
+                    Globals.getLogger().d(TAG, "onGroupRxUnmuted: id='" + id + "', n='" + gd.name + "'");
+                    gd.rxMuted = false;
+                    notifyGroupUiListeners(gd);
+                }
+                else
+                {
+                    Globals.getLogger().d(TAG, "onGroupRxUnmuted: id='" + id + "', n='" + gd.name + "', IGNORED! - eej=" + eventExtraJson);
+                }
             }
         });
     }
@@ -6379,6 +7017,8 @@ public class EngageApplication
                     delay = Constants.MAX_LICENSE_ACTIVATION_DELAY_MS;
                 }
 
+                delay = 5000;
+
                 Globals.getLogger().i(TAG, "scheduling obtaining of activation code in " + (delay / 1000) + " seconds");
 
                 _licenseActivationTimer = new Timer();
@@ -6432,9 +7072,14 @@ public class EngageApplication
 
                         cancelObtainingActivationCode();
 
+
+                        /*
                         String jsonData = getEngine().engageGetActiveLicenseDescriptor();
                         JSONObject obj = new JSONObject(jsonData);
                         String deviceId = obj.getString(Engine.JsonFields.License.deviceId);
+                         */
+
+                        String deviceId = getEngine().engageGetDeviceId();
                         if (Utils.isEmptyString(deviceId))
                         {
                             throw new Exception("no device id available for licensing");
@@ -6457,13 +7102,25 @@ public class EngageApplication
                         }
 
                         String ac = Globals.getSharedPreferences().getString(PreferenceKeys.USER_LICENSING_ACTIVATION_CODE, "");
+                        String jsonData = getEngine().engageGetLicenseDescriptor(getString(R.string.licensing_entitlement),
+                                                            key,
+                                                            ac,
+                                                            getString(R.string.manufacturer_id));
 
-                        String stringToHash = key + deviceId + getString(R.string.licensing_entitlement);
-                        String hValue = Utils.md5HashOfString(stringToHash);
+                        JSONObject obj = new JSONObject(jsonData);
+                        if(Engine.LicensingStatusCode.fromInt(obj.getInt("status")) == Engine.LicensingStatusCode.requiresActivation)
+                        {
+                            String stringToHash = key + deviceId + getString(R.string.licensing_entitlement);
+                            String hValue = Utils.md5HashOfString(stringToHash);
 
-                        LicenseActivationTask lat = new LicenseActivationTask(url, getString(R.string.licensing_entitlement), key, ac, deviceId, hValue, EngageApplication.this);
+                            LicenseActivationTask lat = new LicenseActivationTask(url, getString(R.string.licensing_entitlement), key, ac, deviceId, hValue, EngageApplication.this);
 
-                        lat.execute();
+                            lat.execute();
+                        }
+                        else
+                        {
+                            Globals.getLogger().d(TAG, "license does not require activation at this time");
+                        }
                     }
                     catch (Exception e)
                     {
@@ -6539,5 +7196,81 @@ public class EngageApplication
                 }
             }
         });
+    }
+
+    public void toggleDayAndNightModeTheme()
+    {
+        int mode = AppCompatDelegate.getDefaultNightMode();
+
+        if(mode == AppCompatDelegate.MODE_NIGHT_YES)
+        {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        else
+        {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+    }
+
+    private void flushTtsQueue()
+    {
+        if(_ttsQueue != null && !_ttsQueue.isEmpty() && _ttsIsReady)
+        {
+            for(String s: _ttsQueue)
+            {
+                sayThis(s);
+            }
+            _ttsQueue.clear();
+        }
+    }
+
+    public void sayThis(final String s)
+    {
+        if(!_activeConfiguration.getEnableSpokenPrompts())
+        {
+            return;
+        }
+
+        if(!Utils.isEmptyString(s))
+        {
+            Globals.getLogger().d(TAG, "sayThis: '" + s + "'");
+
+            if (_tts != null)
+            {
+                boolean proceed = true;
+                if(!Utils.isEmptyString(_lastSpokenText))
+                {
+                    if(_lastSpokenText.equalsIgnoreCase(s))
+                    {
+                        if(Utils.nowMs() - _lastSpokenTs < REPETITIVE_SPOKEN_TEXT_MS)
+                        {
+                            proceed = false;
+                        }
+                    }
+                }
+
+                if(proceed)
+                {
+                    if (_ttsIsReady) {
+                        int rc = _tts.speak(s, TextToSpeech.QUEUE_ADD, null, null);
+                        Globals.getLogger().d(TAG, "sayThis rc=" + rc);
+                        _lastSpokenText = s;
+                        _lastSpokenTs = Utils.nowMs();
+                    }
+                    else
+                    {
+                        if(_ttsQueue == null)
+                        {
+                            _ttsQueue = new ArrayList<>();
+                        }
+                        _ttsQueue.add(s);
+                    }
+                }
+            }
+            else
+            {
+                Globals.getLogger().d(TAG, "sayThis no _tts available");
+            }
+        }
     }
 }

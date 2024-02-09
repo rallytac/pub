@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.rallytac.engage.engine.Engine;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +52,15 @@ public class TalkerViewRecyclerAdapter extends RecyclerView.Adapter<TalkerViewRe
     {
         holder._item = _items.get(position);
 
-        holder._tvTalkerName.setText(holder._item.alias);
+        if(holder._item.rxMuted)
+        {
+            holder._tvTalkerName.setText(String.format(Globals.getContext().getString(R.string.talker_rx_muted_alias_fmt), holder._item.alias, holder._item.aliasSpecializer));
+        }
+        else
+        {
+            holder._tvTalkerName.setText(holder._item.alias);
+        }
+
         if((holder._item.rxFlags & 1) == 1)
         {
             holder._tvTalkerName.setBackgroundResource(R.drawable.ic_emergency_talker);

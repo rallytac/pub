@@ -7,6 +7,9 @@
         <SwitchPreference
             android:key="developer_useDevLicensingSystem"
             android:title="@string/set_developer_use_dev_licensing"/>
+        <SwitchPreference
+            android:key="developer_useLowLevelAndroidAudioInterface"
+            android:title="@string/set_developer_use_low_level_android_audio_interface"/>
     </PreferenceCategory>
 
     <PreferenceScreen android:title="@string/set_hdr_identity" android:summary="Manage your identity">
@@ -17,7 +20,7 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/set_identity_user_id"
-            android:hint="@string/set_identity_email_address"/>
+            android:hint="@string/set_identity_email_address_hint"/>
 
         <EditTextPreference
             android:key="user_displayName"
@@ -34,8 +37,18 @@
             android:maxLength="16"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Alias"
-            android:hint="@string/set_identity_transmission_alias"/>
+            android:title="@string/set_identity_user_alias"
+            android:hint="@string/set_identity_transmission_alias_hint"/>
+
+        <EditTextPreference
+            android:key="user_xmute_location_id"
+            android:inputType="number"
+            android:maxLines="1"
+            android:maxLength="4"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/set_identity_user_xmute_loc_id"
+            android:hint="@string/set_identity_user_xmute_loc_id_hint"/>
     </PreferenceScreen>
 
 
@@ -65,7 +78,7 @@
     </PreferenceScreen>
 
 
-    <PreferenceScreen android:title="@string/set_hdr_audio" android:summary="@string/set_summ_audio">
+    <PreferenceScreen android:title="@string/set_hdr_audio" android:summary="@string/set_summ_audio" android:key="prefscreen_audio">
         <PreferenceCategory android:title="@string/set_hdr_audio_input" android:key="prefcat_input_audio_device">
             <ListPreference
                 android:key="user_audio.inputDevice"
@@ -102,19 +115,6 @@
                 android:negativeButtonText="@null"
                 android:positiveButtonText="@null"
                 android:title="@string/set_audio_speaker_agc_level" />
-        </PreferenceCategory>
-
-        <PreferenceCategory android:title="@string/set_hdr_audio_bluetooth">
-            <SwitchPreference
-                android:key="user_bt.use"
-                android:title="@string/set_audio_use_bluetooth_device"/>
-
-            <ListPreference
-                android:key="user_bt.deviceAddress"
-                android:negativeButtonText="@null"
-                android:positiveButtonText="@null"
-                android:title="@string/set_audio_bluetooth_device"
-                android:dependency="user_bt.use"/>
         </PreferenceCategory>
 
         <PreferenceCategory android:title="@string/set_hdr_audio_advanced">
@@ -232,6 +232,10 @@
     <PreferenceScreen android:title="Experience" android:summary="@string/set_summ_experience">
         <PreferenceCategory android:title="@string/set_hdr_notifications">
             <SwitchPreference
+                android:key="user_notify.spoken_prompts"
+                android:title="@string/set_notifications_enable_spoken_prompts"/>
+
+            <SwitchPreference
                 android:key="user_notify.vibrations"
                 android:title="@string/set_notifications_enable_vibrations"/>
 
@@ -329,6 +333,26 @@
                 android:title="@string/set_user_interface_ptt_using_voice_control"/>
             -->
         </PreferenceCategory>
+    </PreferenceScreen>
+
+    <PreferenceScreen android:title="@string/set_hdr_bluetooth" android:summary="@string/set_summ_bluetooth">
+        <SwitchPreference
+            android:key="user_bt_microphone.use"
+            android:title="@string/set_use_bluetooth_microphone"
+            android:defaultValue="true"/>
+        <!--
+        <SwitchPreference
+            android:key="user_bt_ptt.use"
+            android:title="@string/set_use_bluetooth_ptt_device"
+            android:defaultValue="false" />
+
+        <ListPreference
+            android:key="user_bt_ptt.deviceAddress"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/set_bluetooth_ptt_device"
+            android:dependency="user_bt_ptt.use"/>
+        -->
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/set_hdr_location" android:summary="@string/set_summ_location">

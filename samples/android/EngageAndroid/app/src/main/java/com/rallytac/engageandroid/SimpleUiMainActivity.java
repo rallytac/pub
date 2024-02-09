@@ -16,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 
 import androidx.annotation.ColorInt;
@@ -37,6 +38,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.Settings;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
@@ -95,6 +97,7 @@ public class SimpleUiMainActivity
                                 EngageApplication.IGroupTimelineListener,
                                 EngageApplication.IPresenceChangeListener,
                                 EngageApplication.IGroupTextMessageListener,
+                                EngageApplication.IAudioDeviceListener,
                                 OnMapReadyCallback,
                                 GroupSelectorAdapter.SelectionClickListener
 {
@@ -281,6 +284,13 @@ public class SimpleUiMainActivity
                 }
             }
         });
+    }
+
+    @Override
+    public void onActiveAudioDeviceChanged(EngageApplication.ActiveAudioDevice dev)
+    {
+        Globals.getLogger().d(TAG, "onActiveAudioDeviceChanged: " + dev);
+        updateTopIcons();
     }
 
     @Override
@@ -570,8 +580,7 @@ public class SimpleUiMainActivity
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
-        forceSpeakerPhoneOn();
-
+        Globals.getEngageApplication().setMainActivity(this);
         _ac = Globals.getEngageApplication().getActiveConfiguration();
 
         _optAllowMultipleChannelView = Globals.getContext().getResources().getBoolean(R.bool.opt_allow_multiple_channel_view);
@@ -735,6 +744,7 @@ public class SimpleUiMainActivity
         updateLicensingBar();
         updateBiometricsIconDisplay();
         fixPttSize();
+        updateTopIcons();
     }
 
     @Override
@@ -1539,6 +1549,7 @@ public class SimpleUiMainActivity
         Globals.getEngageApplication().addGroupTimelineListener(this);
         Globals.getEngageApplication().addPresenceChangeListener(this);
         Globals.getEngageApplication().addGroupTextMessageListener(this);
+        Globals.getEngageApplication().addAudioDeviceListener(this);
     }
 
     private void unregisterFromApp()
@@ -1550,6 +1561,7 @@ public class SimpleUiMainActivity
         Globals.getEngageApplication().removeGroupTimelineListener(this);
         Globals.getEngageApplication().removePresenceChangeListener(this);
         Globals.getEngageApplication().removeGroupTextMessageListener(this);
+        Globals.getEngageApplication().removeAudioDeviceListener(this);
     }
 
     private void saveState(Bundle bundle)
@@ -2289,18 +2301,6 @@ public class SimpleUiMainActivity
         }
     }
 
-    private void forceSpeakerPhoneOn()
-    {
-        Globals.getEngageApplication().setSpeakerphoneOn();
-        updateTopIcons();
-    }
-
-    private void toggleSpeakerPhone()
-    {
-        Globals.getEngageApplication().toggleSpeakerPhone();
-        updateTopIcons();
-    }
-
     private void cancelTimers()
     {
         if(_waitForEngineStartedTimer != null)
@@ -2314,6 +2314,12 @@ public class SimpleUiMainActivity
     {
         Globals.getEngageApplication().restartEngine();
 
+        if(_waitForEngineStartedTimer != null)
+        {
+            _waitForEngineStartedTimer.cancel();
+            _waitForEngineStartedTimer = null;
+        }
+
         _waitForEngineStartedTimer = new Timer();
         _waitForEngineStartedTimer.scheduleAtFixedRate(new TimerTask()
         {
@@ -2324,6 +2330,7 @@ public class SimpleUiMainActivity
                 {
                     Globals.getLogger().i(TAG, "engine is running, proceeding");//NON-NLS
                     _waitForEngineStartedTimer.cancel();
+                    _waitForEngineStartedTimer = null;
 
                     runOnUiThread(new Runnable()
                     {
@@ -2708,7 +2715,10 @@ public class SimpleUiMainActivity
 
     public void onClickTeamIcon(View view)
     {
+        //runUnRunDevTestThread();
         showTeamList(null);
+        //Globals.getEngageApplication().toggleDayAndNightModeTheme();
+        //doRecreate();
     }
 
     public void onClickGroupsIcon(View view)
@@ -2733,9 +2743,93 @@ public class SimpleUiMainActivity
         doRecreate();
     }
 
-    public void onClickSpeakerphoneToggleIcon(View view)
+    public void onClickActiveAudioDeviceIcon(View view)
     {
-        toggleSpeakerPhone();
+        PopupMenu popup = new PopupMenu(this, view);
+
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.audio_device_selection_menu, popup.getMenu());
+
+        // Bluetooth headset may not even be available - hide it if not
+        popup.getMenu().findItem(R.id.action_active_audio_device_bluetooth_headset)
+                    .setVisible(Globals.getEngageApplication().isBluetoothHeadsetAvailable());
+
+        // Same with the wired headset
+        popup.getMenu().findItem(R.id.action_active_audio_device_wired_headset)
+                .setVisible(Globals.getEngageApplication().isWiredHeadsetAvailable());
+
+        if(Globals.getEngageApplication().isWiredHeadsetAvailable())
+        {
+            popup.getMenu().findItem(R.id.action_active_audio_device_handset).setVisible(false);
+        }
+        else
+        {
+            popup.getMenu().findItem(R.id.action_active_audio_device_wired_headset).setVisible(false);
+        }
+
+        AudioManager am = Globals.getEngageApplication().getAudioManager();
+        EngageApplication.ActiveAudioDevice aad = Globals.getEngageApplication().getActiveAudioDevice();
+        int menuId = -1;
+
+        if(aad == EngageApplication.ActiveAudioDevice.aadBluetooth)
+        {
+            menuId = R.id.action_active_audio_device_bluetooth_headset;
+        }
+        else if(aad == EngageApplication.ActiveAudioDevice.aadWired)
+        {
+            menuId = R.id.action_active_audio_device_wired_headset;
+        }
+        else if(aad == EngageApplication.ActiveAudioDevice.aadSpeakerphone)
+        {
+            menuId = R.id.action_active_audio_device_speakerphone;
+        }
+        else if(aad == EngageApplication.ActiveAudioDevice.aadHandset)
+        {
+            menuId = R.id.action_active_audio_device_handset;
+        }
+
+        if(menuId == -1)
+        {
+            return;
+        }
+
+        popup.getMenu().findItem(menuId).setChecked(true);
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                int id = item.getItemId();
+
+                AudioManager am = Globals.getEngageApplication().getAudioManager();
+
+                if (id == R.id.action_active_audio_device_handset)
+                {
+                    Globals.getEngageApplication().changeActiveAudioDeviceToHandset();
+                    return true;
+                }
+                else if (id == R.id.action_active_audio_device_speakerphone)
+                {
+                    Globals.getEngageApplication().changeActiveAudioDeviceToSpeakerPhone();
+                    return true;
+                }
+                else if (id == R.id.action_active_audio_device_wired_headset)
+                {
+                    Globals.getEngageApplication().changeActiveAudioDeviceToWiredHeadset();
+                    return true;
+                }
+                else if (id == R.id.action_active_audio_device_bluetooth_headset)
+                {
+                    Globals.getEngageApplication().changeActiveAudioDeviceToBluetoothHeadset();
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        popup.show();
     }
 
     public void onClickShareIcon(View view)
@@ -2836,18 +2930,32 @@ public class SimpleUiMainActivity
             {
                 ImageView iv;
 
-                iv = findViewById(R.id.ivSpeakerphoneToggle);
+                iv = findViewById(R.id.ivActiveAudioDevice);
                 if(iv != null)
                 {
                     try
                     {
-                        if(Globals.getEngageApplication().getAudioManager().isSpeakerphoneOn())
+                        EngageApplication.ActiveAudioDevice dev = Globals.getEngageApplication().getActiveAudioDevice();
+
+                        if(dev == EngageApplication.ActiveAudioDevice.aadBluetooth)
                         {
-                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_speakerphone_on));
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_audio_device_bluetooth_headset));
+                        }
+                        else if(dev == EngageApplication.ActiveAudioDevice.aadWired)
+                        {
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_audio_device_wired_headset));
+                        }
+                        else if(dev == EngageApplication.ActiveAudioDevice.aadHandset)
+                        {
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_audio_device_handset));
+                        }
+                        else if(dev == EngageApplication.ActiveAudioDevice.aadSpeakerphone)
+                        {
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_audio_device_speakerphone));
                         }
                         else
                         {
-                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_speakerphone_off));
+                            iv.setImageDrawable(ContextCompat.getDrawable(SimpleUiMainActivity.this, R.drawable.ic_audio_device_unknown));
                         }
                     }
                     catch (Exception e)
@@ -2864,6 +2972,7 @@ public class SimpleUiMainActivity
         ImageView iv;
 
         // Background
+        /*
         if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_ui_theme))
         {
             int color;
@@ -2880,6 +2989,7 @@ public class SimpleUiMainActivity
             View layMainRoot = findViewById(R.id.layMainRoot);
             layMainRoot.setBackgroundColor(color);
         }
+         */
 
         // Network
         iv = findViewById(R.id.ivNetwork);
@@ -3223,11 +3333,19 @@ public class SimpleUiMainActivity
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.main_activity_menu, popup.getMenu());
 
-        // Display the advanced menu options if necessary
+        // Set visibility for mission selection
+        popup.getMenu().findItem(R.id.action_missions)
+                .setVisible(Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_allow_main_menu_missions));
+
+        // Set visibility for security
+        popup.getMenu().findItem(R.id.action_security)
+                .setVisible(Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_allow_main_menu_security));
+
+        // Set visibility for json policy editing
         popup.getMenu().findItem(R.id.action_dev_json_policy_editor)
                 .setVisible(Globals.getSharedPreferences().getBoolean(PreferenceKeys.ADVANCED_MODE_ACTIVE, false));
 
-        // Display the developer menu options if necessary
+        // Set visibility for developer options
         popup.getMenu().findItem(R.id.action_dev_test)
                 .setVisible(Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false));
 
@@ -3506,7 +3624,7 @@ public class SimpleUiMainActivity
         return rc;
     }
 
-    private void switchToNextIdInList(boolean reverse)
+    public void switchToNextIdInList(boolean reverse)
     {
         String currentId = getIdOfSingleViewGroup();
         String newId = null;
@@ -3726,5 +3844,74 @@ public class SimpleUiMainActivity
 
         AlertDialog dlg = alertDialogBuilder.create();
         dlg.show();
+    }
+
+    private DevTestThread _dtt = null;
+    private boolean _dtt_onOff = false;
+
+    private void runUnRunDevTestThread()
+    {
+        if(_dtt == null)
+        {
+            _dtt = new DevTestThread();
+            _dtt.start();
+        }
+        else
+        {
+            _dtt.cancel();
+            _dtt = null;
+        }
+    }
+
+    private class DevTestThread extends Thread
+    {
+        private boolean _running = true;
+        private Object _wakeup = new Object();
+
+        public DevTestThread()
+        {
+        }
+
+        public void run()
+        {
+            long timeToWait = 0;
+
+
+            while(_running)
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        switchNetworking(_dtt_onOff);
+                        _dtt_onOff = !_dtt_onOff;
+                    }
+                });
+
+                timeToWait = 0;
+
+                try {
+                    Thread.sleep(2500);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+
+        public void cancel()
+        {
+            _running = false;
+            synchronized (_wakeup)
+            {
+                _wakeup.notifyAll();
+            }
+
+            try {
+                join();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

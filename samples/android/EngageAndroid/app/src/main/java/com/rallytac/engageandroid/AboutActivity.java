@@ -21,6 +21,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
@@ -221,6 +222,7 @@ public class AboutActivity extends
         });
 
         _etLicenseKey = findViewById(R.id.etLicenseKey);
+        _etLicenseKey.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         _etLicenseKey.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -241,6 +243,7 @@ public class AboutActivity extends
             }
         });
         _etActivationCode = findViewById(R.id.etActivationCode);
+        _etActivationCode.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         _etActivationCode.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -274,6 +277,17 @@ public class AboutActivity extends
         _etDeviceId.setText(s);
         _etLicenseKey.setText(_activeLd._ld._key);
         _etActivationCode.setText(_activeLd._ld._activationCode);
+
+        // Maybe lock down licensing
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_locked_licensing))
+        {
+            _etLicenseKey.setEnabled(false);
+            _etActivationCode.setEnabled(false);
+            _ivScanLicenseKey.setVisibility(View.GONE);
+            _ivLoadLicenseKey.setVisibility(View.GONE);
+            _ivScanActivationCode.setVisibility(View.GONE);
+            _ivWebFetchActivationCode.setVisibility(View.GONE);
+        }
 
         String versionInfo;
 
@@ -453,80 +467,99 @@ public class AboutActivity extends
 
         _tvLicensingMessage.setText(msg);
 
-        if(Utils.isEmptyString(_activeLd._ld._activationCode) || Utils.isEmptyString(_etActivationCode.getText().toString()))
+        if(Globals.getContext().getResources().getBoolean(R.bool.opt_locked_licensing))
         {
             findViewById(R.id.btnDeactivate).setVisibility(View.INVISIBLE);
-        }
-        else
-        {
-            findViewById(R.id.btnDeactivate).setVisibility(View.VISIBLE);
-        }
-
-        if(Utils.isEmptyString(_etLicenseKey.getText().toString()))
-        {
             findViewById(R.id.ivShareLicenseKey).setVisibility(View.GONE);
-        }
-        else
-        {
-            findViewById(R.id.ivShareLicenseKey).setVisibility(View.VISIBLE);
-        }
 
-        String key = _etLicenseKey.getText().toString();
-        String ac = _etActivationCode.getText().toString();
-
-        if(Utils.isEmptyString(ac))
-        {
-            _etLicenseKey.setEnabled(true);
-            _ivScanLicenseKey.setVisibility(View.VISIBLE);
-            _ivLoadLicenseKey.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            _etLicenseKey.setEnabled(false);
             _ivScanLicenseKey.setVisibility(View.GONE);
             _ivLoadLicenseKey.setVisibility(View.GONE);
-        }
-
-        if(Utils.isEmptyString(key))
-        {
+            
             _etActivationCode.setEnabled(false);
             _ivScanActivationCode.setVisibility(View.GONE);
             _ivWebFetchActivationCode.setVisibility(View.GONE);
-        }
-        else
-        {
-            _etActivationCode.setEnabled(true);
-            _ivScanActivationCode.setVisibility(View.VISIBLE);
-            _ivWebFetchActivationCode.setVisibility(View.VISIBLE);
-        }
 
-        if( (_activeLd._ld._status == Engine.LicensingStatusCode.requiresActivation) ||
-            (_newLd._ld._status == Engine.LicensingStatusCode.requiresActivation) )
-        {
-            findViewById(R.id.layActivationSection).setVisibility(View.VISIBLE);
-        }
-        else
-        {
             findViewById(R.id.layActivationSection).setVisibility(View.GONE);
+            findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
+            findViewById(R.id.layEnterpriseIdSection).setVisibility(View.GONE);
         }
-
-        if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_enterprise_id))
+        else
         {
-            findViewById(R.id.layEnterpriseIdSection).setVisibility(View.VISIBLE);
-
-            String ei = _etEnterpriseId.getText().toString();
-            if(!Utils.isEmptyString(ei))
+            if(Utils.isEmptyString(_activeLd._ld._activationCode) || Utils.isEmptyString(_etActivationCode.getText().toString()))
             {
-                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.VISIBLE);
+                findViewById(R.id.btnDeactivate).setVisibility(View.INVISIBLE);
             }
             else
             {
-                findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
+                findViewById(R.id.btnDeactivate).setVisibility(View.VISIBLE);
             }
-        }
-        else
-        {
-            findViewById(R.id.layEnterpriseIdSection).setVisibility(View.GONE);
+
+            if(Utils.isEmptyString(_etLicenseKey.getText().toString()))
+            {
+                findViewById(R.id.ivShareLicenseKey).setVisibility(View.GONE);
+            }
+            else
+            {
+                findViewById(R.id.ivShareLicenseKey).setVisibility(View.VISIBLE);
+            }
+
+            String key = _etLicenseKey.getText().toString();
+            String ac = _etActivationCode.getText().toString();
+
+            if(Utils.isEmptyString(ac))
+            {
+                _etLicenseKey.setEnabled(true);
+                _ivScanLicenseKey.setVisibility(View.VISIBLE);
+                _ivLoadLicenseKey.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                _etLicenseKey.setEnabled(false);
+                _ivScanLicenseKey.setVisibility(View.GONE);
+                _ivLoadLicenseKey.setVisibility(View.GONE);
+            }
+
+            if(Utils.isEmptyString(key))
+            {
+                _etActivationCode.setEnabled(false);
+                _ivScanActivationCode.setVisibility(View.GONE);
+                _ivWebFetchActivationCode.setVisibility(View.GONE);
+            }
+            else
+            {
+                _etActivationCode.setEnabled(true);
+                _ivScanActivationCode.setVisibility(View.VISIBLE);
+                _ivWebFetchActivationCode.setVisibility(View.VISIBLE);
+            }
+
+            if( (_activeLd._ld._status == Engine.LicensingStatusCode.requiresActivation) ||
+                (_newLd._ld._status == Engine.LicensingStatusCode.requiresActivation) )
+            {
+                findViewById(R.id.layActivationSection).setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                findViewById(R.id.layActivationSection).setVisibility(View.GONE);
+            }
+
+            if(Globals.getContext().getResources().getBoolean(R.bool.opt_supports_enterprise_id))
+            {
+                findViewById(R.id.layEnterpriseIdSection).setVisibility(View.VISIBLE);
+
+                String ei = _etEnterpriseId.getText().toString();
+                if(!Utils.isEmptyString(ei))
+                {
+                    findViewById(R.id.ivShareEnterpriseId).setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    findViewById(R.id.ivShareEnterpriseId).setVisibility(View.GONE);
+                }
+            }
+            else
+            {
+                findViewById(R.id.layEnterpriseIdSection).setVisibility(View.GONE);
+            }
         }
     }
 
@@ -869,6 +902,16 @@ public class AboutActivity extends
         sb.append(String.format(getString(R.string.mi_device_build_time), Long.toString(Build.TIME)));
         sb.append(String.format(getString(R.string.mi_device_version_release), Build.VERSION.RELEASE));
         sb.append(String.format(getString(R.string.mi_device_sdk_int), Build.VERSION.SDK_INT));
+
+        sb.append(getString(R.string.mi_hdr_screen));
+        sb.append(String.format(getString(R.string.mi_screen_density), dm.density));
+        sb.append(String.format(getString(R.string.mi_screen_height), dm.heightPixels));
+        sb.append(String.format(getString(R.string.mi_screen_width), dm.widthPixels));
+        sb.append(String.format(getString(R.string.mi_screen_density), dm.density));
+        sb.append(String.format(getString(R.string.mi_screen_scaled_density), dm.scaledDensity));
+        sb.append(String.format(getString(R.string.mi_screen_density_dpi), dm.densityDpi));
+        sb.append(String.format(getString(R.string.mi_screen_xdpi), dm.xdpi));
+        sb.append(String.format(getString(R.string.mi_screen_ydpi), dm.ydpi));
 
         return sb.toString();
     }

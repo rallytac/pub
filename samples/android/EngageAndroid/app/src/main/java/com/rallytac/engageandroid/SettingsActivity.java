@@ -64,6 +64,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                     || key.startsWith("user_")//NON-NLS
                     || key.startsWith("network_")//NON-NLS
                     || key.startsWith("mission_") //NON-NLS
+                    || key.startsWith("developer_") //NON-NLS
                     || key.startsWith("ui."))//NON-NLS
                 {
                     Globals.getLogger().i(TAG, "mission parameters changed");//NON-NLS
@@ -248,7 +249,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             PreferenceCategory pc = (PreferenceCategory) this.findPreference(cat);
             if(pc != null)
             {
-                Preference p = this.findPreference(PreferenceKeys.USER_UI_PTT_LATCHING);
+                Preference p = this.findPreference(nm);
                 if(p != null)
                 {
                     pc.removePreference(p);
@@ -266,6 +267,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false))
             {
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_USE_DEV_LICENSING_SYSTEM));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_USE_LOW_LEVEL_ANDROID_AUDIO_INTERFACE));
             }
             else
             {
@@ -275,6 +277,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_ID));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_DISPLAY_NAME));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_ALIAS_ID));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_CROSS_MUTE_LOCATION_ID));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_TONE_LEVEL_PTT));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_TONE_LEVEL_NOTIFICATION));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_TONE_LEVEL_ERROR));
@@ -288,6 +291,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_NETWORK_ERROR));
             //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_THEME_DARK_MODE));
 
+            //hidePreferenceCategory("prefscreen_audio");
+            /*
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_DENOISE));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_MICROPHONE_AGC_LEVEL));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_SPEAKER_AGC_LEVEL));
@@ -308,9 +313,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_INPUT_PRESET));
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_AUDIO_ENGINE_INTERNAL_AUDIO));
+            */
 
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_VIBRATIONS));
             bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME));
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_NOTIFY_SPOKEN_PROMPTS));
 
             // Show/hide PTT latching depending on flavor option
             if(Globals.getContext().getResources().getBoolean(R.bool.opt_ptt_latching))
@@ -410,6 +417,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity
 
 
             // Audio devices
+            /*
             {
 
                 String audioDeviceArrayJsonString = Globals.getEngageApplication().getEngine().engageGetAudioDevices();
@@ -488,7 +496,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 }
             }
 
-
             // Bluetooth audio device
             {
                 final ListPreference listPreference = (ListPreference) findPreference(PreferenceKeys.USER_BT_DEVICE_ADDRESS);
@@ -506,6 +513,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity
                 listPreference.setEntryValues(entryValues);
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_BT_DEVICE_ADDRESS));
             }
+            */
+
+            bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_BT_MICROPHONE_USE));
+            //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_BT_PTT_USE));
+            //bindPreferenceSummaryToValue(findPreference(PreferenceKeys.USER_BT_PTT_ADDRESS));
 
             if(!Globals.getContext().getResources().getBoolean(R.bool.opt_experimental_general_enabled))
             {

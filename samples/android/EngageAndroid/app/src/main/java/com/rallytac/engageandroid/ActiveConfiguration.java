@@ -140,11 +140,12 @@ public class ActiveConfiguration
     private boolean _notifyPttEveryTx;
     private boolean _pttLatching;
     private boolean _pttVoiceControl;
+    private boolean _enableSpokenPrompts;
 
     private boolean _enforceTransmitSmoothing;
     private boolean _allowDtx;
 
-    private boolean _discoverSsdpAssets;
+    private boolean _discoverMagellanAssets;
     private boolean _discoverTrelliswareAssets;
 
     private boolean _discoverCistechGv1Assets;
@@ -160,6 +161,8 @@ public class ActiveConfiguration
 
     private LocationConfiguration _locationConfiguration = new LocationConfiguration();
     private MulticastFailoverConfiguration _multicastFailoverConfiguration = new MulticastFailoverConfiguration();
+
+    private int _crossMuteLocationId = 0;
 
     public ArrayList<GroupDescriptor> updateGroupMemberPresenceForNode(PresenceDescriptor pd)
     {
@@ -264,14 +267,14 @@ public class ActiveConfiguration
         _enforceTransmitSmoothing = enforce;
     }
 
-    public boolean getDiscoverSsdpAssets()
+    public boolean getDiscoverMagellanAssets()
     {
-        return _discoverSsdpAssets;
+        return _discoverMagellanAssets;
     }
 
-    public void setDiscoverSsdpAssets(boolean discover)
+    public void setDiscoverMagellanAssets(boolean discover)
     {
-        _discoverSsdpAssets = discover;
+        _discoverMagellanAssets = discover;
     }
 
     public boolean getDiscoverCistechGv1Assets()
@@ -309,6 +312,18 @@ public class ActiveConfiguration
         _discoverTrelliswareAssets = discover;
     }
 
+    public boolean getEnableSpokenPrompts()
+    {
+        return _enableSpokenPrompts;
+    }
+
+    public void setEnableSpokenPrompts(boolean enable)
+    {
+        _enableSpokenPrompts = enable;
+
+        Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.USER_NOTIFY_SPOKEN_PROMPTS, _enableSpokenPrompts);
+        Globals.getSharedPreferencesEditor().apply();
+    }
     public boolean getEnableVibrations()
     {
         return _enableVibrations;
@@ -406,6 +421,19 @@ public class ActiveConfiguration
     public void setAudioOutputDeviceId(int deviceId)
     {
         _audioOutputDeviceId = deviceId;
+    }
+
+    public int getCrossMuteLocationId()
+    {
+        return _crossMuteLocationId;
+    }
+
+    public void setCrossMuteLocationId(int id)
+    {
+        _crossMuteLocationId = id;
+
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_CROSS_MUTE_LOCATION_ID, Integer.toString(_crossMuteLocationId));
+        Globals.getSharedPreferencesEditor().apply();
     }
 
     public int getMicrophoneAgcLevel()
@@ -1194,6 +1222,16 @@ public class ActiveConfiguration
                         androidAudio = new JSONObject();
                     }
 
+                    if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_USE_LOW_LEVEL_ANDROID_AUDIO_INTERFACE, false))
+                    {
+                        androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.engineMode, Engine.AndroidAudioEngineMode.lowlevelApi.toInt());
+                    }
+                    else
+                    {
+                        androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.engineMode, Engine.AndroidAudioEngineMode.highlevelApi.toInt());
+                    }
+
+                    /*
                     androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.api,
                             Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_ANDROID_AUDIO_API,
                                     Integer.toString(Constants.DEF_ANDROID_AUDIO_API))));
@@ -1223,6 +1261,7 @@ public class ActiveConfiguration
                     {
                         androidAudio.put(Engine.JsonFields.EnginePolicy.Audio.Android.sessionId, sessionId);
                     }
+                    */
 
                     audio.put(Engine.JsonFields.EnginePolicy.Audio.Android.objectName, androidAudio);
                 }
@@ -1333,83 +1372,28 @@ public class ActiveConfiguration
                 rc.put(Engine.JsonFields.EnginePolicy.Networking.objectName, networking);
             }
 
-            // Discovery --- EXPERIMENTAL !!!
-            if(_discoverSsdpAssets
-                    || _discoverCistechGv1Assets
-                    || _discoverTrelliswareAssets)
+            // Discovery
+            JSONObject discovery = rc.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.objectName);
+            if(discovery == null)
             {
-                JSONObject discovery = rc.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.objectName);
-                if(discovery == null)
-                {
-                    discovery = new JSONObject();
-                }
-
-                // SSDP
-                if(_discoverSsdpAssets)
-                {
-                    JSONObject ssdp = discovery.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.Ssdp.objectName);
-                    if(ssdp == null)
-                    {
-                        ssdp = new JSONObject();
-                    }
-
-                    ssdp.put(Engine.JsonFields.EnginePolicy.Discovery.Ssdp.enabled, true);
-                    ssdp.put(Engine.JsonFields.EnginePolicy.Discovery.Ssdp.ageTimeoutMs, 30000);
-
-                    // Address
-                    {
-                        JSONObject address = new JSONObject();
-
-                        address.put(Engine.JsonFields.Address.address, "255.255.255.255");
-                        address.put(Engine.JsonFields.Address.port, 1900);
-
-                        ssdp.put(Engine.JsonFields.Address.objectName, address);
-                    }
-
-                    discovery.put(Engine.JsonFields.EnginePolicy.Discovery.Ssdp.objectName, ssdp);
-                }
-
-                // Cistech
-                if(_discoverCistechGv1Assets)
-                {
-                    JSONObject cistech = discovery.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.Cistech.objectName);
-                    if(cistech == null)
-                    {
-                        cistech = new JSONObject();
-                    }
-
-                    cistech.put(Engine.JsonFields.EnginePolicy.Discovery.Cistech.enabled, true);
-                    cistech.put(Engine.JsonFields.EnginePolicy.Discovery.Cistech.ageTimeoutMs, _cistechGv1DiscoveryTimeoutSecs * 1000);
-
-                    // Address
-                    {
-                        JSONObject address = new JSONObject();
-
-                        address.put(Engine.JsonFields.Address.address, _cistechGv1DiscoveryAddress);
-                        address.put(Engine.JsonFields.Address.port, _cistechGv1DiscoveryPort);
-
-                        cistech.put(Engine.JsonFields.Address.objectName, address);
-                    }
-
-                    discovery.put(Engine.JsonFields.EnginePolicy.Discovery.Cistech.objectName, cistech);
-                }
-
-                // Trellisware
-                if(_discoverTrelliswareAssets)
-                {
-                    JSONObject trellisware = discovery.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.Trellisware.objectName);
-                    if(trellisware == null)
-                    {
-                        trellisware = new JSONObject();
-                    }
-
-                    trellisware.put(Engine.JsonFields.EnginePolicy.Discovery.Trellisware.enabled, true);
-
-                    discovery.put(Engine.JsonFields.EnginePolicy.Discovery.Trellisware.objectName, trellisware);
-                }
-
-                rc.put(Engine.JsonFields.EnginePolicy.Discovery.objectName, discovery);
+                discovery = new JSONObject();
             }
+
+            if(_discoverMagellanAssets)
+            {
+
+                JSONObject magellan = discovery.optJSONObject(Engine.JsonFields.EnginePolicy.Discovery.Magellan.objectName);
+                if(magellan == null)
+                {
+                    magellan = new JSONObject();
+                }
+
+                magellan.put(Engine.JsonFields.EnginePolicy.Discovery.Magellan.enabled, true);
+
+                discovery.put(Engine.JsonFields.EnginePolicy.Discovery.Magellan.objectName, magellan);
+            }
+
+            rc.put(Engine.JsonFields.EnginePolicy.Discovery.objectName, discovery);
         }
         catch (Exception e)
         {

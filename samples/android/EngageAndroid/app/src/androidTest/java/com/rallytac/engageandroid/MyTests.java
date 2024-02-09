@@ -5,6 +5,7 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
@@ -179,5 +180,45 @@ public class MyTests {
                 e.printStackTrace();
             }
         }
-    }    
+    }
+
+    @Test
+    public void toggleMulticastAndRp() {
+        Random rnd = new Random();
+        int pauseBetweenLoops;
+        int loopCount = 5000;
+
+        long loops = 0;
+
+        Log.d("myTests:toggleMulticastAndRp", "starting toggleMulticastAndRp hammer for " + loopCount + " iterations");
+
+        while (loops < loopCount) {
+            try {
+                onView(withId(R.id.ivNetwork)).check(matches(isCompletelyDisplayed()));
+
+                pauseBetweenLoops = 100 + rnd.nextInt(20);
+
+                Log.d("myTests:toggleMulticastAndRp", "toggle!");
+                onView(withId(R.id.ivNetwork)).perform(touchDownAndUp(500));
+                onView(withId(16908313)).check(matches(isDisplayed())).perform(touchDownAndUp(250));
+                loops++;
+                if (loops % 10 == 0)
+                {
+                    Log.d("myTests:toggleMulticastAndRp", loops + " loops out of " + loopCount);
+                }
+
+                //hammerPtt(10);
+            } catch (Exception e) {
+                pauseBetweenLoops = 100;
+                Log.e("myTests:toggleMulticastAndRp", e.getMessage());
+            }
+
+            try {
+                Log.d("myTests:toggleMulticastAndRp", "sleeping for " + pauseBetweenLoops + " ms");
+                Thread.sleep(pauseBetweenLoops);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

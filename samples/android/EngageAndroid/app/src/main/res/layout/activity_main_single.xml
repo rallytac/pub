@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorMainDark"
+    android:background="@color/colorMainBackground"
     tools:context=".SimpleUiMainActivity">
 
     <TextView
@@ -26,7 +26,7 @@
         android:onClick="onClickNotificationBar"
         android:layout_width="0dp"
         android:layout_height="@dimen/bar_height"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"
@@ -98,12 +98,12 @@
             android:layout_weight="1"/>
 
         <ImageView
-            android:id="@+id/ivSpeakerphoneToggle"
-            android:onClick="onClickSpeakerphoneToggleIcon"
+            android:id="@+id/ivActiveAudioDevice"
+            android:onClick="onClickActiveAudioDeviceIcon"
             android:layout_width="@dimen/topicons_hw"
             android:layout_height="@dimen/topicons_hw"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_group_list"
+            android:visibility="visible"
+            app:srcCompat="@drawable/ic_audio_device_handset"
             android:layout_weight="1"/>
 
         <ImageView
@@ -111,9 +111,11 @@
             android:onClick="onClickMenuIcon"
             android:layout_width="@dimen/topicons_hw"
             android:layout_height="@dimen/topicons_hw"
-            app:srcCompat="@drawable/ic_main_screen_menu"
+            app:srcCompat="@drawable/ic_app_logo"
             android:layout_weight="1"/>
     </LinearLayout>
+
+    <!-- app:srcCompat="@drawable/ic_app_logo" -->
 
     <fragment
         android:id="@+id/card1"
@@ -132,7 +134,7 @@
         android:onClick="onClickLicensingBar"
         android:layout_width="0dp"
         android:layout_height="@dimen/bar_height"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"

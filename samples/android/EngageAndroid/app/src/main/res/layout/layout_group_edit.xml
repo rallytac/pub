@@ -11,6 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/ivToggleGroupIdVisibility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/etGroupName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/etGroupName"
+            app:srcCompat="@drawable/ic_outline_info_24px" />
+
         <EditText
             android:id="@+id/etGroupName"
             android:layout_width="0dp"
@@ -21,9 +31,24 @@
             android:ems="10"
             android:hint="@string/name"
             android:inputType="textPersonName"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivToggleGroupIdVisibility"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/etGroupId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:hint="@string/id"
+            android:inputType="text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etGroupName"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvAddressing"
@@ -35,7 +60,7 @@
             android:textColor="@color/colorAccent"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etGroupName" />
+            app:layout_constraintTop_toBottomOf="@+id/etGroupId" />
 
         <EditText
             android:id="@+id/etRxAddress"
@@ -167,18 +192,32 @@
             app:layout_constraintTop_toBottomOf="@+id/etTxAddress" />
 
         <TextView
-            android:id="@+id/tvCryptoSignature"
+            android:id="@+id/tvCryptoLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="left"
+            android:text="Signature: "
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvCryptoSignature"
+            app:layout_constraintBottom_toBottomOf="@+id/tvCryptoSignature"/>
+
+        <TextView
+            android:id="@+id/tvCryptoSignature"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:gravity="center"
             android:text="@string/placeholder"
-            android:textStyle="bold"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvCryptoLabel"
             app:layout_constraintTop_toBottomOf="@+id/btnRegen" />
+
 
         <Switch
             android:id="@+id/swDisableHeaderExtensions"

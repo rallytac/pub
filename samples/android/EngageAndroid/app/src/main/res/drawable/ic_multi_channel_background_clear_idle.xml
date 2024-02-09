@@ -5,14 +5,11 @@
     android:viewportHeight="264">
   <path
       android:pathData="M0,0h1440v264h-1440z"
-      android:strokeWidth="1"
-      android:fillColor="#353535"
+      android:fillColor="@color/colorChannelCardClearBackground"
       android:fillType="evenOdd"
       android:strokeColor="#00000000"/>
   <path
       android:pathData="M0,0h44v264h-44z"
-      android:strokeWidth="1"
-      android:fillColor="#AAAAAA"
-      android:fillType="evenOdd"
-      android:strokeColor="#00000000"/>
+      android:fillColor="@color/colorChannelCardClearOutline"
+      android:fillType="evenOdd"/>
 </vector>

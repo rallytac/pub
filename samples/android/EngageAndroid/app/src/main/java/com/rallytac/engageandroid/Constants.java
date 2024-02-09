@@ -5,8 +5,6 @@
 
 package com.rallytac.engageandroid;
 
-import com.rallytac.engage.engine.Engine;
-
 public class Constants
 {
     public static String KEY_LAUNCH_ACTIVITY = "Launcher.LAUNCH_ACTIVITY";//NON-NLS
@@ -62,7 +60,7 @@ public class Constants
     public final static String DEF_USER_ALIAS_ID = "";
 
     public final static boolean DEF_LOCATION_ENABLED = true;
-    public final static int DEF_LOCATION_ACCURACY = LocationManager.PRIORITY_BALANCED_POWER_ACCURACY;
+    public final static int DEF_LOCATION_ACCURACY = MyLocationManager.PRIORITY_BALANCED_POWER_ACCURACY;
     public final static int DEF_LOCATION_INTERVAL_SECS = 60;
     public final static int DEF_LOCATION_MIN_INTERVAL_SECS = 60;
     public final static float DEF_LOCATION_MIN_DISPLACEMENT = (float)5.0;
@@ -84,6 +82,7 @@ public class Constants
     public final static boolean DEF_NOTIFY_NETWORK_ERROR = true;
     public final static boolean DEF_NOTIFY_VIBRATIONS = true;
     public final static boolean DEF_NOTIFY_PTT_EVERY_TIME = false;
+    public final static boolean DEF_NOTIFY_SPOKEN_PROMPTS = false;
 
     public final static int GROUP_HEALTH_CHECK_TIMER_INITIAL_DELAY_MS = 2000;
     public final static int GROUP_HEALTH_CHECK_TIMER_INTERVAL_MS = 2000;
@@ -165,4 +164,6 @@ public class Constants
     public final static int KEYCODE_PTT_MODE_NONE = 0;
     public final static int KEYCODE_PTT_MODE_PUSH_ON_AT_FIRST_REPEAT_RELEASE_OFF = 1;
     public final static int KEYCODE_PTT_MODE_PUSH_ON_PUSH_OFF = 2;
+
+    public final static int DEFAULT_CROSS_MUTE_LOCATION_ID = 0;
 }

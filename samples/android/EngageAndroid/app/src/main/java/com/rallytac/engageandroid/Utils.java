@@ -22,12 +22,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -594,7 +596,7 @@ public class Utils
                 // !!!!!!!!!! BEGIN EXPERIMENTAL !!!!!!!!!!
                 rc.setEnforceTransmitSmoothing(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_TX_SMOOTHING, true));
                 rc.setAllowDtx(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ALLOW_DTX, true));
-                rc.setDiscoverSsdpAssets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_SSDP_DISCOVERY, false));
+                rc.setDiscoverMagellanAssets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_SSDP_DISCOVERY, false));
                 rc.setDiscoverTrelliswareAssets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_TRELLISWARE_DISCOVERY, false));
 
                 rc.setDiscoverCistechGv1Assets(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_CISTECH_GV1_DISCOVERY, false));
@@ -614,6 +616,7 @@ public class Utils
                 rc.setNotifyOnNetworkError(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_NOTIFY_NETWORK_ERROR, Constants.DEF_NOTIFY_NETWORK_ERROR));
                 rc.setEnableVibrations(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_NOTIFY_VIBRATIONS, Constants.DEF_NOTIFY_VIBRATIONS));
                 rc.setNotifyPttEveryTime(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_NOTIFY_PTT_EVERY_TIME, Constants.DEF_NOTIFY_PTT_EVERY_TIME));
+                rc.setEnableSpokenPrompts(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_NOTIFY_SPOKEN_PROMPTS, Constants.DEF_NOTIFY_SPOKEN_PROMPTS));
 
                 rc.setPttToneNotificationLevel(Float.parseFloat(Globals.getSharedPreferences().getString(PreferenceKeys.USER_TONE_LEVEL_PTT, Float.toString(Constants.DEF_PTT_TONE_LEVEL))));
                 rc.setErrorToneNotificationLevel(Float.parseFloat(Globals.getSharedPreferences().getString(PreferenceKeys.USER_TONE_LEVEL_ERROR, Float.toString(Constants.DEF_ERROR_TONE_LEVEL))));
@@ -629,7 +632,7 @@ public class Utils
                 rc.setUserDisplayName(Globals.getSharedPreferences().getString(PreferenceKeys.USER_DISPLAY_NAME, Constants.DEF_USER_DISPLAY_NAME));
                 rc.setUserAlias(Globals.getSharedPreferences().getString(PreferenceKeys.USER_ALIAS_ID, Constants.DEF_USER_ALIAS_ID));
 
-                rc.setPttLatching(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Constants.DEF_USER_UI_PTT_LATCHING));
+                rc.setPttLatching(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_UI_PTT_LATCHING, Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_ptt_latching)));
                 rc.setPttVoiceControl(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_UI_PTT_VOICE_CONTROL, Constants.DEF_USER_UI_PTT_VOICE_CONTROL));
 
                 rc.setAudioInputDeviceId(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_INPUT_DEVICE, Integer.toString(Constants.INVALID_AUDIO_DEVICE_ID))));
@@ -639,6 +642,8 @@ public class Utils
                 {
                     rc.setUserAlias(generateUserAlias(Constants.DEF_USER_ALIAS_ID));
                 }
+
+                rc.setCrossMuteLocationId(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_CROSS_MUTE_LOCATION_ID, Integer.toString(Constants.DEFAULT_CROSS_MUTE_LOCATION_ID))));
 
                 // Location
                 ActiveConfiguration.LocationConfiguration lc = new ActiveConfiguration.LocationConfiguration();
@@ -923,6 +928,17 @@ public class Utils
         */
 
         showShortPopupMsg(ctx, msg);
+    }
+
+    public static void showShortSnackMsg(Activity activity, String msg)
+    {
+        showShortSnackMsg(activity.findViewById(android.R.id.content).getRootView(), msg);
+    }
+
+    public static void showShortSnackMsg(View v, String msg)
+    {
+        Snackbar sb = Snackbar.make(v, msg, Snackbar.LENGTH_SHORT);
+        sb.show();
     }
 
     private static void showPopupMsg(Context ctx, String msg, int len)
@@ -1412,5 +1428,21 @@ public class Utils
     public static String getInboundMissionPassword()
     {
         return Globals.getSharedPreferences().getString(PreferenceKeys.INCOMING_MISSION_PASSWORD, null);
+    }
+
+    public static void logIntentExtras(String msg, Intent intent)
+    {
+        Bundle bundle = intent.getExtras();
+        if(bundle != null)
+        {
+            for (String key : bundle.keySet())
+            {
+                Log.d(TAG, msg + key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+            }
+        }
+        else
+        {
+            Log.d(TAG, msg + " : --no extras in intent--");
+        }
     }
 }

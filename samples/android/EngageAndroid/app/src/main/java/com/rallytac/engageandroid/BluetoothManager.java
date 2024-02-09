@@ -222,7 +222,7 @@ public class BluetoothManager
         }
     }
 
-    public static void enableBluetoothRecording(Context ctx)
+    public static void xxx_enableBluetoothRecording(Context ctx)
     {
         AudioManager audioManager = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
 
@@ -240,7 +240,7 @@ public class BluetoothManager
         }
     }
 
-    public static void disableBluetoothRecording(Context ctx)
+    public static void xxx_disableBluetoothRecording(Context ctx)
     {
         AudioManager audioManager = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
 
@@ -258,7 +258,7 @@ public class BluetoothManager
         }
     }
 
-    public static ArrayList<BluetoothDevice> getDevices()
+    public static ArrayList<BluetoothDevice> xxx_getDevices()
     {
         ArrayList<BluetoothDevice> rc = new ArrayList<>();
 
@@ -280,6 +280,7 @@ public class BluetoothManager
         return rc;
     }
 
+    /*
     public static String getAddressOfDeviceByName(String nm)
     {
         String rc = null;
@@ -296,6 +297,7 @@ public class BluetoothManager
 
         return rc;
     }
+    */
 
     private void connectToBluetoothDevice(String address)
     {
