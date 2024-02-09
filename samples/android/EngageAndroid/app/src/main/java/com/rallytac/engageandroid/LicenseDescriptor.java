@@ -49,7 +49,8 @@ public class LicenseDescriptor
 
     public boolean isValid()
     {
-        return (_theType != Engine.LicenseType.unknown );
+        // It's valid if it's a known type *AND* it's status is ok!
+        return (_theType != Engine.LicenseType.unknown && _status == Engine.LicensingStatusCode.ok);
     }
 
     public boolean equals(LicenseDescriptor ld)

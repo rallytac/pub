@@ -52,7 +52,7 @@
     <dimen name="small_card_anchor_end">8dp</dimen>
     <dimen name="small_card_anchor_top">16dp</dimen>
     <dimen name="small_card_anchor_bottom">8dp</dimen>
-    <dimen name="small_card_primary_text_size">14sp</dimen>
+    <dimen name="small_card_primary_text_size">18sp</dimen>
     <dimen name="small_card_secondary_text_size">10sp</dimen>
 
     <string name="show_priority_icon_on_large_card" translatable="false">@string/visibility_visible</string>

@@ -7,11 +7,23 @@
     <color name="colorSentMessage">#007777</color>
     <color name="colorReceivedMessage">#5f5f5f</color>
 
-    <color name="colorMainDark">#000000</color>
+    <color name="colorMainBackground">#000000</color>
     <color name="colorMainLight">#FFB1B1B1</color>
+
+    <color name="colorMainIcon">#0098CB</color>
+    <color name="colorMainIconDim">#0098CB</color>
+
+    <color name="colorPttActiveBackground">#880000</color>
+
+    <color name="colorChannelCardClearBackground">#353535</color>
+    <color name="colorChannelCardClearOutline">#AAAAAA</color>
+    <color name="colorChannelCardSecureBackground">#353535</color>
+    <color name="colorChannelCardSecureOutline">#CC2211</color>
 
     <color name="normalTalker">#5f5f5f</color>
     <color name="priorityTalker">#D3491E</color>
     <color name="emergencyTalker">#FF0000</color>
     <color name="white">#ffffff</color>
+
+    <color name="colorNotificationBars">#FFBB0000</color>
 </resources>

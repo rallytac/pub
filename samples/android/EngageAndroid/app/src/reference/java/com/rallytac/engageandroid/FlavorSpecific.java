@@ -17,4 +17,9 @@ public class FlavorSpecific
     {
         return json;
     }
+
+    public static String getHardwarePttKeyEventIntentFilterActionName()
+    {
+        return null;
+    }
 }

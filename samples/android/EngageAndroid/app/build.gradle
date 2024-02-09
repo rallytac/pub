@@ -33,8 +33,8 @@ android {
         applicationId "com.rallytac.example.package"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1285
-        versionName "1285"
+        versionCode 1326
+        versionName "1326"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         android.defaultConfig.vectorDrawables.useSupportLibrary = true
@@ -66,9 +66,11 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
+    
     // Engage Engine - change this to use a particular version
     def relType = 'release'
-    def engineVersion = '1.218.9056'
+    def engineVersion = '<version_number_here>'
 
     // From a binary repository such as Maven
     // implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'

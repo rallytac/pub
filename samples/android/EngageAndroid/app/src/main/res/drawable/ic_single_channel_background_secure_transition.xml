@@ -5,8 +5,11 @@
     android:viewportHeight="816">
   <path
       android:pathData="M0,0h1440v816h-1440z"
-      android:strokeWidth="1"
-      android:fillColor="#353535"
-      android:fillType="evenOdd"
-      android:strokeColor="#00000000"/>
+      android:fillColor="@color/colorChannelCardSecureBackground"
+      android:fillType="evenOdd"/>
+  <path
+      android:pathData="M10,10h1420v796h-1420z"
+      android:strokeWidth="40"
+      android:strokeColor="@color/colorChannelCardSecureOutline"
+      android:fillType="evenOdd"/>
 </vector>

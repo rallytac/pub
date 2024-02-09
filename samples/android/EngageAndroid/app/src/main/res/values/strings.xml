@@ -10,6 +10,7 @@
 
     <string-array name="certstore_passwords"></string-array>
 
+    <string name="app_intent_fixed_precede" translatable="false"></string>
     <string name="app_intent_ptt_on" translatable="false">PTT_ON</string>
     <string name="app_intent_ptt_off" translatable="false">PTT_OFF</string>
     <string name="app_intent_next_group" translatable="false">NEXT_GROUP</string>
@@ -766,9 +767,10 @@
     <string name="set_hdr_experimental">Experimental Features</string>
     <string name="set_hdr_biometrics">User Human Biometrics (Experimental)</string>
     <string name="set_developer_use_dev_licensing">Use development licensing system</string>
-    <string name="set_identity_email_address">Email address is recommended</string>
+    <string name="set_developer_use_low_level_android_audio_interface">Use low-level Android audio interface</string>
+    <string name="set_identity_email_address_hint">Email address is recommended</string>
     <string name="set_identity_display_name">Display Name</string>
-    <string name="set_identity_transmission_alias">Transmission alias</string>
+    <string name="set_identity_transmission_alias_hint">Transmission alias</string>
     <string name="set_connectivity_network_interface">Network Interface</string>
     <string name="set_connectivity_enable_multicast_failover">Enable Multicast Failover</string>
     <string name="set_connectivity_multicast_failover_threshold">Failover Threshold</string>
@@ -782,8 +784,9 @@
     <string name="set_audio_microphone_agc_level">Automatic Gain Control</string>
     <string name="set_audio_speaker_agc_level">Automatic Gain Control</string>
 
-    <string name="set_audio_use_bluetooth_device">Use a bluetooth device</string>
-    <string name="set_audio_bluetooth_device">Bluetooth device</string>
+    <string name="set_use_bluetooth_microphone">Use a Bluetooth headset microphone</string>
+    <string name="set_use_bluetooth_ptt_device">Use a Bluetooth device for PTT</string>
+    <string name="set_bluetooth_ptt_device">Bluetooth device</string>
     <string name="set_audio_input_device">Input device</string>
     <string name="set_audio_output_device">Output device</string>
     <string name="set_android_audio_api">Android Audio API</string>
@@ -799,6 +802,7 @@
     <string name="set_aec_speaker_tail_ms">Speaker Tail Milliseconds</string>
     <string name="set_aec_disable_stereo_output">Disable Stereo Output</string>
     <string name="set_notifications_enable_vibrations">Enable vibrations</string>
+    <string name="set_notifications_enable_spoken_prompts">Enable spoken prompts</string>
     <string name="set_notifications_when_members_join">When team members join</string>
     <string name="set_notifications_when_members_leave">When team members leave</string>
     <string name="set_notifications_when_receiving_new_audio">When receiving new audio</string>
@@ -836,6 +840,9 @@
     <string name="set_biometrics_fatigue_level">Fatigue Level</string>
     <string name="set_biometrics_task_effectiveness_level">Task Effectiveness Level</string>
     <string name="set_identity_user_id">User Id</string>
+    <string name="set_identity_user_alias">Alias</string>
+    <string name="set_identity_user_xmute_loc_id">Cross Mute Location ID</string>
+    <string name="set_identity_user_xmute_loc_id_hint">A number between 0 and 9999</string>
     <string name="set_location_update_frequency">Update Frequency</string>
     <string name="you_can_add_a_mission_manually_or_generate">You can add a mission manually or have it generated based on a word or phrase.</string>
     <string name="button_manual">Manual</string>
@@ -882,6 +889,14 @@
     <string name="mi_device_build_time">Build time: %1$s\n</string>
     <string name="mi_device_version_release">Version release: %1$s\n</string>
     <string name="mi_device_sdk_int">Version SDK: %1$d\n</string>
+    <string name="mi_hdr_screen">\n\nSCREEN:</string>
+    <string name="mi_screen_density">Density: %1$f\n</string>
+    <string name="mi_screen_width">Width: %1$d\n</string>
+    <string name="mi_screen_height">Height: %1$d\n</string>
+    <string name="mi_screen_scaled_density">Scaled Density: %1$f\n</string>
+    <string name="mi_screen_density_dpi">Density DPI: %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI: %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI: %1$f\n</string>
     <string name="hint_rx_address">rx address</string>
     <string name="hint_tx_address">tx address</string>
     <string name="hint_rx_port">rx port</string>
@@ -948,7 +963,7 @@
     <string name="set_hdr_audio_output">Output</string>
     <string name="set_summ_audio">Settings for audio</string>
     <string name="set_hdr_audio_advanced">Advanced</string>
-    <string name="set_hdr_audio_bluetooth">Bluetooth</string>
+    <string name="set_hdr_bluetooth">Bluetooth</string>
     <string name="set_summ_connectivity">Configure networking options</string>
     <string name="set_summ_experience">Notifications, tones, and visuals</string>
     <string name="set_summ_location">Configure location sharing</string>
@@ -958,7 +973,7 @@
     <string name="failed_to_load_the_mission_from_internal_database">Failed to load the mission from internal database</string>
     <string name="the_cert_store_required_cannot_be_found">The certificate store required by this mission cannot be found</string>
     <string name="failed_to_generate_the_mission">Failed to generate the mission</string>
-    <string name="failed_to_generate_the_mission_using_the_selected_certstore">Failed to generate the mission using selected the certificate store.</string>
+    <string name="failed_to_generate_the_mission_using_the_selected_certstore">Failed to generate the mission using the selected certificate store.</string>
     <string name="failed_to_install_the_generated_mission">Failed to install the generated mission</string>
     <string name="generate_using_passphrase">Generate using a passphrase</string>
     <string name="scan_qr_code">Scan a QR code</string>
@@ -989,4 +1004,16 @@
     <string name="clear_enterprise_id_title">Clear Enterprise ID</string>
     <string name="new_sample_mission_title">New Sample Mission</string>
     <string name="new_sample_mission_msg_fmt">A new sample mission named \'%1$s\' has been automatically created.</string>
+
+    <string name="active_audio_device_handset">The active audio device is the handset</string>
+    <string name="active_audio_device_speakerphone">The active audio device is the speakerphone</string>
+    <string name="active_audio_device_wired">The active audio device is the wired headset</string>
+    <string name="active_audio_device_bluetooth">The active audio device is the Bluetooth headset</string>
+    <string name="active_audio_device_unknown">The active audio device is the device default</string>
+    <string name="set_summ_bluetooth">Interacting with Bluetooth devices</string>
+
+    <string name="talker_rx_muted_alias_fmt">%1$s [MUTED@%2$d]</string>
+    <string name="sample_mission_created_title">Sample Mission Created</string>
+    <string name="sample_mission_created_msg">We couldn\'t find an existing mission to join; so we went ahead and created a sample mission so you can get going right away.\n\nTo create missions of your own, simply select \'Missions\' from the menu and go from there.\n\nPS. This sample mission will be the same for other users of this app so you can talk to those folks right away.</string>
+    <string name="id">id</string>
 </resources>

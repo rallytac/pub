@@ -1,99 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/generate_passphrase_explanation"/>
-
-    <TextView
-        android:id="@+id/txtPassphraseTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/passphrase_title"
-        android:layout_marginTop="16dp"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:passwordToggleContentDescription=""
-        app:passwordToggleDrawable="@drawable/ic_visibility"
-        app:passwordToggleEnabled="true">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassphrase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/passphrase"
-            android:inputType="textPassword"/>
-        <Switch
-            android:id="@+id/swUseEnterpriseId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/use_enterprise_id_for_enhanced_security" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Generated Mission"
-        android:layout_marginTop="16dp"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold" />
+    android:layout_height="match_parent">
 
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/number_of_audio_groups"/>
+            android:text="@string/generate_passphrase_explanation"/>
 
-        <Spinner
-            android:id="@+id/spnGroupCount"
+        <TextView
+            android:id="@+id/txtPassphraseTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/passphrase_title"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/audio_group_count" />
+            app:passwordToggleContentDescription=""
+            app:passwordToggleDrawable="@drawable/ic_visibility"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassphrase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/passphrase"
+                android:inputType="textPassword"/>
+            <Switch
+                android:id="@+id/swUseEnterpriseId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/use_enterprise_id_for_enhanced_security" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generated Mission"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/colorAccent"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/number_of_audio_groups"/>
+
+            <Spinner
+                android:id="@+id/spnGroupCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/audio_group_count" />
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/swFlavorSpecificMg01"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:padding="10dp"
+            android:text="@string/flavor_specific_mg_sw_01_text" />
+
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/mission_name_optional"
+            android:padding="10dp"
+            android:autofillHints=""
+            tools:targetApi="o" />
+
+        <EditText
+            android:id="@+id/etRallypoint"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/rallypoint_optional"
+            android:text="@string/default_rallypoint"
+            android:padding="10dp"
+            android:autofillHints=""
+            tools:targetApi="o" />
     </LinearLayout>
-
-    <Switch
-        android:id="@+id/swFlavorSpecificMg01"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:visibility="gone"
-        android:padding="10dp"
-        android:text="@string/flavor_specific_mg_sw_01_text" />
-
-    <EditText
-        android:id="@+id/etName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/mission_name_optional"
-        android:padding="10dp"
-        android:autofillHints=""
-        tools:targetApi="o" />
-
-    <EditText
-        android:id="@+id/etRallypoint"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/rallypoint_optional"
-        android:text="@string/default_rallypoint"
-        android:padding="10dp"
-        android:autofillHints=""
-        tools:targetApi="o" />
-</LinearLayout>
+</ScrollView>

@@ -7,9 +7,13 @@ package com.rallytac.engageandroid;
 
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Looper;
 import androidx.annotation.NonNull;
-import android.util.Log;
+
+import android.provider.Settings;
+import android.text.TextUtils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -19,9 +23,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-public class LocationManager
+import java.util.List;
+
+public class MyLocationManager
 {
-    private static String TAG = LocationManager.class.getSimpleName();
+    private static String TAG = MyLocationManager.class.getSimpleName();
 
     public interface ILocationUpdateNotifications
     {
@@ -44,12 +50,12 @@ public class LocationManager
     private int _intervalMs;
     private float _minDisplacement;
 
-    public LocationManager(Context ctx,
-                           ILocationUpdateNotifications notificationSubscriber,
-                           int priority,
-                           int intervalMs,
-                           int minIntervalMs,
-                           float minDisplacement)
+    public MyLocationManager(Context ctx,
+                             ILocationUpdateNotifications notificationSubscriber,
+                             int priority,
+                             int intervalMs,
+                             int minIntervalMs,
+                             float minDisplacement)
     {
         _ctx = ctx;
         _notificationSubscriber = notificationSubscriber;
@@ -134,12 +140,12 @@ public class LocationManager
                      {
                          Location location = task.getResult();
 
-                         //Globals.getLogger().d(TAG, "onLicenseActivationTaskComplete success : " + location.toString());
+                         //Globals.getLogger().d(TAG, "requestLastKnownLocation success : " + location.toString());
                          onLocationUpdated(location);
                      }
                      else
                      {
-                         Globals.getLogger().e(TAG, "onLicenseActivationTaskComplete failure");//NON-NLS
+                         Globals.getLogger().w(TAG, "requestLastKnownLocation failure");//NON-NLS
                      }
                  }
              }

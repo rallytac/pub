@@ -610,35 +610,12 @@ public class LauncherActivity extends AppCompatActivity
 
     private void startEngineWhenServiceIsOnline()
     {
-        _waitForEngageOnlineTimer = new Timer();
-        _waitForEngageOnlineTimer.scheduleAtFixedRate(new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                _waitForEngageOnlineTimer.cancel();
-                Globals.getEngageApplication().onEngineServiceOnline();
-                launchUiActivity();
-            }
-        }, 500, 500);
-
-        //-------------------------------------------------------------------------------------------
-        /*
-        if(Globals.getEngageApplication().isEngineRunning())
-        {
-            Globals.getLogger().i(TAG, "engine is already running - ui was likely relaunched");//NON-NLS
-            launchUiActivity();
-            return;
-        }
-
-        Globals.getLogger().i(TAG, "engaging ...");//NON-NLS
-
         long tmrDelay;
         long tmrPeriod;
 
         if(_wasLauncherRunBefore)
         {
-            tmrDelay = 500;
+            tmrDelay = 1000;
             tmrPeriod = 500;
         }
         else
@@ -647,32 +624,46 @@ public class LauncherActivity extends AppCompatActivity
             tmrPeriod = 1000;
         }
 
-        _waitStartedAt = Utils.nowMs();
         _waitForEngageOnlineTimer = new Timer();
         _waitForEngageOnlineTimer.scheduleAtFixedRate(new TimerTask()
         {
             @Override
             public void run()
             {
-                if(Globals.getEngageApplication().isServiceOnline())
-                {
-                    _waitForEngageOnlineTimer.cancel();
+                _waitForEngageOnlineTimer.cancel();
 
-                    Globals.getEngageApplication().onEngineServiceOnline();
-                    launchUiActivity();
+                Globals.getEngageApplication().onEngineServiceOnline();
+
+                if(Globals.getEngageApplication().wasSampleMissionCreatedAndInUse())
+                {
+                    runOnUiThread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            AlertDialog dlg = new AlertDialog.Builder(LauncherActivity.this)
+                                    .setTitle(R.string.sample_mission_created_title)
+                                    .setMessage(R.string.sample_mission_created_msg)
+                                    .setCancelable(false)
+                                    .setPositiveButton(getString(R.string.button_ok), new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i)
+                                        {
+                                            launchUiActivity();
+                                        }
+                                    }).create();
+
+                            dlg.show();
+                        }
+                    });
+
                 }
                 else
                 {
-                    if(Utils.nowMs() - _waitStartedAt > Constants.LAUNCH_TIMEOUT_MS)
-                    {
-                        _waitForEngageOnlineTimer.cancel();
-                        showIssueAndFinish(getString(R.string.title_startup_error), getString(R.string.startup_cannot_connect_to_engine));
-                    }
-
-                    Globals.getLogger().i(TAG, "waiting for engage service to come online");//NON-NLS
+                    launchUiActivity();
                 }
             }
         }, tmrDelay, tmrPeriod);
-        */
     }
 }

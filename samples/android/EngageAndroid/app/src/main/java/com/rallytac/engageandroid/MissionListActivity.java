@@ -113,14 +113,17 @@ public class MissionListActivity extends AppCompatActivity
 
             ((TextView)convertView.findViewById(R.id.tvGroupCount)).setText(Integer.toString(groupCount));
 
-            convertView.setOnClickListener(new View.OnClickListener()
+            if(Globals.getEngageApplication().getResources().getBoolean(R.bool.opt_allow_mission_edit))
             {
-                @Override
-                public void onClick(View v)
+                convertView.setOnClickListener(new View.OnClickListener()
                 {
-                    editMission(item._id);
-                }
-            });
+                    @Override
+                    public void onClick(View v)
+                    {
+                        editMission(item._id);
+                    }
+                });
+            }
 
             if(_activeMissionId.compareTo(item._id) == 0)
             {
@@ -521,7 +524,8 @@ public class MissionListActivity extends AppCompatActivity
 
                                     if(menuId == R.id.action_mission_add_scan)
                                     {
-                                        Globals.getEngageApplication().initiateScanOfAQrCode(MissionListActivity.this, getString(R.string.scan_qr_code));
+                                        Globals.getEngageApplication().scanQrCode(MissionListActivity.this, getString(R.string.scan_qr_code), findViewById(R.id.fabAdd), getString(R.string.select_qr_code_file), Constants.OFFLINE_ACTIVATION_CODE_REQUEST_CODE);
+                                        //Globals.getEngageApplication().initiateScanOfAQrCode(MissionListActivity.this, getString(R.string.scan_qr_code));
                                     }
                                     else
                                     {

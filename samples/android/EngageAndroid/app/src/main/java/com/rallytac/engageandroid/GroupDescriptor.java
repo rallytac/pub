@@ -514,4 +514,28 @@ public class GroupDescriptor implements Parcelable
 
         return rc;
     }
+
+
+    public String getSpokenName()
+    {
+        String rc = null;
+
+        try
+        {
+            JSONObject j = new JSONObject(jsonConfiguration);
+
+            rc = j.optString("spokenName", null);
+        }
+        catch (Exception e)
+        {
+            rc = null;
+        }
+
+        if(rc == null)
+        {
+            rc = name;
+        }
+
+        return rc;
+    }
 }

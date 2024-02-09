@@ -20,11 +20,11 @@
 
     <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
     <string name="opt_lock_orientation" translatable="false">-1</string>
-    <string name="opt_ptt_latching" translatable="false">1</string>
     <string name="opt_experimental_general_enabled" translatable="false">1</string>
     <string name="opt_experimental_human_biometrics_enabled" translatable="false">1</string>
     <string name="opt_firebase_analytics_enabled" translatable="false">1</string>
     <string name="opt_max_groups_allowed" translatable="false">16</string>
+    <bool name="opt_ptt_latching">true</bool>
 
     <string name="fmt_user_alias_id_generate">GEN%1$08X</string>
     <string name="fmt_user_display_name_generate">Engage User - %1$s</string>

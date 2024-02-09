@@ -28,7 +28,7 @@
         android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
-        android:textColor="@android:color/white"
+        android:textColor="@color/colorNotificationBars"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -71,17 +71,14 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/scrollView2"
-        android:layout_width="0dp"
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/small_gap"
-        android:layout_marginEnd="@dimen/small_gap"
         android:layout_marginBottom="@dimen/small_gap"
-        app:layout_constraintBottom_toTopOf="@+id/tvLicensingBar"
-        app:layout_constraintEnd_toStartOf="@+id/ivPtt"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layTopIcons">
+        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
+        app:layout_constraintBottom_toTopOf="@+id/ivPtt">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -138,6 +135,7 @@
                     android:layout_marginBottom="@dimen/small_gap"/>
             </LinearLayout>
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -161,6 +159,7 @@
                     android:layout_marginStart="@dimen/small_gap"
                     android:layout_marginBottom="@dimen/small_gap"/>
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -234,6 +233,7 @@
                     android:layout_marginBottom="@dimen/small_gap"/>
             </LinearLayout>
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -257,6 +257,7 @@
                     android:layout_marginStart="@dimen/small_gap"
                     android:layout_marginBottom="@dimen/small_gap"/>
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -291,33 +292,32 @@
         android:layout_height="@dimen/large_finger_touch_icon"
         android:contentDescription="@string/app_priority_toggle"
         android:visibility="@string/show_priority_icon_on_app_multi_view"
-        app:layout_constraintBottom_toTopOf="@+id/ivPtt"
-        app:layout_constraintEnd_toEndOf="@+id/ivPtt"
-        app:layout_constraintStart_toStartOf="@+id/ivPtt"
-        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPtt"
+        app:layout_constraintEnd_toStartOf="@+id/ivPtt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
         app:srcCompat="@drawable/ic_no_priority" />
 
     <ImageView
         android:id="@+id/ivPtt"
         android:layout_width="@dimen/ptt_width_standard"
         android:layout_height="@dimen/ptt_height_standard"
-        android:layout_marginEnd="@dimen/ptt_end"
+        android:layout_marginBottom="@dimen/ptt_bottom"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toTopOf="@+id/tvLicensingBar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layTopIcons"
+        app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@drawable/ic_ptt_idle" />
-
 
     <ImageView
         android:id="@+id/ivHeart"
+        android:onClick="onClickBiometricsIcon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginTop="16dp"
-        android:onClick="onClickBiometricsIcon"
-        app:layout_constraintEnd_toEndOf="@+id/ivPtt"
-        app:layout_constraintStart_toStartOf="@+id/ivPtt"
-        app:layout_constraintTop_toBottomOf="@+id/ivPtt"
+        app:layout_constraintBottom_toBottomOf="@+id/ivPtt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivPtt"
+        app:layout_constraintTop_toTopOf="@+id/ivPtt"
         app:srcCompat="@drawable/ic_heart"
         android:visibility="gone"/>
 
@@ -335,5 +335,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

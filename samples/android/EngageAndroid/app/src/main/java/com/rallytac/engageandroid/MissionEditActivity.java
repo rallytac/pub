@@ -169,6 +169,8 @@ public class MissionEditActivity extends AppCompatActivity
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setView(view);
 
+        final ImageView ivToggleGroupIdVisibility = view.findViewById(R.id.ivToggleGroupIdVisibility);
+        final EditText etGroupId = view.findViewById(R.id.etGroupId);
         final EditText etGroupName = view.findViewById(R.id.etGroupName);
         final EditText etRxAddress = view.findViewById(R.id.etRxAddress);
         final EditText etRxPort = view.findViewById(R.id.etRxPort);
@@ -184,6 +186,21 @@ public class MissionEditActivity extends AppCompatActivity
         final Switch swUnlimitedTx = view.findViewById(R.id.swUnlimitedTx);
         final Switch swEpt = view.findViewById(R.id.swEpt);
         final Switch swAnonymousAlias = view.findViewById(R.id.swAnonymousAlias);
+
+        ivToggleGroupIdVisibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int vs = etGroupId.getVisibility();
+                if(vs == View.GONE)
+                {
+                    etGroupId.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    etGroupId.setVisibility(View.GONE);
+                }
+            }
+        });
 
         if(!Globals.getContext().getResources().getBoolean(R.bool.opt_supports_fdx))
         {
@@ -223,6 +240,7 @@ public class MissionEditActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
+                    group._id = etGroupId.getText().toString();
                     group._name = etGroupName.getText().toString();
                     group._rxAddress = etRxAddress.getText().toString();
                     group._rxPort = Utils.parseIntSafe(etRxPort.getText().toString());
@@ -258,6 +276,7 @@ public class MissionEditActivity extends AppCompatActivity
 
         AlertDialog alertDialog = dialogBuilder.create();
 
+        etGroupId.setText(group._id);
         etGroupName.setText(group._name);
 
         etRxAddress.setText(group._rxAddress);
@@ -340,6 +359,7 @@ public class MissionEditActivity extends AppCompatActivity
         swAnonymousAlias.setChecked(group._anonymousAlias);
         swUnlimitedTx.setChecked(group._maxTxSecs == Constants.UNLIMITED_TX_SECS);
 
+        etGroupId.setEnabled(_allowEdit);
         etGroupName.setEnabled(_allowEdit);
         etRxAddress.setEnabled(_allowEdit);
         etRxPort.setEnabled(_allowEdit);

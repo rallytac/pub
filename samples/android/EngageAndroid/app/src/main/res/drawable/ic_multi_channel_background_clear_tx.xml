@@ -6,7 +6,7 @@
   <path
       android:pathData="M10,10h1420v244h-1420z"
       android:strokeWidth="20"
-      android:fillColor="#353535"
-      android:strokeColor="#AAAAAA"
+      android:fillColor="@color/colorChannelCardClearBackground"
+      android:strokeColor="@color/colorChannelCardClearOutline"
       android:fillType="evenOdd"/>
 </vector>

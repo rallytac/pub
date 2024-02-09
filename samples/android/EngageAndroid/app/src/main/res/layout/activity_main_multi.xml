@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorMainDark"
+    android:background="@color/colorMainBackground"
     tools:context=".SimpleUiMainActivity">
 
     <TextView
@@ -25,10 +25,10 @@
         android:onClick="onClickNotificationBar"
         android:layout_width="0dp"
         android:layout_height="@dimen/bar_height"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="@color/colorNotificationBars"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,7 +67,7 @@
             android:onClick="onClickMenuIcon"
             android:layout_width="@dimen/topicons_hw"
             android:layout_height="@dimen/topicons_hw"
-            app:srcCompat="@drawable/ic_main_screen_menu"
+            app:srcCompat="@drawable/ic_app_logo"
             android:layout_weight="1"/>
     </LinearLayout>
 
@@ -87,201 +87,140 @@
             android:layout_marginStart="@dimen/small_gap"
             android:layout_marginEnd="@dimen/small_gap">
 
-            <LinearLayout
+            <fragment
+                android:id="@+id/card1"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card1"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card2"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card2"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card3"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card4"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card3"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card5"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card6"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card4"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card7"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card8"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card5"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card9"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card10"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card6"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card11"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card12"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card7"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card13"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-
-                <fragment
-                    android:id="@+id/card14"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
-
-
-            <LinearLayout
+            <fragment
+                android:id="@+id/card8"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card15"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginEnd="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
+            <fragment
+                android:id="@+id/card9"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
-                <fragment
-                    android:id="@+id/card16"
-                    android:name="com.rallytac.engageandroid.SmallCardFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_weight="50"
-                    android:layout_height="@dimen/multi_view_fragment_height"
-                    android:layout_marginStart="@dimen/small_gap"
-                    android:layout_marginBottom="@dimen/small_gap"/>
-            </LinearLayout>
+            <fragment
+                android:id="@+id/card10"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
+
+            <fragment
+                android:id="@+id/card12"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
+
+            <fragment
+                android:id="@+id/card13"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
+
+            <fragment
+                android:id="@+id/card14"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
+
+            <fragment
+                android:id="@+id/card15"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
+
+            <fragment
+                android:id="@+id/card16"
+                android:name="com.rallytac.engageandroid.SmallCardFragment"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/multi_view_fragment_height"
+                android:layout_marginStart="@dimen/small_gap"
+                android:layout_marginEnd="@dimen/small_gap"
+                android:layout_marginBottom="@dimen/small_gap"/>
 
         </LinearLayout>
     </ScrollView>
@@ -326,7 +265,7 @@
         android:onClick="onClickLicensingBar"
         android:layout_width="0dp"
         android:layout_height="@dimen/bar_height"
-        android:background="@android:color/holo_red_dark"
+        android:background="@color/colorNotificationBars"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/placeholder"
         android:textColor="@android:color/white"

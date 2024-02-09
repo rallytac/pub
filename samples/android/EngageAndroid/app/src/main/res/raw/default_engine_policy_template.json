@@ -5,7 +5,7 @@
     "enabled":true,
     "type":2,
     "fixedFileName":"",
-    "forceMaintenance":true,
+    "forceMaintenance":false,
     "reclaimSpace":true
   },
 
@@ -52,8 +52,8 @@
     "rtpJitterUnderrunReductionAger": 100,
     "rtpJitterForceTrimAtMs": 0,
     "rpUdpStreaming": {
-      "enabled": true,
-      "allowClear": true,
+      "enabled": false,
+      "allowClear": false,
       "nic": "",
       "port": 0,
       "keepAliveIntervalSecs": 10,
@@ -107,29 +107,8 @@
   },
 
   "discovery": {
-    "ssdp": {
-      "enabled":false,
-      "ageTimeoutMs":30000,
-      "searchTerms":[
-        "engage:eu",
-        "engage:rp",
-        "engage:gc"
-      ],
-      "address": {
-        "address": "255.255.255.255",
-        "port": 1900
-      }
-    },
-    "cistech": {
-      "enabled":false,
-      "ageTimeoutMs":5000,
-      "address": {
-        "address": "234.10.10.21",
-        "port": 21080
-      }
-    },
-    "trellisware": {
-      "enabled":false
+    "magellan": {
+      "enabled":true
     }
   }
 }
