@@ -171,7 +171,7 @@ def printIt(db, routes):
     print('Last check at %s %s uptime %s %s updated %s ago,' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
     print('')
     print('Basics-----------------------------------------------------------------------------------------------------------------------------------------')
-    print('System-Wide CPU: %9s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %10s packets %s TX: %10s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
+    print('xSystem-Wide CPU: %9s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %9s packets %s TX: %9s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
     
     print('')
     print('Throughput kbps: %10s (EMA: %s)' % (round(db['throughput']["rate"] / 1000, 3), round(db['throughput']["rateEma"] / 1000, 3)))
