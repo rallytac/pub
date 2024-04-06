@@ -30,7 +30,7 @@ if [[ ! -f "${CA_NAME}.cert" ]]; then
     echo ""
     echo ""
     openssl genrsa -out ${CA_NAME}.key 2048
-    openssl req -x509 -new -nodes -key ${CA_NAME}.key -sha256 -days 1024 -out ${CA_NAME}.cert
+    openssl req -x509 -new -nodes -key ${CA_NAME}.key -sha256 -days 9999 -out ${CA_NAME}.cert
 fi
 
 echo "-------------------------------------------------------------------------"
