@@ -1,5 +1,8 @@
 // © 2020 Erik Rigtorp <erik@rigtorp.se>
 // SPDX-License-Identifier: MIT
+//
+// Updates by Rally Tactical Systems:
+//      - Added support for destination port and address
 
 #include <cstring>
 #include <iostream>
@@ -73,13 +76,23 @@ int main(int argc, char *argv[])
     unsigned long pktsFiltered = 0;
     unsigned long bytesFiltered = 0;
     const char *dstAddr = nullptr;
+    unsigned short dstPort = 0;
 
-    while ((opt = getopt(argc, argv, "i:bls:c:r:t:f:g:a:")) != -1)
+    while ((opt = getopt(argc, argv, "i:bls:c:r:t:f:g:a:o:")) != -1)
     {
         switch (opt)
         {
             case 'a':
                 dstAddr = optarg;
+                break;
+
+            case 'o':
+                dstPort = std::stoi(optarg);
+                if (dstPort < 1)
+                {
+                    std::cerr << "desination port must be non-negative integer" << std::endl;
+                    return 1;
+                }
                 break;
 
             case 'i':
@@ -176,6 +189,7 @@ int main(int argc, char *argv[])
                 "  -f port     from port\n"
                 "  -g port     going to port\n"
                 "  -a          going to address\n"
+                "  -o          going to port\n"
                 "  -b          enable broadcast (SO_BROADCAST)"                
                 << std::endl;
         
@@ -393,9 +407,23 @@ int main(int argc, char *argv[])
             memset(&addr, 0, sizeof(addr));
             addr.sin_family = AF_INET;
             #ifdef __GLIBC__
-                addr.sin_port = udp->dest;
+                if(dstPort != 0)
+                {
+                    addr.sin_port = ntohs(dstPort);
+                }
+                else
+                {
+                    addr.sin_port = udp->dest;    
+                }
             #else
-                addr.sin_port = udp->uh_dport;
+                if(dstPort != 0)
+                {
+                    addr.sin_port = ntohs(dstPort);
+                }
+                else
+                {
+                    addr.sin_port = udp->uh_dport;
+                }
             #endif
             addr.sin_addr = {ip->ip_dst};
             if( dstAddr != nullptr )
