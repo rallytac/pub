@@ -1,0 +1,735 @@
+{
+    "bridges": [
+        {
+            "enabled": true,
+            "id": "4TRP",
+            "groups": [
+                "4TRP-TRUNK",
+                "4TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "AIR-COORD-TRP",
+            "groups": [
+                "AIR-COORD-TRP-TRUNK",
+                "AIR-COORD-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "SLVR-1-TRP",
+            "groups": [
+                "SLVR-1-TRP-TRUNK",
+                "SLVR-1-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "SLVR-2-TRP",
+            "groups": [
+                "SLVR-2-TRP-TRUNK",
+                "SLVR-2-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "SLVR-3-TRP",
+            "groups": [
+                "SLVR-3-TRP-TRUNK",
+                "SLVR-3-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "GOLD-1-TRP",
+            "groups": [
+                "GOLD-1-TRP-TRUNK",
+                "GOLD-1-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "GOLD-2-TRP",
+            "groups": [
+                "GOLD-2-TRP-TRUNK",
+                "GOLD-2-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "GOLD-3-TRP",
+            "groups": [
+                "GOLD-3-TRP-TRUNK",
+                "GOLD-3-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "BLUE-1-TRP",
+            "groups": [
+                "BLUE-1-TRP-TRUNK",
+                "BLUE-1-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "BLUE-2-TRP",
+            "groups": [
+                "BLUE-2-TRP-TRUNK",
+                "BLUE-2-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "BLUE-3-TRP",
+            "groups": [
+                "BLUE-3-TRP-TRUNK",
+                "BLUE-3-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "RED-1-TRP",
+            "groups": [
+                "RED-1-TRP-TRUNK",
+                "RED-1-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "RED-2-TRP",
+            "groups": [
+                "RED-2-TRP-TRUNK",
+                "RED-2-TRP"
+            ]
+        },
+        {
+            "enabled": true,
+            "id": "RED-3-TRP",
+            "groups": [
+                "RED-3-TRP-TRUNK",
+                "RED-3-TRP"
+            ]
+        },
+        {
+            "enabled": false,
+            "id": "mpu-2-nem-1",
+            "groups": [
+                "mpu-trunk-1",
+                "navy-enterprise-mpu-1"
+            ]
+        },
+        {
+            "enabled": false,
+            "id": "mpu-2-nem-2",
+            "groups": [
+                "mpu-trunk-2",
+                "navy-enterprise-mpu-2"
+            ]
+        }
+    ],
+    "groups": [
+        {
+            "id": "4TRP-TRUNK",
+            "name": "4TRP-TRUNK",
+            "tx": {
+                "port": 17002,
+                "address": "239.1.2.1"
+            },
+            "rx": {
+                "port": 17002,
+                "address": "239.1.2.1"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "AIR-COORD-TRP-TRUNK",
+            "name": "AIR-COORD-TRP-TRUNK",
+            "tx": {
+                "port": 17004,
+                "address": "239.1.2.2"
+            },
+            "rx": {
+                "port": 17004,
+                "address": "239.1.2.2"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "SLVR-1-TRP-TRUNK",
+            "name": "SLVR-1-TRP-TRUNK",
+            "tx": {
+                "port": 17006,
+                "address": "239.1.2.3"
+            },
+            "rx": {
+                "port": 17006,
+                "address": "239.1.2.3"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "SLVR-2-TRP-TRUNK",
+            "name": "SLVR-2-TRP-TRUNK",
+            "tx": {
+                "port": 17008,
+                "address": "239.1.2.4"
+            },
+            "rx": {
+                "port": 17008,
+                "address": "239.1.2.4"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "SLVR-3-TRP-TRUNK",
+            "name": "SLVR-3-TRP-TRUNK",
+            "tx": {
+                "port": 17010,
+                "address": "239.1.2.5"
+            },
+            "rx": {
+                "port": 17010,
+                "address": "239.1.2.5"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "GOLD-1-TRP-TRUNK",
+            "name": "GOLD-1-TRP-TRUNK",
+            "tx": {
+                "port": 17012,
+                "address": "239.1.2.6"
+            },
+            "rx": {
+                "port": 17012,
+                "address": "239.1.2.6"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "GOLD-2-TRP-TRUNK",
+            "name": "GOLD-2-TRP-TRUNK",
+            "tx": {
+                "port": 17014,
+                "address": "239.1.2.7"
+            },
+            "rx": {
+                "port": 17014,
+                "address": "239.1.2.7"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "GOLD-3-TRP-TRUNK",
+            "name": "GOLD-3-TRP-TRUNK",
+            "tx": {
+                "port": 17016,
+                "address": "239.1.2.8"
+            },
+            "rx": {
+                "port": 17016,
+                "address": "239.1.2.8"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "BLUE-1-TRP-TRUNK",
+            "name": "BLUE-1-TRP-TRUNK",
+            "tx": {
+                "port": 17018,
+                "address": "239.1.2.9"
+            },
+            "rx": {
+                "port": 17018,
+                "address": "239.1.2.9"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "BLUE-2-TRP-TRUNK",
+            "name": "BLUE-2-TRP-TRUNK",
+            "tx": {
+                "port": 17020,
+                "address": "239.1.2.10"
+            },
+            "rx": {
+                "port": 17020,
+                "address": "239.1.2.10"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "BLUE-3-TRP-TRUNK",
+            "name": "BLUE-3-TRP-TRUNK",
+            "tx": {
+                "port": 17022,
+                "address": "239.1.2.11"
+            },
+            "rx": {
+                "port": 17022,
+                "address": "239.1.2.11"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "RED-1-TRP-TRUNK",
+            "name": "RED-1-TRP-TRUNK",
+            "tx": {
+                "port": 17024,
+                "address": "239.1.2.12"
+            },
+            "rx": {
+                "port": 17024,
+                "address": "239.1.2.12"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "RED-2-TRP-TRUNK",
+            "name": "RED-2-TRP-TRUNK",
+            "tx": {
+                "port": 17026,
+                "address": "239.1.2.13"
+            },
+            "rx": {
+                "port": 17026,
+                "address": "239.1.2.13"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "RED-3-TRP-TRUNK",
+            "name": "RED-3-TRP-TRUNK",
+            "tx": {
+                "port": 17028,
+                "address": "239.1.2.14"
+            },
+            "rx": {
+                "port": 17028,
+                "address": "239.1.2.14"
+            },
+            "interfaceName": "paneth3",
+            "txAudio": {
+                "framingMs": 20,
+                "encoder": 12
+            },
+            "type": 1,
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "id": "4TRP",
+            "name": "4TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "AIR-COORD-TRP",
+            "name": "AIR COORD TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "SLVR-1-TRP",
+            "name": "SLVR 1 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "SLVR-2-TRP",
+            "name": "SLVR 2 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "SLVR-3-TRP",
+            "name": "SLVR 3 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "GOLD-1-TRP",
+            "name": "GOLD 1 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "GOLD-2-TRP",
+            "name": "GOLD 2 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "GOLD-3-TRP",
+            "name": "GOLD 3 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "BLUE-1-TRP",
+            "name": "BLUE 1 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "BLUE-2-TRP",
+            "name": "BLUE 2 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "BLUE-3-TRP",
+            "name": "BLUE 3 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "RED-1-TRP",
+            "name": "RED 1 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "RED-2-TRP",
+            "name": "RED 2 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "id": "RED-3-TRP",
+            "name": "RED 3 TRP",
+            "type": 1,
+            "txAudio": {
+                "framingMs": 120,
+                "encoder": 25
+            },
+            "rallypoints": [
+                {
+                    "host": {
+                        "port": 7443,
+                        "address": "127.0.0.1"
+                    },
+                    "id": "local"
+                }
+            ]
+        },
+        {
+            "name": "mpu-trunk-1",
+            "tx": {
+                "port": 60001,
+                "address": "239.192.60.1"
+            },
+            "inboundRtpPayloadTypeTranslations": [
+                {
+                    "engage": 118,
+                    "external": 112
+                }
+            ],
+            "rx": {
+                "port": 60001,
+                "address": "239.192.60.1"
+            },
+            "interfaceName": "paneth2",
+            "txAudio": {
+                "customRtpPayloadType": 112,
+                "encoder": 25
+            },
+            "type": 1,
+            "id": "mpu-trunk-1",
+            "txOptions": {
+                "ttl": 64
+            }
+        },
+        {
+            "name": "mpu-trunk-2",
+            "tx": {
+                "port": 60002,
+                "address": "239.192.60.2"
+            },
+            "inboundRtpPayloadTypeTranslations": [
+                {
+                    "engage": 118,
+                    "external": 112
+                }
+            ],
+            "rx": {
+                "port": 60002,
+                "address": "239.192.60.2"
+            },
+            "interfaceName": "paneth2",
+            "txAudio": {
+                "customRtpPayloadType": 112,
+                "encoder": 25
+            },
+            "type": 1,
+            "id": "mpu-trunk-2",
+            "txOptions": {
+                "ttl": 64
+            }
+        }
+    ],
+    "__nsmHidden": []
+}

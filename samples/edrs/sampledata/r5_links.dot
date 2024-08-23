@@ -1,0 +1,6 @@
+strict digraph r5
+{
+r5[shape=box color=gray style=filled]
+r1[shape=hexagon color=firebrick style=filled]
+r5->r1[dir=none]
+}

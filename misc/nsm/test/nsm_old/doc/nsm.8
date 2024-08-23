@@ -1,0 +1,34 @@
+.\" Manpage for nsm.
+.\" Contact support@rallytac.com to correct errors or typos.
+.Dt nsm (8)
+.TH man 8 "06 May 2010" "1.0" "nsm man page"
+.SH NAME
+nsm \- create a network state machine for shared resource management
+.SH SYNOPSIS
+/usr/sbin/nsm.sh
+.SH DESCRIPTION
+nsm is a network state machine for managing shared resources.
+.SH OPTIONS
+In general, nsm runs as a background service under
+.B systemd
+and is configured from 
+.B /etc/nsm/nsm_conf.json.  
+However, for troubleshooting and testing purposes, you may want to run the process in a terminal window - i.e. not as a daemon.  To do so, simply run the process with the 
+.B "-interactive" 
+option to run it in interactive mode.  Of course, be sure that the existing daemon has been stopped when you do so.
+
+You might also, again for troubleshooting and testing purposes, use a configuration file other than /etc/nsm/nsm_conf.json.  To do so, add the 
+.B "--config-file <configuration_file_name>" 
+option.  For example: 
+.B nsm "--config-file myconfig.conf
+to use the configuration from
+.B myconfig.conf
+and ignore the default configuration file altogether.
+.SH LOGGING OUTPUT
+nsm will output debug and console logging strings to 
+.B syslog
+if available.  In addition, output can be viewed via
+.B journalctl
+if it has been installed on your system.
+.SH AUTHOR
+Rally Tactical Systems, Inc. (support@rallytac.com)

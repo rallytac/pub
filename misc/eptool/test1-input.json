@@ -1,0 +1,32 @@
+{
+    "engageProvisioning": {
+        "meta": {
+            "owner": "",
+            "creator": "",
+            "organization": "",
+            "department": "",
+            "comments": "",
+            "validity": {
+                "from": "",
+                "to": ""
+            }
+        },
+        "source": {},
+        "target": {},
+        "policies": [
+            "@file:///Users/sbotha/Global/github/siyata/install/cfg/engage.policy"
+        ],
+        "identities": [
+            "@file:///Users/sbotha/Global/github/siyata/install/cfg/engage.identity"
+        ],
+        "missions": [
+            "@file:///Users/sbotha/Global/github/siyata/install/cfg/engage.mission"
+        ],
+        "certStores": [
+            "@file:///Users/sbotha/Global/github/siyata/install/cfg/engage.certstore"
+        ],
+        "apps":[
+            "@file:///Users/sbotha/Global/github/siyata/install/cfg/engage.appsettings"
+        ]
+    }
+}

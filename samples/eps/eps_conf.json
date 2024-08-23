@@ -1,0 +1,58 @@
+{
+	"id":"idOfThisService",
+	"localStorageRoot": "./.data",
+
+	"uris":{
+		"apiVersion": "v1",
+		"postSingle": "/${apiVersion}/archive/recording/",
+		"getSingle": "/${apiVersion}/archive/recording/",
+		"getSingleRaw": "/${apiVersion}/archive/raw/",
+		"getMultiple": "/${apiVersion}/archive/recordings"
+	},
+
+	"https":{
+		"host":"",
+		"port":4333,
+		"certPem":"./EpsServer.cert",
+		"keyPem":"./EpsServer.key",
+		"ca":[
+			"./EpsCA.cert"
+		]
+	},
+
+	"timers":{
+		"cleanupIntervalSecs":600
+	},
+
+	"logging":{
+		"level":4
+	},
+
+	"tenants":[
+		{
+			"id":"F3E28F0AF83F469DA5D50BD31E72C655",
+			"maxEventAgeHours":27,
+			"apiKeys":[
+				{
+					"key":"ddb89547b5e64ef087df97f3f30b9575aa8eb9c8dc9f4e3798067ffc2f17b267",
+					"permissions": [
+						"POST",
+						"GET"
+					]
+				},
+				{
+					"key":"281e9e53a53e45708442234d9a50f4006ce49735f9aa4a87876bb9b4dbe32343",
+					"permissions": [
+						"POST"
+					]
+				},
+				{
+					"key":"d948aef9aced4c2398a6be77d01edb867b67dcf63f5e430c85d5f79b29fd428d",
+					"permissions": [
+						"GET"
+					]
+				}
+			]
+		}
+	]
+}

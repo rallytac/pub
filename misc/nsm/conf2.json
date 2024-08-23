@@ -1,0 +1,50 @@
+{
+    "id": "",
+    "favorUptime": true,
+
+    "networking": {
+        "interfaceName": "en0",
+        "xxx_address": "239.17.18.19",
+        "address": "255.255.255.255",
+        "port": 8513,
+        "ttl": 64,
+        "txOversend": 0,
+        "rxLossPercentage": 0,
+        "rxErrorPercentage": 0,
+        "txLossPercentage": 0,
+        "txErrorPercentage": 0,
+        "xxx_cryptoPassword": "just a default password"
+    },
+
+    "resources":[        
+        "res01",
+        "res02",
+        "res03",
+        "res04"
+    ],
+
+    "run": {
+        "onIdle": "./onIdle.sh",
+        "beforeGoingActive": "./beforeGoingActive.sh",
+        "onGoingActive": "./onGoingActive.sh",
+        "beforeActive": "./beforeActive.sh",
+        "onActive": "./onActive.sh"
+    },
+
+    "timing": {
+        "internalMultiplier": 1,
+        "txIntervalSecs": 1,
+        "transitionWaitSecs": 3
+    },
+
+    "electionToken": {
+        "start": 1000000,
+        "end": 2000000
+    },
+
+    "logging":{
+        "level": 4,
+        "dashboard": true,
+        "logCommandOutput":false 
+    }
+}

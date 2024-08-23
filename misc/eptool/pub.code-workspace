@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../siyata"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"ostream": "cpp",
+			"__functional_03": "cpp"
+		}
+	}
+}
