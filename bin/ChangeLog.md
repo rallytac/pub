@@ -1,6 +1,6 @@
 # Change Log
 
-##  - 1.240.9080
+## August 30, 2024 - 1.246.9086
 - Adds support for multi-element X.509 PEM files, certificate bundles, and intermediate issuer certificates.
 - Adds support for G.729 Annex A audio encoding/decoding.
 - Adds support for IPv6.
@@ -12,7 +12,7 @@
 - Adds standard Docker containers for AMD64, ARM64, and ARM32 architectures.
 - Adds display of certificate descriptor JSON in ecstool.
 - Adds engageGenerateSignature() and engageVerifySignature() API calls.
-- Adds the ability to explicity disable audio transmission on a group.
+- Adds the ability to explicitly disable audio transmission on a group.
 - Adds naming of the Linux ALSA audio device from environment variables.
 - Adds forcing of a Rallypoint peer to leaf status at an upstream Rallypoint.
 - Adds display of unknown RTP payload type in error logging.
@@ -24,17 +24,25 @@
 - Adds transcription-only sessions to Engage Linguistics Service.
 - Adds customizable execution timeouts to the Azure Cognitive Services ELS proxy.
 - Adds the ability to disable probing and/or use of the local machine's audio hardware.
+- Adds memory tuning settings for object caching.
 - Re-enables Rallypoint mesh loop detection.
 - Improves performance and reliability of the Android OS-level audio layer.
+- Improves performance and resource utilization for internal object caching.
+- Improves database and timeline I/O performance.
+- Improves performance of discarding of too-old audio jitter buffer elements.
 - Replaces OpenSSL 1.1.1f with OpenSSL 3.0.8 and it's support for FIPS 140-2.
 - Removes dependency on the wolfSSL FIPS 140-2 cryptography engine.
-- Increases the logger's queue size to accomodate heavy load situations losing messages.
+- Increases the logger's queue size to accommodate heavy load situations losing messages.
 - Corrects a state-related problem with multiple talkers on a group.
 - Corrects a Linux ALSA problem related to automatic switch to the default device.
 - Corrects a problem with Rallypoints not reliably setting priority or TTL for transmitted packets.
 - Corrects a problem with random failures to verify signed requests to a Rallypoint.
 - Corrects a problem with the Rallypoint's link graph for host names containing spaces.
 - Corrects an issue in ELS that randomly caused the process to not properly initialize.
+- Corrects a race-condition bug in timelines where the target directory is not created prior to saving of event files.
+- Corrects a few issues with Windows setup packages.
+- Corrects an issue with semaphore naming conventions under Windows.
+- Corrects random Rallypoint connection race conditions in the WASM build.
 
 ## July 29, 2023 - 1.238.9078
 - Adds group-level firewalling capability in Rallypoints based on X.509 certificates.
@@ -138,7 +146,7 @@
 - Adds Android-specific audio settings for more fine-grained customization of the audio experience.
 - Adds selected logging of API arguments to help with debugging.
 - Adds logged warnings to the Rallypoint when system CPU utilization exceeds a configured threshold (default is 65%).
-- Adds accomodation for new file descriptor tracking introduced with Android 11.
+- Adds accommodation for new file descriptor tracking introduced with Android 11.
 - Optimizes microphone open/close operations to reduce stress on a platform's audio subsystem.
 - Optimizes Rallypoint logic to allow new client connections within 1.5 seconds of startup.
 - Changes mission generation to require peer verification.
