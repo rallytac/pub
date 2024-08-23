@@ -1,0 +1,12 @@
+python earbud.py \
+        -db:/Users/sbotha/Global/github/shaunwork/eardata/eardb.sqlite \
+        -node:{35bb350b-2750-4ddb-bbd7-3047cc016b54} \
+        -api:029ea4a0ef1046e9b7b33ee4d1a0537f3b506f76df2645088a46c9c2e37ca4ed \
+        -int:5 \
+        -url:https://ec2-3-14-127-211.us-east-2.compute.amazonaws.com:4343/v1/archive/recording/ \
+        -cert:./EarRestClient.cert \
+        -key:./EarRestClient.key \
+        -ca:./EarCA.cert \
+        -insecure \
+        -verbose 
+

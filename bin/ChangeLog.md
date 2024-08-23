@@ -2,7 +2,7 @@
 
 ## August 30, 2024 - 1.246.9086
 
->PLEASE NOTE: All updates from 1.238.9078 through 1.245.9085 have been rolled up in this single release.
+>PLEASE NOTE: All updates from 1.238.9078 onward to date have been rolled up in this single release.
 
 - Adds support for multi-element X.509 PEM files, certificate bundles, and intermediate issuer certificates.
 - Adds support for G.729 Annex A audio encoding/decoding.

@@ -1,0 +1,10 @@
+strict digraph r1dot
+{
+r1[shape=hexagon color=firebrick style=filled]
+"127.0.0.1:53549"->r1[dir=none]
+"127.0.0.1:53637"->r1[dir=none]
+r2[shape=hexagon color=firebrick style=filled]
+r1->r2[style=dotted arrowhead=o]
+r3[shape=hexagon color=firebrick style=filled]
+r1->r3[style=dotted arrowhead=o]
+}

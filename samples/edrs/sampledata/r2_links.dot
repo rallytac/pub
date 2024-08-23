@@ -1,0 +1,8 @@
+strict digraph r2dot
+{
+r2[shape=hexagon color=firebrick style=filled]
+r1[shape=hexagon color=firebrick style=filled]
+r2->r1[style=dotted arrowhead=o]
+r3[shape=hexagon color=firebrick style=filled]
+r2->r3[style=dotted arrowhead=o]
+}
