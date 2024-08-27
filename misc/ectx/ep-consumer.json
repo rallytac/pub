@@ -1,0 +1,25 @@
+{
+  "comments": [
+    "This is a minimalist policy file for the ectx consumer. It is not intended to be used in production."
+  ],
+  "dataDirectory": "./data/${node_id}",
+  "internals": {
+    "watchdog": {
+      "enabled": false
+    }
+  },
+  "timelines": {
+    "enabled": false
+  },
+  "licensing": {
+    "key": "",
+    "entitlement": ""
+  },
+  "networking": {
+    "defaultNic": ""
+  },
+  "audio": {
+    "internalRate": 8000,
+    "internalChannels": 1
+  }
+}

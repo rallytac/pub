@@ -1,0 +1,77 @@
+#!/bin/bash
+
+echo "-----------------------------------------------------------------------------"
+echo "ectx: A driver script for engage-cmd that simulates group transmit scenarios"
+echo "Copyright (c) 2024 Rally Tactical Systems, Inc."
+echo "-----------------------------------------------------------------------------"
+
+BIN_PATH="."
+CERT_STORE="./all-rts-certs.certstore"
+EP_PRODUCER="./ep-producer.json"
+NID_PRODUCER="AF3B6F0E-2089-4E1F-AB59-4DFD016D10EB"
+EP_CONSUMER="./ep-consumer.json"
+NID_CONSUMER="33CC67E2-0732-41E3-BCD1-3BB44DDB7C19"
+PRODUCER_MIC_FILE="./radio-test-1-2-3-4-5.raw"
+
+MODE=$1
+MI=$2
+RP=$3
+
+function showSyntax() {
+	echo "usage: $0 <C | P> <mission_file_base_name> [<rp_file_base_name>]"
+	echo ""
+	echo "  where:"
+	echo "     Argument 1 (required): C or P for 'Consumer' or 'Producer' mode"
+	echo "     Argument 2 (required): Base name of the mission JSON file (without the '.json' extension)"
+	echo "     Argument 3 (optional): Base name of the Rallypoint JSON file (without the '.json' extension)"
+	echo ""
+	echo "  examples:"
+	echo "     $0 C mission1     : Run in Consumer mode with mission1.json"
+	echo "     $0 C mission1 rp1 : Run in Consumer mode with mission1.json and rp1.json"
+	echo "     $0 P mission1     : Run in Producer mode with mission1.json"
+	echo "     $0 P mission1 rp1 : Run in Producer mode with mission1.json and rp1.json"
+	echo ""
+	echo "  overriding producer settings:"
+	echo "     Settings for the producer include:"
+	echo "        ECTX_RT      : Maximum number of milliseconds to run the script.  The default"
+	echo "                       is 0 - which causes the script to run forever."
+	echo "        ECTX_MIN_TX  : Minimum number of millseconds per transmission.  Default is 500."
+	echo "        ECTX_MAX_TX  : Maximum number of millseconds per transmission.  Default is 2000."
+	echo "        ECTX_TX_PROB : Percentage probability of a transmission being initiated in a given"
+	echo "                       cycle.  Default is 75."
+	echo ""
+	echo "     Override these settings by setting the corresponding environment variable before"
+	echo "        running this script.  For example, to set the maximum transmission time to 60 seconds,"
+	echo "        the minimum transmission time to 1 second, the maximum transmission time to 3 seconds,"
+	echo "        and the transmission probability to 50%:"
+	echo ""
+	echo "           $ ECTX_RT=60000 ECTX_MIN_TX=1000 ECTX_MAX_TX=3000 ECTX_TX_PROB=50 $0 P mission1"
+	echo ""
+}
+
+if [ "$MODE" == "P" ] || [ "$MODE" == "p" ] ; then
+	echo "---PRODUCER MODE---"
+	NID="$NID_PRODUCER"
+	CMD_EXTRA="-ep:$EP_PRODUCER -script:ectx.lua -useadad -adadmic:$PRODUCER_MIC_FILE -adadms:60 -adadsr:8000 -adadch:1 -ll:1"
+
+elif [ "$MODE" == "C" ] || [ "$MODE" == "c" ] ; then
+	echo "---CONSUMER MODE---"
+	NID="$NID_CONSUMER"
+	CMD_EXTRA="-ep:$EP_CONSUMER -acj -ll:3"
+
+else
+	showSyntax
+	exit 1
+
+fi
+
+if [ "$RP" != "" ]; then
+	CMD_EXTRA+="$CMD_EXTRA -rp:$RP.json"
+fi
+
+sleep 0.5
+
+$BIN_PATH/engage-cmd $CMD_EXTRA \
+	-cs:$CERT_STORE \
+	-nid:$NID \
+	-mi:$MI.json

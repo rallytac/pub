@@ -1,0 +1,9 @@
+{
+  "comments": [
+    "When using this RP file, make sure to specify a valid address in the host section"
+  ],
+  "host": {
+    "address": "foo.bar.com",
+    "port": 7443
+  }
+}
