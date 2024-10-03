@@ -1,5 +1,8 @@
 # Change Log
 
+## October 3, 2024 - 1.249.9089
+- Corrects an urgent issue on Linux platforms when using the ALSA audio input in stereo mode.
+
 ## October 2, 2024 - 1.248.9088
 - Adds stricter compliance with FIPS 140-2 guidelines with regards to CA processing and advertised ciphers.
 - Adds experimental active and passive IGMP snooping to Rallypoints to optimize inter-RP traffic.
