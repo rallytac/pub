@@ -1,5 +1,11 @@
 # Change Log
 
+## October 2, 2024 - 1.248.9088
+- Adds stricter compliance with FIPS 140-2 guidelines with regards to CA processing and advertised ciphers.
+- Adds experimental active and passive IGMP snooping to Rallypoints to optimize inter-RP traffic.
+- Corrects an issue on Linux platforms whereby thread names were not included in log output.
+- Corrects an abortive race condition in internal timers when processes are shutting down.
+
 ## August 30, 2024 - 1.246.9086
 
 >PLEASE NOTE: All updates from 1.238.9078 onward to date have been rolled up in this single release.
@@ -28,11 +34,13 @@
 - Adds customizable execution timeouts to the Azure Cognitive Services ELS proxy.
 - Adds the ability to disable probing and/or use of the local machine's audio hardware.
 - Adds memory tuning settings for object caching.
+- Adds initial support for producing a status report from the Engine - similar to that of RP, EBS, EAR, and ELS.
 - Re-enables Rallypoint mesh loop detection.
 - Improves performance and reliability of the Android OS-level audio layer.
 - Improves performance and resource utilization for internal object caching.
 - Improves database and timeline I/O performance.
 - Improves performance of discarding of too-old audio jitter buffer elements.
+- Reduces system-wide audio processing memory utilization by almost 80%.
 - Replaces OpenSSL 1.1.1f with OpenSSL 3.0.8 and it's support for FIPS 140-2.
 - Removes dependency on the wolfSSL FIPS 140-2 cryptography engine.
 - Increases the logger's queue size to accommodate heavy load situations losing messages.
