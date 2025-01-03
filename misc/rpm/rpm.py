@@ -4,6 +4,7 @@
 #
 
 from __future__ import print_function
+import argparse
 import json
 import time
 import datetime
@@ -171,7 +172,7 @@ def printIt(db, routes):
     print('Last check at %s %s uptime %s %s updated %s ago,' % (now.strftime('%Y/%m/%d %H:%M:%S'), headerSepChar, timeDesc(db['uptime']), headerSepChar, timeDesc(tsdelta)))
     print('')
     print('Basics-----------------------------------------------------------------------------------------------------------------------------------------')
-    print('xSystem-Wide CPU: %9s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %9s packets %s TX: %9s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
+    print('System-Wide CPU: %9s%% %s Clients: %6s %s Peers: %6s %s Streams: %6s %s Paths: %6s %s RX: %9s packets %s TX: %9s packets' % (db['systemCpuLoad'], headerSepChar, db['links']['clients']['count'], headerSepChar, db['links']['peers']['count'], headerSepChar, db['routing']['streams'], headerSepChar, db['routing']['paths'], headerSepChar, db['rx']['packets'], headerSepChar, db['tx']['packets']))
     
     print('')
     print('Throughput kbps: %10s (EMA: %s)' % (round(db['throughput']["rate"] / 1000, 3), round(db['throughput']["rateEma"] / 1000, 3)))
@@ -188,14 +189,13 @@ def printIt(db, routes):
     print('Routes-----------------------------------------------------------------------------------------------------------------------------------------')
     print('%42s %7s %7s %10s %10s %10s %10s' % ('ID', 'Clients', 'Peers', 'RX Blobs', 'RX Bytes', 'TX Blobs', 'TX Bytes'))
     print('-----------------------------------------------------------------------------------------------------------------------------------------------')
-    for rme in routes['routeMap']:
-        print('%42s %7s %7s %10s %10s %10s %10s' % (rme['id'], rme['clients'], rme['peers'], rme['rxTraffic']['blobs'], rme['rxTraffic']['bytes'], rme['txTraffic']['blobs'], rme['txTraffic']['bytes']))
+    if routes != None:
+        for rme in routes['routeMap']:
+            print('%42s %7s %7s %10s %10s %10s %10s' % (rme['id'], rme['clients'], rme['peers'], rme['rxTraffic']['blobs'], rme['rxTraffic']['bytes'], rme['txTraffic']['blobs'], rme['txTraffic']['bytes']))
+    else:
+        print('No route information available')
 
     print(colorNone(), end = '')
-
-# --------------------------------------------------------------------------
-def showSyntax():
-    print('usage: python rpm.py <name_of_rallypoint_status_file> [-i:<polling_interval>]')
 
 
 # --------------------------------------------------------------------------
@@ -209,7 +209,11 @@ def main():
     while 1:
         try:
             db = loadInput(statusFile)
-            routes = loadInput(routeFile)
+            if routeFile != None and routeFile != '':
+                routes = loadInput(routeFile)
+            else:
+                routes = None
+
             clearScreen()
 
             try:
@@ -222,7 +226,6 @@ def main():
 
         except Exception as e:
             print(e)
-            showSyntax()
             exit()
 
     if haveColorama:
@@ -231,20 +234,18 @@ def main():
 
 # --------------------------------------------------------------------------
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        showSyntax()
-        exit()
-    else:
-        try:
-            for arg in sys.argv:
-                if arg.startswith('-i:'):
-                        interval = int(arg[3:])
-        except:
-            print('invalid argument ' + arg)
-            showSyntax()
-            exit()
-    
     signal.signal(signal.SIGINT, ctrlcHandler)
-    statusFile = sys.argv[1]
-    routeFile = sys.argv[2]
+    parser = argparse.ArgumentParser(description="Process string and numeric arguments.")
+    parser.add_argument("statusFile", type=str, help="The status file")
+    parser.add_argument("routeFile", type=str, nargs="?", default=None, help="Optional routes file")
+    parser.add_argument("-i", type=int, default=None, help="Optional checking interval")
+    args = parser.parse_args()
+
+    statusFile = args.statusFile
+    routeFile = args.routeFile
+    interval = 5
+
+    if args.i is not None:
+        interval = int(args.i)
+
     main()
