@@ -1,3 +1,6 @@
+# Native Binaries
+Our binaries can be downloaded from [https://hq.rallytac.com/builds](https://hq.rallytac.com/builds/).
+
 ## Docker Images
 Prebuilt Docker images are obtained from Docker Hub at [https://hub.docker.com/orgs/rallytac/repositories](https://hub.docker.com/orgs/rallytac/repositories).
 
