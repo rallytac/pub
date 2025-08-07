@@ -406,6 +406,7 @@ public class Engage
             public static String txId = "txId";
             public static String aliasSpecializer = "aliasSpecializer";
             public static String receiverRxMuteForAliasSpecializer = "receiverRxMuteForAliasSpecializer";
+            public static String reBegin = "reBegin";
             
             public class AudioUri
             {
