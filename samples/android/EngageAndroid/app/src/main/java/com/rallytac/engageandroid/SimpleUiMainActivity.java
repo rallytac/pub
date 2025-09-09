@@ -12,35 +12,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.provider.Settings;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -55,31 +37,34 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
@@ -98,8 +83,9 @@ public class SimpleUiMainActivity
                                 EngageApplication.IPresenceChangeListener,
                                 EngageApplication.IGroupTextMessageListener,
                                 EngageApplication.IAudioDeviceListener,
-                                OnMapReadyCallback,
-                                GroupSelectorAdapter.SelectionClickListener
+                                GroupSelectorAdapter.SelectionClickListener,
+                                EngageApplication.IConnectivityChangeListener,
+                                EngageApplication.IGroupStatusChangeListener
 {
     private static String TAG = SimpleUiMainActivity.class.getSimpleName();
 
@@ -128,10 +114,6 @@ public class SimpleUiMainActivity
     private boolean _optAllowMultipleChannelView = true;
     private boolean _optSupportsTextMessaging = false;
 
-    private GoogleMap _map;
-    private boolean _firstCameraPositioningDone = false;
-    private HashMap<String, MapTracker> _mapTrackers = new HashMap<>();
-
     private RecyclerView _groupSelectorView = null;
     private GroupSelectorAdapter _groupSelectorAdapter = null;
 
@@ -142,6 +124,189 @@ public class SimpleUiMainActivity
 
     private ProgressDialog _transmittingAlertProgressDialog = null;
     private boolean _allowPttResize = true;
+    private OnscreenLogger _onscreenLogger = null;
+
+    @Override
+    public void onConnectivityChanged() {
+        updateConnectivityBar();
+    }
+
+    private int connectMsFromRpNotification(JSONObject jo) {
+        int rc = -1;
+
+        try {
+            rc = jo.getJSONObject("rallypointConnectionDetail").getInt("connectMs");
+        }
+        catch (Exception e) {
+            rc = -1;
+        }
+
+        return rc;
+    }
+
+    private String reasonFromRpNotification(JSONObject jo) {
+        String rc = null;
+
+        try {
+            int code = jo.getJSONObject("rallypointConnectionDetail").getInt("reason");
+            switch(code) {
+                case 1:
+                    rc = "no network";
+                    break;
+                case 2:
+                    rc = "mandated backoff";
+                    break;
+                case 3:
+                    rc = "stopping";
+                    break;
+                case 4:
+                    rc = "cannot resolve address";
+                    break;
+                case 5:
+                    rc = "connection timeout";
+                    break;
+                case 6:
+                    rc = "connection failed";
+                    break;
+                case 7:
+                    rc = "TLS error";
+                    break;
+                default:
+                    rc = "Unknown code " + code;
+                    break;
+            }
+        }
+        catch (Exception ignored) {
+            rc = "?";
+        }
+
+        return rc;
+    }
+
+    @Override
+    public void onRallypointConnectionPausing(String id, String eventExtraJson) {
+        runOnUiThread(() -> {
+            StringBuilder sb = new StringBuilder("RP connection waiting for network");
+
+            int msToNextConnectionAttempt = -1;
+            String reason = null;
+
+            try {
+                JSONObject jo = new JSONObject(eventExtraJson);
+                msToNextConnectionAttempt = jo.getJSONObject("rallypointConnectionDetail").getInt("msToNextConnectionAttempt");
+                reason = reasonFromRpNotification(jo);
+            }
+            catch (Exception ignored) {
+                msToNextConnectionAttempt = -1;
+                reason = null;
+            }
+
+            if(msToNextConnectionAttempt > 0)
+            {
+                sb.append(" (").append(msToNextConnectionAttempt).append(" ms)");
+            }
+            if(!Utils.isEmptyString(reason)) {
+                sb.append(" (").append(reason).append(")");
+            }
+
+            updateRallypointBar(sb.toString(), R.drawable.rp_bar_background_paused);
+            logThis(sb.toString());
+        });
+    }
+
+    @Override
+    public void onRallypointConnectionConnecting(String id, String eventExtraJson) {
+        runOnUiThread(() -> {
+            updateRallypointBar("Connecting to " + id, R.drawable.rp_bar_background_connecting);
+            logThis("Connecting to " + id);
+        });
+    }
+
+    @Override
+    public void onRallypointConnectionConnected(String id, String eventExtraJson) {
+        runOnUiThread(() -> {
+            String protocol = null;
+            try {
+                JSONObject jo = new JSONObject(eventExtraJson);
+                protocol = jo.getJSONObject("rallypointConnectionDetail").getString("protocol");
+            }
+            catch (Exception ignored) {
+                protocol = "?";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Connected to ");
+            sb.append(protocol);
+            sb.append(":").append(id);
+            try {
+                JSONObject jo = new JSONObject(eventExtraJson);
+                int connectMs = connectMsFromRpNotification(jo);
+                sb.append(" (").append(connectMs).append(" ms)");
+            }
+            catch (Exception ignored)
+            {
+            }
+
+            updateRallypointBar(sb.toString(), R.drawable.rp_bar_background_connected);
+            logThis(sb.toString());
+        });
+    }
+
+    @Override
+    public void onRallypointConnectionDisconnected(String id, String eventExtraJson)  {
+        runOnUiThread(() -> {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("Disconnected from ").append(id);
+
+            try {
+                JSONObject jo = new JSONObject(eventExtraJson);
+                String reason = reasonFromRpNotification(jo);
+                sb.append(reason != null ? " (" + reason + ")" : "");
+            }
+            catch (Exception ignored) {
+            }
+
+            updateRallypointBar(sb.toString(), R.drawable.rp_bar_background_disconnected);
+            logThis(sb.toString());
+        });
+    }
+
+    @Override
+    public void onRallypointConnectionRtt(String id, String eventExtraJson) {
+        runOnUiThread(() -> {
+            //updateRallypointBar(rtMs + " ms RTT to " + id, R.drawable.rp_bar_background_connected);
+            //logThis(rtMs + " ms RTT to " + id);
+        });
+    }
+
+    @Override
+    public void onGroupJoined(String id) {
+        runOnUiThread(() -> {
+            logThis("Joined group " + id);
+        });
+    }
+
+    @Override
+    public void onGroupLeft(String id) {
+        runOnUiThread(() -> {
+            logThis("Left group " + id);
+        });
+    }
+
+    @Override
+    public void onGroupConnected(String id) {
+        runOnUiThread(() -> {
+            logThis("Connected to group " + id);
+        });
+    }
+
+    @Override
+    public void onGroupDisconnected(String id) {
+        runOnUiThread(() -> {
+            logThis("Disconnected from group " + id);
+        });
+    }
 
     private class TimelineEventPlayerTracker
     {
@@ -159,133 +324,6 @@ public class SimpleUiMainActivity
 
     TimelineEventPlayerTracker _timelineEventPlayerTracker = new TimelineEventPlayerTracker();
 
-
-    @Override
-    public void onMapReady(final GoogleMap googleMap)
-    {
-        runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                _map = googleMap;
-                applySavedMapSettings();
-                positionCameraToAllNodes();
-                //onAnyPresenceModificationWhichIsVeryUnoptimizedAndNeedsFixing();
-            }
-        });
-    }
-
-    private void applySavedMapSettings()
-    {
-        _map.getUiSettings().setMyLocationButtonEnabled(true);
-        _map.getUiSettings().setAllGesturesEnabled(true);
-        _map.getUiSettings().setCompassEnabled(true);
-        _map.getUiSettings().setScrollGesturesEnabled(true);
-        _map.getUiSettings().setZoomControlsEnabled(true);
-        _map.getUiSettings().setZoomGesturesEnabled(true);
-        _map.getUiSettings().setTiltGesturesEnabled(true);
-        _map.getUiSettings().setIndoorLevelPickerEnabled(true);
-        _map.getUiSettings().setRotateGesturesEnabled(true);
-        _map.getUiSettings().setAllGesturesEnabled(true);
-        _map.getUiSettings().setMapToolbarEnabled(true);
-
-        _map.setIndoorEnabled(true);
-        _map.setBuildingsEnabled(true);
-        _map.setTrafficEnabled(true);
-
-        try
-        {
-            _map.setMyLocationEnabled(true);
-        }
-        catch (SecurityException se)
-        {
-            se.printStackTrace();
-        }
-
-        _map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-        float lat = Globals.getSharedPreferences().getFloat(PreferenceKeys.MAP_OPTION_CAM_LAT, Float.NaN);
-        float lon = Globals.getSharedPreferences().getFloat(PreferenceKeys.MAP_OPTION_CAM_LON, Float.NaN);
-
-        if(!Float.isNaN(lat) && !Float.isNaN(lon))
-        {
-            CameraPosition.Builder builder = new CameraPosition.Builder();
-            builder.target(new LatLng((double)lat, (double)lon));
-
-            /*
-            float v;
-
-            v = Globals.getSharedPreferences().getFloat(PreferenceKeys.MAP_OPTION_CAM_TILT, Float.NaN);
-            if(!Float.isNaN(v))
-            {
-                builder.tilt(v);
-            }
-
-            v = Globals.getSharedPreferences().getFloat(PreferenceKeys.MAP_OPTION_CAM_BEARING, Float.NaN);
-            if(!Float.isNaN(v))
-            {
-                builder.bearing(v);
-            }
-
-            v = Globals.getSharedPreferences().getFloat(PreferenceKeys.MAP_OPTION_CAM_ZOOM, Float.NaN);
-            if(!Float.isNaN(v))
-            {
-                builder.zoom(v);
-            }
-            */
-
-            CameraPosition cp = builder.build();
-            _map.animateCamera(CameraUpdateFactory.newCameraPosition(cp));
-
-            // We're positioning from here so make sure it doesn't get overriden
-            _firstCameraPositioningDone = true;
-        }
-    }
-
-    private void positionCameraToAllNodes()
-    {
-        runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if(_map != null)
-                {
-                    try
-                    {
-                        if (_mapTrackers.size() > 0 && _map != null)
-                        {
-                            boolean found = false;
-                            LatLngBounds.Builder bld = new LatLngBounds.Builder();
-
-                            for (MapTracker t : _mapTrackers.values())
-                            {
-                                if (t._marker != null)
-                                {
-                                    bld.include(t._marker.getPosition());
-                                    found = true;
-                                }
-                            }
-
-                            if (found)
-                            {
-                                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bld.build(), 100);
-                                _map.animateCamera(cu);
-                            }
-
-                            _firstCameraPositioningDone = true;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
-
     @Override
     public void onActiveAudioDeviceChanged(EngageApplication.ActiveAudioDevice dev)
     {
@@ -297,272 +335,78 @@ public class SimpleUiMainActivity
     public void onPresenceAdded(PresenceDescriptor pd)
     {
         //Globals.getLogger().e(TAG, "onPresenceAdded: " + pd.nodeId + ", " + pd.displayName);
-        updateMap();
+        //updateMap();
     }
 
     @Override
     public void onPresenceChange(PresenceDescriptor pd)
     {
         //Globals.getLogger().e(TAG, "onPresenceChange: " + pd.nodeId + ", " + pd.displayName);
-        updateMap();
+        //updateMap();
     }
 
     @Override
     public void onPresenceRemoved(PresenceDescriptor pd)
     {
         //Globals.getLogger().e(TAG, "onPresenceRemoved: " + pd.nodeId + ", " + pd.displayName);
-        updateMap();
+        //updateMap();
     }
 
-    private void updateTrackerTitle(MapTracker t)
-    {
-        // See what we can use as a title
-        String title = "";
-
-        if(!Utils.isEmptyString(t._pd.displayName))
-        {
-            title = t._pd.displayName;
-        }
-        else if(!Utils.isEmptyString(t._pd.userId))
-        {
-            title = t._pd.userId;
-        }
-        else
-        {
-            title = t._pd.nodeId;
-        }
-
-        if(Utils.isEmptyString(t._title))
-        {
-            t._title = title;
-            t._locationChanged = true;
-        }
-        else
-        {
-            if(t._marker != null)
-            {
-                String existingTitle = t._marker.getTitle();
-                if(existingTitle.compareTo(t._title) != 0)
-                {
-                    t._title = title;
-                    t._locationChanged = true;
+    public static void listFilesRecursively(File dir) {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        // Recurse into subdirectory
+                        listFilesRecursively(file);
+                    } else {
+                        // It's a file, print its path
+                        System.out.println("#DBG# File: " + file.getAbsolutePath());
+                    }
                 }
             }
         }
     }
 
-    public static BitmapDescriptor getBitmapFromVector(@NonNull Context context,
-                                                       @DrawableRes int vectorResourceId,
-                                                       @ColorInt int tintColor)
-    {
+    public void listInstalledNativeLibraries(Context context) {
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        String nativeLibraryDir = appInfo.nativeLibraryDir;
 
-        Drawable vectorDrawable = ResourcesCompat.getDrawable(context.getResources(), vectorResourceId, null);
-
-        if (vectorDrawable == null)
-        {
-            Globals.getLogger().e(TAG, "Requested vector resource was not found");
-            return BitmapDescriptorFactory.defaultMarker();
+        if (nativeLibraryDir == null) {
+            Log.e(TAG, "#DBG# Native library directory is null. This might happen on older Android versions or if no native libs are packaged.");
+            // On very old Android versions (before Lollipop), native libraries were extracted
+            // to a different location (often within the data directory, e.g., /data/data/your.package/lib).
+            // Or, if your app truly has no native libraries packaged for the device's ABI, this could be null.
+            // You might also try checking appInfo.dataDir + "/lib" as a fallback for very old systems,
+            // but nativeLibraryDir is the standard way.
+            return;
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        //Bitmap bitmap = Bitmap.createBitmap(60, 100, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        //DrawableCompat.setTint(vectorDrawable, tintColor);
-        vectorDrawable.draw(canvas);
+        Log.i(TAG, "#DBG# Native Library Directory: " + nativeLibraryDir);
 
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
+        File libDir = new File(nativeLibraryDir);
+        if (libDir.exists() && libDir.isDirectory()) {
+            File[] libraryFiles = libDir.listFiles((dir, name) -> name.endsWith(".so"));
 
-    private void updateMap()
-    {
-        runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                if(_map == null)
-                {
-                    return;
+            if (libraryFiles != null && libraryFiles.length > 0) {
+                Log.i(TAG, "#DBG# Found Native Libraries (.so files):");
+                for (File libFile : libraryFiles) {
+                    Log.i(TAG, "#DBG#  - " + libFile.getName() + " (Size: " + libFile.length() + " bytes)");
                 }
-
-                ArrayList<PresenceDescriptor> nodes = Globals.getEngageApplication().getMissionNodes(null);
-
-                if(nodes != null)
-                {
-                    // Let's assume they're all gone
-                    for(MapTracker t : _mapTrackers.values())
-                    {
-                        t._gone = true;
-                        t._removeFromMap = false;
-                    }
-
-                    for (PresenceDescriptor pd : nodes)
-                    {
-                        MapTracker t = _mapTrackers.get(pd.nodeId);
-
-                        // We found him
-                        if(t != null)
-                        {
-                            t._pd = pd;
-                            t._gone = false;
-
-                            // If he has no location, clear out our positioning for him
-                            if(pd.location == null)
-                            {
-                                if(t._marker != null)
-                                {
-                                    t._removeFromMap = true;
-                                }
-
-                                t._lastLatLng = null;
-                                t._latLng = null;
-                                t._locationChanged = false;
-                            }
-                            else
-                            {
-                                // He has a location, do our updates
-                                t._latLng = new LatLng(pd.location.getLatitude(), pd.location.getLongitude());
-
-                                // If we don't have a last position, then make it
-                                if(t._lastLatLng == null)
-                                {
-                                    t._lastLatLng = new LatLng(pd.location.getLatitude(), pd.location.getLongitude());
-                                    t._locationChanged = true;
-                                }
-                                else
-                                {
-                                    if (t._lastLatLng.latitude == t._latLng.latitude &&
-                                            t._lastLatLng.longitude == t._latLng.longitude)
-                                    {
-                                        t._locationChanged = false;
-                                    }
-                                    else
-                                    {
-                                        t._locationChanged = true;
-                                        t._lastLatLng = new LatLng(t._latLng.latitude, t._latLng.longitude);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // This is a new guy
-                            t = new MapTracker();
-                            t._pd = pd;
-
-                            // Setup location goodies for him
-                            if (pd.location != null)
-                            {
-                                // Update the title
-                                updateTrackerTitle(t);
-
-                                t._latLng = new LatLng(pd.location.getLatitude(), pd.location.getLongitude());
-                                t._lastLatLng = new LatLng(t._latLng.latitude, t._latLng.longitude);
-                                t._locationChanged = true;
-                            }
-
-                            _mapTrackers.put(pd.nodeId, t);
-                        }
-                    }
-
-                    // Now, let's process our trackers
-                    ArrayList<MapTracker> trash = new ArrayList<>();
-                    for(MapTracker t : _mapTrackers.values())
-                    {
-                        if(t._gone)
-                        {
-                            if(_map != null && t._marker != null)
-                            {
-                                t._marker.remove();
-                            }
-
-                            trash.add(t);
-                        }
-                        else
-                        {
-                            // First, see if he needs to be removed from the map
-                            if(t._removeFromMap)
-                            {
-                                t._marker.remove();
-                                t._marker = null;
-                            }
-                            else
-                            {
-                                if(t._locationChanged)
-                                {
-                                    // We don't yet have a marker for
-                                    if(t._marker == null)
-                                    {
-                                        MarkerOptions opt = new MarkerOptions();
-                                        opt.position(t._latLng);
-                                        opt.title(t._title);
-
-                                        // TODO: custom map markers based on node type
-
-                                        // Our marker will come up in red, others in violet
-                                        if(t._pd.self)
-                                        {
-                                            opt.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                                        }
-                                        else
-                                        {
-                                            opt.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
-                                        }
-
-                                        t._marker = _map.addMarker(opt);
-                                    }
-                                    else
-                                    {
-                                        // We need to update the marker position
-                                        t._marker.setPosition(t._latLng);
-                                    }
-                                }
-
-                                if(t._marker != null)
-                                {
-                                    if(t._pd.self)
-                                    {
-                                        if(_anyTxActive)
-                                        {
-                                            //t._marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-                                            t._marker.setIcon(getBitmapFromVector(SimpleUiMainActivity.this, R.drawable.ic_map_marker_generic, 0));
-                                        }
-                                        else
-                                        {
-                                            t._marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    // Take out the trash
-                    for(MapTracker t : trash)
-                    {
-                        _mapTrackers.remove(t);
-                    }
-                }
-                else
-                {
-                    // No nodes but we have trackers, take 'em out
-                    if (_mapTrackers.size() > 0 && _map != null)
-                    {
-                        for(MapTracker t : _mapTrackers.values())
-                        {
-                            if(t._marker != null)
-                            {
-                                t._marker.remove();
-                            }
-                        }
-                    }
-
-                    _mapTrackers.clear();
-                }
+            } else {
+                Log.w(TAG, "#DBG# No .so files found in the native library directory for this ABI.");
+                Log.w(TAG, "#DBG# This could mean they were stripped, or your app doesn't include JNI libs for the device's architecture.");
             }
-        });
+        } else {
+            Log.e(TAG, "#DBG# Native library directory does not exist or is not a directory: " + nativeLibraryDir);
+        }
+
+        // For context, also log the primary ABI of the device
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Log.i(TAG, "#DBG# Supported ABIs by device: " + Arrays.toString(android.os.Build.SUPPORTED_ABIS));
+            //Log.i(TAG, "Primary ABI for this app install (picked by system): " + appInfo. .primaryCpuAbi);
+        }
     }
 
     @Override
@@ -575,6 +419,9 @@ public class SimpleUiMainActivity
             Toast.makeText(this, "App restarted after crash", Toast.LENGTH_SHORT).show();
         }
         */
+
+        listInstalledNativeLibraries(this);
+        //listFilesRecursively(this.
 
         Globals.getLogger().d(TAG, "onCreate");
 
@@ -621,6 +468,26 @@ public class SimpleUiMainActivity
             else
             {
                 setContentView(R.layout.activity_main_single);
+                RecyclerView recyclerView = null;
+                boolean devModeActive = Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false);
+                if(devModeActive)
+                {
+                    recyclerView = findViewById(R.id.logRecyclerView);
+                }
+
+                if(recyclerView != null)
+                {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    View fragmentContainer = findViewById(R.id.card1);
+                    if(fragmentContainer != null)
+                    {
+                        ViewGroup.LayoutParams params = fragmentContainer.getLayoutParams();
+                        params.height = 200;
+                        fragmentContainer.setLayoutParams(params);
+                    }
+
+                    _onscreenLogger = new OnscreenLogger(this, recyclerView);
+                }
             }
         }
         else if (_ac.getUiMode() == Constants.UiMode.vMulti)
@@ -662,6 +529,8 @@ public class SimpleUiMainActivity
 
         restoreSavedState(savedInstanceState);
 
+        registerWithApp();
+
         if(assignGroupsToFragments() == 0)
         {
             runOnUiThread(new Runnable() {
@@ -686,18 +555,6 @@ public class SimpleUiMainActivity
 
         setupMainScreen();
         redrawPttButton();
-
-        _firstCameraPositioningDone = true;
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        if(mapFragment != null)
-        {
-            String googleMapsApiKey = Utils.getMetaData("com.google.android.geo.API_KEY");//NON-NLS
-            if(!Utils.isEmptyString(googleMapsApiKey))
-            {
-                mapFragment.getMapAsync(this);
-            }
-        }
 
         // Use the group selector if we have it
         _groupSelectorAdapter = null;
@@ -740,11 +597,12 @@ public class SimpleUiMainActivity
         super.onResume();
         Globals.getEngageApplication().ensureAllIsGood();
         setLockScreenSettings();
-        registerWithApp();
+        //registerWithApp();
         updateLicensingBar();
         updateBiometricsIconDisplay();
         fixPttSize();
         updateTopIcons();
+        onConnectivityChanged();
     }
 
     @Override
@@ -755,7 +613,7 @@ public class SimpleUiMainActivity
         stopTimelineAudioPlayer();
         stopAllTx();
         cancelTimers();
-        unregisterFromApp();
+        //unregisterFromApp();
     }
 
     @Override
@@ -772,6 +630,7 @@ public class SimpleUiMainActivity
     protected void onDestroy()
     {
         Globals.getLogger().d(TAG, "onDestroy");//NON-NLS
+        unregisterFromApp();
         stopTimelineAudioPlayer();
         stopAllTx();
         cancelTimers();
@@ -1084,6 +943,36 @@ public class SimpleUiMainActivity
         Globals.getEngageApplication().endTx();
     }
 
+    private void updateConnectivityBar()
+    {
+        runOnUiThread(() -> {
+            View v = findViewById(R.id.tvSubtitleBar);
+            if(v != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(Globals.getEngageApplication().getCurrentConnectivityDescription());
+                ((TextView)v).setText(sb.toString());
+            }
+        });
+    }
+
+    private void updateRallypointBar(final String msg, final int backgroundResourceId)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                View v = findViewById(R.id.tvRallypointBar);
+                if(v != null)
+                {
+                    ((TextView)v).setText(msg);
+                    v.setBackground(ContextCompat.getDrawable(SimpleUiMainActivity.this, backgroundResourceId));
+                    v.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
     private void showNotificationBar(final String msg)
     {
         runOnUiThread(new Runnable()
@@ -1374,7 +1263,7 @@ public class SimpleUiMainActivity
         _anyTxPending = true;
         redrawPttButton();
         redrawCardFragments();
-        updateMap();
+        //updateMap();
     }
 
     @Override
@@ -1398,7 +1287,7 @@ public class SimpleUiMainActivity
 
         redrawPttButton();
         redrawCardFragments();
-        updateMap();
+        //updateMap();
     }
 
     @Override
@@ -1550,6 +1439,8 @@ public class SimpleUiMainActivity
         Globals.getEngageApplication().addPresenceChangeListener(this);
         Globals.getEngageApplication().addGroupTextMessageListener(this);
         Globals.getEngageApplication().addAudioDeviceListener(this);
+        Globals.getEngageApplication().addConnectivityChangeListener(this);
+        Globals.getEngageApplication().addGroupStatusChangeListener(this);
     }
 
     private void unregisterFromApp()
@@ -1562,6 +1453,8 @@ public class SimpleUiMainActivity
         Globals.getEngageApplication().removePresenceChangeListener(this);
         Globals.getEngageApplication().removeGroupTextMessageListener(this);
         Globals.getEngageApplication().removeAudioDeviceListener(this);
+        Globals.getEngageApplication().removeConnectivityChangeListener(this);
+        Globals.getEngageApplication().removeGroupStatusChangeListener(this);
     }
 
     private void saveState(Bundle bundle)
@@ -2087,17 +1980,6 @@ public class SimpleUiMainActivity
 
             ((TextView)convertView.findViewById(R.id.tvDisplayName)).setText(item.friendlyName);
 
-            convertView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    Intent intent = new Intent(_ctx, UserNodeViewActivity.class);
-                    intent.putExtra(UserNodeViewActivity.EXTRA_NODE_ID, item.nodeId);
-                    startActivity(intent);
-                }
-            });
-
             return convertView;
         }
     }
@@ -2265,18 +2147,18 @@ public class SimpleUiMainActivity
         startActivityForResult(intent, Constants.SETTINGS_REQUEST_CODE);
     }
 
-    private void startMapActivity()
-    {
-        Globals.getEngageApplication().logEvent(Analytics.VIEW_MAP);
-        Intent intent = new Intent(this, MapActivity.class);
-        startActivity(intent);
-    }
-
     private void startCertificateStoresListActivity()
     {
         Globals.getEngageApplication().logEvent(Analytics.VIEW_CERTIFICATES);
         Intent intent = new Intent(this, CertStoreListActivity.class);
         startActivityForResult(intent, Constants.CERTIFICATE_MANAGER_REQUEST_CODE);
+    }
+
+    private void startPasswordsListActivity()
+    {
+        Globals.getEngageApplication().logEvent(Analytics.VIEW_PASSWORDS);
+        Intent intent = new Intent(this, PasswordListActivity.class);
+        startActivityForResult(intent, Constants.PASSWORD_MANAGER_REQUEST_CODE);
     }
 
     private void requestGroupTimeline(String groupId)
@@ -2652,7 +2534,16 @@ public class SimpleUiMainActivity
 
                 if (_ac.getUseRp())
                 {
-                    msg = String.format(getString(R.string.currently_connected_globally_fmt), _ac.getRpAddress(), _ac.getRpPort());
+                    String protocol = "";
+                    if(_ac.getRpProtocol() == 0)
+                    {
+                        protocol = "tcp";
+                    }
+                    else if(_ac.getRpProtocol() == 1)
+                    {
+                        protocol = "wss";
+                    }
+                    msg = String.format(getString(R.string.currently_connected_globally_fmt), protocol, _ac.getRpAddress(), _ac.getRpPort());
                     alertDialogBuilder.setPositiveButton(getString(R.string.go_local), new DialogInterface.OnClickListener()
                     {
                         @Override
@@ -2872,7 +2763,6 @@ public class SimpleUiMainActivity
 
     public void onClickMapIcon(View view)
     {
-        startMapActivity();
     }
 
     public void onClickTimelineIcon(View view)
@@ -2902,6 +2792,22 @@ public class SimpleUiMainActivity
 
 
     public void onClickTitleBar(View view)
+    {
+        LinearLayout ll = findViewById(R.id.layTechbars);
+        if(ll != null) {
+            if(ll.getVisibility() == View.VISIBLE) {
+                ll.setVisibility(View.GONE);
+            } else {
+                ll.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    public void onClickSubtitleBar(View view)
+    {
+    }
+
+    public void onClickRallypointBar(View view)
     {
     }
 
@@ -3193,7 +3099,7 @@ public class SimpleUiMainActivity
                         setVal = Globals.getContext().getResources().getString(R.string.show_priority_icon_on_app_multi_view);
                     }
 
-                    changeAppPriorityIconVisibility = (setVal == visVal);
+                    changeAppPriorityIconVisibility = (setVal.equals(visVal));
 
                     // If we're idle and in multi-group view, then show/hide the PTT button based on whether any groups have been selected for TX
                     if(Globals.getEngageApplication().getActiveConfiguration().anyGroupsSelectedForTx())
@@ -3346,8 +3252,13 @@ public class SimpleUiMainActivity
                 .setVisible(Globals.getSharedPreferences().getBoolean(PreferenceKeys.ADVANCED_MODE_ACTIVE, false));
 
         // Set visibility for developer options
+        boolean devModeActive = Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false);
         popup.getMenu().findItem(R.id.action_dev_test)
-                .setVisible(Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false));
+            .setVisible(devModeActive);
+        popup.getMenu().findItem(R.id.action_clear_log)
+                .setVisible(devModeActive);
+        popup.getMenu().findItem(R.id.action_save_log)
+                .setVisible(devModeActive);
 
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
         {
@@ -3387,11 +3298,37 @@ public class SimpleUiMainActivity
                     verifyDisconnect();
                     return true;
                 }
+                else if (id == R.id.action_certificate_stores)
+                {
+                    startCertificateStoresListActivity();
+                    return true;
+                }
+                else if (id == R.id.action_passwords)
+                {
+                    startPasswordsListActivity();
+                    return true;
+                }
+                else if (id == R.id.action_clear_log)
+                {
+                    if(_onscreenLogger != null) {
+                        _onscreenLogger.clear();
+                    }
+                    return true;
+                }
+                else if (id == R.id.action_save_log)
+                {
+                    if(_onscreenLogger != null) {
+                        _onscreenLogger.saveToFile();
+                    }
+                    return true;
+                }
+                /*
                 else if (id == R.id.action_security)
                 {
                     startCertificateStoresListActivity();
                     return true;
                 }
+                */
 
                 return false;
             }
@@ -3760,6 +3697,14 @@ public class SimpleUiMainActivity
                     rc = getString(R.string.tx_status_reason_invalid_group_id);
                     break;
 
+                case txEndedWithFailure:
+                    rc = "TX ended in failure";
+                    break;
+
+                case othersActive:
+                    rc = "Others are already transmitting";
+                    break;
+
                 case undefined:
                 default:
                     rc = getString(R.string.tx_status_reason_unknown);
@@ -3913,5 +3858,13 @@ public class SimpleUiMainActivity
                 e.printStackTrace();
             }
         }
+    }
+
+    private void logThis(String msg) {
+        runOnUiThread(() -> {
+            if(_onscreenLogger != null) {
+                _onscreenLogger.addLine(msg);
+            }
+        });
     }
 }

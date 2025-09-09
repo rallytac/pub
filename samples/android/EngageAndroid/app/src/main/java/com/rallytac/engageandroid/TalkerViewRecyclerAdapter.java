@@ -12,8 +12,6 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.rallytac.engage.engine.Engine;
-
 import java.util.ArrayList;
 import java.util.List;
 

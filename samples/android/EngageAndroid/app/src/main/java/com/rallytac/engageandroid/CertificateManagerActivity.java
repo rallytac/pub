@@ -6,9 +6,10 @@
 package com.rallytac.engageandroid;
 
 import android.os.Bundle;
+import android.view.MenuItem;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.MenuItem;
 
 public class CertificateManagerActivity extends AppCompatActivity
 {

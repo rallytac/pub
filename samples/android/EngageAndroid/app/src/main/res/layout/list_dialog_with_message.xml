@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="10dp"
         android:paddingTop="15dp"
-        android:text="some text"
+        android:text="@string/some_text"
         android:textAppearance="?android:attr/textAppearanceListItem"
         android:textColor="@android:color/black"
         android:textSize="18sp" />

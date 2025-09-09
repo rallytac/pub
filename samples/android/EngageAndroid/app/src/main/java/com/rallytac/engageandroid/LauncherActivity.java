@@ -5,6 +5,8 @@
 
 package com.rallytac.engageandroid;
 
+import static com.rallytac.engageandroid.PowerSaverHelper.prepareIntentForWhiteListingOfBatteryOptimization;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,11 +18,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -29,15 +26,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
-
-import static com.rallytac.engageandroid.PowerSaverHelper.prepareIntentForWhiteListingOfBatteryOptimization;
 
 public class LauncherActivity extends AppCompatActivity
 {
@@ -82,7 +78,15 @@ public class LauncherActivity extends AppCompatActivity
             setFlavorDefaults();
         }
 
-        // Launcher has been run before :)
+        // If we have no current user certstore, then use the internal default certstore
+        String currentUserCertstoreFn = Globals.getSharedPreferences().getString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, "");
+        if(Utils.isEmptyString(currentUserCertstoreFn))
+        {
+            String csCachePath = Globals.getEngageApplication().getCertStoreCacheDir();
+            String finalFn = csCachePath + "/" + Constants.INTERNAL_DEFAULT_CERTSTORE_FN;
+            Globals.getSharedPreferencesEditor().putString(PreferenceKeys.USER_CERT_STORE_FILE_NAME, finalFn);
+        }
+
         Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.LAUNCHER_RUN_BEFORE, true);
         Globals.getSharedPreferencesEditor().apply();
 
@@ -344,32 +348,6 @@ public class LauncherActivity extends AppCompatActivity
         }
     }
 
-
-    public boolean checkPlayServices(Activity activity)
-    {
-        // Do we even have Google Play services here?
-        final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(activity);
-
-        if (resultCode != ConnectionResult.SUCCESS)
-        {
-            if (apiAvailability.isUserResolvableError(resultCode))
-            {
-                //apiAvailability.getErrorDialog(activity, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            }
-            else
-            {
-                Globals.getLogger().e(TAG, "This device is not supported.");//NON-NLS
-                showIssueAndFinish(getString(R.string.title_google_play_services_error), getString(R.string.google_play_services_not_installed_or_out_of_date));
-            }
-
-            return false;
-        }
-
-        return true;
-    }
-
     private void checkForPermissions()
     {
         /*
@@ -610,6 +588,38 @@ public class LauncherActivity extends AppCompatActivity
 
     private void startEngineWhenServiceIsOnline()
     {
+        Globals.getEngageApplication().onEngineServiceOnline();
+        if(Globals.getEngageApplication().wasSampleMissionCreatedAndInUse())
+        {
+            runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    AlertDialog dlg = new AlertDialog.Builder(LauncherActivity.this)
+                            .setTitle(R.string.sample_mission_created_title)
+                            .setMessage(R.string.sample_mission_created_msg)
+                            .setCancelable(false)
+                            .setPositiveButton(getString(R.string.button_ok), new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i)
+                                {
+                                    launchUiActivity();
+                                }
+                            }).create();
+
+                    dlg.show();
+                }
+            });
+        }
+        else
+        {
+            launchUiActivity();
+        }
+
+
+        /*
         long tmrDelay;
         long tmrPeriod;
 
@@ -625,6 +635,7 @@ public class LauncherActivity extends AppCompatActivity
         }
 
         _waitForEngageOnlineTimer = new Timer();
+
         _waitForEngageOnlineTimer.scheduleAtFixedRate(new TimerTask()
         {
             @Override
@@ -665,5 +676,6 @@ public class LauncherActivity extends AppCompatActivity
                 }
             }
         }, tmrDelay, tmrPeriod);
+        */
     }
 }

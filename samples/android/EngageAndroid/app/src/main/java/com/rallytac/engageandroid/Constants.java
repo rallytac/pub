@@ -50,7 +50,10 @@ public class Constants
 
     public final static boolean DEF_USE_RP = false;
     public final static String DEF_RP_ADDRESS = "";
-    public final static int DEF_RP_PORT = 7443;
+    public final static int DEF_RP_TCP_PORT = 7443;
+    public final static int DEF_RP_WS_PORT = 8443;
+
+    public final static int DEF_RP_PROTOCOL = 0;
 
     public final static String DEF_BINDING_NIC_NAME = "wlan0";//NON-NLS
 
@@ -60,7 +63,6 @@ public class Constants
     public final static String DEF_USER_ALIAS_ID = "";
 
     public final static boolean DEF_LOCATION_ENABLED = true;
-    public final static int DEF_LOCATION_ACCURACY = MyLocationManager.PRIORITY_BALANCED_POWER_ACCURACY;
     public final static int DEF_LOCATION_INTERVAL_SECS = 60;
     public final static int DEF_LOCATION_MIN_INTERVAL_SECS = 60;
     public final static float DEF_LOCATION_MIN_DISPLACEMENT = (float)5.0;
@@ -132,6 +134,7 @@ public class Constants
     public final static int DEF_SPEAKER_AGC_TARGET_DB = 3;
 
     public final static String INTERNAL_DEFAULT_CERTSTORE_FN = "{7662214c-e79e-436f-8e93-7cf75cbac682}.certstore";//NON-NLS
+    public final static String RTS_FACTORY_CERTSTORE_FN = "{9469eae5-3024-429b-b383-de8936a04d70}.certstore";//NON-NLS
 
     public final static String EPT_ELEMENT_NAME = "ept";//NON-NLS
     public final static int EPT_STATIC_VALUE = 100;
@@ -160,10 +163,13 @@ public class Constants
 
     public final static int PICK_ENTERPRISE_ID_FILE_REQUEST_CODE = 57;
     public final static int PICK_QR_ENTERPRISE_ID_FILE_REQUEST_CODE = 58;
+    public final static int PASSWORD_MANAGER_REQUEST_CODE = 59;
 
     public final static int KEYCODE_PTT_MODE_NONE = 0;
     public final static int KEYCODE_PTT_MODE_PUSH_ON_AT_FIRST_REPEAT_RELEASE_OFF = 1;
     public final static int KEYCODE_PTT_MODE_PUSH_ON_PUSH_OFF = 2;
 
     public final static int DEFAULT_CROSS_MUTE_LOCATION_ID = 0;
+
+    public final static boolean DEF_KEEP_PTT_MUTED_ON_TX = false;
 }

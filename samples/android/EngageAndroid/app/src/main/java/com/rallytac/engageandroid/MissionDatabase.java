@@ -132,6 +132,7 @@ public class MissionDatabase
             mission._useRp = ac.getUseRp();
             mission._rpAddress = ac.getRpAddress();
             mission._rpPort = ac.getRpPort();
+            mission._rpProtocol = ac.getRpProtocol();
 
             // Presence
             for (GroupDescriptor gd : ac.getMissionGroups())

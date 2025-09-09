@@ -7,16 +7,23 @@ package com.rallytac.engageandroid;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.text.InputFilter;
-import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -26,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class TextMessagingFragment extends Fragment
 {
@@ -37,6 +45,13 @@ public class TextMessagingFragment extends Fragment
     private MessageAdapter _adapter;
     private EditText _etTextMessage = null;
     private ArrayList<TextMessage> _messageList = new ArrayList<>();
+    private ImageView _ivDictateTextMessage = null;
+
+    private SpeechRecognizer _speechRecognizer;
+    private boolean _isListening = false;
+    private String _provisionalText = "";
+    private DictationBubblePopup _dictationBubblePopup = null;
+
 
     public void setGroupDescriptor(GroupDescriptor gd)
     {
@@ -131,7 +146,45 @@ public class TextMessagingFragment extends Fragment
 
             return convertView;
         }
+    }
 
+    private String getSpeechRecognizerErrorMessage(int errorCode)
+    {
+        switch (errorCode)
+        {
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                return "Network timeout";
+            case SpeechRecognizer.ERROR_NETWORK:
+                return "Network error";
+            case SpeechRecognizer.ERROR_AUDIO:
+                return "Audio recording error";
+            case SpeechRecognizer.ERROR_SERVER:
+                return "Server error";
+            case SpeechRecognizer.ERROR_CLIENT:
+                return "Client-side error";
+            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                return "No speech input detected";
+            case SpeechRecognizer.ERROR_NO_MATCH:
+                return "No recognition match";
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                return "Speech recognizer is busy";
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                return "Insufficient permissions";
+            case SpeechRecognizer.ERROR_TOO_MANY_REQUESTS:
+                return "Too many requests";
+            case SpeechRecognizer.ERROR_SERVER_DISCONNECTED:
+                return "Server disconnected";
+            case SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED:
+                return "Language not supported";
+            case SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE:
+                return "Language unavailable";
+            case SpeechRecognizer.ERROR_CANNOT_CHECK_SUPPORT:
+                return "Cannot check support";
+            case SpeechRecognizer.ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS:
+                return "Cannot listen to download events";
+            default:
+                return "Unknown error " + errorCode;
+        }
     }
 
     @Override
@@ -149,7 +202,107 @@ public class TextMessagingFragment extends Fragment
         _lvMessages = view.findViewById(R.id.lvTextMessages);
         _lvMessages.setAdapter(_adapter);
 
+        _speechRecognizer = SpeechRecognizer.createSpeechRecognizer(requireContext());
+        final Intent speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        speechIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+
+        _speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                showSpeechBubble(_ivDictateTextMessage);
+                _provisionalText = "";
+                updateSpeechBubble("Listening...");
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                _provisionalText = "";
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {}
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {}
+
+            @Override
+            public void onEndOfSpeech() {
+                dismissSpeechBubble();
+                _etTextMessage.setText(_provisionalText);
+            }
+
+            @Override
+            public void onError(int error) {
+                dismissSpeechBubble();
+                Toast.makeText(requireContext(), getSpeechRecognizerErrorMessage(error), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null && !matches.isEmpty()) {
+                    _etTextMessage.setText(matches.get(0));
+                }
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+                ArrayList<String> partialData = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (partialData != null && !partialData.isEmpty()) {
+                    _provisionalText = partialData.get(0);
+                    updateSpeechBubble(_provisionalText + "...");
+                }
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {}
+        });
+
+        _ivDictateTextMessage = view.findViewById(R.id.ivDictateTextMessage);
+        _ivDictateTextMessage.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (!_isListening) {
+                        _speechRecognizer.startListening(speechIntent);
+                        _isListening = true;
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    _speechRecognizer.stopListening();
+                    _isListening = false;
+                    dismissSpeechBubble();
+                    return true;
+            }
+            return false;
+
+        });
+
         return view;
+    }
+
+    private void showSpeechBubble(View anchorView) {
+        if (_dictationBubblePopup == null) {
+            _dictationBubblePopup = new DictationBubblePopup(requireContext());
+            _dictationBubblePopup.setMessage("...");
+            _dictationBubblePopup.setBubbleColor(Color.GREEN);
+
+            _dictationBubblePopup.show(anchorView, 150, -20);
+        }
+    }
+
+    private void updateSpeechBubble(String text) {
+        if (_dictationBubblePopup != null) {
+            _dictationBubblePopup.setMessage(text);
+        }
+    }
+
+    private void dismissSpeechBubble() {
+        if (_dictationBubblePopup != null) {
+            _dictationBubblePopup.dismiss();
+            _dictationBubblePopup = null;
+        }
     }
 
     @Override

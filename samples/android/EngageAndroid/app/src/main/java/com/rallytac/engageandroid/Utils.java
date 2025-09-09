@@ -7,6 +7,7 @@ package com.rallytac.engageandroid;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,11 +16,15 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
+import android.os.SystemClock;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -67,6 +72,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -78,6 +84,33 @@ import java.util.zip.GZIPOutputStream;
 public class Utils
 {
     private static String TAG = Utils.class.getSimpleName();
+    private static long _processStartTimeMillis = 0;
+
+    public static void init()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            _processStartTimeMillis = Process.getStartUptimeMillis();
+        }
+        else
+        {
+            Log.w(TAG, "Process.getStartUptimeMillis() not available on API level " + Build.VERSION.SDK_INT);
+            _processStartTimeMillis = -1;
+        }
+    }
+
+    public static long getProcessUptimeMillis()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {
+            long currentTimeMillis = SystemClock.elapsedRealtime();
+            return currentTimeMillis - _processStartTimeMillis;
+        }
+        else
+        {
+            return -1;
+        }
+    }
 
     public FileContentDescriptor getContentDescriptor(byte[] data)
     {
@@ -104,139 +137,6 @@ public class Utils
     public FileContentDescriptor getContentDescriptor(Uri uri)
     {
         return getContentDescriptor(Utils.readBinaryFile(Globals.getContext(), uri));
-
-        /*
-        FileContentDescriptor rc = null;
-
-        // First, let's see if this a JSON text file
-        try
-        {
-            String plainText = Utils.readTextFile(Globals.getEngageApplication().getApplicationContext(), uri);
-            if(!Utils.isEmptyString(plainText))
-            {
-                JSONObject jo = new JSONObject(plainText);
-                rc = new FileContentDescriptor(FileContentDescriptor.Type.fctJson, jo);
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            BufferedInputStream is = new BufferedInputStream(getContentResolver().openInputStream(uri));
-            Bitmap bm = BitmapFactory.decodeStream(is);
-            String dataString = Utils.qrCodeBitmapToString(bm);
-            Globals.getLogger().e(TAG, "dataString=" + dataString);
-
-            //if(dataString.startsWith(Constants.QR_CODE_HEADER))
-            {
-                byte[] base91DecodedBytes = Base91.decode(dataString.getBytes(Utils.getEngageCharSet()));
-                byte[] decompressed = Utils.inflate(base91DecodedBytes);
-                dataString = new String(decompressed, Utils.getEngageCharSet());
-                Globals.getLogger().e(TAG, "dataString=" + dataString);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        //byte[] base91DecodedBytes = Base91.decode(encryptedString.getBytes(Utils.getEngageCharSet()));
-
-        //qrCodeBitmapToString
-
-        return rc;
-        */
-    }
-
-    public static boolean deleteDirectory(String dirName)
-    {
-        try
-        {
-            File directoryToBeDeleted = new File(dirName);
-            File[] allContents = directoryToBeDeleted.listFiles();
-            if (allContents != null)
-            {
-                for (File file : allContents)
-                {
-                    deleteDirectory(file.getAbsolutePath());
-                }
-            }
-
-            return directoryToBeDeleted.delete();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public static void copyFileOrDirectory(String srcDir, String dstDir)
-    {
-        try
-        {
-            File src = new File(srcDir);
-            File dst = new File(dstDir, src.getName());
-
-            if (src.isDirectory())
-            {
-                String[] files = src.list();
-                int filesLength = files.length;
-                for (int i = 0; i < filesLength; i++)
-                {
-                    String src1 = (new File(src, files[i]).getPath());
-                    String dst1 = dst.getPath();
-                    copyFileOrDirectory(src1, dst1);
-                }
-            }
-            else
-            {
-                copyFile(src, dst);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static void copyFile(File sourceFile, File destFile) throws IOException
-    {
-        if (!destFile.getParentFile().exists())
-        {
-            destFile.getParentFile().mkdirs();
-        }
-
-        if (!destFile.exists())
-        {
-            destFile.createNewFile();
-        }
-
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try
-        {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-        }
-        finally
-        {
-            if (source != null)
-            {
-                source.close();
-            }
-
-            if (destination != null)
-            {
-                destination.close();
-            }
-        }
     }
 
     public static Charset getEngageCharSet()
@@ -399,18 +299,6 @@ public class Utils
 
         return rc;
     }
-
-    /*
-    public static void generateSampleMission(Context ctx)
-    {
-        ActiveConfiguration ac = new ActiveConfiguration();
-        ac.parseTemplate(getStringResource(ctx, R.raw.sample_mission_template));
-        String tmp = ac.makeTemplate().toString();
-
-        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_JSON, tmp);
-        Globals.getSharedPreferencesEditor().apply();
-    }
-    */
 
     public static boolean isValidMulticastAddress(String addr)
     {
@@ -607,7 +495,7 @@ public class Utils
                 // !!!!!!!!!! EXPERIMENTAL !!!!!!!!!!
 
 
-                rc.setUiMode(Constants.UiMode.values()[Globals.getSharedPreferences().getInt(PreferenceKeys.UI_MODE, Constants.DEF_UI_MODE.ordinal())]);
+                rc.setUiMode(Constants.UiMode.values()[Utils.getSafeSharedPreferencesInt(PreferenceKeys.UI_MODE, Constants.DEF_UI_MODE.ordinal())]);
                 rc.setShowTextMessaging(Globals.getSharedPreferences().getBoolean(PreferenceKeys.UI_SHOW_TEXT_MESSAGING, Constants.DEF_UI_SHOW_TEXT_MESSAGING));
 
                 rc.setNotifyOnNodeJoin(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_NOTIFY_NODE_JOIN, Constants.DEF_NOTIFY_NODE_JOIN));
@@ -637,6 +525,7 @@ public class Utils
 
                 rc.setAudioInputDeviceId(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_INPUT_DEVICE, Integer.toString(Constants.INVALID_AUDIO_DEVICE_ID))));
                 rc.setAudioOutputDeviceId(Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_AUDIO_OUTPUT_DEVICE, Integer.toString(Constants.INVALID_AUDIO_DEVICE_ID))));
+                rc.setKeepTxMutedOnPtt(Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_KEEP_PTT_MUTED_ON_TX, Constants.DEF_KEEP_PTT_MUTED_ON_TX));
 
                 if(rc.getUserAlias().isEmpty())
                 {
@@ -649,7 +538,7 @@ public class Utils
                 ActiveConfiguration.LocationConfiguration lc = new ActiveConfiguration.LocationConfiguration();
 
                 lc.enabled = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_LOCATION_SHARED, Constants.DEF_LOCATION_ENABLED);
-                lc.accuracy = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_LOCATION_ACCURACY, Integer.toString(Constants.DEF_LOCATION_ACCURACY)));
+                //lc.accuracy = Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_LOCATION_ACCURACY, Integer.toString(Constants.DEF_LOCATION_ACCURACY)));
                 lc.intervalMs = (Integer.parseInt(Globals.getSharedPreferences().getString(PreferenceKeys.USER_LOCATION_INTERVAL_SECS, Integer.toString(Constants.DEF_LOCATION_INTERVAL_SECS))) * 1000);
                 // TODO: figure out how to explain minIntervalMs in preference settings
                 lc.minIntervalMs = lc.intervalMs;
@@ -1139,14 +1028,14 @@ public class Utils
 
     public static Date javaDateFromUnixMilliseconds(long milliseconds)
     {
-        return new java.util.Date(milliseconds);
+        return new Date(milliseconds);
     }
 
     public static String formatDateUtc(Date dt)
     {
         try
         {
-            SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");//NON-NLS
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");//NON-NLS
             sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));//NON-NLS
             return sdf.format(dt);
         }
@@ -1251,100 +1140,6 @@ public class Utils
         return rc;
     }
 
-    /*
-    public static int intOpt(String s, int defaultValue)
-    {
-        int rc;
-
-        try
-        {
-            rc = Integer.parseInt(s);
-        }
-        catch (Exception e)
-        {
-            rc = defaultValue;
-        }
-
-        return rc;
-    }
-
-    public static boolean boolOpt(String s, boolean defaultValue)
-    {
-        boolean rc;
-
-        try
-        {
-            rc = (intOpt(s, defaultValue ? 0 : 1) != 0);
-        }
-        catch (Exception e)
-        {
-            rc = defaultValue;
-        }
-
-        return rc;
-    }
-
-    public static String stringOpt(String s, String defaultValue)
-    {
-        if(isEmptyString(s))
-        {
-            return defaultValue;
-        }
-        else
-        {
-            return s;
-        }
-    }
-
-    public static int intOpt(int resId, int defaultValue)
-    {
-        int rc;
-
-        try
-        {
-            rc = Globals.getContext().getResources().getInteger(resId);
-        }
-        catch (Exception e)
-        {
-            rc = defaultValue;
-        }
-
-        return rc;
-    }
-
-    public static boolean boolOpt(int resId, boolean defaultValue)
-    {
-        boolean rc;
-
-        try
-        {
-            rc = Globals.getContext().getResources().getBoolean(resId);
-        }
-        catch (Exception e)
-        {
-            rc = defaultValue;
-        }
-
-        return rc;
-    }
-
-    public static String stringOpt(int resId, String defaultValue)
-    {
-        String rc;
-
-        try
-        {
-            rc = Globals.getContext().getResources().getString(resId);
-        }
-        catch (Exception e)
-        {
-            rc = defaultValue;
-        }
-
-        return rc;
-    }
-    */
-
     public static String readTextFile(Context ctx, Uri uri)
     {
         String rc;
@@ -1430,6 +1225,17 @@ public class Utils
         return Globals.getSharedPreferences().getString(PreferenceKeys.INCOMING_MISSION_PASSWORD, null);
     }
 
+    public static String getInboundCertStorePassword()
+    {
+        return Globals.getSharedPreferences().getString(PreferenceKeys.INCOMING_CERTSTORE_PASSWORD, null);
+    }
+    public static void setInboundCertStorePassword(String pwd)
+    {
+        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.INCOMING_CERTSTORE_PASSWORD, pwd);
+        Globals.getSharedPreferencesEditor().apply();
+    }
+
+
     public static void logIntentExtras(String msg, Intent intent)
     {
         Bundle bundle = intent.getExtras();
@@ -1444,5 +1250,53 @@ public class Utils
         {
             Log.d(TAG, msg + " : --no extras in intent--");
         }
+    }
+
+    public static String queryName(ContentResolver resolver, Uri uri)
+    {
+        String rc = null;
+        try {
+            Cursor returnCursor =
+                    resolver.query(uri, null, null, null, null);
+            if (returnCursor != null) {
+                int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                returnCursor.moveToFirst();
+                rc = returnCursor.getString(nameIndex);
+                returnCursor.close();
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            rc = null;
+        }
+
+        return rc;
+    }
+
+    public static int getSafeSharedPreferencesInt(String key, int def)
+    {
+        int rc = def;
+
+        try
+        {
+            rc = Globals.getSharedPreferences().getInt(key, def);
+        }
+        catch (ClassCastException cce)
+        {
+            String val = Globals.getSharedPreferences().getString(key, Integer.toString(def));
+            rc = Integer.parseInt(val);
+        }
+        catch (Exception e)
+        {
+            rc = def;
+            e.printStackTrace();
+        }
+
+        return rc;
+    }
+
+    public static String getShortDateTime(Date dt) {
+        return new SimpleDateFormat("yyMMdd.HHmm.ss", Locale.getDefault()).format(dt);
     }
 }

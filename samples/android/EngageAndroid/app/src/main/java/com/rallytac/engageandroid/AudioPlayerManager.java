@@ -9,7 +9,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
-import android.util.Log;
 
 import java.util.HashMap;
 

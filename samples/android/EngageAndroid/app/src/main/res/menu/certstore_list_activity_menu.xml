@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_certstore_add_scan"
+        android:title="@string/scan_qr_code" />
+
+    <item
+        android:id="@+id/action_certstore_add_load_file"
+        android:title="@string/load_from_file" />
+
+    <item
+        android:id="@+id/action_certstore_add_download"
+        android:title="@string/download"
+        android:visible="false"/>
+</menu>

@@ -98,6 +98,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Spinner
+            android:id="@+id/spnRpProtocol"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:entries="@array/rp_protocol_name"
+            android:entryValues="@array/rp_protocol_values"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swUseRallypoint" />
+
         <EditText
             android:id="@+id/etRpAddress"
             android:layout_width="0dp"
@@ -108,7 +119,7 @@
             android:hint="@string/address"
             app:layout_constraintEnd_toStartOf="@+id/etRpPort"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/swUseRallypoint" />
+            app:layout_constraintTop_toBottomOf="@+id/spnRpProtocol" />
 
         <EditText
             android:id="@+id/etRpPort"
@@ -119,7 +130,7 @@
             android:hint="@string/port"
             android:inputType="numberDecimal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/swUseRallypoint" />
+            app:layout_constraintTop_toBottomOf="@+id/spnRpProtocol" />
 
         <Spinner
             android:id="@+id/spnMcFailoverPolicy"

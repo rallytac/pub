@@ -5,8 +5,6 @@
 
 package com.rallytac.engageandroid;
 
-import com.rallytac.engage.engine.Engine;
-
 public class EngageAppPermission
 {
     EngageAppPermission(String p, boolean r)

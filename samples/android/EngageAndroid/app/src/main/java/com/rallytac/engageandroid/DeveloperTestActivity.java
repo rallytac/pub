@@ -21,14 +21,15 @@
 
 package com.rallytac.engageandroid;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.rallytac.engage.engine.Engine;
-import com.rallytac.engageandroid.Biometrics.DataSeries;
+//import com.rallytac.engageandroid.Biometrics.DataSeries;
 
 import org.json.JSONObject;
 
@@ -47,6 +48,8 @@ public class DeveloperTestActivity extends AppCompatActivity
         setContentView(R.layout.activity_developer_test);
         _app = Globals.getEngageApplication();
 
+        ((Switch)findViewById(R.id.swKeepTxMuted)).setChecked(_app.getActiveConfiguration().getKeepTxMutedOnPtt());
+
         installDeveloperTestingMission();
     }
 
@@ -56,7 +59,7 @@ public class DeveloperTestActivity extends AppCompatActivity
     }
     public void onClickSendHumanBiometrics(View view)
     {
-        testSendHumanBiometrics();
+        //testSendHumanBiometrics();
     }
     public void onClickSendRaw(View view)
     {
@@ -73,6 +76,11 @@ public class DeveloperTestActivity extends AppCompatActivity
     public void onClickUnregisterRtp(View view)
     {
         testUnregisterRtp();
+    }
+
+    public void onClickKeepTxMuted(View view)
+    {
+        _app.getActiveConfiguration().setKeepTxMutedOnPtt(((Switch)view).isChecked());
     }
 
     private GroupDescriptor getFirstPresenceGroup()
@@ -198,6 +206,7 @@ public class DeveloperTestActivity extends AppCompatActivity
         }
     }
 
+    /*
     DataSeries _dsHeartrate = null;
     Random _rnd = new Random();
     long _beats = 0;
@@ -259,7 +268,7 @@ public class DeveloperTestActivity extends AppCompatActivity
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
+    */
 
     // --------- Custom RTP-related
     /*

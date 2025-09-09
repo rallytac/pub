@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fmt_user_display_name_generate">Користувач Android - %1$s</string>
+    <string name="sample_mission_gen_mission_name_fmt">%1$s Приклад Місії</string>
+    <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
+    <string name="application_internal_certificate_store_display_name">Сховище Сертифікатів за Замовчуванням</string>
+    <string name="rts_factory_certificate_store_display_name">Заводське Сховище Сертифікатів RTS</string>
+
+    <!-- Main UI Strings -->
+    <string name="title_activity_settings">Налаштування</string>
+    <string name="title_activity_missions">Доступні Місії</string>
+    <string name="title_activity_edit_mission">Місія</string>
+    <string name="title_activity_certstores">Сховища Сертифікатів</string>
+    <string name="title_activity_map">Карта</string>
+    <string name="title_about">Про Програму</string>
+    <string name="title_licensing">Ліцензування</string>
+
+    <!-- Settings Headers -->
+    <string name="set_hdr_developer_options">Опції Розробника</string>
+    <string name="set_hdr_general">Загальні</string>
+    <string name="set_hdr_identity">Ідентифікація</string>
+    <string name="set_hdr_connectivity">Підключення</string>
+    <string name="set_hdr_location">Місцезнаходження</string>
+    <string name="set_hdr_audio">Аудіо</string>
+    <string name="set_hdr_aec">Акустичне Придушення Луни</string>
+    <string name="set_hdr_notifications">Сповіщення</string>
+    <string name="set_hdr_tone_levels">Рівні Тонів</string>
+    <string name="set_hdr_experimental">Експериментальні Функції</string>
+    <string name="set_hdr_biometrics">Біометрія Користувача (Експериментально)</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_yes">Так</string>
+    <string name="button_no">Ні</string>
+    <string name="button_cancel">Скасувати</string>
+    <string name="button_save">Зберегти</string>
+    <string name="button_close">Закрити</string>
+    <string name="button_clear">Очистити</string>
+    <string name="button_reset">Скинути</string>
+    <string name="button_map_show_all">Показати Всіх</string>
+
+    <!-- QR Code Related -->
+    <string name="qr_code_scan_button">Сканувати</string>
+    <string name="qr_scan_prompt">Сканувати QR-код Місії</string>
+    <string name="qr_scan_cancelled">Сканування скасовано</string>
+    <string name="qr_scan_decode_failed">Помилка декодування</string>
+    <string name="qr_scan_decrypt_failed">Помилка розшифрування</string>
+    <string name="qr_scan_decompress_failed">Помилка розпакування</string>
+    <string name="qr_scan_invalid">Недійсний QR-код</string>
+    <string name="qr_scn_invalid_version">Недійсна версія QR-коду</string>
+    <string name="qr_cannot_parse">Неможливо розібрати QR-код</string>
+
+    <!-- Error Messages -->
+    <string name="title_ui_launch_error">Помилка Запуску Інтерфейсу</string>
+    <string name="title_startup_error">Помилка Запуску</string>
+    <string name="startup_cannot_connect_to_engine">Неможливо підключитися до голосового двигуна. Можлива проблема з цією версією Android або пакетом встановлення.</string>
+    <string name="title_permissions_required">Потрібні Дозволи</string>
+    <string name="startup_one_or_more_permissions_denied">Один або більше необхідних дозволів було відхилено.</string>
+    <string name="title_google_play_services_error">Помилка Сервісів Google Play</string>
+    <string name="google_play_services_not_installed_or_out_of_date">Сервіси Google Play недоступні або застарілі</string>
+
+    <!-- Mission Related -->
+    <string name="mission_download_button">Завантажити</string>
+    <string name="mission_load_continue_button">Продовжити</string>
+    <string name="mission_control">Керування Місією</string>
+    <string name="add_mission">Додати Місію</string>
+    <string name="delete_mission">Видалити Місію</string>
+    <string name="are_you_sure_you_want_to_delete_mission">Ви впевнені, що хочете видалити %1$s?</string>
+    <string name="activated_mission_fmt">%1$s активовано</string>
+    <string name="loaded_mission_fmt">%1$s завантажено</string>
+
+    <!-- Menu Items -->
+    <string name="menu_list">Список</string>
+    <string name="menu_mission">Місія</string>
+    <string name="menu_missions">Місії</string>
+    <string name="menu_share">Поділитися</string>
+    <string name="menu_scan">Сканувати</string>
+    <string name="menu_load">Завантажити</string>
+    <string name="menu_download">Завантажити</string>
+    <string name="menu_security">Безпека</string>
+    <string name="menu_settings">Налаштування</string>
+    <string name="menu_about">Про Програму</string>
+    <string name="menu_contact">Контакти</string>
+    <string name="menu_disconnect">Відключитися</string>
+
+    <!-- Identity Settings -->
+    <string name="set_identity_email_address_hint">Рекомендується електронна пошта</string>
+    <string name="set_identity_display_name">Відображуване Ім\'я</string>
+    <string name="set_identity_transmission_alias_hint">Псевдонім передачі</string>
+    <string name="set_identity_user_id">ID Користувача</string>
+    <string name="set_identity_user_alias">Псевдонім</string>
+
+    <!-- Location Settings -->
+    <string name="set_location_accuracy">Точність</string>
+    <string name="set_location_share_my_location">Поділитися моїм місцезнаходженням</string>
+    <string name="set_location_displacement_trigger">Тригер Переміщення</string>
+    <string name="set_location_update_frequency">Частота Оновлення</string>
+
+    <!-- Audio Settings -->
+    <string name="set_audio_microphone_denoise">Увімкнути Шумопоглинання</string>
+    <string name="set_audio_microphone_agc_level">Автоматичне Керування Підсиленням</string>
+    <string name="set_audio_speaker_agc_level">Автоматичне Керування Підсиленням</string>
+    <string name="set_use_bluetooth_microphone">Використовувати мікрофон Bluetooth-гарнітури</string>
+    <string name="set_use_bluetooth_ptt_device">Використовувати Bluetooth-пристрій для PTT</string>
+    <string name="set_bluetooth_ptt_device">Bluetooth-пристрій</string>
+    <string name="set_audio_input_device">Пристрій введення</string>
+    <string name="set_audio_output_device">Пристрій виведення</string>
+
+    <!-- Notifications -->
+    <string name="set_notifications_enable_vibrations">Увімкнути вібрацію</string>
+    <string name="set_notifications_enable_spoken_prompts">Увімкнути голосові підказки</string>
+    <string name="set_notifications_when_members_join">Коли учасники приєднуються</string>
+    <string name="set_notifications_when_members_leave">Коли учасники залишають</string>
+    <string name="set_notifications_when_receiving_new_audio">При отриманні нового аудіо</string>
+    <string name="set_notifications_when_network_error">При помилці мережі</string>
+
+    <!-- Network Status -->
+    <string name="experiencing_network_problems">Виникли проблеми з мережею</string>
+    <string name="currently_operating_in_mc_failover_mode">Зараз працює в режимі відмовостійкості мультикасту</string>
+    <string name="currently_connected_via_ip_multicast">Зараз підключено локально через IP-мультикаст</string>
+    <string name="currently_connected_globally_fmt">Зараз підключено глобально через %1$s:%2$s:%3$d</string>
+    <string name="connect_to_a_rallypoint">Підключитися до Rallypoint</string>
+
+    <!-- Licensing -->
+    <string name="license_has_expired">Немає ліцензії або ліцензія закінчилася</string>
+    <string name="about_license_key">Ліцензійний Ключ</string>
+    <string name="about_enter_license_key">З дійсною ліцензією (та кодом активації, якщо потрібно) ви зможете повністю використовувати цю програму.</string>
+    <string name="about_activation_code">Код Активації</string>
+    <string name="about_enter_activation_code">Введіть або відскануйте код активації нижче, або натисніть іконку хмари, щоб отримати його з сервера ліцензування.</string>
+    <string name="about_click_for_offline_activation">Якщо у вас немає підключення до Інтернету, натисніть іконку подвійної стрілки для двоетапної активації за допомогою другого пристрою з Інтернетом.</string>
+    <string name="about_hint_activation_code">код активації</string>
+    <string name="about_btn_deactivate">Деактивувати</string>
+    <string name="license_type_does_not_require_activation">Цей тип ліцензії не потребує активації</string>
+    <string name="failed_to_validate_license_info">Не вдалося перевірити інформацію про ліцензію</string>
+
+    <!-- Security -->
+    <string name="about_enterprise_id">ID Підприємства</string>
+    <string name="about_enter_enterprise_id">Вам не обов\'язково потрібен ID підприємства, але якщо він у вас є, це допоможе ще краще захистити ваші комунікації при використанні спільної інфраструктури.</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">id підприємства</string>
+    <string name="use_enterprise_id_for_enhanced_security">Використовувати ID Організації для підвищеної безпеки</string>
+
+    <!-- Contact -->
+    <string name="contact_friendly_message">Ми тут, щоб допомогти, і нам подобається чути відгуки від наших клієнтів. Ви можете зв\'язатися з нами електронною поштою або відвідати наш веб-сайт за посиланнями нижче.</string>
+    <string name="contact_web_site">Веб-сайт</string>
+    <string name="contact_support">Підтримка</string>
+    <string name="contact_sales">Продажі</string>
+
+    <!-- Mission Generation -->
+    <string name="generate_mission_button">Згенерувати</string>
+    <string name="generate_using_passphrase">Згенерувати за допомогою парольної фрази</string>
+    <string name="generate_passphrase_explanation">Введіть парольну фразу, на якій буде базуватися місія. Потім поділіться місією, повідомивши інших членів команди згенерувати місію, використовуючи точно таку ж парольну фразу.\n\nПРИМІТКА: Якщо ви будете використовувати Rallypoint, обов\'язково повідомте свою команду, який саме.</string>
+    <string name="a_passphrase_is_required_to_generate">Для генерації місії потрібна парольна фраза.</string>
+    <string name="a_passphrase_of_minimum_length_is_required_to_generate">Для генерації місії потрібна парольна фраза довжиною не менше %1$d символів.</string>
+
+    <!-- Audio Devices -->
+    <string name="active_audio_device_handset">Активний аудіопристрій - телефонна трубка</string>
+    <string name="active_audio_device_speakerphone">Активний аудіопристрій - гучномовець</string>
+    <string name="active_audio_device_wired">Активний аудіопристрій - дротова гарнітура</string>
+    <string name="active_audio_device_bluetooth">Активний аудіопристрій - Bluetooth-гарнітура</string>
+    <string name="active_audio_device_unknown">Активний аудіопристрій - пристрій за замовчуванням</string>
+    <string name="handset">Телефонна трубка</string>
+    <string name="speakerphone">Гучномовець</string>
+    <string name="wired_headset">Дротова гарнітура</string>
+    <string name="bluetooth_headset">Bluetooth-гарнітура</string>
+
+    <!-- Group Management -->
+    <string name="number_of_audio_groups">Кількість аудіогруп:</string>
+    <string name="no_groups_to_display_title">Немає Груп для Відображення</string>
+    <string name="no_groups_to_display_description">Схоже, у вашій місії немає груп.\n\nПеревірте конфігурацію за допомогою опції меню Місії або використовуйте той самий екран для створення місії з групами.</string>
+    <string name="title_group">Група</string>
+    <string name="title_delete_group">Видалити Групу</string>
+    <string name="are_you_sure_delete_group">Ви впевнені, що хочете видалити %1$s?</string>
+    <string name="groups">Групи</string>
+    <string name="unknown_group">Невідома Група</string>
+    <string name="all_groups">(Всі Групи)</string>
+
+    <!-- Sharing -->
+    <string name="share_mission_share">Поділитися</string>
+    <string name="share_mission_upload_to_mission_hub">Завантажити до центру місій</string>
+    <string name="share_mission_upload_header">Поділитися …</string>
+    <string name="share_mission_email_subject">%1$s Місія : %2$s</string>
+    <string name="share_mission_mission_uploaded">Місію завантажено</string>
+    <string name="share_mission_mission_upload_failed">Помилка завантаження місії -</string>
+    <string name="share_title">Поділитися</string>
+    <string name="share_json">Поділитися JSON-файлом у відкритому тексті</string>
+
+    <!-- Certificate Store -->
+    <string name="certstore_not_available_for_mission">Вибрана місія потребує сховище сертифікатів, яке зараз не встановлено.</string>
+    <string name="invalid_cert_store_cannot_obtain_descriptor">Недійсне сховище сертифікатів - неможливо отримати дескриптор</string>
+    <string name="invalid_cert_store_cannot_decode_descriptor">Недійсне сховище сертифікатів - неможливо декодувати дескриптор</string>
+    <string name="invalid_cert_store_cannot_invalid_version">Недійсне сховище сертифікатів - невідома версія</string>
+    <string name="invalid_cert_store_cannot_no_certificates_found">Недійсне сховище сертифікатів - сертифікати не знайдено</string>
+
+    <!-- Text Messaging -->
+    <string name="text_message_dictate_message">Продиктувати повідомлення</string>
+    <string name="text_message_send_message">Надіслати повідомлення</string>
+    <string name="text_message_hint_enter_text_message">введіть текстове повідомлення</string>
+
+    <!-- Biometrics -->
+    <string name="set_biometrics_simulate">Симулювати біометричні показники</string>
+    <string name="set_biometrics_reporting_intervals_secs">Інтервали Звітності в Секундах</string>
+    <string name="set_biometrics_heart_rate">Частота Серцебиття</string>
+    <string name="set_biometrics_skin_temp">Температура Шкіри</string>
+    <string name="set_biometrics_core_temp">Температура Ядра</string>
+    <string name="set_biometrics_blood_oxy_perc">Відсоток Кисню в Крові</string>
+    <string name="set_biometrics_blood_hydro_level">Рівень Гідратації Крові</string>
+    <string name="set_biometrics_fatigue_level">Рівень Втоми</string>
+    <string name="set_biometrics_task_effectiveness_level">Рівень Ефективності Завдання</string>
+
+    <!-- System Information -->
+    <string name="system_information">Системна Інформація</string>
+    <string name="mi_hdr_system">СИСТЕМА:\n</string>
+    <string name="mi_hdr_device">\n\nПРИСТРІЙ:\n</string>
+    <string name="mi_sys_id">ID: %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
+    <string name="mi_device_manufacturer">Виробник: %1$s\n</string>
+    <string name="mi_device_id">ID: %1$s\n</string>
+    <string name="mi_device_brand">Бренд: %1$s\n</string>
+    <string name="mi_device_model">Модель: %1$s\n</string>
+    <string name="mi_device_board">Плата: %1$s\n</string>
+    <string name="mi_device_hardware">Апаратне забезпечення: %1$s\n</string>
+    <string name="mi_device_serial">Серійний номер: %1$s\n</string>
+    <string name="mi_device_bootloader">Завантажувач: %1$s\n</string>
+    <string name="mi_device_user">Користувач: %1$s\n</string>
+    <string name="mi_device_host">Хост: %1$s\n</string>
+    <string name="mi_device_build_time">Час збірки: %1$s\n</string>
+    <string name="mi_device_version_release">Версія випуску: %1$s\n</string>
+    <string name="mi_device_sdk_int">Версія SDK: %1$d\n</string>
+
+    <!-- Screen Information -->
+    <string name="mi_hdr_screen">\n\nЕКРАН:</string>
+    <string name="mi_screen_density">Щільність: %1$f\n</string>
+    <string name="mi_screen_width">Ширина: %1$d\n</string>
+    <string name="mi_screen_height">Висота: %1$d\n</string>
+    <string name="mi_screen_scaled_density">Масштабована щільність: %1$f\n</string>
+    <string name="mi_screen_density_dpi">Щільність DPI: %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI: %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI: %1$f\n</string>
+
+    <!-- Miscellaneous -->
+    <string name="copyright">Авторське право © 2020 Rally Tactical Systems, Inc.</string>
+    <string name="name">ім\'я</string>
+    <string name="description">опис</string>
+    <string name="address">адреса</string>
+    <string name="port">порт</string>
+    <string name="cancel">Скасувати</string>
+    <string name="passphrase">парольна фраза</string>
+    <string name="url">url</string>
+    <string name="pin">PIN</string>
+    <string name="id">id</string>
+</resources>

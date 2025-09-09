@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_set_id"
-        android:title="Set a new ID" />
+        android:title="@string/set_a_new_id" />
 
     <item
         android:id="@+id/action_clear_id"
-        android:title="Clear ID" />
+        android:title="@string/clear_id" />
 </menu>

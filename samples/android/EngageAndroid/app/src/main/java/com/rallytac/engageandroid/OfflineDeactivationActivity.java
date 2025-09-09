@@ -8,11 +8,12 @@ package com.rallytac.engageandroid;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class OfflineDeactivationActivity extends AppCompatActivity
 {

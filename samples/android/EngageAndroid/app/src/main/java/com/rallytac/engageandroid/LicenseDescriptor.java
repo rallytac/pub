@@ -8,6 +8,7 @@ package com.rallytac.engageandroid;
 import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONObject;
+
 import java.util.Date;
 
 public class LicenseDescriptor

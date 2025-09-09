@@ -21,6 +21,7 @@ public class DatabaseMission
     public boolean _useRp;
     public String _rpAddress;
     public int _rpPort;
+    public int _rpProtocol;
     public int _multicastFailoverPolicy;
 
     public String _mcId;
@@ -108,6 +109,8 @@ public class DatabaseMission
             root.put("_useRp", _useRp);//NON-NLS
             root.put("_rpAddress", Utils.trimString(_rpAddress));//NON-NLS
             root.put("_rpPort", _rpPort);//NON-NLS
+            root.put("_rpProtocol", _rpProtocol);//NON-NLS
+
             root.put("_certStoreId", Utils.trimString(_certStoreId));//NON-NLS
 
             root.put("multicastFailoverPolicy", _multicastFailoverPolicy);//NON-NLS
@@ -146,7 +149,8 @@ public class DatabaseMission
             mission._description = Utils.trimString(root.optString("_description"));//NON-NLS
             mission._useRp = root.optBoolean("_useRp");//NON-NLS
             mission._rpAddress = Utils.trimString(root.optString("_rpAddress"));//NON-NLS
-            mission._rpPort = root.optInt("_rpPort");//NON-NLS
+            mission._rpPort = root.optInt("_rpPort", Constants.DEF_RP_TCP_PORT);//NON-NLS
+            mission._rpProtocol = root.optInt("_rpProtocol", Constants.DEF_RP_PROTOCOL);//NON-NLS
             mission._multicastFailoverPolicy = root.optInt("multicastFailoverPolicy");//NON-NLS
             mission._mcId = Utils.trimString(root.getString("_mcId"));//NON-NLS
             mission._mcAddress = Utils.trimString(root.getString("_mcAddress"));//NON-NLS

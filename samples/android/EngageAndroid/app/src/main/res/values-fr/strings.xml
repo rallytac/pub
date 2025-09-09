@@ -1,402 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="android_notification_channel_id">.NotificationChannel</string>
-    <string name="android_notification_channel_name">.Notifications</string>
-
-    <string name="fmt_user_alias_id_generate">ANDR%1$08X</string>
     <string name="fmt_user_display_name_generate">Utilisateur Android - %1$s</string>
-
-    <string name="sample_mission_gen_mission_name_fmt">%1$s échantillon Mission</string>
-
+    <string name="sample_mission_gen_mission_name_fmt">%1$s Mission Exemple</string>
     <string name="generated_mission_description"></string>
     <string name="generated_mission_name"></string>
+    <string name="application_internal_certificate_store_display_name">Magasin de Certificats par Défaut</string>
+    <string name="rts_factory_certificate_store_display_name">Magasin de Certificats RTS d\'Usine</string>
 
+    <!-- Main UI Strings -->
     <string name="title_activity_settings">Paramètres</string>
-    <string name="title_activity_missions">Mission Disponible</string>
+    <string name="title_activity_missions">Missions Disponibles</string>
     <string name="title_activity_edit_mission">Mission</string>
     <string name="title_activity_certstores">Magasins de Certificats</string>
     <string name="title_activity_map">Carte</string>
-    <string name="android_notitication_channel_description">%1$s est la norme en matière de capacités de communication fiables et hautes performances pour les systèmes sécurisés</string>
-    <string name="android_notification_service_is_running">%1$s est en cours d\'exécution</string>
-    <string name="title_about">À propos</string>
+    <string name="title_about">À Propos</string>
     <string name="title_licensing">Licence</string>
-    <string name="qr_code_scan_button">Analyse</string>
-    <string name="mission_download_button">Télécharger</string>
-    <string name="cancel">Annuler</string>
-    <string name="qr_scan_prompt">Scannez le code QR de la mission</string>
+
+    <!-- Settings Headers -->
+    <string name="set_hdr_developer_options">Options Développeur</string>
+    <string name="set_hdr_general">Général</string>
+    <string name="set_hdr_identity">Identité</string>
+    <string name="set_hdr_connectivity">Connectivité</string>
+    <string name="set_hdr_location">Localisation</string>
+    <string name="set_hdr_audio">Audio</string>
+    <string name="set_hdr_aec">Annulation d\'Écho Acoustique</string>
+    <string name="set_hdr_notifications">Notifications</string>
+    <string name="set_hdr_tone_levels">Niveaux Sonores</string>
+    <string name="set_hdr_experimental">Fonctionnalités Expérimentales</string>
+    <string name="set_hdr_biometrics">Biométrie Humaine (Expérimental)</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_yes">Oui</string>
+    <string name="button_no">Non</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_save">Enregistrer</string>
+    <string name="button_close">Fermer</string>
+    <string name="button_clear">Effacer</string>
+    <string name="button_reset">Réinitialiser</string>
+    <string name="button_map_show_all">Afficher Tout</string>
+
+    <!-- QR Code Related -->
+    <string name="qr_code_scan_button">Scanner</string>
+    <string name="qr_scan_prompt">Scanner le Code QR de Mission</string>
     <string name="qr_scan_cancelled">Scan annulé</string>
     <string name="qr_scan_decode_failed">Échec du décodage</string>
     <string name="qr_scan_decrypt_failed">Échec du déchiffrement</string>
-    <string name="qr_scan_decompress_failed">Échec de décompression</string>
-    <string name="qr_scan_invalid">Code QR non valide</string>
-    <string name="qr_scn_invalid_version">Version de code QR non valide</string>
+    <string name="qr_scan_decompress_failed">Échec de la décompression</string>
+    <string name="qr_scan_invalid">Code QR invalide</string>
+    <string name="qr_scn_invalid_version">Version de code QR invalide</string>
     <string name="qr_cannot_parse">Impossible d\'analyser le code QR</string>
-    <string name="title_ui_launch_error">Erreur de lancement de l\'interface utilisateur</string>
-    <string name="title_startup_error">Erreur de démarrage</string>
+
+    <!-- Error Messages -->
+    <string name="title_ui_launch_error">Erreur de Lancement UI</string>
+    <string name="title_startup_error">Erreur de Démarrage</string>
     <string name="startup_cannot_connect_to_engine">Impossible de se connecter au moteur vocal. Il peut y avoir un problème avec cette version d\'Android ou le package d\'installation.</string>
-    <string name="title_permissions_required">Autorisations requises</string>
-    <string name="startup_one_or_more_permissions_denied">Une ou plusieurs autorisations requises ont été refusées.</string>
-    <string name="title_google_play_services_error">Erreur des services Google Play</string>
-    <string name="google_play_services_not_installed_or_out_of_date">Les services Google Play ne sont pas disponibles ou obsolètes</string>
-    <string name="startup_error_looks_like_we_cannot_ask_for_battery_optimization">Il semble que cette version de l\'application ne puisse pas demander à Android de désactiver automatiquement l\'optimisation de la batterie.</string>
-    <string name="startup_error_looks_like_version_of_application_cannot_ask_for_battery_optimization">Il semble que cette version de l\'application ne puisse pas demander à Android de désactiver automatiquement l\'optimisation de la batterie.</string>
-    <string name="startup_error_older_android_version">Ancienne version Android.</string>
-    <string name="startup_error_cannot_determine_battery_optimization_state">Impossible de déterminer l\'état d\'optimisation de la batterie.</string>
-    <string name="button_ok">OK</string>
-    <string name="title_battery_optimization_issue">Problème d\'optimisation de la batterie</string>
-    <string name="tap_to_open_battery_optimizations">Appuyez sur \'Optimisations de la batterie\' pour ouvrir les paramètres d\'optimisation de la batterie d\'Android.</string>
-    <string name="button_battery_optimizations">Optimisations de batterie</string>
-    <string name="startup_note_about_optimization_that_performance_may_vary">Veuillez noter qu\'en raison de l\'optimisation de l\'utilisation de la batterie par Android pour cette application, vous risquez de perdre de temps en temps la connectivité.</string>
-    <string name="to_ensure_best_performance_disable_battery_optimizations">Pour garantir les meilleures performances possibles, veuillez désactiver les optimisations de batterie pour cette application.</string>
-    <string name="title_map_incompatibility_issue">Problème d\'incompatibilité</string>
-    <string name="mapping_does_not_appear_to_be_supported">Le mappage ne semble pas être correctement pris en charge sur cet appareil.</string>
-    <string name="title_no_google_maps_key">Aucune clé API Google Maps</string>
-    <string name="need_google_maps_key">Avant de pouvoir utiliser Google Maps, vous aurez besoin d\'une clé API Google Maps.</string>
-    <string name="title_android_version_too_old_for_maps">Version Android trop ancienne</string>
-    <string name="maps_not_available_on_such_and_old_android_platform">Le mappage n\'est disponible que sur Android Lollipop (v21) et versions supérieures.</string>
-    <string name="title_map_team_1">Carte: %1$d membre de l\'équipe</string>
-    <string name="title_map_team">Carte: %1$d membres de l\'équipe</string>
-    <string name="map_no_team_members_found">Aucun autre membre de l\'équipe n\'a été trouvé!</string>
-    <string name="button_map_show_all">Afficher tout</string>
-    <string name="settings_invalid_group_type">Type de groupe non valide</string>
-    <string name="title_new_mission">Nouvelle mission</string>
-    <string name="button_yes">Oui</string>
-    <string name="button_cancel">Annuler</string>
-    <string name="title_cat_tx_audio_specific">Tx Audio-Specific</string>
-    <string name="title_cat_presence_specific">Presence-Specific</string>
-    <string name="url">url</string>
-    <string name="title_share_mission_share">Partager la mission</string>
-    <string name="fmt_scan_this_qr_code_to_join_the_mission">Scannez ce code QR pour rejoindre \'%1$s\'.</string>
-    <string name="fmt_scan_this_qr_code_to_join_the_mission_or_download_from">&lt;html&gt;&lt;body&gt;Scan this QR code to join \'%1$s\' or click &lt;a href=\'%2$s\'&gt;%2$s&lt;/a&gt; to download.&lt;/body&gt;&lt;/html&gt;</string>
+    <string name="title_permissions_required">Permissions Requises</string>
+    <string name="startup_one_or_more_permissions_denied">Une ou plusieurs permissions requises ont été refusées.</string>
+    <string name="title_google_play_services_error">Erreur Services Google Play</string>
+    <string name="google_play_services_not_installed_or_out_of_date">Les services Google Play ne sont pas disponibles ou sont obsolètes</string>
 
-    <string name="fmt_load_this_json_file_to_join_the_mission">Chargez ce fichier JSON pour rejoindre \'%1$s\'.</string>
-    <string name="fmt_load_this_json_file_to_join_the_mission_or_download_from">&lt;html&gt;&lt;body&gt;Load this JSON file to join \'%1$s\' or click &lt;a href=\'%2$s\'&gt;%2$s&lt;/a&gt; to download.&lt;/body&gt;&lt;/html&gt;</string>
+    <!-- Mission Related -->
+    <string name="mission_download_button">Télécharger</string>
+    <string name="mission_load_continue_button">Continuer</string>
+    <string name="mission_control">Contrôle de Mission</string>
+    <string name="add_mission">Ajouter Mission</string>
+    <string name="delete_mission">Supprimer Mission</string>
+    <string name="are_you_sure_you_want_to_delete_mission">Êtes-vous sûr de vouloir supprimer %1$s ?</string>
+    <string name="activated_mission_fmt">%1$s activée</string>
+    <string name="loaded_mission_fmt">%1$s chargée</string>
 
-    <string name="license_has_expired">Aucune licence ou licence expirée</string>
-    <string name="title_activity_single_user_biometrics_view">SingleUserBiometricsView</string>
-    <string name="about_device_id">Reference de l\'appareil</string>
-    <string name="about_license_key">Clé de licence</string>
-    <string name="about_enter_license_key">Saisissez votre clé de licence ci-dessous ou cliquez sur l\'appareil photo pour scanner un code QR.</string>
-    <string name="about_activation_code">Code d\'activation</string>
-    <string name="about_enter_activation_code">Saisissez ou scannez votre code d\'activation ci-dessous ou cliquez sur l\'icône cloud pour l\'obtenir auprès du serveur de licences Internet.</string>
-    <string name="about_click_for_offline_activation">Si vous n\'avez pas de connectivité Internet, cliquez sur l\'icône à double flèche pour effectuer une activation en deux étapes à l\'aide d\'un appareil secondaire connecté à Internet.</string>
-    <string name="about_hint_activation_code">code d\'activation</string>
-    <string name="about_btn_deactivate">Désactiver</string>
-    <string name="offline_activation_step_2">Étape 2</string>
-    <string name="share_mission_upload_header">Partager ...</string>
-    <string name="share_mission_email_subject">%1$s Mission : %2$s</string>
-    <string name="share_mission_mission_upload_failed">Échec du téléchargement de la mission -</string>
-    <string name="share_title">Partager</string>
-    <string name="hint_alias">alias</string>
-    <string name="hint_display_name">afficher un nom</string>
-    <string name="hint_user_id">identifiant d\'utilisateur</string>
-    <string name="identity_description1">Bienvenue! Pour vous identifier auprès des autres, vous devez saisir quelques informations ici. Si vous laissez l\'un de ces champs vide, l\'application les générera pour vous.</string>
-    <string name="identity_description2">Tout d\'abord, fournissez un identifiant, tel qu\'une adresse e-mail, significatif pour votre organisation.</string>
-    <string name="identity_description3">Ensuite, votre nom complet serait génial car c\'est ce qui est généralement affiché pour les autres.</string>
-    <string name="identity_description4">Enfin, un \'alias\' court qui est utile pour l\'affichage dans les interfaces utilisateur contraintes / petites.</string>
-    <string name="tx_status_reason_invalid_group_id">Identificateur de groupe non valide</string>
-    <string name="share_json">Partager JSON</string>
-
-    <string-array name="lp_group_type_names">
-        <item>Acoustique</item>
-        <item>Présence</item>
-        <item>Écru</item>
-    </string-array>
-
-    <string-array name="lp_tx_max_tx_secs_names">
-        <item>10 secondes</item>
-        <item>30 secondes</item>
-        <item>1 minute</item>
-        <item>5 minutes</item>
-        <item>Illimité</item>
-    </string-array>
-
-    <string-array name="notification_tone_level_names">
-        <item>Utiliser le niveau de notification Android</item>
-        <item>Aucun</item>
-        <item>Doux</item>
-        <item>Moyen</item>
-        <item>Bruyant</item>
-    </string-array>
-
-    <string-array name="location_accuracy_names">
-        <item>Élevé</item>
-        <item>Puissance équilibrée</item>
-        <item>Batterie faible</item>
-        <item>Aucune puissance</item>
-    </string-array>
-
-    <string-array name="location_interval_names">
-        <item>Chaque seconde</item>
-        <item>Toutes les 5 secondes</item>
-        <item>Toutes les 10 secondes</item>
-        <item>Toutes les 30 secondes</item>
-        <item>Toutes les 60 secondes</item>
-    </string-array>
-
-    <string-array name="location_displacement_names">
-        <item>1 mètre</item>
-        <item>5 mètres</item>
-        <item>10 mètres</item>
-        <item>25 mètres</item>
-        <item>50 mètres</item>
-        <item>100 mètres</item>
-    </string-array>
-
-    <string-array name="multicast_failover_secs_names">
-        <item>5 secondes</item>
-        <item>10 secondes</item>
-        <item>20 secondes</item>
-        <item>30 secondes</item>
-        <item>40 secondes</item>
-        <item>50 secondes</item>
-        <item>60 secondes</item>
-    </string-array>
-
-    <string-array name="aec_mode_names">
-        <item>Défaut</item>
-        <item>Faible</item>
-        <item>Moyen</item>
-        <item>Élevé</item>
-        <item>Très élevé</item>
-        <item>Le plus élevé</item>
-    </string-array>
-
-    <string name="a_passphrase_is_required_to_generate">Une phrase secrète est requise pour générer une mission.</string>
-    <string name="about_activate_title">Activer</string>
-    <string name="about_deactivate_really_sure">Cette action désactivera votre licence sur cet appareil. Etes-vous vraiment sûr de vouloir faire ça?</string>
-    <string name="about_deactivate_title">Désactiver</string>
-    <string name="about_invalid_entitlement_key">Clé d\'autorisation non valide</string>
-    <string name="about_invalid_license_key">Clé de licence non valide</string>
-    <string name="about_to_share_qr">Vous êtes sur le point de partager votre mission à l\'aide d\'un code QR. Vous pouvez le protéger avec un mot de passe si vous le souhaitez. Vous pouvez également induire en erreur d\'autres scanners de code QR en entrant une URL de déviation.</string>
-    <string name="about_version_placeholder">espace réservé de version</string>
-    <string name="activation_failed_try_offline">L\'activation en ligne a échoué. Vous pourrez peut-être activer hors ligne à l\'aide d\'un deuxième appareil doté d\'une connectivité Internet. Voulez-vous essayer cela?</string>
-    <string name="app_ptt_voice_control_off">se dégager</string>
-    <string name="audio_group_count">nombre de groupes audio</string>
-    <string name="button_close">Fermer</string>
-    <string name="app_ptt_voice_control_on">engager</string>
-    <string name="button_no">Non</string>
-    <string name="contact_friendly_message">Nous sommes là pour aider et aimer entendre nos clients. Vous pouvez nous joindre par e-mail ou en visitant notre site Web à partir des liens ci-dessous.</string>
-    <string name="contact_sales">Ventes</string>
-    <string name="contact_support">Soutien</string>
-    <string name="contact_web_site">Site Internet</string>
-    <string name="currently_operating_in_mc_failover_mode">Fonctionne actuellement en mode de basculement multicast</string>
-    <string name="deactivated">Désactivée</string>
-    <string name="deactivating">Désactiver</string>
-    <string name="deactivation_failed_try_offline">La désactivation en ligne a échoué. Vous pourrez peut-être désactiver hors ligne à l\'aide d\'un deuxième appareil doté d\'une connectivité Internet. Voulez-vous essayer cela? REMARQUE: cela désactivera immédiatement l\'application localement.</string>
-    <string name="deflection_url">URL de déviation</string>
-    <string name="experiencing_network_problems">Vivre des problèmes de réseau</string>
-    <string name="failed_to_validate_license_info">Impossible de valider les informations de licence fournies</string>
-    <string name="generate_mission_button">Produire</string>
-    <string name="generate_qr_code">Générer un code QR</string>
-    <string name="generate_passphrase_explanation">Saisissez une phrase secrète sur laquelle la mission sera basée. Ensuite, partagez la mission en disant aux autres membres de l\'équipe de générer une mission en utilisant exactement la même phrase secrète. REMARQUE: Si vous utilisez un Rallypoint, assurez-vous d\'indiquer à votre équipe quel Rallypoint.</string>
-    <string name="license_type_does_not_require_activation">Ce type de licence ne nécessite pas d\'activation</string>
-    <string name="max_tx_time_exceeded">Dépassement du temps de transmission maximum</string>
-    <string name="mission_name_optional">nom de la mission (facultatif)</string>
-    <string name="no_events_in_timeline_report">Aucun événement trouvé dans le rapport de chronologie</string>
-    <string name="no_team_members_present">Aucun membre de l\'équipe présent</string>
-    <string name="number_of_audio_groups">Nombre de groupes audio:</string>
-    <string name="obtaining_activation_code">Obtention du code d\'activation</string>
-    <string name="offline_activation_other_device_should_display">Votre autre appareil doit afficher un code QR qui est l\'activation reçue du serveur de licences. Si ce n\'est pas le cas, assurez-vous que l\'appareil est connecté et que vous lui avez permis d\'accéder à l\'URL indiquée par le code QR que vous avez scanné.</string>
-    <string name="offline_activation_scan_qr_code">Scannez le code QR affiché sur l\'autre appareil en appuyant sur l\'icône de l\'appareil photo.</string>
-    <string name="offline_activation_scn_qr_using_another_device">Essayons d\'activer avec un autre appareil. Commencez par scanner ce code QR à l\'aide d\'un appareil connecté à Internet.</string>
-    <string name="offline_activation_step_1">Étape 1</string>
-    <string name="offline_deactivation_notification_of_deactivation">Notez que, que vous obteniez ou non une réponse, votre licence sur cet appareil est désormais désactivée.</string>
-    <string name="offline_deactivation_scan_qr">Scannez ce code QR à l\'aide d\'un appareil connecté à Internet. Vous devriez obtenir une confirmation du système de licence vous indiquant que votre licence a été désactivée.</string>
-    <string name="passphrase">phrase de passe</string>
-    <string name="pin">Numéro d\'identification personnel</string>
-    <string name="rallypoint_optional">rallypoint (facultatif)</string>
-    <string name="sample_mission_gen_audio_group_name_fmt">Groupe échantillon %1$d</string>
-    <string name="scan_activation_code">Scanner le code d\'activation</string>
-    <string name="scan_license_key">Clé de licence de numérisation</string>
-    <string name="share_failed_to_create_configuration_package">Impossible de créer un package de configuration partageable</string>
-    <string name="share_failed_to_create_shareable_configuration_package">Impossible de créer un package de configuration partageable</string>
-    <string name="share_failed_to_encrypt_configuration_package">Impossible de crypter le package de configuration</string>
-    <string name="share_mission_mission_uploaded">Mission téléchargée</string>
-    <string name="share_mission_share">Partager</string>
-    <string name="share_mission_upload_to_mission_hub">Télécharger sur le hub de mission</string>
-    <string name="tap_the_qr_code_to_zoom">Appuyez sur le code QR pour basculer le zoom</string>
-    <string name="text_message_hint_enter_text_message">saisir un message texte</string>
-    <string name="text_message_send_message">Envoyer le message</string>
-    <string name="tx_status_reason_akready_tx">Transmettant déjà sur ce groupe</string>
-    <string name="tx_status_reason_another_already_tx">Un autre utilisateur transmet déjà</string>
-    <string name="tx_status_reason_another_already_tx_higher_priority">Un autre utilisateur transmet à une priorité plus élevée</string>
-    <string name="tx_status_reason_cannot_open_mic">Impossible d\'ouvrir le microphone</string>
-    <string name="tx_status_reason_ended">Transmission terminée</string>
-    <string name="tx_status_reason_started">La transmission a commencé</string>
-    <string name="tx_status_reason_tx_on_non_audio">Tentative de transmission sur un groupe non audio</string>
-    <string name="tx_status_reason_tx_on_non_connected">Tentative de transmission sur un groupe non connecté</string>
-    <string name="tx_status_reason_tx_on_non_joined">Tentative de transmission sur un groupe qui n\'a pas été rejoint</string>
-    <string name="tx_status_reason_unknown">Erreur inconnue</string>
-    <string name="tx_usurped_by_higher_priority">Transmission usurpée par une priorité plus élevée</string>
-    <string name="address">adresse</string>
-    <string name="connect_to_a_rallypoint">Se connecter à un Rallypoint</string>
-    <string name="description">la description</string>
-    <string name="groups">Groupes</string>
-    <string name="left">La gauche</string>
-    <string name="mission_control">Contrôle de mission</string>
-    <string name="name">nom</string>
-    <string name="right">Droit</string>
-    <string name="synchronize_left_and_right">Synchroniser gauche et droite</string>
-    <string name="port">le porto</string>
-    <string name="menu_about">À propos</string>
-    <string name="menu_contact">Contact</string>
-    <string name="menu_developer_testing">Test des développeurs</string>
-    <string name="menu_download">Télécharger</string>
+    <!-- Menu Items -->
     <string name="menu_list">Liste</string>
-    <string name="menu_load">Charger</string>
     <string name="menu_mission">Mission</string>
-    <string name="menu_scan">Lire</string>
+    <string name="menu_missions">Missions</string>
+    <string name="menu_share">Partager</string>
+    <string name="menu_scan">Scanner</string>
+    <string name="menu_load">Charger</string>
+    <string name="menu_download">Télécharger</string>
     <string name="menu_security">Sécurité</string>
     <string name="menu_settings">Paramètres</string>
-    <string name="menu_share">Partager</string>
-    <string name="menu_shutdown">Fermer</string>
-    <string name="developer_mode_activated">Mode développeur activé</string>
-    <string name="developer_mode_deactivated">Mode développeur désactivé</string>
-    <string name="set_aec_aggressiveness">Agressivité</string>
-    <string name="set_aec_disable_stereo_output">Désactiver la sortie stéréo</string>
-    <string name="set_aec_enable">Activer</string>
-    <string name="set_aec_enable_cng">Activer la génération de bruit de confort</string>
-    <string name="set_aec_speaker_tail_ms">Haut-parleur Tail Milliseconds</string>
-    <string name="set_bluetooth_ptt_device">Appareil Bluetooth</string>
-    <string name="set_use_bluetooth_ptt_device">Utilisez un appareil Bluetooth</string>
-    <string name="set_biometrics_blood_hydro_level">Niveau d\'hydratation du sang</string>
-    <string name="set_biometrics_blood_oxy_perc">Pourcentage d\'oxygénation du sang</string>
-    <string name="set_biometrics_core_temp">Température à cœur</string>
-    <string name="set_biometrics_fatigue_level">Niveau de fatigue</string>
-    <string name="set_biometrics_heart_rate">Rythme cardiaque</string>
-    <string name="set_biometrics_reporting_intervals_secs">Rapports d\'intervalles en secondes</string>
-    <string name="set_biometrics_simulate">Simuler des lectures de biométrie humaine</string>
-    <string name="set_biometrics_skin_temp">Température de la peau</string>
-    <string name="set_biometrics_task_effectiveness_level">Niveau d\'efficacité des tâches</string>
-    <string name="set_connectivity_enable_multicast_failover">Activer le basculement multidiffusion</string>
-    <string name="set_connectivity_multicast_failover_threshold">Seuil de basculement</string>
-    <string name="set_connectivity_network_interface">Interface réseau</string>
-    <string name="set_developer_use_dev_licensing">Utiliser le système de licence de développement</string>
-    <string name="set_experimental_cistech_gv1_address">Adresse</string>
-    <string name="set_experimental_cistech_gv1_port">Porto</string>
-    <string name="set_experimental_cistech_gv1_timeout_secs">Délai d\'expiration</string>
-    <string name="set_experimental_discover_cistech_gv1_assets">Découvrez les actifs CISTECH GV1 LMR</string>
-    <string name="set_experimental_discover_ssdp_assets">Découvrez les actifs SSDP</string>
-    <string name="set_experimental_discover_trellisware_assets">Découvrez les actifs Trellisware CNR</string>
-    <string name="set_experimental_report_device_connectivity_state">Signaler l\'état de la connectivité de l\'appareil</string>
-    <string name="set_experimental_report_device_power_state">Signaler l\'état d\'alimentation de l\'appareil</string>
-    <string name="set_hdr_aec">Annulation d\'écho acoustique</string>
-    <string name="set_hdr_audio">l\'audio</string>
-    <string name="set_hdr_biometrics">Biométrie humaine utilisateur (expérimentale)</string>
-    <string name="set_hdr_connectivity">Connectivité</string>
-    <string name="set_hdr_developer_options">Options de développeur</string>
-    <string name="set_hdr_experimental">Caractéristiques expérimentales</string>
-    <string name="set_hdr_identity">Identité</string>
-    <string name="set_hdr_location">Emplacement</string>
-    <string name="set_hdr_notifications">Notifications</string>
-    <string name="set_hdr_tone_levels">Niveaux de tonalité</string>
-    <string name="set_hdr_user_interface">Interface utilisateur</string>
-    <string name="set_identity_display_name">Afficher un nom</string>
-    <string name="set_identity_email_address_hint">L\'adresse e-mail est recommandée</string>
+    <string name="menu_about">À Propos</string>
+    <string name="menu_contact">Contact</string>
+    <string name="menu_disconnect">Déconnecter</string>
+
+    <!-- Identity Settings -->
+    <string name="set_identity_email_address_hint">Adresse e-mail recommandée</string>
+    <string name="set_identity_display_name">Nom d\'Affichage</string>
     <string name="set_identity_transmission_alias_hint">Alias de transmission</string>
+    <string name="set_identity_user_id">ID Utilisateur</string>
+    <string name="set_identity_user_alias">Alias</string>
+
+    <!-- Location Settings -->
     <string name="set_location_accuracy">Précision</string>
-    <string name="set_location_displacement_trigger">Déclencheur de déplacement</string>
     <string name="set_location_share_my_location">Partager ma position</string>
+    <string name="set_location_displacement_trigger">Déclencheur de Déplacement</string>
+    <string name="set_location_update_frequency">Fréquence de Mise à Jour</string>
+
+    <!-- Audio Settings -->
+    <string name="set_audio_microphone_denoise">Activer la Réduction de Bruit</string>
+    <string name="set_audio_microphone_agc_level">Contrôle Automatique de Gain</string>
+    <string name="set_audio_speaker_agc_level">Contrôle Automatique de Gain</string>
+    <string name="set_use_bluetooth_microphone">Utiliser un microphone Bluetooth</string>
+    <string name="set_use_bluetooth_ptt_device">Utiliser un appareil Bluetooth pour PTT</string>
+    <string name="set_bluetooth_ptt_device">Appareil Bluetooth</string>
+    <string name="set_audio_input_device">Périphérique d\'entrée</string>
+    <string name="set_audio_output_device">Périphérique de sortie</string>
+
+    <!-- Notifications -->
     <string name="set_notifications_enable_vibrations">Activer les vibrations</string>
-    <string name="set_notifications_when_members_join">Lorsque les membres de l\'équipe se joignent</string>
-    <string name="set_notifications_when_members_leave">Lorsque les membres de l\'équipe partent</string>
+    <string name="set_notifications_enable_spoken_prompts">Activer les invites vocales</string>
+    <string name="set_notifications_when_members_join">Quand les membres rejoignent</string>
+    <string name="set_notifications_when_members_leave">Quand les membres partent</string>
+    <string name="set_notifications_when_receiving_new_audio">À la réception d\'un nouvel audio</string>
     <string name="set_notifications_when_network_error">En cas d\'erreur réseau</string>
-    <string name="set_notifications_when_receiving_new_audio">Lors de la réception d\'un nouvel audio</string>
-    <string name="set_tone_levels_errors">Les erreurs</string>
-    <string name="set_tone_levels_notifications_and_warnings">Notifications et avertissements</string>
-    <string name="set_tone_levels_play_ptt_tone_every_tx">Jouez la tonalité push to talk à chaque transmission</string>
-    <string name="set_tone_levels_ptt">PTT</string>
-    <string name="set_user_interface_latch_unlatch_ptt">Verrouiller / déverrouiller le bouton PTT</string>
-    <string name="set_user_interface_ptt_using_voice_control">PTT utilisant la commande vocale</string>
-    <string name="set_identity_user_id">Identité de l\'utilisateur</string>
-    <string name="set_location_update_frequency">Fréquence de mise à jour</string>
-    <string name="button_generate">Générer</string>
-    <string name="button_manual">Manuel</string>
-    <string name="you_can_add_a_mission_manually_or_generate">Vous pouvez ajouter une mission manuellement ou la faire générer sur la base d\'un mot ou d\'une phrase.</string>
-    <string name="add_mission">Ajouter une mission</string>
-    <string name="are_you_sure_you_want_to_delete_mission">Voulez-vous vraiment supprimer %1$s?</string>
-    <string name="delete_mission">Supprimer la mission</string>
-    <string name="activated_mission_fmt">%1$s activé</string>
-    <string name="loaded_mission_fmt">%1$s chargé</string>
-    <string name="adjust_group_volume">Ajuster le volume du groupe</string>
-    <string name="button_reset">Réinitialiser</string>
-    <string name="button_save">Sauvegarder</string>
-    <string name="local_connection_via_ip_multicast">Connexion locale via multidiffusion IP</string>
-    <string name="currently_connected_via_ip_multicast">Actuellement connecté localement via multidiffusion IP</string>
-    <string name="go_global">Connectez-vous à l\'échelle mondiale</string>
-    <string name="go_local">Se connecter localement</string>
-    <string name="networking">La mise en réseau</string>
-    <string name="currently_connected_globally_fmt">Actuellement connecté globalement via %1$s:%2$d</string>
-    <string name="license_never_expires_but_requires_activation">Votre licence existante n\'expire jamais mais nécessite un code d\'activation. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="your_license_is_active">Votre licence est active.</string>
-    <string name="existing_license_never_expires_but_requires_activation">Votre licence existante n\'expire jamais mais nécessite un code d\'activation. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="not_a_valid_license">Ce n\'est pas une licence valide. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="this_license_never_expires_but_requires_activation">Cette licence existante n\'expire jamais mais nécessite un code d\'activation. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="you_dont_yet_have_a_valid_license">Vous n\'avez pas encore de licence valide. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="this_license_expired_on">Cette licence a expiré le %1$s. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="this_license_expires_on">Cette licence expire %1$s.</string>
-    <string name="your_license_expired_on">Votre licence actuelle a expiré le %1$s. Vous pouvez continuer à utiliser l\'application, mais vous ne pourrez pas transmettre plus de 3 secondes à la fois.</string>
-    <string name="your_license_expires_on">Votre licence existante expire %1$s.</string>
-    <string name="system_information">Informations système</string>
-    <string name="mi_hdr_system">SYSTÈME:\n</string>
-    <string name="mi_hdr_device">\n\L\'APPAREIL:\n</string>
-    <string name="mi_sys_id">Identifiant:%1$s\n</string>
-    <string name="mi_device_manufacturer">Fabricant:%1$s\n</string>
-    <string name="mi_device_id">Identifiant:%1$s\n</string>
-    <string name="mi_device_brand">Marque:%1$s\n</string>
-    <string name="mi_device_model">Modèle:%1$s\n</string>
-    <string name="mi_device_board">Table:%1$s\n</string>
-    <string name="mi_device_hardware">Matériel:%1$s\n</string>
-    <string name="mi_device_serial">En série:%1$s\n</string>
-    <string name="mi_device_bootloader">Chargeur:%1$s\n</string>
-    <string name="mi_device_user">L\'usager:%1$s\n</string>
-    <string name="mi_device_host">Ordinateur:%1$s\n</string>
-    <string name="mi_device_build_time">Temps de construction:%1$s\n</string>
-    <string name="mi_device_version_release">Version finale:%1$s\n</string>
-    <string name="mi_device_sdk_int">Version SDK:%1$d\n</string>
-    <string name="addressing">Adressage</string>
-    <string name="audio">Acoustique</string>
-    <string name="disable_header_extensions">Désactiver les extensions d\'en-tête</string>
-    <string name="enable_full_duplex">Activer le duplex intégral</string>
-    <string name="enable_unlimited_tx">Activer la transmission illimitée</string>
-    <string name="encrypted">Crypté</string>
-    <string name="encryption">Chiffrement</string>
-    <string name="hint_rx_address">recevoir l\'adresse</string>
-    <string name="hint_rx_port">recevoir le port</string>
-    <string name="hint_tx_port">port de transmission</string>
-    <string name="hint_tx_address">transmettre l\'adresse</string>
-    <string name="other">Autre</string>
-    <string name="regenerate">Régénérer</string>
-    <string name="active_mission_cannot_be_deleted">La mission active ne peut pas être supprimée</string>
-    <string name="are_you_sure_delete_cert_store">Voulez-vous vraiment supprimer ce magasin de certificats?</string>
-    <string name="are_you_sure_delete_group">Voulez-vous vraiment supprimer %1$s?</string>
-    <string name="button_clear">Expliquer</string>
-    <string name="button_lock">Bloquer</string>
-    <string name="button_unlock">Ouvrir</string>
-    <string name="cannot_open_mission_database">Impossible d\'ouvrir la base de données de mission</string>
-    <string name="cannot_parse_mission_template">Impossible d\'analyser le modèle de mission</string>
-    <string name="cannot_process_image">Impossible de traiter l\'image</string>
-    <string name="cannot_process_qr_code">Impossible de traiter le code QR</string>
-    <string name="cert_store_in_use_proceed_with_delete_will_use_default">Ce magasin de certificats est actuellement utilisé. Si vous le supprimez, l\'application utilisera le magasin de certificats par défaut jusqu\'à ce que vous en sélectionniez un autre.\\n\\nProcéder?</string>
-    <string name="delete_cert_store">Supprimer le magasin de certificats</string>
-    <string name="failed_to_install_the_mission">Échec de l\'installation de la mission</string>
-    <string name="installed_the_mission">Installé la mission</string>
-    <string name="invalid_cert_store_cannot_decode_descriptor">Magasin de certificats non valide - ne peut pas décoder le descripteur</string>
-    <string name="invalid_cert_store_cannot_invalid_version">Magasin de certificats non valide - version inconnue</string>
-    <string name="invalid_cert_store_cannot_no_certificates_found">Magasin de certificats non valide - aucun certificat trouvé</string>
-    <string name="invalid_cert_store_cannot_obtain_descriptor">Magasin de certificats non valide - impossible d\'obtenir le descripteur</string>
-    <string name="invalid_configuration">(invalide)</string>
-    <string name="invalid_pin">Code invalide</string>
-    <string name="io_error_while_importing">Erreur rencontrée lors de l\'importation</string>
-    <string name="max_num_groups_reached">Nombre maximum de groupes atteint</string>
-    <string name="no_certstore_name">(sans nom)</string>
-    <string name="no_group_name">(sans nom)</string>
-    <string name="no_mission_description">(pas de description)</string>
-    <string name="no_mission_name">(sans nom)</string>
-    <string name="no_pin_entered">Aucun code saisi</string>
-    <string name="scan_the_activation_qr_code">Scannez le code QR d\'activation</string>
-    <string name="select_a_file">Sélectionner un fichier</string>
-    <string name="title_delete_group">Supprimer le groupe</string>
+
+    <!-- Network Status -->
+    <string name="experiencing_network_problems">Problèmes de réseau en cours</string>
+    <string name="currently_operating_in_mc_failover_mode">Fonctionnement actuel en mode de basculement multicast</string>
+    <string name="currently_connected_via_ip_multicast">Actuellement connecté localement via IP multicast</string>
+    <string name="currently_connected_globally_fmt">Actuellement connecté globalement via %1$s:%2$s:%3$d</string>
+    <string name="connect_to_a_rallypoint">Se connecter à un Rallypoint</string>
+
+    <!-- Licensing -->
+    <string name="license_has_expired">Pas de licence ou licence expirée</string>
+    <string name="about_license_key">Clé de Licence</string>
+    <string name="about_enter_license_key">Avec une licence valide (et un code d\'activation si nécessaire), vous pourrez profiter pleinement de cette application.</string>
+    <string name="about_activation_code">Code d\'Activation</string>
+    <string name="about_enter_activation_code">Entrez ou scannez votre code d\'activation ci-dessous, ou cliquez sur l\'icône nuage pour l\'obtenir du serveur de licences Internet.</string>
+    <string name="about_click_for_offline_activation">Si vous n\'avez pas de connectivité Internet, cliquez sur l\'icône double-flèche pour effectuer une activation en deux étapes à l\'aide d\'un appareil secondaire connecté à Internet.</string>
+    <string name="about_hint_activation_code">code d\'activation</string>
+    <string name="about_btn_deactivate">Désactiver</string>
+    <string name="license_type_does_not_require_activation">Ce type de licence ne nécessite pas d\'activation</string>
+    <string name="failed_to_validate_license_info">Échec de la validation des informations de licence</string>
+
+    <!-- Security -->
+    <string name="about_enterprise_id">ID Entreprise</string>
+    <string name="about_enter_enterprise_id">Vous n\'avez pas absolument besoin d\'un ID entreprise, mais si vous en avez un, cela aide à sécuriser davantage vos communications lors de l\'utilisation d\'infrastructures partagées.</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">id entreprise</string>
+    <string name="use_enterprise_id_for_enhanced_security">Utiliser l\'ID Organisation pour une sécurité renforcée</string>
+
+    <!-- Contact -->
+    <string name="contact_friendly_message">Nous sommes là pour vous aider et aimons avoir des nouvelles de nos clients. Vous pouvez nous joindre par e-mail ou en visitant notre site web via les liens ci-dessous.</string>
+    <string name="contact_web_site">Site Web</string>
+    <string name="contact_support">Support</string>
+    <string name="contact_sales">Ventes</string>
+
+    <!-- Mission Generation -->
+    <string name="generate_mission_button">Générer</string>
+    <string name="generate_using_passphrase">Générer avec une phrase secrète</string>
+    <string name="generate_passphrase_explanation">Entrez une phrase secrète sur laquelle la mission sera basée. Ensuite, partagez la mission en disant aux autres membres de l\'équipe de générer une mission en utilisant exactement la même phrase secrète.\n\nNOTE : Si vous utiliserez un Rallypoint, assurez-vous d\'indiquer lequel à votre équipe.</string>
+    <string name="a_passphrase_is_required_to_generate">Une phrase secrète est requise pour générer une mission.</string>
+    <string name="a_passphrase_of_minimum_length_is_required_to_generate">Une phrase secrète d\'au moins %1$d caractères est requise pour générer une mission.</string>
+
+    <!-- Audio Devices -->
+    <string name="active_audio_device_handset">Le périphérique audio actif est le combiné</string>
+    <string name="active_audio_device_speakerphone">Le périphérique audio actif est le haut-parleur</string>
+    <string name="active_audio_device_wired">Le périphérique audio actif est le casque filaire</string>
+    <string name="active_audio_device_bluetooth">Le périphérique audio actif est le casque Bluetooth</string>
+    <string name="active_audio_device_unknown">Le périphérique audio actif est celui par défaut</string>
+    <string name="handset">Combiné</string>
+    <string name="speakerphone">Haut-parleur</string>
+    <string name="wired_headset">Casque Filaire</string>
+    <string name="bluetooth_headset">Casque Bluetooth</string>
+
+    <!-- Group Management -->
+    <string name="number_of_audio_groups">Nombre de groupes audio :</string>
+    <string name="no_groups_to_display_title">Aucun Groupe à Afficher</string>
+    <string name="no_groups_to_display_description">Il semble que votre mission n\'ait pas de groupes.\n\nVérifiez votre configuration en utilisant l\'option de menu Missions ou utilisez cet écran pour créer une mission avec des groupes.</string>
     <string name="title_group">Groupe</string>
-    <string name="unknown_device_id">inconnue</string>
+    <string name="title_delete_group">Supprimer Groupe</string>
+    <string name="are_you_sure_delete_group">Êtes-vous sûr de vouloir supprimer %1$s ?</string>
+    <string name="groups">Groupes</string>
+    <string name="unknown_group">Groupe Inconnu</string>
+    <string name="all_groups">(Tous les Groupes)</string>
+
+    <!-- Sharing -->
+    <string name="share_mission_share">Partager</string>
+    <string name="share_mission_upload_to_mission_hub">Téléverser vers le hub de mission</string>
+    <string name="share_mission_upload_header">Partager …</string>
+    <string name="share_mission_email_subject">%1$s Mission : %2$s</string>
+    <string name="share_mission_mission_uploaded">Mission téléversée</string>
+    <string name="share_mission_mission_upload_failed">Échec du téléversement de la mission -</string>
+    <string name="share_title">Partager</string>
+    <string name="share_json">Partager un fichier JSON en texte clair</string>
+
+    <!-- Certificate Store -->
+    <string name="certstore_not_available_for_mission">La mission sélectionnée nécessite un magasin de certificats qui n\'est pas actuellement installé.</string>
+    <string name="invalid_cert_store_cannot_obtain_descriptor">Magasin de certificats invalide - impossible d\'obtenir le descripteur</string>
+    <string name="invalid_cert_store_cannot_decode_descriptor">Magasin de certificats invalide - impossible de décoder le descripteur</string>
+    <string name="invalid_cert_store_cannot_invalid_version">Magasin de certificats invalide - version inconnue</string>
+    <string name="invalid_cert_store_cannot_no_certificates_found">Magasin de certificats invalide - aucun certificat trouvé</string>
+
+    <!-- Text Messaging -->
+    <string name="text_message_dictate_message">Dicter un message</string>
+    <string name="text_message_send_message">Envoyer un message</string>
+    <string name="text_message_hint_enter_text_message">entrer un message texte</string>
+
+    <!-- Biometrics -->
+    <string name="set_biometrics_simulate">Simuler les lectures biométriques</string>
+    <string name="set_biometrics_reporting_intervals_secs">Intervalles de Rapport en Secondes</string>
+    <string name="set_biometrics_heart_rate">Fréquence Cardiaque</string>
+    <string name="set_biometrics_skin_temp">Température Cutanée</string>
+    <string name="set_biometrics_core_temp">Température Centrale</string>
+    <string name="set_biometrics_blood_oxy_perc">Pourcentage d\'Oxygène Sanguin</string>
+    <string name="set_biometrics_blood_hydro_level">Niveau d\'Hydratation Sanguine</string>
+    <string name="set_biometrics_fatigue_level">Niveau de Fatigue</string>
+    <string name="set_biometrics_task_effectiveness_level">Niveau d\'Efficacité des Tâches</string>
+
+    <!-- System Information -->
+    <string name="system_information">Informations Système</string>
+    <string name="mi_hdr_system">SYSTÈME :\n</string>
+    <string name="mi_hdr_device">\n\nAPPAREIL :\n</string>
+    <string name="mi_sys_id">ID : %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI : %1$s\n</string>
+    <string name="mi_device_manufacturer">Fabricant : %1$s\n</string>
+    <string name="mi_device_id">ID : %1$s\n</string>
+    <string name="mi_device_brand">Marque : %1$s\n</string>
+    <string name="mi_device_model">Modèle : %1$s\n</string>
+    <string name="mi_device_board">Carte : %1$s\n</string>
+    <string name="mi_device_hardware">Matériel : %1$s\n</string>
+    <string name="mi_device_serial">Numéro de série : %1$s\n</string>
+    <string name="mi_device_bootloader">Bootloader : %1$s\n</string>
+    <string name="mi_device_user">Utilisateur : %1$s\n</string>
+    <string name="mi_device_host">Hôte : %1$s\n</string>
+    <string name="mi_device_build_time">Heure de compilation : %1$s\n</string>
+    <string name="mi_device_version_release">Version : %1$s\n</string>
+    <string name="mi_device_sdk_int">Version SDK : %1$d\n</string>
+
+    <!-- Screen Information -->
+    <string name="mi_hdr_screen">\n\nÉCRAN :</string>
+    <string name="mi_screen_density">Densité : %1$f\n</string>
+    <string name="mi_screen_width">Largeur : %1$d\n</string>
+    <string name="mi_screen_height">Hauteur : %1$d\n</string>
+    <string name="mi_screen_scaled_density">Densité mise à l\'échelle : %1$f\n</string>
+    <string name="mi_screen_density_dpi">Densité DPI : %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI : %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI : %1$f\n</string>
+
+    <!-- Miscellaneous -->
+    <string name="copyright">Copyright © 2020 Rally Tactical Systems, Inc.</string>
+    <string name="name">nom</string>
+    <string name="description">description</string>
+    <string name="address">adresse</string>
+    <string name="port">port</string>
+    <string name="cancel">Annuler</string>
+    <string name="passphrase">phrase secrète</string>
+    <string name="url">url</string>
+    <string name="pin">PIN</string>
+    <string name="id">id</string>
 </resources>

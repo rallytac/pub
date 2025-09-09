@@ -27,38 +27,43 @@ public class SimpleLogger implements ILogger
         return _logToEngage;
     }
 
+    private String formatMsg(String msg)
+    {
+        return "[" + Utils.getProcessUptimeMillis() + "] " + msg;
+    }
+
     @Override
     public void d(String tag, String msg)
     {
-        Log.d(tag, msg);
+        Log.d(tag, formatMsg(msg));
         logToEngage(Engine.LoggingLevel.debug, tag, msg);
     }
 
     @Override
     public void i(String tag, String msg)
     {
-        Log.i(tag, msg);
+        Log.i(tag, formatMsg(msg));
         logToEngage(Engine.LoggingLevel.information, tag, msg);
     }
 
     @Override
     public void w(String tag, String msg)
     {
-        Log.w(tag, msg);
+        Log.w(tag, formatMsg(msg));
         logToEngage(Engine.LoggingLevel.warning, tag, msg);
     }
 
     @Override
     public void e(String tag, String msg)
     {
-        Log.e(tag, msg);
+        Log.e(tag, formatMsg(msg));
         logToEngage(Engine.LoggingLevel.error, tag, msg);
     }
 
     @Override
     public void f(String tag, String msg)
     {
-        Log.wtf(tag, msg);
+        Log.wtf(tag, formatMsg(msg));
         logToEngage(Engine.LoggingLevel.fatal, tag, msg);
     }
 
@@ -72,7 +77,7 @@ public class SimpleLogger implements ILogger
                 Engine engine = app.getEngine();
                 if( engine != null )
                 {
-                    engine.engageLogMsg(level.toInt(), tag, msg);
+                    engine.engageLogMsg(level.toInt(), tag, formatMsg(msg));
                 }
             }
         }

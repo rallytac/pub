@@ -1,36 +1,17 @@
 <resources>
-    <string name="app_name">Engage</string>
     <string name="file_content_provider" translatable="false">com.rallytac.engageandroid.reference</string>
-    <string name="share_mission_activity_action">com.rallytac.engageandroid.rts.ShareMissionActivity</string>
-
-    <string name="copyright">Copyright &#169; 2020 Rally Tactical Systems, Inc.</string>
-    <string name="licensing_manufacturerId"></string>
+    <string name="share_mission_activity_action" translatable="false">com.rallytac.engageandroid.rts.ShareMissionActivity</string>
     <string name="licensing_entitlement" translatable="false">{d8d689b8-7f13-48b1-94e0-091e679058d6}</string>
 
-    <string name="generated_user_id_email_domain">\@demo.rallytac.com</string>
-
-    <string name="support_email_address">support@demo.rallytac.com</string>
-    <string name="sales_email_address">sales@demo.rallytac.com</string>
-    <string name="home_website_address" translatable="false">https://www.demo.rallytac.com</string>
-
-    <string name="mission_hub_address">https://s3.us-east-2.amazonaws.com/rts-missions</string>
-
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false"></string>
-    <string name="default_rallypoint">demo.rallytac.com</string>
 
     <string name="opt_allow_multiple_channel_view" translatable="false">1</string>
     <string name="opt_lock_orientation" translatable="false">-1</string>
     <string name="opt_experimental_general_enabled" translatable="false">1</string>
     <string name="opt_experimental_human_biometrics_enabled" translatable="false">1</string>
     <string name="opt_firebase_analytics_enabled" translatable="false">1</string>
-    <string name="opt_max_groups_allowed" translatable="false">16</string>
+    <integer name="opt_max_groups_allowed" translatable="false">16</integer>
     <bool name="opt_ptt_latching">true</bool>
-
-    <string name="fmt_user_alias_id_generate">GEN%1$08X</string>
-    <string name="fmt_user_display_name_generate">Engage User - %1$s</string>
-
-    <string name="license_key"></string>
-    <string name="activation_code" translatable="false"></string>
 
     <string name="preload_rp_use" translatable="false">0</string>
     <string name="preload_rp_address" translatable="false"></string>
@@ -39,9 +20,7 @@
     <string name="sample_mission_gen_mission_name_fmt">%1$s Sample Mission</string>
     <string name="sample_mission_gen_group_count" translatable="false">4</string>
     <string name="sample_mission_gen_audio_group_name_fmt">Sample Group %1$d</string>
-    <string name="sample_mission_gen_use_default_rallypoint">0</string>
-
-    <string name="application_internal_certificate_store_display_name">Engage Default Certificate Store</string>
+    <string name="sample_mission_gen_use_default_rallypoint" translatable="false">0</string>
 
     <string-array name="flavor_defaults">
         <item>ui.orientation,integer,1</item>

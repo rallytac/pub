@@ -7,17 +7,13 @@ package com.rallytac.engageandroid;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.journeyapps.barcodescanner.Util;
 import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class GroupDescriptor implements Parcelable
 {

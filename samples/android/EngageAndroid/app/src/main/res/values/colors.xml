@@ -26,4 +26,5 @@
     <color name="white">#ffffff</color>
 
     <color name="colorNotificationBars">#FFBB0000</color>
+    <color name="dictation_bubble_color">#8D0000</color>
 </resources>

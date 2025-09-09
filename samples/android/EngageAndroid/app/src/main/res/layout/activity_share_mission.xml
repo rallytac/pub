@@ -129,6 +129,35 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/tvQrCodeDescription" />
 
+                    <Switch
+                        android:id="@+id/swShareSaveToDocuments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/save_to_my_documents"
+                        app:layout_constraintEnd_toEndOf="@+id/swShareJson"
+                        app:layout_constraintTop_toBottomOf="@+id/tvOtherOptions" />
+
+
+                    <Switch
+                        android:id="@+id/swUpload"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/share_mission_upload_to_mission_hub"
+                        app:layout_constraintEnd_toEndOf="@+id/swShareJson"
+                        app:layout_constraintTop_toBottomOf="@+id/swShareSaveToDocuments" />
+
+                    <Switch
+                        android:id="@+id/swShareJson"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/share_json"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/swUpload" />
+
                     <Button
                         android:id="@+id/btnShare"
                         android:layout_width="0dp"
@@ -140,26 +169,7 @@
                         android:text="@string/share_mission_share"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/swUpload" />
-
-                    <Switch
-                        android:id="@+id/swUpload"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/share_mission_upload_to_mission_hub"
-                        app:layout_constraintEnd_toEndOf="@+id/swShareJson"
                         app:layout_constraintTop_toBottomOf="@+id/swShareJson" />
-
-                    <Switch
-                        android:id="@+id/swShareJson"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginEnd="8dp"
-                        android:text="@string/share_json"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvOtherOptions" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

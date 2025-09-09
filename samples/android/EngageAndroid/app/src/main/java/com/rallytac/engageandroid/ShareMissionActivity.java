@@ -12,12 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,12 +21,19 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ShareMissionActivity extends AppCompatActivity
 {
@@ -378,30 +379,21 @@ public class ShareMissionActivity extends AppCompatActivity
             downloadUrl = urlBase + "/" + fn;
         }
 
-        boolean sharingJson = (((Switch) findViewById(R.id.swShareJson)).isChecked());
-
-        try
+        if(((Switch) findViewById(R.id.swShareSaveToDocuments)).isChecked())
         {
-            String extraText;
-            ShareableData data = new ShareableData();
-
-            if(sharingJson)
+            try
             {
-                if(Utils.isEmptyString(downloadUrl))
+                File dir = this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                if(dir == null)
                 {
-                    extraText = String.format(getString(R.string.fmt_load_this_json_file_to_join_the_mission), ac.getMissionName());
-                }
-                else
-                {
-                    data.setUrl(downloadUrl);
-
-                    extraText = String.format(getString(R.string.fmt_load_this_json_file_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
+                    dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
                 }
 
-                File fd = File.createTempFile("mission-" + ac.getMissionName().replace(" ", "-"), ".json", Globals.getEngageApplication().getTempDir());
+                String fn = "mission-" + ac.getMissionName().replace(" ", "-") + ".json";//NON-NLS
+                File fd = new File(dir, fn);
                 FileOutputStream fos = new FileOutputStream(fd);
 
-                if(!Utils.isEmptyString(_pwd))
+                if (!Utils.isEmptyString(_pwd))
                 {
                     String pwdHexString = Utils.toHexString(_pwd.getBytes(Utils.getEngageCharSet()));
                     byte[] encryptedBytes = Globals.getEngageApplication().getEngine().encryptSimple(_jsonConfiguration.toString().getBytes(), pwdHexString);
@@ -414,49 +406,86 @@ public class ShareMissionActivity extends AppCompatActivity
 
                 fos.close();
 
-                Uri u = FileProvider.getUriForFile(this, getString(R.string.file_content_provider), fd);
-
-                fd.deleteOnExit();
-                data.addUri(u);
-
-                Globals.getEngageApplication().logEvent(Analytics.MISSION_SHARE_JSON);
+                Toast.makeText(this, "File saved!", Toast.LENGTH_SHORT).show();
             }
-            else
+            catch (Exception e)
             {
-                if(Utils.isEmptyString(downloadUrl))
-                {
-                    extraText = String.format(getString(R.string.fmt_scan_this_qr_code_to_join_the_mission), ac.getMissionName());
-                }
-                else
-                {
-                    data.setUrl(downloadUrl);
-
-                    extraText = String.format(getString(R.string.fmt_scan_this_qr_code_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
-                }
-
-                File fd = File.createTempFile("qr-" + ac.getMissionName().replace(" ", "-"), ".jpg", Globals.getEngageApplication().getTempDir());//NON-NLS
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                _bm.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                byte[] bitmapdata = bos.toByteArray();
-
-                FileOutputStream fos = new FileOutputStream(fd);
-                fos.write(bitmapdata);
-                fos.close();
-
-                Uri u = FileProvider.getUriForFile(this, getString(R.string.file_content_provider), fd);
-
-                fd.deleteOnExit();
-                data.addUri(u);
-
-                Globals.getEngageApplication().logEvent(Analytics.MISSION_SHARE_QR);
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        }
 
-            data.setText(String.format(getString(R.string.share_mission_email_subject), getString(R.string.app_name), ac.getMissionName()));
+        boolean sharingJson = (((Switch) findViewById(R.id.swShareJson)).isChecked());
+        boolean uploadJson = (((Switch) findViewById(R.id.swUpload)).isChecked());
 
-            data.setHtml(extraText);
+        try
+        {
+            String extraText = "";
+            ShareableData data = new ShareableData();
 
-            data.setSubject(getString(R.string.app_name) + " : " + ac.getMissionName());
-            startActivity(ShareHelper.buildShareIntent(this, data, getString(R.string.share_mission_upload_header)));
+            if(sharingJson || uploadJson) {
+                if (sharingJson) {
+                    if (Utils.isEmptyString(downloadUrl)) {
+                        extraText = String.format(getString(R.string.fmt_load_this_json_file_to_join_the_mission), ac.getMissionName());
+                    } else {
+                        data.setUrl(downloadUrl);
+
+                        extraText = String.format(getString(R.string.fmt_load_this_json_file_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
+                    }
+
+                    File fd = File.createTempFile("mission-" + ac.getMissionName().replace(" ", "-"), ".json", Globals.getEngageApplication().getTempDir());
+                    FileOutputStream fos = new FileOutputStream(fd);
+
+                    if (!Utils.isEmptyString(_pwd)) {
+                        String pwdHexString = Utils.toHexString(_pwd.getBytes(Utils.getEngageCharSet()));
+                        byte[] encryptedBytes = Globals.getEngageApplication().getEngine().encryptSimple(_jsonConfiguration.toString().getBytes(), pwdHexString);
+                        fos.write(encryptedBytes);
+                    } else {
+                        fos.write(_jsonConfiguration.toString().getBytes());
+                    }
+
+                    fos.close();
+
+                    Uri u = FileProvider.getUriForFile(this, getString(R.string.file_content_provider), fd);
+
+                    fd.deleteOnExit();
+                    data.addUri(u);
+
+                    Globals.getEngageApplication().logEvent(Analytics.MISSION_SHARE_JSON);
+                }
+
+                if (uploadJson) {
+                    if (Utils.isEmptyString(downloadUrl)) {
+                        extraText = String.format(getString(R.string.fmt_scan_this_qr_code_to_join_the_mission), ac.getMissionName());
+                    } else {
+                        data.setUrl(downloadUrl);
+
+                        extraText = String.format(getString(R.string.fmt_scan_this_qr_code_to_join_the_mission_or_download_from), ac.getMissionName(), downloadUrl);
+                    }
+
+                    File fd = File.createTempFile("qr-" + ac.getMissionName().replace(" ", "-"), ".jpg", Globals.getEngageApplication().getTempDir());//NON-NLS
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    _bm.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                    byte[] bitmapdata = bos.toByteArray();
+
+                    FileOutputStream fos = new FileOutputStream(fd);
+                    fos.write(bitmapdata);
+                    fos.close();
+
+                    Uri u = FileProvider.getUriForFile(this, getString(R.string.file_content_provider), fd);
+
+                    fd.deleteOnExit();
+                    data.addUri(u);
+
+                    Globals.getEngageApplication().logEvent(Analytics.MISSION_SHARE_QR);
+                }
+
+                data.setText(String.format(getString(R.string.share_mission_email_subject), getString(R.string.app_name), ac.getMissionName()));
+
+                data.setHtml(extraText);
+
+                data.setSubject(getString(R.string.app_name) + " : " + ac.getMissionName());
+                startActivity(ShareHelper.buildShareIntent(this, data, getString(R.string.share_mission_upload_header)));
+            }
         }
         catch (Exception e)
         {

@@ -1,0 +1,128 @@
+{
+  "id":"{A084F471-FF8D-4A4E-AF02-4403B359E42F}",
+  "name":"Public Mission",
+  "description":"Public Mission",
+  "multicastFailoverPolicy": 0,
+  "rallypoint": {
+    "use": false,
+    "address": "",
+    "port": 7443
+  },
+  "groups": [
+    {
+      "blockAdvertising": true,
+      "cryptoPassword": "997E84FD464AB25A0A132E7E2C2092F202F0872FDE826F78B158C1AB43AC1E7C",
+      "id": "{784a9621-9ac6-443d-9f27-433fc9cb5272}",
+      "name": "Mission Control",
+      "rx": {
+        "address": "239.55.114.84",
+        "port": 35023
+      },
+      "tx": {
+        "address": "239.55.114.84",
+        "port": 35023
+      },
+      "type": 2
+    },
+    {
+      "blockAdvertising": true,
+      "cryptoPassword": "9A0140643F5F002D9DF0851DE5D8C3DA101756A6247734CBE66262C9C5B42DAF",
+      "id": "{9f02af55-9a49-33d6-da31-4bb98806912e}",
+      "name": "Group 1",
+      "rx": {
+        "address": "239.14.93.250",
+        "port": 35024
+      },
+      "timeline": {
+        "enabled": true,
+        "maxAudioTimeMs": 60000
+      },
+      "tx": {
+        "address": "239.14.93.250",
+        "port": 35024
+      },
+      "txAudio": {
+        "encoder": 25,
+        "fdx": false,
+        "framingMs": 60,
+        "maxTxSecs": 30
+      },
+      "type": 1
+    },
+    {
+      "blockAdvertising": true,
+      "cryptoPassword": "F51A36CD78BC03ADC0285D69E8922DCF52A427696B32FE74DFB28FC9C5CDD25D",
+      "id": "{3288ae90-8137-c7eb-b714-bbf678c59f7b}",
+      "name": "Group 2",
+      "rx": {
+        "address": "239.43.17.107",
+        "port": 35026
+      },
+      "timeline": {
+        "enabled": true,
+        "maxAudioTimeMs": 60000
+      },
+      "tx": {
+        "address": "239.43.17.107",
+        "port": 35026
+      },
+      "txAudio": {
+        "encoder": 25,
+        "fdx": false,
+        "framingMs": 60,
+        "maxTxSecs": 30
+      },
+      "type": 1
+    },
+    {
+      "blockAdvertising": true,
+      "cryptoPassword": "5264347614516124AE85CF5C2879A57E717AFD99E109914D9765C15DF59A4D59",
+      "id": "{a96d4d78-7a73-f21a-6ca0-13eef67cada7}",
+      "name": "Group 3",
+      "rx": {
+        "address": "239.118.218.13",
+        "port": 35028
+      },
+      "timeline": {
+        "enabled": true,
+        "maxAudioTimeMs": 60000
+      },
+      "tx": {
+        "address": "239.118.218.13",
+        "port": 35028
+      },
+      "txAudio": {
+        "encoder": 25,
+        "fdx": false,
+        "framingMs": 60,
+        "maxTxSecs": 30
+      },
+      "type": 1
+    },
+    {
+      "blockAdvertising": true,
+      "cryptoPassword": "D424640457BEE36777B2512E9A6BFE549254ECAE29E354A6750519A9EFEBC900",
+      "id": "{610137f2-4818-8f20-df47-a055816ca3a9}",
+      "name": "Group 4",
+      "rx": {
+        "address": "239.84.39.77",
+        "port": 35030
+      },
+      "timeline": {
+        "enabled": true,
+        "maxAudioTimeMs": 60000
+      },
+      "tx": {
+        "address": "239.84.39.77",
+        "port": 35030
+      },
+      "txAudio": {
+        "encoder": 25,
+        "fdx": false,
+        "framingMs": 60,
+        "maxTxSecs": 30
+      },
+      "type": 1
+    }
+  ]
+}

@@ -5,10 +5,8 @@
 
 package com.rallytac.engageandroid;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
 
 import com.rallytac.engage.engine.Engine;
 

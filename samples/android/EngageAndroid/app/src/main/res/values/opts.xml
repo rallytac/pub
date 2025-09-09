@@ -11,7 +11,7 @@
     <bool name="opt_supports_ui_theme">false</bool>
     <bool name="opt_log_to_engage">false</bool>
     <bool name="opt_flavor_specific_mg_01">false</bool>
-    <integer name="opt_min_mission_generate_passphrase_len">0</integer>
+    <integer name="opt_min_mission_generate_passphrase_len">3</integer>
     <string name="opt_sample_mission_fixed_id" translatable="false"></string>
     <bool name="opt_supports_text_messaging">false</bool>
     <bool name="opt_allow_animations">true</bool>

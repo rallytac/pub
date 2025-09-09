@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_scan_qr_from_camera"
-        android:title="Scan using the camera"/>
+        android:title="@string/scan_using_the_camera"/>
 
     <item
         android:id="@+id/action_scan_qr_from_file"
-        android:title="Scan from a file" />
+        android:title="@string/scan_from_a_file" />
 </menu>
