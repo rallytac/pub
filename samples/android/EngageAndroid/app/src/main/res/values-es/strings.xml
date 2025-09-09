@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fmt_user_display_name_generate">Usuario Android - %1$s</string>
+    <string name="sample_mission_gen_mission_name_fmt">%1$s Misión de Ejemplo</string>
+    <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
+    <string name="application_internal_certificate_store_display_name">Almacén de Certificados Predeterminado</string>
+    <string name="rts_factory_certificate_store_display_name">Almacén de Certificados RTS de Fábrica</string>
+
+    <!-- Main UI Strings -->
+    <string name="title_activity_settings">Configuración</string>
+    <string name="title_activity_missions">Misiones Disponibles</string>
+    <string name="title_activity_edit_mission">Misión</string>
+    <string name="title_activity_certstores">Almacenes de Certificados</string>
+    <string name="title_activity_map">Mapa</string>
+    <string name="title_about">Acerca de</string>
+    <string name="title_licensing">Licencia</string>
+
+    <!-- Settings Headers -->
+    <string name="set_hdr_developer_options">Opciones de Desarrollador</string>
+    <string name="set_hdr_general">General</string>
+    <string name="set_hdr_identity">Identidad</string>
+    <string name="set_hdr_connectivity">Conectividad</string>
+    <string name="set_hdr_location">Ubicación</string>
+    <string name="set_hdr_audio">Audio</string>
+    <string name="set_hdr_aec">Cancelación de Eco Acústico</string>
+    <string name="set_hdr_notifications">Notificaciones</string>
+    <string name="set_hdr_tone_levels">Niveles de Tono</string>
+    <string name="set_hdr_experimental">Funciones Experimentales</string>
+    <string name="set_hdr_biometrics">Biometría Humana (Experimental)</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">Aceptar</string>
+    <string name="button_yes">Sí</string>
+    <string name="button_no">No</string>
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_save">Guardar</string>
+    <string name="button_close">Cerrar</string>
+    <string name="button_clear">Limpiar</string>
+    <string name="button_reset">Restablecer</string>
+    <string name="button_map_show_all">Mostrar Todo</string>
+
+    <!-- QR Code Related -->
+    <string name="qr_code_scan_button">Escanear</string>
+    <string name="qr_scan_prompt">Escanear Código QR de Misión</string>
+    <string name="qr_scan_cancelled">Escaneo cancelado</string>
+    <string name="qr_scan_decode_failed">Error de decodificación</string>
+    <string name="qr_scan_decrypt_failed">Error de descifrado</string>
+    <string name="qr_scan_decompress_failed">Error de descompresión</string>
+    <string name="qr_scan_invalid">Código QR inválido</string>
+    <string name="qr_scn_invalid_version">Versión de código QR inválida</string>
+    <string name="qr_cannot_parse">No se puede analizar el código QR</string>
+
+    <!-- Error Messages -->
+    <string name="title_ui_launch_error">Error de Inicio de UI</string>
+    <string name="title_startup_error">Error de Inicio</string>
+    <string name="startup_cannot_connect_to_engine">No se puede conectar al motor de voz. Puede haber un problema con esta versión de Android o el paquete de instalación.</string>
+    <string name="title_permissions_required">Permisos Requeridos</string>
+    <string name="startup_one_or_more_permissions_denied">Se han denegado uno o más permisos requeridos.</string>
+    <string name="title_google_play_services_error">Error de Servicios de Google Play</string>
+    <string name="google_play_services_not_installed_or_out_of_date">Los servicios de Google Play no están disponibles o están desactualizados</string>
+
+    <!-- Mission Related -->
+    <string name="mission_download_button">Descargar</string>
+    <string name="mission_load_continue_button">Continuar</string>
+    <string name="mission_control">Control de Misión</string>
+    <string name="add_mission">Agregar Misión</string>
+    <string name="delete_mission">Eliminar Misión</string>
+    <string name="are_you_sure_you_want_to_delete_mission">¿Está seguro de que desea eliminar %1$s?</string>
+    <string name="activated_mission_fmt">%1$s activada</string>
+    <string name="loaded_mission_fmt">%1$s cargada</string>
+
+    <!-- Menu Items -->
+    <string name="menu_list">Lista</string>
+    <string name="menu_mission">Misión</string>
+    <string name="menu_missions">Misiones</string>
+    <string name="menu_share">Compartir</string>
+    <string name="menu_scan">Escanear</string>
+    <string name="menu_load">Cargar</string>
+    <string name="menu_download">Descargar</string>
+    <string name="menu_security">Seguridad</string>
+    <string name="menu_settings">Configuración</string>
+    <string name="menu_about">Acerca de</string>
+    <string name="menu_contact">Contacto</string>
+    <string name="menu_disconnect">Desconectar</string>
+
+    <!-- Identity Settings -->
+    <string name="set_identity_email_address_hint">Se recomienda dirección de correo electrónico</string>
+    <string name="set_identity_display_name">Nombre para Mostrar</string>
+    <string name="set_identity_transmission_alias_hint">Alias de transmisión</string>
+    <string name="set_identity_user_id">ID de Usuario</string>
+    <string name="set_identity_user_alias">Alias</string>
+
+    <!-- Location Settings -->
+    <string name="set_location_accuracy">Precisión</string>
+    <string name="set_location_share_my_location">Compartir mi ubicación</string>
+    <string name="set_location_displacement_trigger">Disparador de Desplazamiento</string>
+    <string name="set_location_update_frequency">Frecuencia de Actualización</string>
+
+    <!-- Audio Settings -->
+    <string name="set_audio_microphone_denoise">Activar Reducción de Ruido</string>
+    <string name="set_audio_microphone_agc_level">Control Automático de Ganancia</string>
+    <string name="set_audio_speaker_agc_level">Control Automático de Ganancia</string>
+    <string name="set_use_bluetooth_microphone">Usar micrófono de auricular Bluetooth</string>
+    <string name="set_use_bluetooth_ptt_device">Usar dispositivo Bluetooth para PTT</string>
+    <string name="set_bluetooth_ptt_device">Dispositivo Bluetooth</string>
+    <string name="set_audio_input_device">Dispositivo de entrada</string>
+    <string name="set_audio_output_device">Dispositivo de salida</string>
+
+    <!-- Notifications -->
+    <string name="set_notifications_enable_vibrations">Activar vibraciones</string>
+    <string name="set_notifications_enable_spoken_prompts">Activar indicaciones habladas</string>
+    <string name="set_notifications_when_members_join">Cuando los miembros se unen</string>
+    <string name="set_notifications_when_members_leave">Cuando los miembros se van</string>
+    <string name="set_notifications_when_receiving_new_audio">Al recibir nuevo audio</string>
+    <string name="set_notifications_when_network_error">Cuando hay un error de red</string>
+
+    <!-- Network Status -->
+    <string name="experiencing_network_problems">Experimentando problemas de red</string>
+    <string name="currently_operating_in_mc_failover_mode">Operando actualmente en modo de conmutación por error multicast</string>
+    <string name="currently_connected_via_ip_multicast">Actualmente conectado localmente vía IP multicast</string>
+    <string name="currently_connected_globally_fmt">Actualmente conectado globalmente vía %1$s:%2$s:%3$d</string>
+    <string name="connect_to_a_rallypoint">Conectar a un Rallypoint</string>
+
+    <!-- Licensing -->
+    <string name="license_has_expired">Sin licencia o licencia expirada</string>
+    <string name="about_license_key">Clave de Licencia</string>
+    <string name="about_enter_license_key">Con una licencia válida (y código de activación si es necesario) podrá aprovechar al máximo esta aplicación.</string>
+    <string name="about_activation_code">Código de Activación</string>
+    <string name="about_enter_activation_code">Ingrese o escanee su código de activación abajo, o haga clic en el ícono de nube para obtenerlo del servidor de licencias de Internet.</string>
+    <string name="about_click_for_offline_activation">Si no tiene conectividad a Internet, haga clic en el ícono de doble flecha para realizar una activación en dos pasos usando un dispositivo secundario conectado a Internet.</string>
+    <string name="about_hint_activation_code">código de activación</string>
+    <string name="about_btn_deactivate">Desactivar</string>
+    <string name="license_type_does_not_require_activation">Este tipo de licencia no requiere activación</string>
+    <string name="failed_to_validate_license_info">No se pudo validar la información de licencia</string>
+
+    <!-- Security -->
+    <string name="about_enterprise_id">ID de Empresa</string>
+    <string name="about_enter_enterprise_id">No necesita absolutamente un ID de empresa, pero si lo tiene, ayuda a proteger aún más sus comunicaciones cuando usa infraestructuras compartidas.</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">id de empresa</string>
+    <string name="use_enterprise_id_for_enhanced_security">Usar ID de Organización para seguridad mejorada</string>
+
+    <!-- Contact -->
+    <string name="contact_friendly_message">Estamos aquí para ayudar y nos encanta saber de nuestros clientes. Puede contactarnos por correo electrónico o visitando nuestro sitio web desde los enlaces a continuación.</string>
+    <string name="contact_web_site">Sitio Web</string>
+    <string name="contact_support">Soporte</string>
+    <string name="contact_sales">Ventas</string>
+
+    <!-- Mission Generation -->
+    <string name="generate_mission_button">Generar</string>
+    <string name="generate_using_passphrase">Generar usando frase de contraseña</string>
+    <string name="generate_passphrase_explanation">Ingrese una frase de contraseña en la que se basará la misión. Luego, comparta la misión diciéndole a otros miembros del equipo que generen una misión usando exactamente la misma frase de contraseña.\n\nNOTA: Si usará un Rallypoint, asegúrese de decirle a su equipo cuál.</string>
+    <string name="a_passphrase_is_required_to_generate">Se requiere una frase de contraseña para generar una misión.</string>
+    <string name="a_passphrase_of_minimum_length_is_required_to_generate">Se requiere una frase de contraseña de al menos %1$d caracteres para generar una misión.</string>
+
+    <!-- Audio Devices -->
+    <string name="active_audio_device_handset">El dispositivo de audio activo es el auricular</string>
+    <string name="active_audio_device_speakerphone">El dispositivo de audio activo es el altavoz</string>
+    <string name="active_audio_device_wired">El dispositivo de audio activo es el auricular con cable</string>
+    <string name="active_audio_device_bluetooth">El dispositivo de audio activo es el auricular Bluetooth</string>
+    <string name="active_audio_device_unknown">El dispositivo de audio activo es el predeterminado del dispositivo</string>
+    <string name="handset">Auricular</string>
+    <string name="speakerphone">Altavoz</string>
+    <string name="wired_headset">Auricular con Cable</string>
+    <string name="bluetooth_headset">Auricular Bluetooth</string>
+
+    <!-- Group Management -->
+    <string name="number_of_audio_groups">Número de grupos de audio:</string>
+    <string name="no_groups_to_display_title">No Hay Grupos para Mostrar</string>
+    <string name="no_groups_to_display_description">Parece que su misión no tiene grupos.\n\nVerifique su configuración usando la opción de menú Misiones o use esa misma pantalla para crear una misión con grupos.</string>
+    <string name="title_group">Grupo</string>
+    <string name="title_delete_group">Eliminar Grupo</string>
+    <string name="are_you_sure_delete_group">¿Está seguro de que desea eliminar %1$s?</string>
+    <string name="groups">Grupos</string>
+    <string name="unknown_group">Grupo Desconocido</string>
+    <string name="all_groups">(Todos los Grupos)</string>
+
+    <!-- Sharing -->
+    <string name="share_mission_share">Compartir</string>
+    <string name="share_mission_upload_to_mission_hub">Subir al centro de misiones</string>
+    <string name="share_mission_upload_header">Compartir …</string>
+    <string name="share_mission_email_subject">%1$s Misión : %2$s</string>
+    <string name="share_mission_mission_uploaded">Misión subida</string>
+    <string name="share_mission_mission_upload_failed">Error al subir la misión -</string>
+    <string name="share_title">Compartir</string>
+    <string name="share_json">Compartir archivo JSON en texto plano</string>
+
+    <!-- Certificate Store -->
+    <string name="certstore_not_available_for_mission">La misión seleccionada requiere un almacén de certificados que no está instalado actualmente.</string>
+    <string name="invalid_cert_store_cannot_obtain_descriptor">Almacén de certificados inválido - no se puede obtener el descriptor</string>
+    <string name="invalid_cert_store_cannot_decode_descriptor">Almacén de certificados inválido - no se puede decodificar el descriptor</string>
+    <string name="invalid_cert_store_cannot_invalid_version">Almacén de certificados inválido - versión desconocida</string>
+    <string name="invalid_cert_store_cannot_no_certificates_found">Almacén de certificados inválido - no se encontraron certificados</string>
+
+    <!-- Text Messaging -->
+    <string name="text_message_dictate_message">Dictar mensaje</string>
+    <string name="text_message_send_message">Enviar mensaje</string>
+    <string name="text_message_hint_enter_text_message">escribir un mensaje de texto</string>
+
+    <!-- Biometrics -->
+    <string name="set_biometrics_simulate">Simular lecturas biométricas</string>
+    <string name="set_biometrics_reporting_intervals_secs">Intervalos de Informe en Segundos</string>
+    <string name="set_biometrics_heart_rate">Frecuencia Cardíaca</string>
+    <string name="set_biometrics_skin_temp">Temperatura de la Piel</string>
+    <string name="set_biometrics_core_temp">Temperatura Central</string>
+    <string name="set_biometrics_blood_oxy_perc">Porcentaje de Oxígeno en Sangre</string>
+    <string name="set_biometrics_blood_hydro_level">Nivel de Hidratación en Sangre</string>
+    <string name="set_biometrics_fatigue_level">Nivel de Fatiga</string>
+    <string name="set_biometrics_task_effectiveness_level">Nivel de Efectividad en Tareas</string>
+
+    <!-- System Information -->
+    <string name="system_information">Información del Sistema</string>
+    <string name="mi_hdr_system">SISTEMA:\n</string>
+    <string name="mi_hdr_device">\n\nDISPOSITIVO:\n</string>
+    <string name="mi_sys_id">ID: %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
+    <string name="mi_device_manufacturer">Fabricante: %1$s\n</string>
+    <string name="mi_device_id">ID: %1$s\n</string>
+    <string name="mi_device_brand">Marca: %1$s\n</string>
+    <string name="mi_device_model">Modelo: %1$s\n</string>
+    <string name="mi_device_board">Placa: %1$s\n</string>
+    <string name="mi_device_hardware">Hardware: %1$s\n</string>
+    <string name="mi_device_serial">Número de serie: %1$s\n</string>
+    <string name="mi_device_bootloader">Bootloader: %1$s\n</string>
+    <string name="mi_device_user">Usuario: %1$s\n</string>
+    <string name="mi_device_host">Host: %1$s\n</string>
+    <string name="mi_device_build_time">Tiempo de compilación: %1$s\n</string>
+    <string name="mi_device_version_release">Versión: %1$s\n</string>
+    <string name="mi_device_sdk_int">Versión SDK: %1$d\n</string>
+
+    <!-- Screen Information -->
+    <string name="mi_hdr_screen">\n\nPANTALLA:</string>
+    <string name="mi_screen_density">Densidad: %1$f\n</string>
+    <string name="mi_screen_width">Ancho: %1$d\n</string>
+    <string name="mi_screen_height">Alto: %1$d\n</string>
+    <string name="mi_screen_scaled_density">Densidad escalada: %1$f\n</string>
+    <string name="mi_screen_density_dpi">Densidad DPI: %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI: %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI: %1$f\n</string>
+
+    <!-- Miscellaneous -->
+    <string name="copyright">Copyright © 2020 Rally Tactical Systems, Inc.</string>
+    <string name="name">nombre</string>
+    <string name="description">descripción</string>
+    <string name="address">dirección</string>
+    <string name="port">puerto</string>
+    <string name="cancel">Cancelar</string>
+    <string name="passphrase">frase de contraseña</string>
+    <string name="url">url</string>
+    <string name="pin">PIN</string>
+    <string name="id">id</string>
+</resources>

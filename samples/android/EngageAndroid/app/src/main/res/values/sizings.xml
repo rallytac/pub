@@ -24,7 +24,7 @@
     <dimen name="ptt_width_large">260dp</dimen>
     <dimen name="ptt_bottom">8dp</dimen>
     <dimen name="ptt_end">8dp</dimen>
-    <string name="show_map_icon_on_top_icons" translatable="false">@string/visibility_visible</string>
+    <string name="show_map_icon_on_top_icons" translatable="false">@string/visibility_gone</string>
 
     <!-- Information -->
     <string name="ui_sizing_type" translatable="false">default</string>
@@ -58,7 +58,7 @@
     <string name="show_priority_icon_on_large_card" translatable="false">@string/visibility_visible</string>
     <string name="show_priority_icon_on_small_card" translatable="false">@string/visibility_gone</string>
     <string name="show_selected_for_ptt_on_small_card" translatable="false">@string/visibility_visible</string>
-    <string name="show_priority_icon_on_app_single_view" translatable="false">@string/visibility_gone</string>
+    <string name="show_priority_icon_on_app_single_view" translatable="false">@string/visibility_visible</string>
     <string name="show_priority_icon_on_app_multi_view" translatable="false">@string/visibility_gone</string>
     <string name="show_tx_alert_icon_on_app_single_view" translatable="false">@string/visibility_visible</string>
 

@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Parcelable;
 import android.text.Html;
@@ -32,6 +31,8 @@ public class ShareHelper {
     private static final String SHARE_TXT_PLAIN = "text/plain"; //NON-NLS
 
     private static final String TWITTER_PACKAGE = "com.twitter.android"; //NON-NLS
+    private static final String GMAIL_PACKAGE = "com.google.android.gm"; //NON-NLS
+    private static final String SHARE_EMAIL = "message/rfc822"; //NON-NLS
 
     private ShareHelper() { }
 
@@ -104,6 +105,25 @@ public class ShareHelper {
         return buildIntentsForAppsSupportingType(context, SHARE_TXT_PLAIN, targetedShareIntent, selectedPackageNames);
 
     }
+    private static List<Intent> buildIntentsForAppsSupportingEmail(final Activity context, final ShareableData data,
+                                                                       final Set<String> selectedPackageNames) {
+        // Build base intent
+        final Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType(SHARE_EMAIL);
+
+        // Add email-specific extras
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, data.getSubject());
+        emailIntent.putExtra(Intent.EXTRA_TEXT, data.getText());
+
+        // Attach files if available
+        if(!data.getUris().isEmpty()) {
+            emailIntent.putExtra(Intent.EXTRA_STREAM, data.getUris().get(0));
+            // For multiple attachments, you would use:
+            // emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, data.getUris());
+        }
+
+        return buildIntentsForAppsSupportingType(context, SHARE_EMAIL, emailIntent, selectedPackageNames);
+    }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private static List<Intent> buildIntentsForAppsSupportingHtml(final Activity context, final ShareableData data,
@@ -119,7 +139,7 @@ public class ShareHelper {
 
         targetedShareIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(data.getHtml()));
         targetedShareIntent.putExtra(Intent.EXTRA_SUBJECT, data.getSubject());
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             targetedShareIntent.putExtra(Intent.EXTRA_HTML_TEXT, data.getHtml());
         }
 
@@ -161,11 +181,28 @@ public class ShareHelper {
             selectedPackageNames.add(TWITTER_PACKAGE);
         }
 
+        // Special handling for Gmail
+        if (isAppAvailable(context, GMAIL_PACKAGE)) {
+            Intent gmailIntent = new Intent(Intent.ACTION_SEND);
+            gmailIntent.setType(SHARE_EMAIL);
+            gmailIntent.putExtra(Intent.EXTRA_SUBJECT, data.getSubject());
+            gmailIntent.putExtra(Intent.EXTRA_TEXT, data.getText());
+            if(!data.getUris().isEmpty()) {
+                gmailIntent.putExtra(Intent.EXTRA_STREAM, data.getUris().get(0));
+            }
+            gmailIntent.setPackage(GMAIL_PACKAGE);
+            targetedShareIntents.add(gmailIntent);
+            selectedPackageNames.add(GMAIL_PACKAGE);
+        }
+
         // App supporting HTML
         targetedShareIntents.addAll(buildIntentsForAppsSupportingHtml(context, data, selectedPackageNames));
 
         // App supporting simple text
         targetedShareIntents.addAll(buildIntentsForAppsSupportingPlainText(context, data, selectedPackageNames));
+
+        // App supporting email
+        targetedShareIntents.addAll(buildIntentsForAppsSupportingEmail(context, data, selectedPackageNames));
 
         Intent chooserIntent = Intent.createChooser(new Intent(Intent.ACTION_SEND), sharingHeader);
         if (targetedShareIntents.size() > 0) {

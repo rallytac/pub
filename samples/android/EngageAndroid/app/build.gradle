@@ -1,13 +1,21 @@
-apply plugin: 'com.android.application'
+plugins {
+    alias(libs.plugins.android.application)
+}
 
-// Comment this to disable Firebase Analytics or if you do not have the necessary
-// google-services.json file for Firebase.
-apply plugin: 'com.google.gms.google-services'
+ext.engageVersion = "1.251.9091"
+ext.useEngageAar = true
 
-// Addition flavors that we want to build for
-def additionalFlavorsFile = "flavors/flavors.gradle"
+// Apply RTS-specific configuration
+try {
+    apply from: "ext/rts.gradle"
+}
+catch (ignored) {
+}
 
 android {
+    namespace 'com.rallytac.engageandroid'
+    compileSdk 34
+
     flavorDimensions "version"
 
     productFlavors {
@@ -18,41 +26,40 @@ android {
         }
     }
 
-    // Add additional OEM flavors if any
+    // Add additional OEM ext if any
     try {
-        apply from: additionalFlavorsFile
+        apply from: "ext/flavors.gradle"
     }
     catch (ignored) {
     }
 
-    compileSdkVersion 29
+    buildFeatures {
+        buildConfig true
+    }
 
     defaultConfig {
-        // The default application ID will be overridden by the one
-        // defined in the product flavor
-        applicationId "com.rallytac.example.package"
-        minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 1326
-        versionName "1326"
+        applicationId "com.rallytac.engageandroid"
+        minSdk 24
+        targetSdk 34
+        versionCode 1337
+        versionName "1337"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
-        android.defaultConfig.vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
-
-    lintOptions {
-        checkReleaseBuilds false
-        abortOnError false
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
-    applicationVariants.all { variant ->
+    applicationVariants.configureEach { variant ->
         variant.outputs.all { output ->
             def apkBaseName = variant.productFlavors.get(0).name
             def SEP = "_"
@@ -66,47 +73,14 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
-    
-    // Engage Engine - change this to use a particular version
-    def relType = 'release'
-    def engineVersion = '<version_number_here>'
+    implementation libs.appcompat
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
 
-    // From a binary repository such as Maven
-    // implementation 'com.rallytac.engage:engage-engine-release:' + engineVersion + '@aar'
-    
-    // From a local file tree - replace <path_to_the_aar_file> with a valid path in youe environment
-    implementation fileTree(dir: '<path_to_the_aar_file>', include: ["engage-engine-" + relType + "-" + engineVersion + ".aar"])
+    implementation libs.zxing.android.embedded
 
-    // Android goodies
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.preference:preference:1.0.0'
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-
-    // QR codes
-    implementation 'com.journeyapps:zxing-android-embedded:3.5.0'
-
-    // Google Maps
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
-    implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
-
-    // Charting
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-
-    // Testing
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-
-    // Firebase
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
-    implementation 'com.google.firebase:firebase-core:17.2.3'
-
-    // JSON
-    implementation 'com.tzx.json:jsonhandleview:1.2.2'
+    if(useEngageAar) {
+        implementation files("libs/engage-engine-release-${engageVersion}.aar")
+    }
 }

@@ -1,4 +1,10 @@
 <resources>
+    <string name="licensing_entitlement" translatable="false"></string>
+    <string name="google_maps_key" translatable="false"></string>
+    <string name="file_content_provider" translatable="false">EngageAndroid</string>
+
+
+    <string name="app_name" translatable="false">Engage</string>
     <string name="certstore_cache_dir" translatable="false">certstore_cache</string>
     <string name="certstore_default_fn" translatable="false">engage.certstore</string>
     <string name="certstore_active_fn" translatable="false">active-certstore.certstore</string>
@@ -28,7 +34,7 @@
     <string name="preload_rp_address" translatable="false"></string>
     <string name="preload_rp_port" translatable="false"></string>
 
-    <string name="fmt_user_alias_id_generate">ANDR%1$08X</string>
+    <string name="fmt_user_alias_id_generate" translatable="false">ANDR%1$08X</string>
     <string name="fmt_user_display_name_generate">Android User - %1$s</string>
 
     <string name="sample_mission_gen_mission_name_fmt">%1$s Sample Mission</string>
@@ -43,8 +49,14 @@
     <string name="generated_mission_description"></string>
     <string name="generated_mission_name"></string>
     <string name="replacement_main_screen_title_bar">${appName} : ${missionName}</string>
-
+    <string name="support_email_address" translatable="false">support@demo.rallytac.com</string>
+    <string name="sales_email_address" translatable="false">sales@demo.rallytac.com</string>
+    <string name="home_website_address" translatable="false">https://www.rallytac.com</string>
     <string name="application_internal_certificate_store_display_name">Default Certificate Store</string>
+    <string name="rts_factory_certificate_store_display_name">RTS Factory Certificate Store</string>
+    <string name="licensing_manufacturerId" translatable="false"></string>
+    <string name="generated_user_id_email_domain" translatable="false">\@demo.rallytac.com</string>
+    <string name="mission_hub_address" translatable="false">https://s3.us-east-2.amazonaws.com/engage-missions</string>
 
     <string name="online_licensing_activation_url_prod" translatable="false">https://licensing.rallytac.com/api/v1/activations</string>
     <string name="offline_licensing_activation_url_prod" translatable="false">https://licensing.rallytac.com/api/v1/getactivationqrcode</string>
@@ -66,8 +78,8 @@
     <string name="wifi_lock_name" translatable="false">.WifiLock</string>
     <string name="multicast_lock_name" translatable="false">.MulticastLock</string>
     <string name="wake_lock_name" translatable="false">.WakeLock</string>
-    <string name="android_notification_channel_id">.NotificationChannel</string>
-    <string name="android_notification_channel_name">.Notifications</string>
+    <string name="android_notification_channel_id" translatable="false">.NotificationChannel</string>
+    <string name="android_notification_channel_name" translatable="false">.Notifications</string>
     <string name="android_notitication_channel_description">%1$s is the standard for high-performance, reliable communications capabilities for secure systems</string>
     <string name="android_notification_service_is_running">%1$s is running</string>
     <string name="title_about">About</string>
@@ -181,7 +193,7 @@
     <string name="offline_deactivation_notification_of_deactivation">Note that, regardless of whether you get a response, your license on this device has now been deactivated.</string>
     <string name="share_mission_share">Share</string>
     <string name="share_mission_upload_to_mission_hub">Upload to mission hub</string>
-    <string name="share_mission_upload_header">Share ...</string>
+    <string name="share_mission_upload_header">Share …</string>
     <string name="share_mission_email_subject">%1$s Mission : %2$s</string>
     <string name="share_mission_mission_uploaded">Mission uploaded</string>
     <string name="share_mission_mission_upload_failed">Mission upload failed -</string>
@@ -210,6 +222,7 @@
     <string name="currently_operating_in_mc_failover_mode">Currently operating in multicast failover mode</string>
     <string name="license_type_does_not_require_activation">This license type does not require activation</string>
     <string name="failed_to_validate_license_info">Failed to validate the license information provided</string>
+    <string name="text_message_dictate_message">Dictate message</string>
     <string name="text_message_send_message">Send message</string>
     <string name="text_message_hint_enter_text_message">enter a text message</string>
     <string name="tx_usurped_by_higher_priority">Transmit usurped by higher priority</string>
@@ -626,6 +639,15 @@
         <item>3</item>
     </string-array>
 
+    <string-array name="rp_protocol_name">
+        <item>Connect via encrypted TCP</item>
+        <item>Connect via encrypted WebSocket</item>
+    </string-array>
+    <string-array name="rp_protocol_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
     <string-array name="mc_failover_policy_name">
         <item>Use app setting for multicast failover</item>
         <item>Use multicast if Rallypoint is unavailable</item>
@@ -651,7 +673,7 @@
         <item>FM Tuner</item>
         <item>HDMI</item>
         <item>HDMI ARC</item>
-        <item>Hearin Aid</item>
+        <item>Hearing Aid</item>
         <item>IP</item>
         <item>Analog Line</item>
         <item>Digital Line</item>
@@ -757,6 +779,7 @@
     <string name="advanced_mode_activated">Advanced mode activated</string>
     <string name="advanced_mode_deactivated">Advanced mode deactivated</string>
     <string name="set_hdr_developer_options">Developer Options</string>
+    <string name="set_hdr_general">General</string>
     <string name="set_hdr_identity">Identity</string>
     <string name="set_hdr_connectivity">Connectivity</string>
     <string name="set_hdr_location">Location</string>
@@ -860,7 +883,7 @@
     <string name="go_local">Go Local</string>
     <string name="go_global">Go Global</string>
     <string name="currently_connected_via_ip_multicast">Currently connected locally via IP multicast</string>
-    <string name="currently_connected_globally_fmt">Currently connected globally via %1$s:%2$d</string>
+    <string name="currently_connected_globally_fmt">Currently connected globally via %1$s:%2$s:%3$d</string>
     <string name="existing_license_never_expires_but_requires_activation">Your existing license never expires but requires an activation code.  You can continue to use the application but won\'t be able to transmit for more than 3 seconds at a time.</string>
     <string name="your_license_is_active">Your license is active.</string>
     <string name="you_dont_yet_have_a_valid_license">You don\'t yet have a valid license. You can continue to use the application but won\'t be able to transmit for more than 3 seconds at a time.</string>
@@ -873,7 +896,7 @@
     <string name="license_never_expires_but_requires_activation">This existing license never expires but requires an activation code.  You can continue to use the application but won\\\'t be able to transmit for more than 3 seconds at a time.</string>
     <string name="system_information">System Information</string>
     <string name="mi_hdr_system">SYSTEM:\n</string>
-    <string name="mi_hdr_device">\n\nDEVICE:</string>
+    <string name="mi_hdr_device">\n\nDEVICE:\n</string>
     <string name="mi_sys_id">ID: %1$s\n</string>
     <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
     <string name="mi_device_manufacturer">Manufacturer: %1$s\n</string>
@@ -993,7 +1016,7 @@
     <string name="failed_to_load_enterprise_id_data">Failed to load the enterprise ID data</string>
     <string name="failed_to_load_license_key_data">Failed to load the license data</string>
     <string name="use_enterprise_id_for_enhanced_security">Use Organization ID for enhanced security</string>
-    <string name="passphrase_title">Passphrase</string>
+    <string name="passphrase_title">Passphrase (%1$d characters or more)</string>
     <string name="no_groups_to_display_title">No Groups To Display</string>
     <string name="no_groups_to_display_description">It\'s likely your mission has no groups.\n\nCheck your configuration using the Missions menu option or use that same screen to create a mission with groups.</string>
     <string name="flavor_specific_mg_sw_01_text"></string>
@@ -1016,4 +1039,36 @@
     <string name="sample_mission_created_title">Sample Mission Created</string>
     <string name="sample_mission_created_msg">We couldn\'t find an existing mission to join; so we went ahead and created a sample mission so you can get going right away.\n\nTo create missions of your own, simply select \'Missions\' from the menu and go from there.\n\nPS. This sample mission will be the same for other users of this app so you can talk to those folks right away.</string>
     <string name="id">id</string>
+    <string name="cs_popup_plus_private_key">[+PK]</string>
+    <string name="manage_your_identity">Manage your identity</string>
+    <string name="set_a_new_id">Set a new ID</string>
+    <string name="clear_id">Clear ID</string>
+    <string name="scan_using_the_camera">Scan using the camera</string>
+    <string name="scan_from_a_file">Scan from a file</string>
+    <string name="oem_specific_mission">OEM-specific mission</string>
+    <string name="json_policy_editor">JSON Policy Editor</string>
+    <string name="some_text" translatable="false">some text</string>
+    <string name="signature">Signature:</string>
+    <string name="generated_mission">Generated Mission</string>
+    <string name="if_the_mission_you_re_downloading_is_protected_with_a_password_or_passphrase_please_enter_it_here">If the mission you\'re downloading is protected with a password or passphrase, please enter it here.</string>
+    <string name="handset">Handset</string>
+    <string name="speakerphone">Speakerphone</string>
+    <string name="wired_headset">Wired Headset</string>
+    <string name="bluetooth_headset">Bluetooth Headset</string>
+    <string name="copyright">Copyright &#169; 2020 Rally Tactical Systems, Inc.</string>
+    <string name="please_select_a_certificate_store_to_use_to_generate_the_mission">Please select a certificate store to use to generate the mission</string>
+    <string name="descriptor_certificate_id_placeholder">(no id)</string>
+    <string name="descriptor_certificates_fmt">%1$s, %2$d certificates</string>
+    <string name="experience">Experience</string>
+    <string name="if_the_certificate_store_you_re_loading_is_protected_by_a_password_please_enter_it_now">If the certificate store you\'re loading is protected by a password, please enter it now.</string>
+    <string name="are_you_sure_you_want_to_delete_this_password">Are you sure you want to delete this password?</string>
+    <string name="delete_password">Delete Password</string>
+    <string name="passwords">Passwords</string>
+    <string name="passwords_cannot_be_viewed_or_edited_only_added_or_removed">Passwords cannot be viewed or edited - only added or removed</string>
+    <string name="please_enter_the_password_passphrase">Please enter the password/passphrase</string>
+    <string name="entry">entry</string>
+    <string name="save_to_my_documents">Save to My Documents</string>
+    <string name="certificate_stores">Certificate Stores</string>
+    <string name="clear_log">Clear Log</string>
+    <string name="save_log">Save Log</string>
 </resources>

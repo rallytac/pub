@@ -25,7 +25,7 @@ public class MyUncaughtExceptionHandler implements Thread.UncaughtExceptionHandl
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(EngageApplication.getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(EngageApplication.getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager mgr = (AlarmManager) EngageApplication.getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
         mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
 

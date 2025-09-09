@@ -6,17 +6,16 @@
 package com.rallytac.engageandroid;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Debug;
 import android.widget.Toast;
+
+import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
-
-import com.rallytac.engage.engine.Engine;
 
 public class ActiveConfiguration
 {
@@ -81,7 +80,7 @@ public class ActiveConfiguration
             enabled = Constants.DEF_LOCATION_ENABLED;
             intervalMs = (Constants.DEF_LOCATION_INTERVAL_SECS * 1000);
             minIntervalMs = intervalMs;
-            accuracy = Constants.DEF_LOCATION_ACCURACY;
+            //accuracy = Constants.DEF_LOCATION_ACCURACY;
             minDisplacement = Constants.DEF_LOCATION_MIN_DISPLACEMENT;
         }
     }
@@ -116,6 +115,7 @@ public class ActiveConfiguration
     private boolean _useRP;
     private String _rpAddress;
     private int _rpPort;
+    private int _rpProtocol;
     private int _multicastFailoverPolicy;
 
     private String _nodeId;
@@ -156,6 +156,8 @@ public class ActiveConfiguration
     private int _audioInputDeviceId;
     private int _audioOutputDeviceId;
     private int _priorityTxLevel = 0;
+
+    private boolean _keepTxMutedOnPtt = false;
 
     private String _inputJson;
 
@@ -350,6 +352,18 @@ public class ActiveConfiguration
         Globals.getSharedPreferencesEditor().apply();
     }
 
+    public boolean getKeepTxMutedOnPtt()
+    {
+        return _keepTxMutedOnPtt;
+    }
+
+    public void setKeepTxMutedOnPtt(boolean b)
+    {
+        _keepTxMutedOnPtt = b;
+
+        Globals.getSharedPreferencesEditor().putBoolean(PreferenceKeys.DEVELOPER_KEEP_PTT_MUTED_ON_TX, _keepTxMutedOnPtt);
+        Globals.getSharedPreferencesEditor().apply();
+    }
 
     public boolean getNotifyOnNodeJoin()
     {
@@ -586,6 +600,12 @@ public class ActiveConfiguration
 
     public boolean addDynamicGroup(GroupDescriptor gd)
     {
+        if(!ActiveConfiguration.allowGroupInMission(gd.type))
+        {
+            Globals.getLogger().e(TAG, "addDynamicGroup: group type not allowed in mission");//NON-NLS
+            return false;
+        }
+
         boolean rc = false;
 
         try
@@ -723,6 +743,16 @@ public class ActiveConfiguration
         return _rpAddress;
     }
 
+    public int getRpProtocol()
+    {
+    	return _rpProtocol;
+    }
+
+    public void setRpProtocol(int protocol)
+    {
+    	_rpProtocol = protocol;
+    }
+
     public void setRpPort(int port)
     {
         _rpPort = port;
@@ -826,6 +856,7 @@ public class ActiveConfiguration
         _useRP = false;
         _rpAddress = "";
         _rpPort = 0;
+        _rpProtocol = 0;
         _multicastFailoverPolicy = IntFromMulticastFailoverPolicy(MulticastFailoverPolicy.followAppSetting);
         _locationConfiguration.clear();
         _multicastFailoverConfiguration.clear();
@@ -876,6 +907,7 @@ public class ActiveConfiguration
                 rallypoint.put(JSON_FIELD_FOR_RP_USE, _useRP);
                 rallypoint.put(Engine.JsonFields.Rallypoint.Host.address, _rpAddress);
                 rallypoint.put(Engine.JsonFields.Rallypoint.Host.port, _rpPort);
+                rallypoint.put(Engine.JsonFields.Rallypoint.protocol, _rpProtocol);
                 rc.put(Engine.JsonFields.Rallypoint.objectName, rallypoint);
             }
 
@@ -905,6 +937,7 @@ public class ActiveConfiguration
 
         return rc;
     }
+
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean parseTemplate(String json)
@@ -938,6 +971,7 @@ public class ActiveConfiguration
                     {
                         _rpAddress = rallypoint.getString(Engine.JsonFields.Rallypoint.Host.address);
                         _rpPort = rallypoint.getInt(Engine.JsonFields.Rallypoint.Host.port);
+                        _rpProtocol = rallypoint.optInt(Engine.JsonFields.Rallypoint.protocol, Constants.DEF_RP_PROTOCOL);
                     }
                     catch (Exception outerE)
                     {
@@ -951,6 +985,7 @@ public class ActiveConfiguration
                             {
                                 _rpAddress = host.getString(Engine.JsonFields.Rallypoint.Host.address);
                                 _rpPort = host.getInt(Engine.JsonFields.Rallypoint.Host.port);
+                                _rpProtocol = host.getInt(Engine.JsonFields.Rallypoint.protocol);
                             }
                         }
                         catch (Exception innerE)
@@ -980,7 +1015,12 @@ public class ActiveConfiguration
 
                 if(_rpPort <= 0)
                 {
-                    _rpPort = Constants.DEF_RP_PORT;
+                    _rpPort = Constants.DEF_RP_TCP_PORT;
+                }
+
+                if(_rpProtocol <= 0)
+                {
+                    _rpProtocol = Constants.DEF_RP_PROTOCOL;
                 }
             }
 
@@ -994,54 +1034,52 @@ public class ActiveConfiguration
                         JSONObject group = groups.getJSONObject(x);
                         if(group != null)
                         {
-                            GroupDescriptor g = new GroupDescriptor();
-
-                            g.id = group.optString(Engine.JsonFields.Group.id, "");
-                            g.type = GroupDescriptor.Type.values()[group.optInt(Engine.JsonFields.Group.type, 0)];
-                            g.name = group.optString(Engine.JsonFields.Group.name, "");
-                            g.isEncrypted = (!group.optString(Engine.JsonFields.Group.cryptoPassword, "").isEmpty());
-                            g.ept = group.optInt(Constants.EPT_ELEMENT_NAME, 0);
-                            g.anonymousAlias = group.optBoolean(Constants.ANONYMOUS_ALIAS_ELEMENT_NAME, false);
-                            g.jsonConfiguration = group.toString();
-
-                            JSONObject txAudio = group.optJSONObject(Engine.JsonFields.TxAudio.objectName);
-                            if(txAudio != null)
+                            if(ActiveConfiguration.allowGroupInMission(GroupDescriptor.Type.values()[group.optInt(Engine.JsonFields.Group.type, 0)]))
                             {
-                                g.fdx = group.optBoolean(Engine.JsonFields.TxAudio.fdx, false);
-                            }
+                                GroupDescriptor g = new GroupDescriptor();
 
-                            JSONArray rallypointArray = group.optJSONArray(Engine.JsonFields.Rallypoint.arrayName);
-                            if (rallypointArray != null)
-                            {
-                                if(Utils.isEmptyString(_rpAddress))
-                                {
-                                    for (int y = 0; y < rallypointArray.length(); y++)
-                                    {
-                                        JSONObject rp = rallypointArray.optJSONObject(y);
-                                        if(rp != null)
-                                        {
-                                            JSONObject host = rp.optJSONObject(Engine.JsonFields.Rallypoint.Host.objectName);
-                                            if( host != null)
-                                            {
-                                                String tmpAddr = host.optString(Engine.JsonFields.Rallypoint.Host.address, null);
-                                                int tmpPort = host.optInt(Engine.JsonFields.Rallypoint.Host.port, 0);
+                                g.id = group.optString(Engine.JsonFields.Group.id, "");
+                                g.type = GroupDescriptor.Type.values()[group.optInt(Engine.JsonFields.Group.type, 0)];
+                                g.name = group.optString(Engine.JsonFields.Group.name, "");
+                                g.isEncrypted = (!group.optString(Engine.JsonFields.Group.cryptoPassword, "").isEmpty());
+                                g.ept = group.optInt(Constants.EPT_ELEMENT_NAME, 0);
+                                g.anonymousAlias = group.optBoolean(Constants.ANONYMOUS_ALIAS_ELEMENT_NAME, false);
+                                g.jsonConfiguration = group.toString();
 
-                                                if(!Utils.isEmptyString(tmpAddr) && tmpPort > 0)
-                                                {
-                                                    _rpAddress = tmpAddr;
-                                                    _rpPort = tmpPort;
-                                                    break;
+                                JSONObject txAudio = group.optJSONObject(Engine.JsonFields.TxAudio.objectName);
+                                if (txAudio != null) {
+                                    g.fdx = group.optBoolean(Engine.JsonFields.TxAudio.fdx, false);
+                                }
+
+                                JSONArray rallypointArray = group.optJSONArray(Engine.JsonFields.Rallypoint.arrayName);
+                                if (rallypointArray != null) {
+                                    if (Utils.isEmptyString(_rpAddress)) {
+                                        for (int y = 0; y < rallypointArray.length(); y++) {
+                                            JSONObject rp = rallypointArray.optJSONObject(y);
+                                            if (rp != null) {
+                                                JSONObject host = rp.optJSONObject(Engine.JsonFields.Rallypoint.Host.objectName);
+                                                if (host != null) {
+                                                    String tmpAddr = host.optString(Engine.JsonFields.Rallypoint.Host.address, null);
+                                                    int tmpPort = host.optInt(Engine.JsonFields.Rallypoint.Host.port, 0);
+                                                    int tmpProtocol = host.optInt(Engine.JsonFields.Rallypoint.protocol, 0);
+
+                                                    if (!Utils.isEmptyString(tmpAddr) && tmpPort > 0) {
+                                                        _rpAddress = tmpAddr;
+                                                        _rpPort = tmpPort;
+                                                        _rpProtocol = tmpProtocol;
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
                                     }
+
+                                    // Remove the Rallypoint array
+                                    group.remove(Engine.JsonFields.Rallypoint.arrayName);
                                 }
 
-                                // Remove the Rallypoint array
-                                group.remove(Engine.JsonFields.Rallypoint.arrayName);
+                                _missionGroups.add(g);
                             }
-
-                            _missionGroups.add(g);
                         }
                     }
                 }
@@ -1348,6 +1386,12 @@ public class ActiveConfiguration
 
         try
         {
+            // Internals
+            if(Debug.isDebuggerConnected())
+            {
+                rc.getJSONObject("internals").getJSONObject("watchdog").put("enabled", false);
+            }
+
             // Networking
             {
                 JSONObject networking = rc.optJSONObject(Engine.JsonFields.EnginePolicy.Networking.objectName);
@@ -1766,6 +1810,17 @@ public class ActiveConfiguration
         }
     }
 
+    public static boolean allowMissionControl()
+    {
+        return Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_ALLOW_MISSION_CONTROL, true);
+    }
+
+    public static boolean allowGroupInMission(GroupDescriptor.Type groupType)
+    {
+        return ((groupType == GroupDescriptor.Type.gtAudio) ||
+                ((groupType == GroupDescriptor.Type.gtPresence) && ActiveConfiguration.allowMissionControl()));
+    }
+
     public static ActiveConfiguration loadFromDatabaseMission(DatabaseMission mission)
     {
         ActiveConfiguration rc;
@@ -1784,6 +1839,7 @@ public class ActiveConfiguration
             rc._useRP = mission._useRp;
             rc._rpAddress = mission._rpAddress;
             rc._rpPort = mission._rpPort;
+            rc._rpProtocol = mission._rpProtocol;
             rc._multicastFailoverPolicy = mission._multicastFailoverPolicy;
 
             GroupDescriptor gd;
@@ -1792,31 +1848,34 @@ public class ActiveConfiguration
             JSONObject txAudio;
 
             // Presence group if we have one
-            if(!Utils.isEmptyString(mission._mcId))
+            if(ActiveConfiguration.allowGroupInMission(GroupDescriptor.Type.gtPresence))
             {
-                gd = new GroupDescriptor();
-                gd.id = mission._mcId;
-                gd.type = GroupDescriptor.Type.gtPresence;
-                gd.name = "$MISSIONCONTROL$." + mission._id;//NON-NLS
+                if (!Utils.isEmptyString(mission._mcId))
+                {
+                    gd = new GroupDescriptor();
+                    gd.id = mission._mcId;
+                    gd.type = GroupDescriptor.Type.gtPresence;
+                    gd.name = "$MISSIONCONTROL$." + mission._id;//NON-NLS
 
-                groupObject = new JSONObject();
-                groupObject.put(Engine.JsonFields.Group.id, gd.id);
-                groupObject.put(Engine.JsonFields.Group.name, gd.name);
-                groupObject.put(Engine.JsonFields.Group.type, GroupDescriptor.Type.gtPresence.ordinal());
-                groupObject.put(Engine.JsonFields.Group.cryptoPassword, mission._mcCryptoPassword);
+                    groupObject = new JSONObject();
+                    groupObject.put(Engine.JsonFields.Group.id, gd.id);
+                    groupObject.put(Engine.JsonFields.Group.name, gd.name);
+                    groupObject.put(Engine.JsonFields.Group.type, GroupDescriptor.Type.gtPresence.ordinal());
+                    groupObject.put(Engine.JsonFields.Group.cryptoPassword, mission._mcCryptoPassword);
 
-                rxTx = new JSONObject();
-                rxTx.put(Engine.JsonFields.Rx.address, mission._mcAddress);
-                rxTx.put(Engine.JsonFields.Rx.port, mission._mcPort);
-                groupObject.put(Engine.JsonFields.Rx.objectName, rxTx);
+                    rxTx = new JSONObject();
+                    rxTx.put(Engine.JsonFields.Rx.address, mission._mcAddress);
+                    rxTx.put(Engine.JsonFields.Rx.port, mission._mcPort);
+                    groupObject.put(Engine.JsonFields.Rx.objectName, rxTx);
 
-                rxTx = new JSONObject();
-                rxTx.put(Engine.JsonFields.Tx.address, mission._mcAddress);
-                rxTx.put(Engine.JsonFields.Tx.port, mission._mcPort);
-                groupObject.put(Engine.JsonFields.Tx.objectName, rxTx);
+                    rxTx = new JSONObject();
+                    rxTx.put(Engine.JsonFields.Tx.address, mission._mcAddress);
+                    rxTx.put(Engine.JsonFields.Tx.port, mission._mcPort);
+                    groupObject.put(Engine.JsonFields.Tx.objectName, rxTx);
 
-                gd.jsonConfiguration = groupObject.toString();
-                rc._missionGroups.add(gd);
+                    gd.jsonConfiguration = groupObject.toString();
+                    rc._missionGroups.add(gd);
+                }
             }
 
             // Audio groups
@@ -1825,42 +1884,44 @@ public class ActiveConfiguration
                 {
                     if(!Utils.isEmptyString(dbg._id))
                     {
-                        gd = new GroupDescriptor();
-                        gd.id = dbg._id;
-                        gd.type = GroupDescriptor.Type.gtAudio;
-                        gd.name = dbg._name;
-                        gd.ept = dbg._ept;
-                        gd.anonymousAlias = dbg._anonymousAlias;
-
-                        groupObject = new JSONObject();
-                        groupObject.put(Engine.JsonFields.Group.id, gd.id);
-                        groupObject.put(Engine.JsonFields.Group.name, gd.name);
-                        groupObject.put(Engine.JsonFields.Group.type, GroupDescriptor.Type.gtAudio.ordinal());
-                        if (dbg._useCrypto && !Utils.isEmptyString(dbg._cryptoPassword))
+                        if(ActiveConfiguration.allowGroupInMission(GroupDescriptor.Type.gtAudio))
                         {
-                            groupObject.put(Engine.JsonFields.Group.cryptoPassword, dbg._cryptoPassword);
+                            gd = new GroupDescriptor();
+                            gd.id = dbg._id;
+                            gd.type = GroupDescriptor.Type.gtAudio;
+                            gd.name = dbg._name;
+                            gd.ept = dbg._ept;
+                            gd.anonymousAlias = dbg._anonymousAlias;
+
+                            groupObject = new JSONObject();
+                            groupObject.put(Engine.JsonFields.Group.id, gd.id);
+                            groupObject.put(Engine.JsonFields.Group.name, gd.name);
+                            groupObject.put(Engine.JsonFields.Group.type, GroupDescriptor.Type.gtAudio.ordinal());
+                            if (dbg._useCrypto && !Utils.isEmptyString(dbg._cryptoPassword)) {
+                                groupObject.put(Engine.JsonFields.Group.cryptoPassword, dbg._cryptoPassword);
+                            }
+
+                            rxTx = new JSONObject();
+                            rxTx.put(Engine.JsonFields.Rx.address, dbg._rxAddress);
+                            rxTx.put(Engine.JsonFields.Rx.port, dbg._rxPort);
+                            groupObject.put(Engine.JsonFields.Rx.objectName, rxTx);
+
+                            rxTx = new JSONObject();
+                            rxTx.put(Engine.JsonFields.Tx.address, dbg._txAddress);
+                            rxTx.put(Engine.JsonFields.Tx.port, dbg._txPort);
+                            groupObject.put(Engine.JsonFields.Tx.objectName, rxTx);
+
+                            txAudio = new JSONObject();
+                            txAudio.put(Engine.JsonFields.TxAudio.encoder, dbg._txCodecId);
+                            txAudio.put(Engine.JsonFields.TxAudio.framingMs, dbg._txFramingMs);
+                            txAudio.put(Engine.JsonFields.TxAudio.noHdrExt, dbg._noHdrExt);
+                            txAudio.put(Engine.JsonFields.TxAudio.fdx, dbg._fdx);
+                            txAudio.put(Engine.JsonFields.TxAudio.maxTxSecs, dbg._maxTxSecs);
+                            groupObject.put(Engine.JsonFields.TxAudio.objectName, txAudio);
+
+                            gd.jsonConfiguration = groupObject.toString();
+                            rc._missionGroups.add(gd);
                         }
-
-                        rxTx = new JSONObject();
-                        rxTx.put(Engine.JsonFields.Rx.address, dbg._rxAddress);
-                        rxTx.put(Engine.JsonFields.Rx.port, dbg._rxPort);
-                        groupObject.put(Engine.JsonFields.Rx.objectName, rxTx);
-
-                        rxTx = new JSONObject();
-                        rxTx.put(Engine.JsonFields.Tx.address, dbg._txAddress);
-                        rxTx.put(Engine.JsonFields.Tx.port, dbg._txPort);
-                        groupObject.put(Engine.JsonFields.Tx.objectName, rxTx);
-
-                        txAudio = new JSONObject();
-                        txAudio.put(Engine.JsonFields.TxAudio.encoder, dbg._txCodecId);
-                        txAudio.put(Engine.JsonFields.TxAudio.framingMs, dbg._txFramingMs);
-                        txAudio.put(Engine.JsonFields.TxAudio.noHdrExt, dbg._noHdrExt);
-                        txAudio.put(Engine.JsonFields.TxAudio.fdx, dbg._fdx);
-                        txAudio.put(Engine.JsonFields.TxAudio.maxTxSecs, dbg._maxTxSecs);
-                        groupObject.put(Engine.JsonFields.TxAudio.objectName, txAudio);
-
-                        gd.jsonConfiguration = groupObject.toString();
-                        rc._missionGroups.add(gd);
                     }
                 }
             }

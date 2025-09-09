@@ -22,7 +22,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="If the mission you're downloading is protected with a password or passphrase, please enter it here." />
+        android:text="@string/if_the_mission_you_re_downloading_is_protected_with_a_password_or_passphrase_please_enter_it_here" />
 
     <EditText
         android:id="@+id/etPassword"

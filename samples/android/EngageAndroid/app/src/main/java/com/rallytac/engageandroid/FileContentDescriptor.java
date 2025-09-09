@@ -16,7 +16,7 @@ public class FileContentDescriptor
         fctPicture
     };
 
-    FileContentDescriptor(FileContentDescriptor.Type type, Object data)
+    FileContentDescriptor(Type type, Object data)
     {
         _type = type;
         _data = data;
@@ -27,6 +27,6 @@ public class FileContentDescriptor
         return _data;
     }
 
-    private FileContentDescriptor.Type _type = FileContentDescriptor.Type.fctUnknown;
+    private Type _type = Type.fctUnknown;
     private Object _data = null;
 }

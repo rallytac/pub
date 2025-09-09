@@ -11,14 +11,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -119,6 +123,11 @@ public class CertStoreListActivity extends AppCompatActivity
                 }
             });
 
+            if(item.getFileName().contains(Constants.INTERNAL_DEFAULT_CERTSTORE_FN) || item.getFileName().contains(Constants.RTS_FACTORY_CERTSTORE_FN))
+            {
+                convertView.findViewById(R.id.ivDeleteCertStore).setVisibility(View.INVISIBLE);
+            }
+
             return convertView;
         }
     }
@@ -135,6 +144,7 @@ public class CertStoreListActivity extends AppCompatActivity
             @Override
             public void onClick(View view)
             {
+                //promptToAddCertStore();
                 selectFileForImport();
             }
         });
@@ -146,7 +156,7 @@ public class CertStoreListActivity extends AppCompatActivity
             _activeMissionCertStoreId = ac.getMissionCertStoreId();
         }
 
-        loadStores(Globals.getEngageApplication().getCertStoreCacheDir(), false);
+        loadStores(Globals.getEngageApplication().getCertStoreCacheDir(), true);
 
         _adapter = new CertStoreListAdapter(this, R.layout.certstore_list_entry, _stores);
         ListView lv = findViewById(R.id.lvCertStores);
@@ -219,6 +229,85 @@ public class CertStoreListActivity extends AppCompatActivity
         }
     }
 
+    private void promptToAddCertStore()
+    {
+        PopupMenu popup = new PopupMenu(this, findViewById(R.id.fabAdd));
+
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.certstore_list_activity_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+        {
+            @Override
+            public boolean onMenuItemClick(MenuItem item)
+            {
+                final int menuId = item.getItemId();
+
+                if ( (menuId == R.id.action_certstore_add_scan) ||
+                        (menuId == R.id.action_certstore_add_load_file) )
+                {
+                    // Clear any left-over password
+                    Utils.setInboundCertStorePassword(null);
+
+                    LayoutInflater layoutInflater = LayoutInflater.from(CertStoreListActivity.this);
+                    View promptView = layoutInflater.inflate(R.layout.certstore_load_password_dialog, null);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(CertStoreListActivity.this);
+                    alertDialogBuilder.setView(promptView);
+
+                    final EditText editText = promptView.findViewById(R.id.etPassword);
+
+                    alertDialogBuilder.setCancelable(false)
+                            .setPositiveButton(R.string.mission_load_continue_button, new DialogInterface.OnClickListener()
+                            {
+                                public void onClick(DialogInterface dialog, int id)
+                                {
+                                    // Save the password for later
+                                    Utils.setInboundCertStorePassword(editText.getText().toString());
+
+                                    if(menuId == R.id.action_certstore_add_scan)
+                                    {
+                                        Globals.getEngageApplication().scanQrCode(CertStoreListActivity.this, getString(R.string.scan_qr_code), findViewById(R.id.fabAdd), getString(R.string.select_qr_code_file), Constants.OFFLINE_ACTIVATION_CODE_REQUEST_CODE);
+                                        //Globals.getEngageApplication().initiateScanOfAQrCode(MissionListActivity.this, getString(R.string.scan_qr_code));
+                                    }
+                                    else
+                                    {
+                                        selectFileForImport();
+                                    }
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel,
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                    AlertDialog alert = alertDialogBuilder.create();
+                    alert.show();
+
+                    return true;
+                }
+                else
+                {
+                    /*
+                    if (menuId == R.id.action_certstore_add_manual)
+                    {
+                        Intent intent = new Intent(MissionListActivity.this, MissionEditActivity.class);
+                        startActivityForResult(intent, Constants.EDIT_ACTION_REQUEST_CODE);
+                        return true;
+                    }
+                     */
+                }
+
+                return false;
+            }
+        });
+
+        popup.show();
+    }
+
     private void selectFileForImport()
     {
         try
@@ -246,8 +335,12 @@ public class CertStoreListActivity extends AppCompatActivity
             String displayName;
             String importedFileName;
 
-            displayName = uri.getPath();
-            displayName = displayName.substring(displayName.lastIndexOf('/') + 1);
+            displayName = Utils.queryName(getContentResolver(), uri);
+            if(Utils.isEmptyString(displayName))
+            {
+                displayName = uri.getPath();
+                displayName = displayName.substring(displayName.lastIndexOf('/') + 1);
+            }
 
             importedFileName = "{" + UUID.randomUUID().toString() + "}-" + displayName;
 
@@ -319,6 +412,8 @@ public class CertStoreListActivity extends AppCompatActivity
                 Utils.showLongPopupMsg(this, getString(R.string.invalid_cert_store_cannot_invalid_version) + version);
                 throw new Exception("");
             }
+
+            String csName = descriptor.optString("name", "");
 
             JSONArray certificates = null;
             try
@@ -416,7 +511,25 @@ public class CertStoreListActivity extends AppCompatActivity
 
     private void viewCertStore(final EngageCertStore cs)
     {
-        // TODO
+        String message = cs.getPopupDescriptionAsHtml();
+
+        Spanned spannedMessage;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+        {
+            spannedMessage = Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY);
+        }
+        else
+        {
+            spannedMessage = Html.fromHtml(message);
+        }
+
+        AlertDialog dlg = new AlertDialog.Builder(CertStoreListActivity.this)
+                .setTitle(cs.getDisplayName())
+                .setMessage(spannedMessage)
+                .setCancelable(true)
+                .create();
+
+        dlg.show();
     }
 
     private void confirmDeleteCertStore(final EngageCertStore cs)

@@ -6,11 +6,10 @@
 package com.rallytac.engageandroid;
 
 import android.location.Location;
-import android.util.Log;
 
 import com.rallytac.engage.engine.Engine;
-import com.rallytac.engageandroid.Biometrics.DataSeries;
-import com.rallytac.engageandroid.Biometrics.NodeUserBiometrics;
+//import com.rallytac.engageandroid.Biometrics.DataSeries;
+//import com.rallytac.engageandroid.Biometrics.NodeUserBiometrics;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -48,7 +47,7 @@ public class PresenceDescriptor
     public Calendar lastUpdate;
     public HashMap<String, GroupMembershipTracker> groupMembership;
 
-    public NodeUserBiometrics userBiometrics = null;
+    //public NodeUserBiometrics userBiometrics = null;
     public Connectivity connectivity = null;
     public Power power = null;
 
@@ -256,6 +255,8 @@ public class PresenceDescriptor
         return true;
     }
 
+
+    /*
     public boolean updateBioMetrics(DataSeries ds)
     {
         boolean rc = false;
@@ -276,4 +277,5 @@ public class PresenceDescriptor
 
         return rc;
     }
+    */
 }

@@ -198,7 +198,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:gravity="left"
-            android:text="Signature: "
+            android:text="@string/signature"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvCryptoSignature"

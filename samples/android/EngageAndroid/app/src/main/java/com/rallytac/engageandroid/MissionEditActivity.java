@@ -9,19 +9,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +25,14 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -535,6 +537,37 @@ public class MissionEditActivity extends AppCompatActivity
             findViewById(R.id.spnMcFailoverPolicy).setEnabled(_allowEdit);
 
             findViewById(R.id.ivAddGroup).setEnabled(_allowEdit);
+
+            Spinner spn = findViewById(R.id.spnRpProtocol);
+            spn.setSelection(_mission._rpProtocol);
+            spn.setEnabled(_allowEdit);
+            spn.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                {
+                    int port = 0;
+                    _mission._rpProtocol = position;
+                    if(position == 0)
+                    {
+                        port = Constants.DEF_RP_TCP_PORT;
+                    }
+                    else if(position == 1)
+                    {
+                        port = Constants.DEF_RP_WS_PORT;
+                    }
+                    ((TextView)findViewById(R.id.etRpPort)).setText(Integer.toString(port));
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    // This method is called when the previously selected item is no longer available,
+                    // or when the adapter becomes empty.
+                    // You can leave it empty if you have no specific action to take.
+                    // For example:
+                    // System.out.println("Nothing selected");
+                }
+            });
         }
     }
 
@@ -550,6 +583,7 @@ public class MissionEditActivity extends AppCompatActivity
             tmp._useRp = ((Switch) findViewById(R.id.swUseRallypoint)).isChecked();
             tmp._rpAddress = Utils.trimString(((TextView) findViewById(R.id.etRpAddress)).getText().toString());
             tmp._rpPort = Utils.parseIntSafe(Utils.trimString(((TextView) findViewById(R.id.etRpPort)).getText().toString()));
+            tmp._rpProtocol = ((Spinner)findViewById(R.id.spnRpProtocol)).getSelectedItemPosition();
             tmp._multicastFailoverPolicy = ((Spinner)findViewById(R.id.spnMcFailoverPolicy)).getSelectedItemPosition();
 
             tmp._mcAddress = Utils.trimString(((TextView) findViewById(R.id.etMcAddress)).getText().toString());

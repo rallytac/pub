@@ -20,11 +20,9 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import android.util.Log;
-
-import com.rallytac.engage.engine.Engine;
 
 public class EngageService extends Service
 {
@@ -91,7 +89,13 @@ public class EngageService extends Service
         {
             for (int x = 0; x < _requestActions.length; x++)
             {
-                registerReceiver(this, new IntentFilter(_requestActions[x]));
+                IntentFilter filter = new IntentFilter(_requestActions[x]);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    registerReceiver(this, filter, RECEIVER_EXPORTED | RECEIVER_VISIBLE_TO_INSTANT_APPS);
+                }
+                else {
+                    registerReceiver(this, filter);
+                }
             }
         }
 
@@ -316,7 +320,7 @@ public class EngageService extends Service
             notification.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL);
 
             Intent i = new Intent(INTENT_ACTION_WAKEUP);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_IMMUTABLE);
             notification.contentIntent = pendingIntent;
 
             if(_notificationManager != null)

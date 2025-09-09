@@ -7,6 +7,11 @@ public class Analytics
     public static final String ENGINE_STOPPED = "ENGINE_STOPPED";//NON-NLS
     public static final String ENGINE_AUDIO_DEVICES_REFRESH = "ENGINE_AUDIO_DEVICES_REFRESH";//NON-NLS
 
+    public static final String ENGINE_GROUP_BY_GROUP_PCM_LEVELS = "ENGINE_GROUP_BY_GROUP_PCM_LEVELS";//NON-NLS
+
+    public static final String ENGINE_AUDIO_DEVICE_EVENT = "ENGINE_AUDIO_DEVICE_EVENT";//NON-NLS
+
+
     public static final String GROUP_CREATED = "GRP_CREATED";//NON-NLS
     public static final String GROUP_CREATE_FAILED = "GRP_CREATE_FAILED";//NON-NLS
     public static final String GROUP_DELETED = "GRP_DELETED";//NON-NLS
@@ -101,6 +106,7 @@ public class Analytics
     public static final String VIEW_GROUP_LIST = "VIEW_GROUP_LIST";//NON-NLS
     public static final String VIEW_TIMELINE = "VIEW_TIMELINE";//NON-NLS
     public static final String VIEW_CERTIFICATES = "VIEW_CERTIFICATES";//NON-NLS
+    public static final String VIEW_PASSWORDS = "VIEW_PASSWORDS";//NON-NLS
 
     public static final String TOGGLE_NETWORKING = "TOGGLE_NETWORKING";//NON-NLS
     public static final String MISSION_CHANGED = "MISS_CHANGED";//NON-NLS

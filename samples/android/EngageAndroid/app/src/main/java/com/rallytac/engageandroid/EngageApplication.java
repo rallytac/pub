@@ -38,12 +38,7 @@ import android.os.Message;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.PopupMenu;
-
 import android.speech.tts.TextToSpeech;
-import android.system.Os;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -52,17 +47,18 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.PopupMenu;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.rallytac.engage.engine.Engine;
-import com.rallytac.engageandroid.Biometrics.DataSeries;
-import com.rallytac.engageandroid.Biometrics.RandomHumanBiometricGenerator;
+//import com.rallytac.engageandroid.Biometrics.DataSeries;
+//import com.rallytac.engageandroid.Biometrics.RandomHumanBiometricGenerator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -71,7 +67,6 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -91,7 +86,6 @@ public class EngageApplication
                                     Engine.ILicenseListener,
                                     Engine.ILoggingListener,
                                     Engine.IAppNetworkDeviceListener,
-                                    MyLocationManager.ILocationUpdateNotifications,
                                     IPushToTalkRequestHandler,
                                     BluetoothManager.IBtNotification,
                                     LicenseActivationTask.ITaskCompletionNotification
@@ -484,6 +478,29 @@ public class EngageApplication
         }
     }
 
+    private void notifyRegistrantOffGroupStatusChange(String id, GroupState gs)
+    {
+        synchronized (_groupStatusChangeListeners)
+        {
+            for (IGroupStatusChangeListener listener : _groupStatusChangeListeners)
+            {
+                if(gs == GroupState.gsJoined) {
+                    listener.onGroupJoined(id);
+                }
+                else if(gs == GroupState.gsLeft) {
+                    listener.onGroupLeft(id);
+                }
+                else if(gs == GroupState.gsConnected) {
+                    listener.onGroupConnected(id);
+                }
+                else if(gs == GroupState.gsDisconnected) {
+                    listener.onGroupDisconnected(id);
+                }
+            }
+        }
+    }
+
+
     private void notifyRegistrantsOfActiveAudioDeviceChange(ActiveAudioDevice dev)
     {
         synchronized (_audioDeviceListeners)
@@ -494,6 +511,74 @@ public class EngageApplication
             }
         }
     }
+
+    private void notifyConnectivityChangeListenersOfConnectivityChange()
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onConnectivityChanged();
+            }
+        }
+    }
+
+    private void notifyConnectivityChangeListenersOfRallypointConnectionPausing(final String id, final String eventExtraJson)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onRallypointConnectionPausing(id, eventExtraJson);
+            }
+        }
+    }
+
+    private void notifyConnectivityChangeListenersOfRallypointConnectionConnecting(final String id, final String eventExtraJson)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onRallypointConnectionConnecting(id, eventExtraJson);
+            }
+        }
+    }
+
+    private void notifyConnectivityChangeListenersOfRallypointConnectionConnected(final String id, final String eventExtraJson)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onRallypointConnectionConnected(id, eventExtraJson);
+            }
+        }
+    }
+
+    private void notifyConnectivityChangeListenersOfRallypointConnectionDisconnected(final String id, final String eventExtraJson)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onRallypointConnectionDisconnected(id, eventExtraJson);
+            }
+        }
+    }
+
+    private void notifyConnectivityChangeListenersOfRallypointRtt(final String id, final String eventExtraJson)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            for(IConnectivityChangeListener listener : _connectivityChangeListeners)
+            {
+                listener.onRallypointConnectionRtt(id, eventExtraJson);
+            }
+        }
+    }
+
+
 
     private void onActiveAudioDeviceChanged(ActiveAudioDevice dev)
     {
@@ -584,6 +669,14 @@ public class EngageApplication
         void onGroupTxFailed(GroupDescriptor gd, String eventExtra);
     }
 
+    public interface IGroupStatusChangeListener
+    {
+        void onGroupJoined(String id);
+        void onGroupLeft(String id);
+        void onGroupConnected(String id);
+        void onGroupDisconnected(String id);
+    }
+
     public interface IAssetChangeListener
     {
         void onAssetDiscovered(String id, String json);
@@ -618,6 +711,16 @@ public class EngageApplication
         void onGroupStatsReportFailed(GroupDescriptor gd);
     }
 
+    public interface IConnectivityChangeListener
+    {
+        void onConnectivityChanged();
+        void onRallypointConnectionPausing(String id, String eventExtraJson);
+        void onRallypointConnectionConnecting(String id, String eventExtraJson);
+        void onRallypointConnectionConnected(String id, String eventExtraJson);
+        void onRallypointConnectionDisconnected(String id, String eventExtraJson);
+        void onRallypointConnectionRtt(String id, String eventExtraJson);
+    }
+
     private static EngageApplication _instance = null;
     private Engine _engine = null;
 
@@ -625,16 +728,18 @@ public class EngageApplication
     private boolean _engineRunning = false;
     private ActiveConfiguration _activeConfiguration = null;
     private boolean _missionChangedStatus = false;
-    private MyLocationManager _locationManager = null;
+    private final HashSet<IPresenceChangeListener> _presenceChangeListeners = new HashSet<>();
+    private final HashSet<IUiUpdateListener> _uiUpdateListeners = new HashSet<>();
+    private final HashSet<IAssetChangeListener> _assetChangeListeners = new HashSet<>();
+    private final HashSet<IConfigurationChangeListener> _configurationChangeListeners = new HashSet<>();
+    private final HashSet<ILicenseChangeListener> _licenseChangeListeners = new HashSet<>();
+    private final HashSet<IGroupTimelineListener> _groupTimelineListeners = new HashSet<>();
+    private final HashSet<IGroupTextMessageListener> _groupTextMessageListeners = new HashSet<>();
+    private final HashSet<IAudioDeviceListener> _audioDeviceListeners = new HashSet<>();
+    private final HashSet<IConnectivityChangeListener> _connectivityChangeListeners = new HashSet<>();
+    private final HashSet<IGroupStatusChangeListener> _groupStatusChangeListeners = new HashSet<>();
 
-    private HashSet<IPresenceChangeListener> _presenceChangeListeners = new HashSet<>();
-    private HashSet<IUiUpdateListener> _uiUpdateListeners = new HashSet<>();
-    private HashSet<IAssetChangeListener> _assetChangeListeners = new HashSet<>();
-    private HashSet<IConfigurationChangeListener> _configurationChangeListeners = new HashSet<>();
-    private HashSet<ILicenseChangeListener> _licenseChangeListeners = new HashSet<>();
-    private HashSet<IGroupTimelineListener> _groupTimelineListeners = new HashSet<>();
-    private HashSet<IGroupTextMessageListener> _groupTextMessageListeners = new HashSet<>();
-    private HashSet<IAudioDeviceListener> _audioDeviceListeners = new HashSet<>();
+    private enum GroupState {gsUnknown, gsJoined, gsLeft, gsConnected, gsDisconnected};
 
     private long _lastAudioActivity = 0;
     private long _lastTxActivity = 0;
@@ -652,6 +757,7 @@ public class EngageApplication
     private int _hbmTicksSoFar = 0;
     private int _hbmTicksBeforeReport = 5;
 
+    /*
     private DataSeries _hbmHeartRate = null;
     private DataSeries _hbmSkinTemp = null;
     private DataSeries _hbmCoreTemp = null;
@@ -667,6 +773,7 @@ public class EngageApplication
     private RandomHumanBiometricGenerator _rhbmgOxygenation = null;
     private RandomHumanBiometricGenerator _rhbmgFatigueLevel = null;
     private RandomHumanBiometricGenerator _rhbmgTaskEffectiveness = null;
+    */
 
     private JSONObject _cachedPdLocation = null;
     private JSONObject _cachedPdConnectivityInfo = null;
@@ -680,8 +787,6 @@ public class EngageApplication
 
     private MyApplicationIntentReceiver _appIntentReceiver = null;
 	
-	private FirebaseAnalytics _firebaseAnalytics = null;
-
     private boolean _hasEngineBeenInitialized = false;
 
     private boolean _terminateOnEngineStopped = false;
@@ -715,6 +820,7 @@ public class EngageApplication
 
     private EngageAppPermission[] _appPermissions =
             {
+                    new EngageAppPermission(Manifest.permission.READ_PHONE_STATE, false),
                     new EngageAppPermission(Manifest.permission.BLUETOOTH, false),
                     new EngageAppPermission("android.permission.BLUETOOTH_CONNECT", false),
                     new EngageAppPermission(Manifest.permission.RECORD_AUDIO, false),
@@ -730,7 +836,7 @@ public class EngageApplication
                     new EngageAppPermission(Manifest.permission.ACCESS_FINE_LOCATION, false),
                     new EngageAppPermission(Manifest.permission.ACCESS_COARSE_LOCATION, false),
                     new EngageAppPermission(Manifest.permission.CAMERA, false),
-                    new EngageAppPermission(android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, false)
+                    new EngageAppPermission(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, false)
             };
 
     public EngageAppPermission[] getAllAppPermissions()
@@ -771,7 +877,8 @@ public class EngageApplication
 
     public boolean wasSampleMissionCreatedAndInUse()
     {
-        return _sampleMissionCreatedAndInUse;
+        return false;
+        //return _sampleMissionCreatedAndInUse;
     }
 
     public AudioManager getAudioManager()
@@ -985,7 +1092,12 @@ public class EngageApplication
             filter.addAction(precede + "." + getString(R.string.app_intent_mute_group));
             filter.addAction(precede + "." + getString(R.string.app_intent_unmute_group));
 
-            registerReceiver(this, filter);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                registerReceiver(this, filter, RECEIVER_EXPORTED | RECEIVER_VISIBLE_TO_INSTANT_APPS);
+            }
+            else {
+                registerReceiver(this, filter);
+            }
         }
 
         public void stop()
@@ -1038,6 +1150,31 @@ public class EngageApplication
         }
     }
 
+    public String getCurrentConnectivityDescription()
+    {
+        return NetworkUtils.getConnectivityDetails(Globals.getContext());
+    }
+
+    private void notifyEngineOfNetworkStatus(boolean isUp)
+    {
+        try {
+            JSONArray ja = new JSONArray();
+            if(isUp) {
+                Globals.getLogger().i(TAG, "ENGAGE_PLATFORM_CHANGE_APP_NETWORK_SYSTEM_ONLINE");
+                ja.put("ENGAGE_PLATFORM_CHANGE_APP_NETWORK_SYSTEM_ONLINE");
+            }
+            else {
+                Globals.getLogger().i(TAG, "ENGAGE_PLATFORM_CHANGE_APP_NETWORK_SYSTEM_OFFLINE");
+                ja.put("ENGAGE_PLATFORM_CHANGE_APP_NETWORK_SYSTEM_OFFLINE");
+            }
+
+            getEngine().engagePlatformNotifyChanges(ja.toString());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private class MyDeviceMonitor extends BroadcastReceiver
     {
         private final int NUM_SIGNAL_LEVELS = 5;
@@ -1060,11 +1197,35 @@ public class EngageApplication
             intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
 
             registerReceiver(this, intentFilter);
+
+            Globals.getLogger().i(TAG, ">>>>>>>>>>>>>>>>> before onConnectivityAction");
+            onConnectivityAction(getApplicationContext());
+            Globals.getLogger().i(TAG, ">>>>>>>>>>>>>>>>> after onConnectivityAction");
         }
 
         public void stop()
         {
             unregisterReceiver(this);
+        }
+
+        private void onConnectivityAction(Context context)
+        {
+            //Globals.getLogger().i(TAG, ">>>>>>>>>>>>>>>>> onConnectivityAction");
+
+            boolean isThereSomeKindOfConnectivity = NetworkUtils.isAnyConnectivityAvailable(context);
+
+            if(isThereSomeKindOfConnectivity)
+            {
+                Globals.getLogger().i(TAG, ">>>>>>>>>>>>>>>>> onConnectivityAction UP!!");
+                playNetworkUpNotification();
+                notifyEngineOfNetworkStatus(true);
+            }
+            else
+            {
+                Globals.getLogger().i(TAG, ">>>>>>>>>>>>>>>>> onConnectivityAction DOWN");
+                playNetworkDownNotification();
+                notifyEngineOfNetworkStatus(false);
+            }
         }
 
         @Override
@@ -1100,6 +1261,8 @@ public class EngageApplication
             }
             else if(action.compareTo(ConnectivityManager.CONNECTIVITY_ACTION) == 0)
             {
+                onConnectivityAction(context);
+
                 try
                 {
                     NetworkInfo info1 = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -1115,6 +1278,7 @@ public class EngageApplication
                             {
                                 // TODO: RSSI for cellular
                                 onConnectivityChange(true, ConnectivityType.wirelessCellular, 0, NUM_SIGNAL_LEVELS);
+                                notifyConnectivityChangeListenersOfConnectivityChange();
                             }
                             else if (info1.getType() == ConnectivityManager.TYPE_WIFI)
                             {
@@ -1123,12 +1287,24 @@ public class EngageApplication
                                 int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), NUM_SIGNAL_LEVELS);
 
                                 onConnectivityChange(true, ConnectivityType.wirelessWifi, wifiInfo.getRssi(), level);
+                                notifyConnectivityChangeListenersOfConnectivityChange();
                             }
                             else if (info1.getType() == ConnectivityManager.TYPE_ETHERNET)
                             {
                                 onConnectivityChange(true, ConnectivityType.wired, 0, NUM_SIGNAL_LEVELS);
+                                notifyConnectivityChangeListenersOfConnectivityChange();
                             }
                         }
+                        else
+                        {
+                            onConnectivityChange(false, ConnectivityType.none, 0, 0);
+                            notifyConnectivityChangeListenersOfConnectivityChange();
+                        }
+                    }
+                    else
+                    {
+                        onConnectivityChange(false, ConnectivityType.none, 0, 0);
+                        notifyConnectivityChangeListenersOfConnectivityChange();
                     }
                 }
                 catch (Exception e)
@@ -1198,27 +1374,6 @@ public class EngageApplication
         }
     }
 
-    private void startFirebaseAnalytics()
-    {
-        if(Globals.getContext().getResources().getBoolean(R.bool.opt_firebase_analytics_enabled))
-        {
-            try
-            {
-                _firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-            }
-            catch (Exception e)
-            {
-                _firebaseAnalytics = null;
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void stopFirebaseAnalytics()
-    {
-        _firebaseAnalytics = null;
-    }
-
     public void logEvent(String eventName)
     {
         logEvent(eventName, null);
@@ -1240,17 +1395,6 @@ public class EngageApplication
 
     public void logEvent(String eventName, Bundle b)
     {
-        try
-        {
-            if (_firebaseAnalytics != null)
-            {
-                _firebaseAnalytics.logEvent(eventName, b);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     private void makeThisDirectory(String dirName)
@@ -1360,6 +1504,8 @@ public class EngageApplication
 
         super.onCreate();
 
+        Utils.init();
+
         // Its important to set this stuff as soon as possible!
         Engine.setApplicationContext(this.getApplicationContext());
 
@@ -1397,13 +1543,6 @@ public class EngageApplication
             {
                 Log.d("Files", "FileName:" + files[i].getName());
             }
-
-            //System.loadLibrary(Globals.getContext().getApplicationInfo().nativeLibraryDir + "/rts-fips");
-
-            JSONObject obj = new JSONObject();
-            obj.put(Engine.JsonFields.FipsCryptoSettings.enabled, true);
-            obj.put(Engine.JsonFields.FipsCryptoSettings.path, Globals.getContext().getApplicationInfo().nativeLibraryDir + "/rts-fips");
-            getEngine().engageSetFipsCrypto(obj.toString());
         }
         catch(Exception e)
         {
@@ -1480,8 +1619,6 @@ public class EngageApplication
 
         exportRawFilesToCache();
 
-        startFirebaseAnalytics();
-
         runPreflightCheck();
 
         ensureAllIsGood();
@@ -1506,6 +1643,28 @@ public class EngageApplication
             }
         });
 
+        /* JUST SOME DEV TESTING
+        try
+        {
+            String fn = "file:///data/user/0/com.rallytac.dynamo/cache/import-730296628915771313-import";
+            Uri u = Uri.parse(fn);
+            byte[] b = Utils.readBinaryFile(Globals.getContext(), Uri.parse(fn));
+            Log.d(TAG, "len is: " + b.length);
+
+            File fd = File.createTempFile("certstore-", ".tmp", Globals.getEngageApplication().getTempDir());
+            fd.deleteOnExit();
+            FileOutputStream fos = new FileOutputStream(fd);
+            fos.write(b);
+            fos.close();
+
+            String descriptorText = Globals.getEngageApplication().getEngine().engageQueryCertStoreContents(fd.toString(), "");
+            fd.delete();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        */
     }
 
     @Override
@@ -1517,8 +1676,6 @@ public class EngageApplication
         stopAppIntentReceiver();
 
         stop();
-        stopFirebaseAnalytics();
-
         // We may not have subscribed to listen for logging.  But, to be safe
         // we'll just unsubscribe anyway
         getEngine().removeLoggingListener(this);
@@ -1695,7 +1852,7 @@ public class EngageApplication
         }
     }
 
-    public enum ConnectivityType {unknown, wired, wirelessWifi, wirelessCellular}
+    public enum ConnectivityType {unknown, none, wired, wirelessWifi, wirelessCellular}
     public enum PowerSourceType {unknown, battery, wired}
     public enum PowerSourceState {unknown, charging, discharging, notCharging, full}
 
@@ -1844,8 +2001,8 @@ public class EngageApplication
             _enableDevicePowerMonitor = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_DEVICE_REPORT_POWER, false);
             _enableDeviceConnectivityMonitor = Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_DEVICE_REPORT_CONNECTIVITY, false);
 
-            //_enableDevicePowerMonitor = true;
-            //_enableDeviceConnectivityMonitor = true;
+            _enableDevicePowerMonitor = true;
+            _enableDeviceConnectivityMonitor = true;
 
             if(_enableDevicePowerMonitor || _enableDeviceConnectivityMonitor)
             {
@@ -2063,6 +2220,40 @@ public class EngageApplication
         }
     }
 
+
+    public void addConnectivityChangeListener(IConnectivityChangeListener listener)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            _connectivityChangeListeners.add(listener);
+        }
+    }
+
+    public void removeConnectivityChangeListener(IConnectivityChangeListener listener)
+    {
+        synchronized (_connectivityChangeListeners)
+        {
+            _connectivityChangeListeners.remove(listener);
+        }
+    }
+
+    public void addGroupStatusChangeListener(IGroupStatusChangeListener listener)
+    {
+        synchronized (_groupStatusChangeListeners)
+        {
+            _groupStatusChangeListeners.add(listener);
+        }
+    }
+
+    public void removeGroupStatusChangeListener(IGroupStatusChangeListener listener)
+    {
+        synchronized (_groupStatusChangeListeners)
+        {
+            _groupStatusChangeListeners.remove(listener);
+        }
+    }
+
+
     public void startHardwareButtonManager()
     {
         Globals.getLogger().d(TAG, "startHardwareButtonManager");
@@ -2081,31 +2272,10 @@ public class EngageApplication
 
     public void startLocationUpdates()
     {
-        Globals.getLogger().d(TAG, "startLocationUpdates");
-        stopLocationUpdates();
-
-        ActiveConfiguration.LocationConfiguration lc = getActiveConfiguration().getLocationConfiguration();
-        if(lc != null && lc.enabled)
-        {
-            _locationManager = new MyLocationManager(this,
-                    this,
-                    lc.accuracy,
-                    lc.intervalMs,
-                    lc.minIntervalMs,
-                    lc.minDisplacement);
-
-            _locationManager.start();
-        }
     }
 
     public void stopLocationUpdates()
     {
-        Globals.getLogger().d(TAG, "stopLocationUpdates");
-        if(_locationManager != null)
-        {
-            _locationManager.stop();
-            _locationManager = null;
-        }
     }
 
     public void setMissionChangedStatus(boolean s)
@@ -2173,25 +2343,17 @@ public class EngageApplication
     }
 
 
-    @Override
-    public void onLocationUpdated(Location loc)
-    {
-        Globals.getLogger().d(TAG, "onLocationUpdated: " + loc.toString());
-        updateCachedPdLocation(loc);
-        sendUpdatedPd(buildPd());
-    }
-
     public VolumeLevels loadVolumeLevels(String groupId)
     {
         VolumeLevels vl = new VolumeLevels();
 
-        vl.left = Globals.getSharedPreferences().getInt(PreferenceKeys.VOLUME_LEFT_FOR_GROUP_BASE_NAME + groupId, 100);
+        vl.left = Utils.getSafeSharedPreferencesInt(PreferenceKeys.VOLUME_LEFT_FOR_GROUP_BASE_NAME + groupId, 100);
         if(vl.left < 0)
         {
             vl.left = 0;
         }
 
-        vl.right = Globals.getSharedPreferences().getInt(PreferenceKeys.VOLUME_RIGHT_FOR_GROUP_BASE_NAME + groupId, 100);
+        vl.right = Utils.getSafeSharedPreferencesInt(PreferenceKeys.VOLUME_RIGHT_FOR_GROUP_BASE_NAME + groupId, 100);
         if(vl.right < 0)
         {
             vl.right = 0;
@@ -2393,6 +2555,7 @@ public class EngageApplication
                 host.put(Engine.JsonFields.Rallypoint.Host.port, _activeConfiguration.getRpPort());
 
                 rallypoint.put(Engine.JsonFields.Rallypoint.Host.objectName, host);
+                rallypoint.put(Engine.JsonFields.Rallypoint.protocol, _activeConfiguration.getRpProtocol());
 
                 rallypoint.put(Engine.JsonFields.Rallypoint.certificate, getDefaultCertificateIdUri());
                 rallypoint.put(Engine.JsonFields.Rallypoint.certificateKey, getDefaultCertificateKeyUri());
@@ -2673,6 +2836,10 @@ public class EngageApplication
 
     public void vibrate()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         if(_activeConfiguration.getEnableVibrations())
         {
             Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -2693,6 +2860,10 @@ public class EngageApplication
 
     public void playAssetDiscoveredNotification()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         Globals.getLogger().d(TAG, "playAssetDiscoveredOnNotification");
 
         vibrate();
@@ -2715,6 +2886,10 @@ public class EngageApplication
 
     public void playAssetUndiscoveredNotification()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         Globals.getLogger().d(TAG, "playAssetUndiscoveredNotification");
 
         vibrate();
@@ -2735,8 +2910,38 @@ public class EngageApplication
         }
     }
 
+    public void playNetworkUpNotification()
+    {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
+        Globals.getLogger().d(TAG, "playNetworkUpNotification");
+
+        vibrate();
+
+        float volume = _activeConfiguration.getErrorToneNotificationLevel();
+        if(volume == 0.0)
+        {
+            return;
+        }
+
+        try
+        {
+            Globals.getAudioPlayerManager().playNotification(R.raw.engage_network_up, volume, null);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public void playNetworkDownNotification()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         Globals.getLogger().d(TAG, "playNetworkDownNotification");
 
         vibrate();
@@ -2759,6 +2964,10 @@ public class EngageApplication
 
     public void playGeneralErrorNotification()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         Globals.getLogger().d(TAG, "playGeneralErrorNotification");
 
         vibrate();
@@ -2782,6 +2991,10 @@ public class EngageApplication
 
     public boolean playTxOnNotification(Runnable onPlayComplete)
     {
+        if(_activeConfiguration == null) {
+            return true;
+        }
+
         Globals.getLogger().d(TAG, "playTxOnNotification");
 
         vibrate();
@@ -2810,6 +3023,10 @@ public class EngageApplication
     // TODO:
     public void playTxOffNotification()
     {
+        if(_activeConfiguration == null) {
+            return;
+        }
+
         Globals.getLogger().d(TAG, "playTxOffNotification");
         /*
         float volume = _activeConfiguration.getPttToneNotificationLevel();
@@ -2954,6 +3171,7 @@ public class EngageApplication
     public void saveInternalCertificateStoreToCache()
     {
         exportRawFile(R.raw.android_engage_default_certstore, getCertStoreCacheDir() + "/" + Constants.INTERNAL_DEFAULT_CERTSTORE_FN);
+        exportRawFile(R.raw.all_rts_certstore, getCertStoreCacheDir() + "/" + Constants.RTS_FACTORY_CERTSTORE_FN);
     }
 
     private void exportRawFilesToCache()
@@ -3125,7 +3343,7 @@ public class EngageApplication
 
         try
         {
-            File dirs[] = this.getExternalFilesDirs(Environment.DIRECTORY_DOCUMENTS);
+            File[] dirs = this.getExternalFilesDirs(Environment.DIRECTORY_DOCUMENTS);
 
             f = dirs[0];
         }
@@ -3199,6 +3417,7 @@ public class EngageApplication
         String identityJson = "{}";
         String resultingMissionId = null;
 
+        /*
         try
         {
             JSONObject dummyPolicy = new JSONObject(enginePolicyJson);
@@ -3218,6 +3437,8 @@ public class EngageApplication
         {
             e.printStackTrace();
         }
+
+         */
 
         openCertificateStore("");
 
@@ -3313,10 +3534,11 @@ public class EngageApplication
         return resultingMissionId;
     }
 
-    private void createEmptyConfiguration()
+    private void createPublicConfiguration()
     {
-        String missionJson = Utils.getStringResource(this, R.raw.empty_mission_template);
+        String missionJson = Utils.getStringResource(this, R.raw.public_mission_template);
 
+        missionJson = FlavorSpecific.applyGeneratedMissionModifications(missionJson, true);
         Globals.getSharedPreferencesEditor().putString(PreferenceKeys.ACTIVE_MISSION_CONFIGURATION_JSON, missionJson);
         Globals.getSharedPreferencesEditor().apply();
 
@@ -3362,12 +3584,13 @@ public class EngageApplication
             {
                 if(Globals.getContext().getResources().getBoolean(R.bool.opt_auto_generate_sample_mission))
                 {
+                    Globals.getLogger().i(TAG, "============CREATING SAMPLE CONFIGURATION==========");
                     createSampleConfiguration();
                     _sampleMissionCreatedAndInUse = true;
                 }
                 else
                 {
-                    createEmptyConfiguration();
+                    createPublicConfiguration();
                 }
 
                 updateActiveConfiguration();
@@ -3379,9 +3602,59 @@ public class EngageApplication
             JSONObject policyBaseline = ActiveConfiguration.makeBaselineEnginePolicyObject(getEnginePolicy());
 
             String enginePolicyJson = getActiveConfiguration().makeEnginePolicyObjectFromBaseline(policyBaseline).toString();
+
+            // Apply app-level fine-tuning
+            boolean devModeActive = Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_MODE_ACTIVE, false);
+            if(devModeActive)
+            {
+                try {
+                    JSONObject policy = new JSONObject(enginePolicyJson);
+
+                    int i = Utils.getSafeSharedPreferencesInt(PreferenceKeys.DEVELOPER_RP_CONNECT_TIMEOUT_SECS, 5);
+                    System.out.println(i);
+
+                    policy.getJSONObject("internals")
+                            .put("rpConnectionTimeoutSecs",
+                                    Utils.getSafeSharedPreferencesInt(PreferenceKeys.DEVELOPER_RP_CONNECT_TIMEOUT_SECS, 5));
+                    policy.getJSONObject("internals")
+                            .put("rpTransactionTimeoutMs",
+                                    Utils.getSafeSharedPreferencesInt(PreferenceKeys.DEVELOPER_RP_TRANSACTION_TIMEOUT_MS, 5000));
+
+                    policy.getJSONObject("networking")
+                            .put("rallypointRtTestIntervalMs",
+                                    Utils.getSafeSharedPreferencesInt(PreferenceKeys.DEVELOPER_RP_RT_TEST_INTERVAL_MS, 30000));
+
+                    policy.getJSONObject("networking")
+                            .getJSONObject("rpUdpStreaming")
+                            .put("enabled",
+                                    Globals.getSharedPreferences().getBoolean(PreferenceKeys.DEVELOPER_RP_USE_UDP_STREAMING, false));
+
+                    enginePolicyJson = policy.toString();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
             String identityJson = getActiveConfiguration().makeIdentityObject().toString();
 
-            Globals.getLogger().d(TAG, "policy=" + enginePolicyJson);
+            // TODO: figure out why the FIPS module is not loading on Android
+            /*
+            {
+                String theDir = Globals.getContext().getApplicationInfo().nativeLibraryDir;
+                JSONObject obj = new JSONObject();
+                obj.put(Engine.JsonFields.FipsCryptoSettings.enabled, true);
+                obj.put(Engine.JsonFields.FipsCryptoSettings.path, theDir);
+
+                int fipsRc = getEngine().engageSetFipsCrypto(obj.toString());
+                if(fipsRc != 0)
+                {
+                    Globals.getLogger().f(TAG, "engageSetFipsCrypto failed with error code " + fipsRc);
+                }
+            }
+            */
+
+            getEngine().engageSetLogLevel(4);
 
             int initRc = getEngine().engageInitialize(enginePolicyJson,
                     identityJson,
@@ -3701,7 +3974,7 @@ public class EngageApplication
             }
 
             restartStartHumanBiometricsReporting();
-            restartDeviceMonitoring();
+            //restartDeviceMonitoring();
         }
 
         return _activeConfiguration;
@@ -4043,53 +4316,11 @@ public class EngageApplication
                     }
 
                     checkIfAnyTxStillActiveAndNotify();
-
-                    /*
-                    synchronized (_groupsSelectedForTx)
-                    {
-                        if (!_groupsSelectedForTx.isEmpty())
-                        {
-                            for (GroupDescriptor g : _groupsSelectedForTx)
-                            {
-                                getEngine().engageEndGroupTx(g.id);
-                            }
-
-                            _groupsSelectedForTx.clear();
-
-                            // TODO: only play tx off notification if something was already in a TX state of some sort
-                            playTxOffNotification();
-                        }
-                        else
-                        {
-                            Globals.getLogger().w(TAG, "#SB# - endTx but no groups selected for tx");
-
-                        }
-
-                        synchronized (_uiUpdateListeners)
-                        {
-                            for (IUiUpdateListener listener : _uiUpdateListeners)
-                            {
-                                listener.onAnyTxEnding();
-                            }
-                        }
-
-                        checkIfAnyTxStillActiveAndNotify();
-                    }
-                    */
                 }
                 catch (Exception e)
                 {
                     e.printStackTrace();
                 }
-    
-            /*
-            if(_txPending)
-            {
-                _txPending = false;
-                Globals.getLogger().i(TAG, "cancelling previous tx pending");
-                cancelPreviousTxPending();
-            }
-            */
             }
         });
     }
@@ -4127,11 +4358,6 @@ public class EngageApplication
                     {
                         if (!_groupsSelectedForTx.contains(testGroup))
                         {
-                            if (testGroup.tx || testGroup.txPending)
-                            {
-                                //Globals.getLogger().wtf(TAG, "#SB# data model says group is tx or txPending but the group is not in the tx set!!, tx=" + testGroup.tx + ", txPending=" + testGroup.txPending);
-                            }
-
                             testGroup.tx = false;
                             testGroup.txPending = false;
                         }
@@ -4288,46 +4514,6 @@ public class EngageApplication
         return IntentIntegrator.REQUEST_CODE;
     }
 
-    /*
-    private void initiateMissionQrCodeScan(final Activity activity, final View sourceMenuPopupAnchor)
-    {
-        // Clear any left-over password
-        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.QR_CODE_SCAN_PASSWORD, null);
-        Globals.getSharedPreferencesEditor().apply();
-
-        LayoutInflater layoutInflater = LayoutInflater.from(activity);
-        View promptView = layoutInflater.inflate(R.layout.qr_code_mission_scan_password_dialog, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
-        alertDialogBuilder.setView(promptView);
-
-        final EditText editText = promptView.findViewById(R.id.etPassword);
-
-        alertDialogBuilder.setCancelable(false)
-                .setPositiveButton(R.string.qr_code_scan_button, new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
-                    {
-                        // Save the password so the scanned intent result can get it later
-                        Globals.getSharedPreferencesEditor().putString(PreferenceKeys.QR_CODE_SCAN_PASSWORD, editText.getText().toString());
-                        Globals.getSharedPreferencesEditor().apply();
-
-                        scanQrCode(activity, getString(R.string.qr_scan_prompt), sourceMenuPopupAnchor, getString(R.string.select_qr_code_file), Constants.MISSION_QR_CODE_SCAN);
-                    }
-                })
-                .setNegativeButton(R.string.cancel,
-                        new DialogInterface.OnClickListener()
-                        {
-                            public void onClick(DialogInterface dialog, int id)
-                            {
-                                dialog.cancel();
-                            }
-                        });
-
-        AlertDialog alert = alertDialogBuilder.create();
-        alert.show();
-    }
-    */
-
     public void initiateScanOfAQrCode(Activity activity, String prompt)
     {
         IntentIntegrator ii = new IntentIntegrator(activity);
@@ -4336,7 +4522,7 @@ public class EngageApplication
         ii.setPrompt(prompt);
         ii.setBeepEnabled(true);
         ii.setOrientationLocked(false);
-        ii.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        ii.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
         ii.setBarcodeImageEnabled(true);
         ii.setTimeout(10000);
         ii.initiateScan();
@@ -4561,6 +4747,7 @@ public class EngageApplication
 
                 Globals.getLogger().d(TAG, "onEngineStarted");
                 _engineRunning = true;
+                notifyEngineOfNetworkStatus(NetworkUtils.isAnyConnectivityAvailable(getApplicationContext()));
                 createAllGroupObjects();
                 joinSelectedGroups();
                 startLocationUpdates();
@@ -4636,6 +4823,36 @@ public class EngageApplication
                 logEvent(Analytics.ENGINE_AUDIO_DEVICES_REFRESH);
 
                 Globals.getLogger().i(TAG, "onEngineAudioDevicesRefreshed");
+            }
+        });
+    }
+
+    @Override
+    public void onEngineGroupByGroupPcmPowerLevels(String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                logEvent(Analytics.ENGINE_GROUP_BY_GROUP_PCM_LEVELS);
+
+                Globals.getLogger().i(TAG, "onEngineGroupByGroupPcmPowerLevels");
+            }
+        });
+    }
+
+    @Override
+    public void onEngineAudioDeviceEvent(String s)
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                logEvent(Analytics.ENGINE_AUDIO_DEVICE_EVENT);
+
+                Globals.getLogger().i(TAG, "onEngineAudioDeviceEvent");
             }
         });
     }
@@ -4816,6 +5033,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().d(TAG, "onGroupConnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsConnected);
 
                 // Only speak the group name for media groups - and then only in single view mode
                 if(_activeConfiguration.getUiMode() == Constants.UiMode.vSingle)
@@ -4908,6 +5126,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().d(TAG, "onGroupConnectFailed: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsDisconnected);
 
                 try
                 {
@@ -4982,6 +5201,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().d(TAG, "onGroupDisconnected: id='" + id + "', n='" + gd.name + "', x=" + eventExtraJson);
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsDisconnected);
 
                 try
                 {
@@ -5058,6 +5278,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().d(TAG, "onGroupJoined: id='" + id + "', n='" + gd.name + "'");
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsJoined);
 
                 gd.joined = true;
                 gd.joinError = false;
@@ -5085,6 +5306,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().e(TAG, "onGroupJoinFailed: id='" + id + "', n='" + gd.name + "'");
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsLeft);
 
                 gd.resetState();
                 gd.joinError = true;
@@ -5112,6 +5334,7 @@ public class EngageApplication
                 }
 
                 Globals.getLogger().d(TAG, "onGroupLeft: id='" + id + "', n='" + gd.name + "'");
+                notifyRegistrantOffGroupStatusChange(id, GroupState.gsLeft);
 
                 gd.resetState();
                 gd.joined = false;
@@ -5402,13 +5625,19 @@ public class EngageApplication
                                     @Override
                                     public void run()
                                     {
-                                        getEngine().engageUnmuteGroupTx(id);
+                                        if(!getActiveConfiguration().getKeepTxMutedOnPtt())
+                                        {
+                                            getEngine().engageUnmuteGroupTx(id);
+                                        }
                                     }
                                 }, Constants.TX_UNMUTE_DELAY_MS_AFTER_GRANT_TONE);
                             }
                             else
                             {
-                                getEngine().engageUnmuteGroupTx(id);
+                                if(!getActiveConfiguration().getKeepTxMutedOnPtt())
+                                {
+                                    getEngine().engageUnmuteGroupTx(id);
+                                }
                             }
 
                             _lastAudioActivity = Utils.nowMs();
@@ -6068,6 +6297,7 @@ public class EngageApplication
 
     public void startHumanBiometricsReporting()
     {
+        /*
         if(_humanBiometricsReportingTimer == null)
         {
             if(Globals.getSharedPreferences().getBoolean(PreferenceKeys.USER_EXPERIMENT_ENABLE_HBM, false))
@@ -6105,6 +6335,7 @@ public class EngageApplication
                 }
             }
         }
+         */
     }
 
     public void stopHumanBiometricsReporting()
@@ -6118,6 +6349,7 @@ public class EngageApplication
 
     private void onHumanBiometricsTimerTick()
     {
+        /*
         if(_hbmTicksSoFar == 0)
         {
             _hbmHeartRate.restart();
@@ -6212,6 +6444,7 @@ public class EngageApplication
 
             _hbmTicksSoFar = 0;
         }
+         */
     }
 
     @Override
@@ -6426,6 +6659,7 @@ public class EngageApplication
                     // Human biometrics ... ?
                     if (Engine.BlobType.fromInt(payloadType) == Engine.BlobType.engageHumanBiometrics)
                     {
+                        /*
                         int blobOffset = 0;
                         int bytesLeft = (int) blobSize;
                         boolean anythingUpdated = false;
@@ -6458,6 +6692,7 @@ public class EngageApplication
                                 }
                             }
                         }
+                         */
                     }
                     else if (Engine.BlobType.fromInt(payloadType) == Engine.BlobType.appTextUtf8)
                     {
@@ -6868,8 +7103,8 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Globals.getLogger().d(TAG, "onRallypointPausingConnectionAttempt");
-                // Stub
+                Globals.getLogger().d(TAG, "onRallypointPausingConnectionAttempt: " + id + ", " + eventExtraJson);
+                notifyConnectivityChangeListenersOfRallypointConnectionPausing(id, eventExtraJson);
             }
         });
     }
@@ -6882,8 +7117,8 @@ public class EngageApplication
             @Override
             public void run()
             {
-                Globals.getLogger().d(TAG, "onRallypointConnecting: " + id);
-                // Stub
+                Globals.getLogger().d(TAG, "onRallypointConnecting: " + id + "," + eventExtraJson);
+                notifyConnectivityChangeListenersOfRallypointConnectionConnecting(id, eventExtraJson);
             }
         });
     }
@@ -6898,8 +7133,8 @@ public class EngageApplication
             {
                 logEvent(Analytics.GROUP_RP_CONNECTED);
 
-                Globals.getLogger().d(TAG, "onRallypointConnected: " + id);
-                // Stub
+                Globals.getLogger().d(TAG, "onRallypointConnected: " + id + "," + eventExtraJson);
+                notifyConnectivityChangeListenersOfRallypointConnectionConnected(id, eventExtraJson);
             }
         });
     }
@@ -6907,10 +7142,15 @@ public class EngageApplication
     @Override
     public void onRallypointDisconnected(final String id, final String eventExtraJson)
     {
-        logEvent(Analytics.GROUP_RP_DISCONNECTED);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logEvent(Analytics.GROUP_RP_DISCONNECTED);
 
-        Globals.getLogger().d(TAG, "onRallypointDisconnected: " + id);
-        // Stub
+                Globals.getLogger().d(TAG, "onRallypointDisconnected: " + id + "," + eventExtraJson);
+                notifyConnectivityChangeListenersOfRallypointConnectionDisconnected(id, eventExtraJson);
+            }
+        });
     }
 
     @Override
@@ -6946,8 +7186,11 @@ public class EngageApplication
                     logEvent(Analytics.GROUP_RP_RT_0);
                 }
 
-                Globals.getLogger().d(TAG, "onRallypointRoundtripReport: " + id + ", ms=" + rtMs + ", qual=" + rtQualityRating);
-                // Stub
+                Globals.getLogger().d(TAG, "onRallypointRoundtripReport: " + id +
+                        ", ms=" + rtMs +
+                        ", qual=" + rtQualityRating +
+                        "," + eventExtraJson);
+                notifyConnectivityChangeListenersOfRallypointRtt(id, eventExtraJson);
             }
         });
     }

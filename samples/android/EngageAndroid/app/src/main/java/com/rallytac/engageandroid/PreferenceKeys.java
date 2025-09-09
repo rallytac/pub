@@ -65,6 +65,7 @@ public class PreferenceKeys
 
     public static String LAST_QRCODE_DEFLECTION_URL = "lastQrCodeDeflectionUrl";//NON-NLS
     public static String INCOMING_MISSION_PASSWORD = "incomingMissionPassword";//NON-NLS
+    public static String INCOMING_CERTSTORE_PASSWORD = "incomingMissionPassword";//NON-NLS
 
     public static String MAP_OPTION_BASE = "map.option.";//NON-NLS
     public static String MAP_OPTION_VIEW_INDEX = MAP_OPTION_BASE + "viewIndex";//NON-NLS
@@ -90,7 +91,6 @@ public class PreferenceKeys
     public static String USER_NOTIFY_VIBRATIONS = "user_notify.vibrations";//NON-NLS
     public static String USER_NOTIFY_PTT_EVERY_TIME = "user_notify.ptt_everyTime";//NON-NLS
     public static String USER_NOTIFY_SPOKEN_PROMPTS = "user_notify.spoken_prompts";//NON-NLS
-
 
 
     public static String USER_EXPERIMENT_ENABLE_TX_SMOOTHING = "user_experiment.tx.smoothing.enable";//NON-NLS
@@ -136,6 +136,13 @@ public class PreferenceKeys
     public static String DEVELOPER_USE_DEV_LICENSING_SYSTEM = "developer_useDevLicensingSystem";//NON-NLS
     public static String ADVANCED_MODE_ACTIVE = "advanced_modeActive";//NON-NLS
     public static String DEVELOPER_USE_LOW_LEVEL_ANDROID_AUDIO_INTERFACE = "developer_useLowLevelAndroidAudioInterface";//NON-NLS
+    public static String DEVELOPER_KEEP_PTT_MUTED_ON_TX = "developer.keep_ptt_muted_on_tx";//NON-NLS
+    public static String DEVELOPER_RP_USE_UDP_STREAMING = "developer_useRpUdpStreaming";//NON-NLS
+    public static String DEVELOPER_RP_CONNECT_TIMEOUT_SECS = "developer_rpConnectTimeoutSecs";//NON-NLS
+    public static String DEVELOPER_RP_TRANSACTION_TIMEOUT_MS = "developer_rpTransactionTimeoutMs";//NON-NLS
+    public static String DEVELOPER_RP_RT_TEST_INTERVAL_MS = "developer_rpRtTestIntervalMs";//NON-NLS
+    public static String DEVELOPER_ALLOW_MISSION_CONTROL = "developer_allowMissionControl";//NON-NLS
+
 
     public static String USER_CERT_STORE_FILE_NAME = "user_activeCertStoreFileName";//NON-NLS
     public static String USER_CERT_STORE_PASSWORD_SET = "user_certStore.passwordSet";//NON-NLS

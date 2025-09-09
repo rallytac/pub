@@ -52,13 +52,7 @@
     "rtpJitterUnderrunReductionAger": 100,
     "rtpJitterForceTrimAtMs": 0,
     "rpUdpStreaming": {
-      "enabled": false,
-      "allowClear": false,
-      "nic": "",
-      "port": 0,
-      "keepAliveIntervalSecs": 10,
-      "priority": 1,
-      "ttl": 64
+      "enabled": true
     }
   },
 
@@ -108,7 +102,7 @@
 
   "discovery": {
     "magellan": {
-      "enabled":true
+      "enabled":false
     }
   }
 }

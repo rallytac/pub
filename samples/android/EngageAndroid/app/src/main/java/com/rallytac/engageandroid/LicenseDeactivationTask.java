@@ -7,7 +7,6 @@ package com.rallytac.engageandroid;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONObject;
 

@@ -23,6 +23,6 @@
 
     <item
         android:id="@+id/action_mission_add_oem"
-        android:title="OEM-specific mission"
+        android:title="@string/oem_specific_mission"
         android:visible="false"/>
 </menu>

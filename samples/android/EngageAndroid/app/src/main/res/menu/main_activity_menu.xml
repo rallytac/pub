@@ -6,15 +6,24 @@
 
     <item
         android:id="@+id/action_security"
-        android:title="@string/menu_security" />
+        android:title="@string/menu_security">
+        <menu>
+            <item
+                android:id="@+id/action_certificate_stores"
+                android:title="@string/certificate_stores" />
+            <item
+                android:id="@+id/action_passwords"
+                android:title="@string/passwords" />
+        </menu>
+    </item>
 
     <item
         android:id="@+id/action_settings"
-        android:title="@string/menu_settings" />
+        android:title="@string/menu_settings"/>
 
     <item
         android:id="@+id/action_dev_json_policy_editor"
-        android:title="JSON Policy Editor"
+        android:title="@string/json_policy_editor"
         android:visible="false"/>
 
     <item
@@ -23,6 +32,15 @@
     <item
         android:id="@+id/action_dev_test"
         android:title="@string/menu_developer_testing"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/action_clear_log"
+        android:title="@string/clear_log"
+        android:visible="false"/>
+    <item
+        android:id="@+id/action_save_log"
+        android:title="@string/save_log"
         android:visible="false"/>
 
     <item

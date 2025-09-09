@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fmt_user_display_name_generate">Androidユーザー - %1$s</string>
+    <string name="sample_mission_gen_mission_name_fmt">%1$s サンプルミッション</string>
+    <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
+    <string name="application_internal_certificate_store_display_name">デフォルト証明書ストア</string>
+    <string name="rts_factory_certificate_store_display_name">RTS工場証明書ストア</string>
+
+    <!-- Main UI Strings -->
+    <string name="title_activity_settings">設定</string>
+    <string name="title_activity_missions">利用可能なミッション</string>
+    <string name="title_activity_edit_mission">ミッション</string>
+    <string name="title_activity_certstores">証明書ストア</string>
+    <string name="title_activity_map">マップ</string>
+    <string name="title_about">アプリについて</string>
+    <string name="title_licensing">ライセンス</string>
+
+    <!-- Settings Headers -->
+    <string name="set_hdr_developer_options">開発者オプション</string>
+    <string name="set_hdr_general">一般</string>
+    <string name="set_hdr_identity">個人情報</string>
+    <string name="set_hdr_connectivity">接続</string>
+    <string name="set_hdr_location">位置情報</string>
+    <string name="set_hdr_audio">オーディオ</string>
+    <string name="set_hdr_aec">音響エコーキャンセル</string>
+    <string name="set_hdr_notifications">通知</string>
+    <string name="set_hdr_tone_levels">音量レベル</string>
+    <string name="set_hdr_experimental">実験的機能</string>
+    <string name="set_hdr_biometrics">生体情報（実験的）</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_yes">はい</string>
+    <string name="button_no">いいえ</string>
+    <string name="button_cancel">キャンセル</string>
+    <string name="button_save">保存</string>
+    <string name="button_close">閉じる</string>
+    <string name="button_clear">クリア</string>
+    <string name="button_reset">リセット</string>
+    <string name="button_map_show_all">すべて表示</string>
+
+    <!-- QR Code Related -->
+    <string name="qr_code_scan_button">スキャン</string>
+    <string name="qr_scan_prompt">ミッションQRコードをスキャン</string>
+    <string name="qr_scan_cancelled">スキャンがキャンセルされました</string>
+    <string name="qr_scan_decode_failed">デコードに失敗しました</string>
+    <string name="qr_scan_decrypt_failed">復号化に失敗しました</string>
+    <string name="qr_scan_decompress_failed">解凍に失敗しました</string>
+    <string name="qr_scan_invalid">無効なQRコード</string>
+    <string name="qr_scn_invalid_version">無効なQRコードバージョン</string>
+    <string name="qr_cannot_parse">QRコードを解析できません</string>
+
+    <!-- Error Messages -->
+    <string name="title_ui_launch_error">UI起動エラー</string>
+    <string name="title_startup_error">起動エラー</string>
+    <string name="startup_cannot_connect_to_engine">音声エンジンに接続できません。このAndroidバージョンまたはインストールパッケージに問題がある可能性があります。</string>
+    <string name="title_permissions_required">権限が必要です</string>
+    <string name="startup_one_or_more_permissions_denied">1つ以上の必要な権限が拒否されました。</string>
+    <string name="title_google_play_services_error">Google Playサービスエラー</string>
+    <string name="google_play_services_not_installed_or_out_of_date">Google Playサービスが利用できないか、古いバージョンです</string>
+
+    <!-- Mission Related -->
+    <string name="mission_download_button">ダウンロード</string>
+    <string name="mission_load_continue_button">続行</string>
+    <string name="mission_control">ミッション制御</string>
+    <string name="add_mission">ミッションを追加</string>
+    <string name="delete_mission">ミッションを削除</string>
+    <string name="are_you_sure_you_want_to_delete_mission">%1$sを削除してもよろしいですか？</string>
+    <string name="activated_mission_fmt">%1$sが有効化されました</string>
+    <string name="loaded_mission_fmt">%1$sが読み込まれました</string>
+
+    <!-- Menu Items -->
+    <string name="menu_list">リスト</string>
+    <string name="menu_mission">ミッション</string>
+    <string name="menu_missions">ミッション</string>
+    <string name="menu_share">共有</string>
+    <string name="menu_scan">スキャン</string>
+    <string name="menu_load">読み込み</string>
+    <string name="menu_download">ダウンロード</string>
+    <string name="menu_security">セキュリティ</string>
+    <string name="menu_settings">設定</string>
+    <string name="menu_about">アプリについて</string>
+    <string name="menu_contact">お問い合わせ</string>
+    <string name="menu_disconnect">切断</string>
+
+    <!-- Identity Settings -->
+    <string name="set_identity_email_address_hint">メールアドレスを推奨</string>
+    <string name="set_identity_display_name">表示名</string>
+    <string name="set_identity_transmission_alias_hint">送信用エイリアス</string>
+    <string name="set_identity_user_id">ユーザーID</string>
+    <string name="set_identity_user_alias">エイリアス</string>
+
+    <!-- Location Settings -->
+    <string name="set_location_accuracy">精度</string>
+    <string name="set_location_share_my_location">位置情報を共有</string>
+    <string name="set_location_displacement_trigger">移動トリガー</string>
+    <string name="set_location_update_frequency">更新頻度</string>
+
+    <!-- Audio Settings -->
+    <string name="set_audio_microphone_denoise">ノイズ低減を有効化</string>
+    <string name="set_audio_microphone_agc_level">自動ゲイン制御</string>
+    <string name="set_audio_speaker_agc_level">自動ゲイン制御</string>
+    <string name="set_use_bluetooth_microphone">Bluetoothヘッドセットマイクを使用</string>
+    <string name="set_use_bluetooth_ptt_device">BluetoothデバイスをPTTに使用</string>
+    <string name="set_bluetooth_ptt_device">Bluetoothデバイス</string>
+    <string name="set_audio_input_device">入力デバイス</string>
+    <string name="set_audio_output_device">出力デバイス</string>
+
+    <!-- Notifications -->
+    <string name="set_notifications_enable_vibrations">バイブレーションを有効化</string>
+    <string name="set_notifications_enable_spoken_prompts">音声プロンプトを有効化</string>
+    <string name="set_notifications_when_members_join">メンバーが参加したとき</string>
+    <string name="set_notifications_when_members_leave">メンバーが退出したとき</string>
+    <string name="set_notifications_when_receiving_new_audio">新しい音声を受信したとき</string>
+    <string name="set_notifications_when_network_error">ネットワークエラー時</string>
+
+    <!-- Network Status -->
+    <string name="experiencing_network_problems">ネットワークに問題が発生しています</string>
+    <string name="currently_operating_in_mc_failover_mode">現在マルチキャストフェイルオーバーモードで動作中</string>
+    <string name="currently_connected_via_ip_multicast">現在IPマルチキャストでローカル接続中</string>
+    <string name="currently_connected_globally_fmt">現在%1$s:%2$s:%3$dでグローバル接続中</string>
+    <string name="connect_to_a_rallypoint">Rallypointに接続</string>
+
+    <!-- Licensing -->
+    <string name="license_has_expired">ライセンスがないか期限切れです</string>
+    <string name="about_license_key">ライセンスキー</string>
+    <string name="about_enter_license_key">有効なライセンス（および必要な場合はアクティベーションコード）があれば、このアプリケーションを最大限に活用できます。</string>
+    <string name="about_activation_code">アクティベーションコード</string>
+    <string name="about_enter_activation_code">アクティベーションコードを入力またはスキャンするか、クラウドアイコンをクリックしてインターネットライセンスサーバーから取得してください。</string>
+    <string name="about_click_for_offline_activation">インターネット接続がない場合は、二重矢印アイコンをクリックして、インターネットに接続された別のデバイスを使用して2段階アクティベーションを実行してください。</string>
+    <string name="about_hint_activation_code">アクティベーションコード</string>
+    <string name="about_btn_deactivate">無効化</string>
+    <string name="license_type_does_not_require_activation">このライセンスタイプはアクティベーションが不要です</string>
+    <string name="failed_to_validate_license_info">ライセンス情報の検証に失敗しました</string>
+
+    <!-- Security -->
+    <string name="about_enterprise_id">企業ID</string>
+    <string name="about_enter_enterprise_id">企業IDは必須ではありませんが、お持ちの場合は共有インフラストラクチャを使用する際の通信をさらに安全にするのに役立ちます。</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">企業id</string>
+    <string name="use_enterprise_id_for_enhanced_security">セキュリティ強化のために組織IDを使用</string>
+
+    <!-- Contact -->
+    <string name="contact_friendly_message">私たちはお客様のサポートをさせていただき、お客様からのご意見をお聞きすることを楽しみにしています。以下のリンクからメールまたはウェブサイトでお問い合わせください。</string>
+    <string name="contact_web_site">ウェブサイト</string>
+    <string name="contact_support">サポート</string>
+    <string name="contact_sales">営業</string>
+
+    <!-- Mission Generation -->
+    <string name="generate_mission_button">生成</string>
+    <string name="generate_using_passphrase">パスフレーズを使用して生成</string>
+    <string name="generate_passphrase_explanation">ミッションのベースとなるパスフレーズを入力してください。その後、他のチームメンバーに同じパスフレーズを使用してミッションを生成するよう伝えて、ミッションを共有します。\n\n注意：Rallypointを使用する場合は、どのRallypointを使用するかチームに必ず伝えてください。</string>
+    <string name="a_passphrase_is_required_to_generate">ミッションを生成するにはパスフレーズが必要です。</string>
+    <string name="a_passphrase_of_minimum_length_is_required_to_generate">ミッションを生成するには最低%1$d文字のパスフレーズが必要です。</string>
+
+    <!-- Audio Devices -->
+    <string name="active_audio_device_handset">アクティブな音声デバイスはハンドセットです</string>
+    <string name="active_audio_device_speakerphone">アクティブな音声デバイスはスピーカーフォンです</string>
+    <string name="active_audio_device_wired">アクティブな音声デバイスは有線ヘッドセットです</string>
+    <string name="active_audio_device_bluetooth">アクティブな音声デバイスはBluetoothヘッドセットです</string>
+    <string name="active_audio_device_unknown">アクティブな音声デバイスはデバイスのデフォルトです</string>
+    <string name="handset">ハンドセット</string>
+    <string name="speakerphone">スピーカーフォン</string>
+    <string name="wired_headset">有線ヘッドセット</string>
+    <string name="bluetooth_headset">Bluetoothヘッドセット</string>
+
+    <!-- Group Management -->
+    <string name="number_of_audio_groups">オーディオグループ数：</string>
+    <string name="no_groups_to_display_title">表示するグループがありません</string>
+    <string name="no_groups_to_display_description">ミッションにグループがないようです。\n\nミッションメニューオプションで設定を確認するか、同じ画面でグループを含むミッションを作成してください。</string>
+    <string name="title_group">グループ</string>
+    <string name="title_delete_group">グループを削除</string>
+    <string name="are_you_sure_delete_group">%1$sを削除してもよろしいですか？</string>
+    <string name="groups">グループ</string>
+    <string name="unknown_group">不明なグループ</string>
+    <string name="all_groups">（すべてのグループ）</string>
+
+    <!-- Sharing -->
+    <string name="share_mission_share">共有</string>
+    <string name="share_mission_upload_to_mission_hub">ミッションハブにアップロード</string>
+    <string name="share_mission_upload_header">共有…</string>
+    <string name="share_mission_email_subject">%1$s ミッション : %2$s</string>
+    <string name="share_mission_mission_uploaded">ミッションがアップロードされました</string>
+    <string name="share_mission_mission_upload_failed">ミッションのアップロードに失敗しました -</string>
+    <string name="share_title">共有</string>
+    <string name="share_json">プレーンテキストJSONファイルを共有</string>
+
+    <!-- Certificate Store -->
+    <string name="certstore_not_available_for_mission">選択したミッションには現在インストールされていない証明書ストアが必要です。</string>
+    <string name="invalid_cert_store_cannot_obtain_descriptor">無効な証明書ストア - 記述子を取得できません</string>
+    <string name="invalid_cert_store_cannot_decode_descriptor">無効な証明書ストア - 記述子をデコードできません</string>
+    <string name="invalid_cert_store_cannot_invalid_version">無効な証明書ストア - 不明なバージョン</string>
+    <string name="invalid_cert_store_cannot_no_certificates_found">無効な証明書ストア - 証明書が見つかりません</string>
+
+    <!-- Text Messaging -->
+    <string name="text_message_dictate_message">メッセージを音声入力</string>
+    <string name="text_message_send_message">メッセージを送信</string>
+    <string name="text_message_hint_enter_text_message">テキストメッセージを入力</string>
+
+    <!-- Biometrics -->
+    <string name="set_biometrics_simulate">生体情報の読み取りをシミュレート</string>
+    <string name="set_biometrics_reporting_intervals_secs">レポート間隔（秒）</string>
+    <string name="set_biometrics_heart_rate">心拍数</string>
+    <string name="set_biometrics_skin_temp">皮膚温度</string>
+    <string name="set_biometrics_core_temp">体温</string>
+    <string name="set_biometrics_blood_oxy_perc">血中酸素濃度</string>
+    <string name="set_biometrics_blood_hydro_level">血液水分レベル</string>
+    <string name="set_biometrics_fatigue_level">疲労レベル</string>
+    <string name="set_biometrics_task_effectiveness_level">タスク効率レベル</string>
+
+    <!-- System Information -->
+    <string name="system_information">システム情報</string>
+    <string name="mi_hdr_system">システム:\n</string>
+    <string name="mi_hdr_device">\n\nデバイス:\n</string>
+    <string name="mi_sys_id">ID: %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
+    <string name="mi_device_manufacturer">製造元: %1$s\n</string>
+    <string name="mi_device_id">ID: %1$s\n</string>
+    <string name="mi_device_brand">ブランド: %1$s\n</string>
+    <string name="mi_device_model">モデル: %1$s\n</string>
+    <string name="mi_device_board">ボード: %1$s\n</string>
+    <string name="mi_device_hardware">ハードウェア: %1$s\n</string>
+    <string name="mi_device_serial">シリアル: %1$s\n</string>
+    <string name="mi_device_bootloader">ブートローダー: %1$s\n</string>
+    <string name="mi_device_user">ユーザー: %1$s\n</string>
+    <string name="mi_device_host">ホスト: %1$s\n</string>
+    <string name="mi_device_build_time">ビルド時間: %1$s\n</string>
+    <string name="mi_device_version_release">バージョン: %1$s\n</string>
+    <string name="mi_device_sdk_int">SDKバージョン: %1$d\n</string>
+
+    <!-- Screen Information -->
+    <string name="mi_hdr_screen">\n\n画面:</string>
+    <string name="mi_screen_density">密度: %1$f\n</string>
+    <string name="mi_screen_width">幅: %1$d\n</string>
+    <string name="mi_screen_height">高さ: %1$d\n</string>
+    <string name="mi_screen_scaled_density">スケール済み密度: %1$f\n</string>
+    <string name="mi_screen_density_dpi">DPI密度: %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI: %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI: %1$f\n</string>
+
+    <!-- Miscellaneous -->
+    <string name="copyright">Copyright © 2020 Rally Tactical Systems, Inc.</string>
+    <string name="name">名前</string>
+    <string name="description">説明</string>
+    <string name="address">アドレス</string>
+    <string name="port">ポート</string>
+    <string name="cancel">キャンセル</string>
+    <string name="passphrase">パスフレーズ</string>
+    <string name="url">url</string>
+    <string name="pin">PIN</string>
+    <string name="id">id</string>
+</resources>

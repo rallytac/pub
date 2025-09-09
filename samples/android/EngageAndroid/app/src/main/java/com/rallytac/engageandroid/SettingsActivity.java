@@ -6,11 +6,9 @@
 package com.rallytac.engageandroid;
 
 import android.annotation.TargetApi;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.media.AudioDeviceInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -20,19 +18,15 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.ActionBar;
-
-import android.provider.Settings;
-import android.util.Log;
-import android.view.MenuItem;
 
 import com.rallytac.engage.engine.Engine;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SettingsActivity extends AppCompatPreferenceActivity
@@ -268,6 +262,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity
             {
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_USE_DEV_LICENSING_SYSTEM));
                 bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_USE_LOW_LEVEL_ANDROID_AUDIO_INTERFACE));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_ALLOW_MISSION_CONTROL));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_RP_USE_UDP_STREAMING));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_RP_CONNECT_TIMEOUT_SECS));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_RP_TRANSACTION_TIMEOUT_MS));
+                bindPreferenceSummaryToValue(findPreference(PreferenceKeys.DEVELOPER_RP_RT_TEST_INTERVAL_MS));
             }
             else
             {

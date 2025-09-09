@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fmt_user_display_name_generate">Android Gebruiker - %1$s</string>
+    <string name="sample_mission_gen_mission_name_fmt">%1$s Voorbeeld Sending</string>
+    <string name="generated_mission_description"></string>
+    <string name="generated_mission_name"></string>
+    <string name="application_internal_certificate_store_display_name">Verstek Sertifikaatwinkel</string>
+    <string name="rts_factory_certificate_store_display_name">RTS Fabriek Sertifikaatwinkel</string>
+
+    <!-- Main UI Strings -->
+    <string name="title_activity_settings">Instellings</string>
+    <string name="title_activity_missions">Beskikbare Sendings</string>
+    <string name="title_activity_edit_mission">Sending</string>
+    <string name="title_activity_certstores">Sertifikaatwinkel</string>
+    <string name="title_activity_map">Kaart</string>
+    <string name="title_about">Aangaande</string>
+    <string name="title_licensing">Lisensiëring</string>
+
+    <!-- Settings Headers -->
+    <string name="set_hdr_developer_options">Ontwikkelaar Opsies</string>
+    <string name="set_hdr_general">Algemeen</string>
+    <string name="set_hdr_identity">Identiteit</string>
+    <string name="set_hdr_connectivity">Konnektiwiteit</string>
+    <string name="set_hdr_location">Ligging</string>
+    <string name="set_hdr_audio">Oudio</string>
+    <string name="set_hdr_aec">Akoestiese Eggo Kansellasie</string>
+    <string name="set_hdr_notifications">Kennisgewings</string>
+    <string name="set_hdr_tone_levels">Toon Vlakke</string>
+    <string name="set_hdr_experimental">Eksperimentele Kenmerke</string>
+    <string name="set_hdr_biometrics">Gebruiker Menslike Biometrika (Eksperimenteel)</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_yes">Ja</string>
+    <string name="button_no">Nee</string>
+    <string name="button_cancel">Kanselleer</string>
+    <string name="button_save">Stoor</string>
+    <string name="button_close">Sluit</string>
+    <string name="button_clear">Maak skoon</string>
+    <string name="button_reset">Herstel</string>
+    <string name="button_map_show_all">Wys Almal</string>
+
+    <!-- QR Code Related -->
+    <string name="qr_code_scan_button">Skandeer</string>
+    <string name="qr_scan_prompt">Skandeer Sending QR-kode</string>
+    <string name="qr_scan_cancelled">Skandering gekanselleer</string>
+    <string name="qr_scan_decode_failed">Dekoderingsfout</string>
+    <string name="qr_scan_decrypt_failed">Ontsyferingsfout</string>
+    <string name="qr_scan_decompress_failed">Dekompressie misluk</string>
+    <string name="qr_scan_invalid">Ongeldige QR-kode</string>
+    <string name="qr_scn_invalid_version">Ongeldige QR-kode weergawe</string>
+    <string name="qr_cannot_parse">Kan nie QR-kode ontleed nie</string>
+
+    <!-- Error Messages -->
+    <string name="title_ui_launch_error">Gebruikerskoppelvlak Laaifout</string>
+    <string name="title_startup_error">Aanvangsfout</string>
+    <string name="startup_cannot_connect_to_engine">Kan nie aan die stemenjin koppel nie. Daar mag \'n probleem wees met hierdie Android-weergawe of die installasie pakket.</string>
+    <string name="title_permissions_required">Toestemmings Benodig</string>
+    <string name="startup_one_or_more_permissions_denied">Een of meer vereiste toestemmings is geweier.</string>
+    <string name="title_google_play_services_error">Google Play Dienste Fout</string>
+    <string name="google_play_services_not_installed_or_out_of_date">Google Play Dienste is nie beskikbaar of verouderd nie</string>
+
+    <!-- Mission Related -->
+    <string name="mission_download_button">Aflaai</string>
+    <string name="mission_load_continue_button">Gaan voort</string>
+    <string name="mission_control">Sending Beheer</string>
+    <string name="add_mission">Voeg Sending By</string>
+    <string name="delete_mission">Verwyder Sending</string>
+    <string name="are_you_sure_you_want_to_delete_mission">Is jy seker jy wil %1$s verwyder?</string>
+    <string name="activated_mission_fmt">%1$s geaktiveer</string>
+    <string name="loaded_mission_fmt">%1$s gelaai</string>
+
+    <!-- Menu Items -->
+    <string name="menu_list">Lys</string>
+    <string name="menu_mission">Sending</string>
+    <string name="menu_missions">Sendings</string>
+    <string name="menu_share">Deel</string>
+    <string name="menu_scan">Skandeer</string>
+    <string name="menu_load">Laai</string>
+    <string name="menu_download">Aflaai</string>
+    <string name="menu_security">Sekuriteit</string>
+    <string name="menu_settings">Instellings</string>
+    <string name="menu_about">Aangaande</string>
+    <string name="menu_contact">Kontak</string>
+    <string name="menu_disconnect">Ontkoppel</string>
+
+    <!-- Identity Settings -->
+    <string name="set_identity_email_address_hint">E-posadres word aanbeveel</string>
+    <string name="set_identity_display_name">Vertoonnaam</string>
+    <string name="set_identity_transmission_alias_hint">Transmissie alias</string>
+    <string name="set_identity_user_id">Gebruiker ID</string>
+    <string name="set_identity_user_alias">Alias</string>
+
+    <!-- Location Settings -->
+    <string name="set_location_accuracy">Akkuraatheid</string>
+    <string name="set_location_share_my_location">Deel my ligging</string>
+    <string name="set_location_displacement_trigger">Verplasing Sneller</string>
+    <string name="set_location_update_frequency">Opdateer Frekwensie</string>
+
+    <!-- Audio Settings -->
+    <string name="set_audio_microphone_denoise">Aktiveer Geraasvermindering</string>
+    <string name="set_audio_microphone_agc_level">Outomatiese Aanwinsbeheer</string>
+    <string name="set_audio_speaker_agc_level">Outomatiese Aanwinsbeheer</string>
+    <string name="set_use_bluetooth_microphone">Gebruik \'n Bluetooth kopstuk mikrofoon</string>
+    <string name="set_use_bluetooth_ptt_device">Gebruik \'n Bluetooth toestel vir PTT</string>
+    <string name="set_bluetooth_ptt_device">Bluetooth toestel</string>
+    <string name="set_audio_input_device">Inset toestel</string>
+    <string name="set_audio_output_device">Uitset toestel</string>
+
+    <!-- Notifications -->
+    <string name="set_notifications_enable_vibrations">Aktiveer vibrasies</string>
+    <string name="set_notifications_enable_spoken_prompts">Aktiveer gesproke aanwysings</string>
+    <string name="set_notifications_when_members_join">Wanneer spanlede aansluit</string>
+    <string name="set_notifications_when_members_leave">Wanneer spanlede vertrek</string>
+    <string name="set_notifications_when_receiving_new_audio">Wanneer nuwe oudio ontvang word</string>
+    <string name="set_notifications_when_network_error">Wanneer daar \'n netwerk fout is</string>
+
+    <!-- Network Status -->
+    <string name="experiencing_network_problems">Ondervind netwerk probleme</string>
+    <string name="currently_operating_in_mc_failover_mode">Werk tans in multisaai terugval modus</string>
+    <string name="currently_connected_via_ip_multicast">Tans plaaslik gekoppel via IP multisaai</string>
+    <string name="currently_connected_globally_fmt">Tans wêreldwyd gekoppel via %1$s:%2$s:%3$d</string>
+    <string name="connect_to_a_rallypoint">Koppel aan \'n Rallypoint</string>
+
+    <!-- Licensing -->
+    <string name="license_has_expired">Geen lisensie of lisensie verval</string>
+    <string name="about_license_key">Lisensie Sleutel</string>
+    <string name="about_enter_license_key">Met \'n geldige lisensie (en aktiveringskode indien nodig) sal jy ten volle voordeel kan trek uit hierdie toepassing.</string>
+    <string name="about_activation_code">Aktiveringskode</string>
+    <string name="about_enter_activation_code">Voer jou aktiveringskode hieronder in of skandeer dit, of klik die wolk ikoon om dit vanaf die Internet lisensiëring bediener te verkry.</string>
+    <string name="about_click_for_offline_activation">As jy nie Internet konnektiwiteit het nie, klik die dubbel-pyl ikoon om \'n twee-stap aktivering te doen met \'n sekondêre, Internet-gekoppelde toestel.</string>
+    <string name="about_hint_activation_code">aktiveringskode</string>
+    <string name="about_btn_deactivate">Deaktiveer</string>
+    <string name="license_type_does_not_require_activation">Hierdie lisensie tipe benodig nie aktivering nie</string>
+    <string name="failed_to_validate_license_info">Kon nie die lisensie inligting valideer nie</string>
+
+    <!-- Security -->
+    <string name="about_enterprise_id">Onderneming ID</string>
+    <string name="about_enter_enterprise_id">Jy het nie absoluut \'n onderneming ID nodig nie, maar as jy dit het, help dit om jou kommunikasie nog meer te beveilig wanneer gedeelde infrastruktuur gebruik word.</string>
+    <string name="enterprise_id_title">ID</string>
+    <string name="enterprise_id_hint">onderneming id</string>
+    <string name="use_enterprise_id_for_enhanced_security">Gebruik Organisasie ID vir verbeterde sekuriteit</string>
+
+    <!-- Contact -->
+    <string name="contact_friendly_message">Ons is hier om te help en hou daarvan om van ons kliënte te hoor. Jy kan ons bereik per e-pos of deur ons webwerf te besoek vanaf die skakels hieronder.</string>
+    <string name="contact_web_site">Webwerf</string>
+    <string name="contact_support">Ondersteuning</string>
+    <string name="contact_sales">Verkope</string>
+
+    <!-- Mission Generation -->
+    <string name="generate_mission_button">Genereer</string>
+    <string name="generate_using_passphrase">Genereer met \'n wagfrase</string>
+    <string name="generate_passphrase_explanation">Voer \'n wagfrase in waarop die sending gebaseer sal word. Deel dan die sending deur ander spanlede te vertel om \'n sending te genereer met presies dieselfde wagfrase.\n\nLET WEL: As jy \'n Rallypoint gaan gebruik, maak seker om jou span te vertel watter Rallypoint.</string>
+    <string name="a_passphrase_is_required_to_generate">\'n Wagfrase word benodig om \'n sending te genereer.</string>
+    <string name="a_passphrase_of_minimum_length_is_required_to_generate">\'n Wagfrase van ten minste %1$d karakters word benodig om \'n sending te genereer.</string>
+
+    <!-- Audio Devices -->
+    <string name="active_audio_device_handset">Die aktiewe oudio toestel is die handstuk</string>
+    <string name="active_audio_device_speakerphone">Die aktiewe oudio toestel is die luidspreker</string>
+    <string name="active_audio_device_wired">Die aktiewe oudio toestel is die bedrade kopstuk</string>
+    <string name="active_audio_device_bluetooth">Die aktiewe oudio toestel is die Bluetooth kopstuk</string>
+    <string name="active_audio_device_unknown">Die aktiewe oudio toestel is die toestel verstek</string>
+    <string name="handset">Handstuk</string>
+    <string name="speakerphone">Luidspreker</string>
+    <string name="wired_headset">Bedrade Kopstuk</string>
+    <string name="bluetooth_headset">Bluetooth Kopstuk</string>
+
+    <!-- Group Management -->
+    <string name="number_of_audio_groups">Aantal oudio groepe:</string>
+    <string name="no_groups_to_display_title">Geen Groepe om te Vertoon</string>
+    <string name="no_groups_to_display_description">Dit lyk of jou sending geen groepe het nie.\n\nGaan jou konfigurasie na met die Sendings spyskaart opsie of gebruik daardie selfde skerm om \'n sending met groepe te skep.</string>
+    <string name="title_group">Groep</string>
+    <string name="title_delete_group">Verwyder Groep</string>
+    <string name="are_you_sure_delete_group">Is jy seker jy wil %1$s verwyder?</string>
+    <string name="groups">Groepe</string>
+    <string name="unknown_group">Onbekende Groep</string>
+    <string name="all_groups">(Alle Groepe)</string>
+
+    <!-- Sharing -->
+    <string name="share_mission_share">Deel</string>
+    <string name="share_mission_upload_to_mission_hub">Laai op na sending sentrum</string>
+    <string name="share_mission_upload_header">Deel …</string>
+    <string name="share_mission_email_subject">%1$s Sending : %2$s</string>
+    <string name="share_mission_mission_uploaded">Sending opgelaai</string>
+    <string name="share_mission_mission_upload_failed">Sending oplaai het misluk -</string>
+    <string name="share_title">Deel</string>
+    <string name="share_json">Deel \'n duidelike-teks JSON lêer</string>
+
+    <!-- Certificate Store -->
+    <string name="certstore_not_available_for_mission">Die geselekteerde sending benodig \'n sertifikaatwinkel wat nie tans geïnstalleer is nie.</string>
+    <string name="invalid_cert_store_cannot_obtain_descriptor">Ongeldige sertifikaatwinkel - kan nie die beskrywer verkry nie</string>
+    <string name="invalid_cert_store_cannot_decode_descriptor">Ongeldige sertifikaatwinkel - kan nie die beskrywer dekodeer nie</string>
+    <string name="invalid_cert_store_cannot_invalid_version">Ongeldige sertifikaatwinkel - onbekende weergawe</string>
+    <string name="invalid_cert_store_cannot_no_certificates_found">Ongeldige sertifikaatwinkel - geen sertifikate gevind nie</string>
+
+    <!-- Text Messaging -->
+    <string name="text_message_dictate_message">Dikteer boodskap</string>
+    <string name="text_message_send_message">Stuur boodskap</string>
+    <string name="text_message_hint_enter_text_message">tik \'n teksboodskap</string>
+
+    <!-- Biometrics -->
+    <string name="set_biometrics_simulate">Simuleer menslike biometrika lesings</string>
+    <string name="set_biometrics_reporting_intervals_secs">Verslagdoening Intervalle Sekondes</string>
+    <string name="set_biometrics_heart_rate">Harttempo</string>
+    <string name="set_biometrics_skin_temp">Vel Temperatuur</string>
+    <string name="set_biometrics_core_temp">Kern Temperatuur</string>
+    <string name="set_biometrics_blood_oxy_perc">Bloed Suurstof Persentasie</string>
+    <string name="set_biometrics_blood_hydro_level">Bloed Hidrasie Vlak</string>
+    <string name="set_biometrics_fatigue_level">Moegheid Vlak</string>
+    <string name="set_biometrics_task_effectiveness_level">Taak Effektiwiteit Vlak</string>
+
+    <!-- System Information -->
+    <string name="system_information">Stelsel Inligting</string>
+    <string name="mi_hdr_system">STELSEL:\n</string>
+    <string name="mi_hdr_device">\n\nTOESTEL:\n</string>
+    <string name="mi_sys_id">ID: %1$s\n</string>
+    <string name="mi_sys_sizing_type">DPI: %1$s\n</string>
+    <string name="mi_device_manufacturer">Vervaardiger: %1$s\n</string>
+    <string name="mi_device_id">ID: %1$s\n</string>
+    <string name="mi_device_brand">Handelsmerk: %1$s\n</string>
+    <string name="mi_device_model">Model: %1$s\n</string>
+    <string name="mi_device_board">Bord: %1$s\n</string>
+    <string name="mi_device_hardware">Hardeware: %1$s\n</string>
+    <string name="mi_device_serial">Reeksnommer: %1$s\n</string>
+    <string name="mi_device_bootloader">Selflaai: %1$s\n</string>
+    <string name="mi_device_user">Gebruiker: %1$s\n</string>
+    <string name="mi_device_host">Gasheer: %1$s\n</string>
+    <string name="mi_device_build_time">Boutyd: %1$s\n</string>
+    <string name="mi_device_version_release">Weergawe vrystelling: %1$s\n</string>
+    <string name="mi_device_sdk_int">Weergawe SDK: %1$d\n</string>
+
+    <!-- Screen Information -->
+    <string name="mi_hdr_screen">\n\nSKERM:</string>
+    <string name="mi_screen_density">Digtheid: %1$f\n</string>
+    <string name="mi_screen_width">Wydte: %1$d\n</string>
+    <string name="mi_screen_height">Hoogte: %1$d\n</string>
+    <string name="mi_screen_scaled_density">Geskaaleerde Digtheid: %1$f\n</string>
+    <string name="mi_screen_density_dpi">Digtheid DPI: %1$d\n</string>
+    <string name="mi_screen_xdpi">XDPI: %1$f\n</string>
+    <string name="mi_screen_ydpi">YDPI: %1$f\n</string>
+
+    <!-- Miscellaneous -->
+    <string name="copyright">Kopiereg © 2020 Rally Tactical Systems, Inc.</string>
+    <string name="name">naam</string>
+    <string name="description">beskrywing</string>
+    <string name="address">adres</string>
+    <string name="port">poort</string>
+    <string name="cancel">Kanselleer</string>
+    <string name="passphrase">wagfrase</string>
+    <string name="url">url</string>
+    <string name="pin">PIN</string>
+    <string name="id">id</string>
+</resources>

@@ -6,6 +6,49 @@
     android:layout_height="match_parent"
     android:fadingEdge="vertical">
 
+    <ListView
+        android:id="@+id/lvTextMessages"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/etTextMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:divider="@null"
+        android:dividerHeight="0dp"/>
+
+    <EditText
+        android:id="@+id/etTextMessage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"
+        android:hint="@string/text_message_hint_enter_text_message"
+        android:textColor="#FFFFFF"
+        android:lines="3"
+        android:maxLines="3"
+        android:minLines="3"
+        android:textSize="14dp"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toBottomOf="@+id/ivSendTextMessage"
+        app:layout_constraintEnd_toStartOf="@+id/ivSendTextMessage"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivDictateTextMessage"
+        android:scrollbars="vertical"/>
+
+    <ImageView
+        android:id="@+id/ivDictateTextMessage"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/text_message_send_message"
+        app:layout_constraintBottom_toTopOf="@id/ivSendTextMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/ic_btn_speak_now"
+        android:onClick="onClickSendTextMessageIcon"/>
+
     <ImageView
         android:id="@+id/ivSendTextMessage"
         android:layout_width="42dp"
@@ -17,31 +60,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_menu_send"
         android:onClick="onClickSendTextMessageIcon"/>
-
-    <EditText
-        android:id="@+id/etTextMessage"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
-        android:gravity="center_vertical"
-        android:hint="@string/text_message_hint_enter_text_message"
-        android:textColor="#FFFFFF"
-        android:textSize="14dp"
-        app:layout_constraintBottom_toBottomOf="@+id/ivSendTextMessage"
-        app:layout_constraintEnd_toStartOf="@+id/ivSendTextMessage"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivSendTextMessage" />
-
-    <ListView
-        android:id="@+id/lvTextMessages"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/etTextMessage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:divider="@null"
-        android:dividerHeight="0dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
