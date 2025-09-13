@@ -21,6 +21,9 @@ import base64
 import hashlib
 import subprocess
 import ipaddress
+import copy
+
+NSM_VERSION = '0.5'
 
 RX_INTERVAL_SECS = 1
 
@@ -29,11 +32,18 @@ LOG_ERROR = 1
 LOG_WARN = 2
 LOG_INFO = 3
 LOG_DEBUG = 4
+LOG_CHATTY=5
 
 ST_NONE = 0
 ST_IDLE = 1
 ST_GOING_ACTIVE = 2
 ST_ACTIVE = 3
+
+WD_TIMEOUT_SECS = 5
+
+WDT_MAIN = 0
+WDT_RX = 1
+WDT_TX = 2
 
 global running
 global rx
@@ -53,6 +63,10 @@ global startTs
 global cryptoInstance
 global netError
 global dashboardToken
+global lastTrackerState
+
+global watchdogMutex
+global watchdogCheckins
 
 try:
         from cryptography.fernet import Fernet
@@ -84,6 +98,9 @@ cryptoInstance = None
 startTs = datetime.now()
 netError = False
 dashboardToken = False
+lastTrackerState = {}
+watchdogMutex = Lock()
+watchdogCheckins = [0, 0, 0]
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--config-file', type=str, help='Override the configuration file to use (default is nsm_conf.json)')
@@ -95,55 +112,97 @@ parser.add_argument('--log-cmds', type=bool, help='Log command output(s)')
 parser.add_argument('--dashboard-token', action=argparse.BooleanOptionalAction, help='Show the resource token in the dashboard')
 args = parser.parse_args()
 
+
+# --------------------------------------------------------------------------
+def watchdogThread():
+        global running
+        global watchdogCheckins
+
+        while running:
+                now = datetime.now()
+
+                watchdogMutex.acquire()
+
+                for idx in range(len(watchdogCheckins)):
+                        if (now - watchdogCheckins[idx]) > timedelta(seconds=WD_TIMEOUT_SECS):
+                                # NOTE: it would nice to log something here but the logger
+                                # may be hung too - hanging the watchdog
+                                #logThis(LOG_FATAL, 'index %d has timed out' % (idx))
+                                os._exit(1)
+                
+                watchdogMutex.release()
+
+                time.sleep(1)
+        
+
+# --------------------------------------------------------------------------
+def startWatchdog():
+        for idx in range(len(watchdogCheckins)):
+                watchdogCheckins[idx] = datetime.now()
+
+        wd = threading.Thread(target=watchdogThread)
+        wd.start()
+    
+
+# --------------------------------------------------------------------------
+def updateWatchdog(idx):
+        global watchdogMutex
+        global watchdogCheckins
+
+        watchdogMutex.acquire()
+        watchdogCheckins[idx] = datetime.now()
+        watchdogMutex.release()
+
+
 # --------------------------------------------------------------------------
 def colorNone():
-    if haveColorama:
-        return colorama.Style.RESET_ALL
-    else:
-        return ''
+        if haveColorama:
+                return colorama.Style.RESET_ALL
+        else:
+                return ''
 
 
 # --------------------------------------------------------------------------
 def colorRed():
-    if haveColorama:
-        return colorama.Fore.RED
-    else:
-        return ''
+        if haveColorama:
+                return colorama.Fore.RED
+        else:
+                return ''
 
 
 # --------------------------------------------------------------------------
 def colorYellow():
-    if haveColorama:
-        return colorama.Fore.YELLOW
-    else:
-        return ''
+        if haveColorama:
+                return colorama.Fore.YELLOW
+        else:
+                return ''
 
 
 # --------------------------------------------------------------------------
 def colorGreen():
-    if haveColorama:
-        return colorama.Fore.GREEN
-    else:
-        return ''
+        if haveColorama:
+                return colorama.Fore.GREEN
+        else:
+                return ''
 
 
 # --------------------------------------------------------------------------
 def setCursor(r, c):
-    if haveColorama:
-        print('%s' % pos(r, c))
+        if haveColorama:
+                print('%s' % pos(r, c))
 
 
 # --------------------------------------------------------------------------
 def clearScreen():
-    if haveColorama:
-        print(colorama.ansi.clear_screen())
-        setCursor(0, 0)
+        if haveColorama:
+                print(colorama.ansi.clear_screen())
+                setCursor(0, 0)
 
-    else:
-        if os.name == 'nt':
-            os.system('cls')
         else:
-            os.system('clear')
+                if os.name == 'nt':
+                        os.system('cls')
+                else:
+                        os.system('clear')
 
 
 # ---------------------------------------------------------------
@@ -197,8 +256,11 @@ def logThis(lvl, msg):
                         elif lvl == LOG_DEBUG:
                                 clr = colorNone()
                                 t = 'D'
+                        elif lvl == LOG_CHATTY:
+                                clr = colorNone()
+                                t = 'Y'                                
 
-                        print('%s%s %s : %s%s' % (clr, str(datetime.now()), t, msg, colorNone()))
+                        print('%s[%s] %s %s : %s%s' % (clr, configuration['id'], str(datetime.now()), t, msg, colorNone()))
 
 
 
@@ -254,6 +316,7 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('run', {}, 'onGoingActive', '')
         setDefaultConfigurationValue('run', {}, 'beforeActive', '')
         setDefaultConfigurationValue('run', {}, 'onActive', '')
+        setDefaultConfigurationValue('run', {}, 'inDashboard', '')
 
         setDefaultConfigurationValue('timing', {})
         setDefaultConfigurationValue('timing', {}, 'internalMultiplier', 1)
@@ -267,7 +330,8 @@ def loadConfiguration(path):
         setDefaultConfigurationValue('logging', {})
         setDefaultConfigurationValue('logging', {}, 'level', 3)
         setDefaultConfigurationValue('logging', {}, 'dashboard', True)
-        setDefaultConfigurationValue('logging', {}, 'logCommandOutput', False)        
+        setDefaultConfigurationValue('logging', {}, 'logCommandOutput', False)
+        setDefaultConfigurationValue('logging', {}, 'logResourceStates', False)        
 
         for item in configuration['resources']:
                 key = item['id']
@@ -535,7 +599,13 @@ def rxThread():
 
         sock.setblocking(False)
 
-        #sock.bind((configuration['networking']['interfaceAddress'], configuration['networking']['port']))
+        try:
+                interface_name = configuration['networking']['interfaceName']
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BINDTODEVICE, interface_name.encode('utf-8'))
+        except:
+                logThis(LOG_WARN, 'could not use socket.SO_BINDTODEVICE')
+                pass
+        
         sock.bind(('', configuration['networking']['port']))
 
         if configuration['networking']['type'] == 'mc':
@@ -544,6 +614,8 @@ def rxThread():
                 sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
         while running and not netError:
+                updateWatchdog(WDT_RX)
+
                 ready = select.select([sock], [], [], (RX_INTERVAL_SECS * configuration['timing']['internalMultiplier']))
 
                 if ready[0]:
@@ -555,6 +627,9 @@ def rxThread():
                                 if obj['i'] != configuration['id']:
                                         packetsRx = packetsRx + 1
                                         bytesRx = bytesRx + len(wireMsg)
+                                else:
+                                        logThis(LOG_CHATTY, 'received "' + obj + '" was sent by me')
+                                        continue
 
                                 if (configuration['networking']['rxErrorPercentage'] == 0 or configuration['networking']['rxErrorPercentage'] <= random.randint(1, 100)):
                                         if (configuration['networking']['rxLossPercentage'] == 0 or configuration['networking']['rxLossPercentage'] <= random.randint(1, 100)):
@@ -593,6 +668,8 @@ def txThread():
         sock.bind((configuration['networking']['interfaceAddress'], configuration['networking']['port']))
 
         while running and not netError:
+                updateWatchdog(WDT_TX)
+
                 try:
                         time.sleep(configuration['timing']['txIntervalSecs'])
 
@@ -627,7 +704,7 @@ def txThread():
 
                         if sendTheMsg and (configuration['networking']['txLossPercentage'] == 0 or configuration['networking']['txLossPercentage'] <= random.randint(1, 100)):
                                 for x in range(0, (configuration['networking']['txOversend'] + 1)):
-                                        logThis(LOG_DEBUG, 'sending (' + str(x + 1) + ') ' + msg)
+                                        logThis(LOG_CHATTY, 'sending (' + str(x + 1) + ') ' + msg)
                                         wireMsg = wireMsgFromString(msg)
                                         sock.sendto(wireMsg, (configuration['networking']['address'], configuration['networking']['port']))
                                         packetsTx = packetsTx + 1
@@ -663,27 +740,27 @@ def processRx(obj):
                                 if remoteTracker != None:
                                         if remoteTracker['s'] == ST_ACTIVE:
                                                 if configuration['priority'] > tokenPriority(remoteTracker['t']):
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active with a lower priority token, i will ignore it and accelerate my interval')
+                                                        logThis(LOG_CHATTY, res + ' @ ' + remoteId + ' is active with a lower priority token, i will ignore it and accelerate my interval')
                                                         tracker['goActiveTime'] = datetime.now()
                                                 else:
                                                         tracker['goActiveTime'] = datetime.max
                                                         tracker['owner'] = remoteId
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
+                                                        logThis(LOG_CHATTY, res + ' @ ' + remoteId + ' is active, i will go or stay idle')
                                                         stateChange(tracker, ST_IDLE)
 
                                         elif remoteTracker['s'] == ST_GOING_ACTIVE:
                                                 if configuration['priority'] > tokenPriority(remoteTracker['t']):
-                                                        logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower priority token, i will ignore it and accelerate my interval')
+                                                        logThis(LOG_CHATTY, res + ' @ ' + remoteId + ' is going active with a lower priority token, i will ignore it and accelerate my interval')
                                                         tracker['goActiveTime'] = datetime.now()
                                                 else:
                                                         if remoteTracker['t'] > tracker['token']:
                                                                 tracker['goActiveTime'] = datetime.max
                                                                 tracker['owner'] = remoteId
-                                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
+                                                                logThis(LOG_CHATTY, res + ' @ ' + remoteId + ' is going active with a higher token, i will go or stay idle')
                                                                 stateChange(tracker, ST_IDLE)
                                                         else:
                                                                 tracker['owner'] = ''
-                                                                logThis(LOG_DEBUG, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
+                                                                logThis(LOG_CHATTY, res + ' @ ' + remoteId + ' is going active with a lower token, i will continue going or staying active')
 
         for res in trackers:
                 tracker = trackers[res]
@@ -698,10 +775,10 @@ def processRx(obj):
                                                 tokenRange = getExternalTokenRange(tracker,)
                                                 if tokenRange != None:
                                                         tracker['goActiveTime'] = datetime.now() + timedelta(seconds=(configuration['timing']['transitionWaitSecs']))                                                        
-                                                        logThis(LOG_DEBUG, res + ' is going active with a token range of ' + str(tokenRange[0]) + '-' + str(tokenRange[1]))
+                                                        logThis(LOG_CHATTY, res + ' is going active with a token range of ' + str(tokenRange[0]) + '-' + str(tokenRange[1]))
                                                         stateChange(tracker, ST_GOING_ACTIVE, tokenRange)
                                                 else:
-                                                        logThis(LOG_DEBUG, res + ' is denied going active - remaining idle')
+                                                        logThis(LOG_CHATTY, res + ' is denied going active - remaining idle')
 
                                         elif tracker['state'] == ST_GOING_ACTIVE:
                                                 if getExternalConfirmation(tracker) == True:
@@ -841,11 +918,99 @@ def showDashboard():
                 else:
                         print('%s%-20s %-18s %-36s%s%s' % (clr, res, stateDesc(tracker['state']), '(self)', token, colorNone()))
 
+        cmdToRun = configuration['run']['inDashboard']
+        if cmdToRun != '':                
+                outputString = runCmd(tracker, cmdToRun)
+                print('')
+                print(outputString)
+
+
+# ---------------------------------------------------------------
+def logResourceStates():
+        global trackers
+        global packetsTx
+        global bytesTx
+        global packetsRx
+        global bytesRx
+        global errorsRx
+        global maxRunSecs
+        global cryptoInstance
+        global lastTrackerState
+
+        acquireMutex('logResourceStates')
+
+        snapShotOfTrackers = {}
+        for res in trackers:
+                        snapShotOfTrackers[res] = {
+                                'state': trackers[res]['state'],
+                                'token': trackers[res]['token'],
+                                'owner': trackers[res]['owner'],
+                                'goActiveTime': trackers[res]['goActiveTime'],
+                                'stunSecs': trackers[res]['stunSecs']
+                        }
+
+        releaseMutex('logResourceStates')        
+        
+        stateChanged = False
+        if len(snapShotOfTrackers) != len(lastTrackerState):
+                stateChanged = True
+        else:
+                for res in snapShotOfTrackers:
+                        if res not in lastTrackerState:
+                                stateChanged = True
+                                break
+
+                        if snapShotOfTrackers[res]['state'] != lastTrackerState[res]['state'] or \
+                        snapShotOfTrackers[res]['owner'] != lastTrackerState[res]['owner']:
+                                stateChanged = True
+                                break
+
+        if stateChanged:                        
+                lastTrackerState = {}
+
+                for res in snapShotOfTrackers:
+                        lastTrackerState[res] = {
+                                'state': snapShotOfTrackers[res]['state'],
+                                'token': snapShotOfTrackers[res]['token'],
+                                'owner': snapShotOfTrackers[res]['owner'],
+                                'goActiveTime': snapShotOfTrackers[res]['goActiveTime'],
+                                'stunSecs': snapShotOfTrackers[res]['stunSecs']
+                        }
+
+                try:
+                        logThis(LOG_DEBUG, '[RL] >>-------------------------------------------')
+                        for res in snapShotOfTrackers:
+                                tracker = snapShotOfTrackers[res]
+
+                                if tracker['state'] == ST_IDLE:
+                                        clr = colorNone()
+                                elif tracker['state'] == ST_GOING_ACTIVE:
+                                        clr = colorYellow()
+                                elif tracker['state'] == ST_ACTIVE:
+                                        clr = colorGreen()
+                                elif tracker['state'] == ST_NONE:
+                                        clr = colorYellow()
+                                else:
+                                        clr = colorNone()
+
+                                if tracker['state'] == ST_NONE:
+                                        formatted_line = '%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '?', colorNone())
+                                elif tracker['state'] == ST_IDLE:
+                                        formatted_line = '%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), tracker['owner'], colorNone())
+                                else:
+                                        formatted_line = '%s%-20s %-18s %-36s%s' % (clr, res, stateDesc(tracker['state']), '(self)', colorNone())
+
+                                logThis(LOG_DEBUG, '[RL] ' + formatted_line)
+                        logThis(LOG_DEBUG, '[RL] <<-------------------------------------------')
+                except Exception as e:
+                        print(f"Exception: {e}")
+                        pass
+
 
 # ---------------------------------------------------------------
 def printHeadline():
         print('-----------------------------------------------------------------------------------')
-        print('nsm v0.4')
+        print('nsm %s' % (NSM_VERSION))
         print('Copyright (c) 2022 Rally Tactical Systems, Inc.')
         print('-----------------------------------------------------------------------------------')
 
@@ -876,6 +1041,10 @@ def isIpBroadcast(ip):
 
 # ---------------------------------------------------------------
 if __name__ == "__main__":
+        running = True
+
+        startWatchdog()
+
         printHeadline()
 
         if args.config_file == None:
@@ -901,12 +1070,13 @@ if __name__ == "__main__":
         checkConfiguration()
         initCrypto()
 
-        running = True
         signal.signal(signal.SIGINT, sigHandler)
         signal.signal(signal.SIGTERM, sigHandler)
         signal.signal(signal.SIGHUP, sigHandler)
 
         while running:
+                updateWatchdog(WDT_MAIN)
+
                 if configuration['logging']['dashboard']:
                         showDashboard()
 
@@ -917,7 +1087,7 @@ if __name__ == "__main__":
                         time.sleep(1)
                         continue                        
 
-                logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
+                logThis(LOG_INFO, 'starting for id: ' + configuration['id'] + ' on ' + configuration['networking']['interfaceName'] + ' via ' + configuration['networking']['interfaceAddress'] + ' on ' + configuration['networking']['address'] + '/' + str(configuration['networking']['port'] ))
 
                 processRx(None)
 
@@ -929,17 +1099,20 @@ if __name__ == "__main__":
                         maxRunSecs = 0
 
                 while running and not netError:
+                        updateWatchdog(WDT_MAIN)
+
                         if configuration['logging']['dashboard']:
                                 showDashboard()
-                                time.sleep(1 * configuration['timing']['internalMultiplier'])
-                        else:
-                                time.sleep(1)
+                        elif configuration['logging']['logResourceStates']:
+                                logResourceStates()
+
+                        time.sleep(1)
 
                         if maxRunSecs > 0:
                                 maxRunSecs = maxRunSecs - (1 * configuration['timing']['internalMultiplier'])
                                 if maxRunSecs <= 0:
                                         running = False
-                                        break                        
+                                        break
 
                 logThis(LOG_INFO, 'stopping...')
                 stopRxTx()
