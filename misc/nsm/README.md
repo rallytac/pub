@@ -123,6 +123,17 @@ NSM is designed to minimize network traffic:
 - **Bandwidth usage**: For a single resource, network bandwidth is approximately 0.5 kbps. The more resources an instance is responsible for, the larger the data packets will be and, therefore, bandwidth usage will increase proportionally
 - **Multiple active instances**: If multiple instances are active (for example, when multiple resources are spread across multiple instances), network bandwidth utilization will also increase as each active instance transmits its own traffic
 
+## Watchdog Feature
+
+NSM includes a built-in watchdog feature to guard against the process hanging or getting into a bad state:
+
+- **Automatic detection**: The watchdog monitors the main process, receive thread, and transmit thread
+- **5-second timeout**: If any component doesn't check in within 5 seconds, a hang is detected
+- **Automatic exit**: When a hang is detected, the process automatically exits to prevent system lockup
+- **Script performance**: User-provided state transition scripts must execute as quickly as possible to avoid triggering the watchdog timeout
+
+**Important**: Keep your state transition scripts fast and efficient. Long-running operations in these scripts can cause the watchdog to trigger and terminate the NSM process.
+
 ## Customizing State Transitions
 
 Each state transition can trigger custom scripts:
@@ -275,6 +286,7 @@ python3 _nsm.py --log-level 5
 4. **Monitoring**: Enable dashboard for production monitoring
 5. **Resource Priorities**: Set appropriate priorities for your resources
 6. **Timing Tuning**: Adjust timing parameters based on your network latency
+7. **Clean State Management**: Always call the `onIdle` script before NSM starts and after it ends to ensure a clean slate, whether NSM was terminated cleanly, crashed, or shut down unexpectedly. Use `nsm.sh` or a derivative script rather than invoking NSM directly - this wrapper script handles the proper cleanup automatically
 
 ## Examples
 
@@ -319,6 +331,10 @@ NSM is designed to be flexible and adaptable to your specific needs. You are fre
 - **Integration** - Integrate NSM with your existing systems and workflows
 
 Feel free to fork, modify, and adapt NSM to work exactly how you need it to work!
+
+## License
+
+This software is licensed under the [Rally Tactical Systems License](https://github.com/rallytac/pub/blob/main/LICENSE). Please review the license terms before using this software.
 
 ## Support
 
