@@ -3,7 +3,6 @@
         "priority": 0,
         "networking": {
                 "interfaceName": "en0",
-                "xxx_address": "239.17.18.19",
                 "address": "255.255.255.255",
                 "port": 8513,
                 "ttl": 64,
@@ -16,10 +15,22 @@
                 "cryptoPassword": "just a default password"
         },
         "resources": [
-                "res01",
-                "res02",
-                "res03",
-                "res04"
+                {
+                        "id": "res01",
+                        "priority": 100
+                },
+                {
+                        "id": "res02", 
+                        "priority": 100
+                },
+                {
+                        "id": "res03",
+                        "priority": 100
+                },
+                {
+                        "id": "res04",
+                        "priority": 100
+                }
         ],
         "run": {
                 "onIdle": "./onIdle.sh",
