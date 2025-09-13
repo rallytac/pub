@@ -1,6 +1,6 @@
-# Network State Manager (NSM)
+# Network State Machine (NSM)
 
-Welcome to the Network State Manager (NSM)! This is a distributed state management system designed to coordinate network resources across multiple instances using a leader election protocol. Think of it as a smart coordinator that ensures only one instance is "active" at any given time, with automatic failover when needed.
+Welcome to the Network State Machine (NSM)! This is a distributed state management system designed to coordinate network resources across multiple instances using a leader election protocol. Think of it as a smart coordinator that ensures only one instance is "active" at any given time, with automatic failover when needed.
 
 ## What is NSM?
 
