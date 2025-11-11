@@ -1,5 +1,5 @@
 ﻿//
-//  Copyright (c) 2018 Rally Tactical Systems, Inc.
+//  Copyright (c) 2019 Rally Tactical Systems, Inc.
 //  All rights reserved.
 //
 
@@ -839,7 +839,7 @@ namespace engage_sample_cs_console
         {
             Console.WriteLine("---------------------------------------------------------------------------------");
             Console.WriteLine("engage-sample-cs-console");
-            Console.WriteLine("Copyright (c) 2018 Rally Tactical Systems, Inc.");
+            Console.WriteLine("Copyright (c) 2019 Rally Tactical Systems, Inc.");
             Console.WriteLine("---------------------------------------------------------------------------------");
 
             new Program().run(args);

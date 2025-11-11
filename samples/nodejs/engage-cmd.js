@@ -1,5 +1,5 @@
 //
-//  Copyright (c) 2018 Rally Tactical Systems, Inc.
+//  Copyright (c) 2019 Rally Tactical Systems, Inc.
 //  All rights reserved.
 //
 
