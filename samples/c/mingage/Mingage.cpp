@@ -156,7 +156,7 @@ void onGroupConnected(const char *pId, const char *pEventExtraJson)
 void onGroupDisconnected(const char *pId, const char *pEventExtraJson)
 {
     std::string id = pId;
-    std::cout << "onGroupDisconnected - " << id << " - " << pEventExtraJson << std::endl;
+    
     g_wq.submit(([id]()
  	{
         nlohmann::json *g = getGroup(id.c_str());
