@@ -6,7 +6,8 @@ CC := gcc
 CXX := g++
 CFLAGS := -Wall -std=c++11 -fPIC 
 #CFLGAS += -Wno-psabi
-VER := 
+VER := 1.255.9095
+ENGAGE_LINE := interim
 
 ifeq ($(DEBUG), 1)
     CFLAGS += -DDEBUG -O0 -ggdb
@@ -25,9 +26,10 @@ else ifeq ($(ARCH), aarch64)
 	LIBNAME=libengage-shared.so
 endif
 
-INCLUDES =  -I. -I./engage
+INCLUDES =  -I. -I./engage -I./engage/include
 LFLAGS = -L./engage
-LIBS = -lengage-shared -lpthread -lstdc++
+
+LIBS = -lengage-shared -lpthread 
 SRCS = Mingage.cpp WorkQueue.cpp
 OBJS = $(SRCS:.cpp=.o)
 
@@ -42,7 +44,8 @@ $(MAIN): $(OBJS)
 	@echo ""
 	@echo "****************************** IMPORTANT ******************************"
 	@echo "$(LIBNAME) has been placed in './engage'"
-	@echo "Be sure to 'export LD_LIBRARY_PATH=./engage' if your OS requires it"
+	@echo "Be sure to 'export LD_LIBRARY_PATH=./engage' if your OS requires it or"
+	@echo "simply run as 'LD_LIBRARY_PATH=./engage ./mingage'."
 	@echo "***********************************************************************"
 
 .cpp.o:
@@ -54,6 +57,6 @@ clean:
 
 depend: depends
 depends:
-	@../../../misc/getengage.sh $(VER)
+	@./getengage.sh $(VER) $(ENGAGE_LINE)
 	
 # DO NOT DELETE THIS LINE -- make depend needs it
