@@ -22,6 +22,8 @@ static const char* MISSION_FILE_NAME = "cfg/active_mission.json";
 static const char* POLICY_FILE_NAME = "cfg/active_engine_policy.json";
 static const char* IDENTITY_FILE_NAME = "cfg/active_identity.json";
 static const char* RP_FILE_NAME = "cfg/active_rallypoint.json";
+static const char* CERTSTORE_FILE_NAME = "cfg/mingage.certstore";
+static const char* CERTSTORE_PASSWORD = "";
 
 static const size_t MAX_CMD_BUFF_SIZE = 4096;
 
@@ -73,7 +75,7 @@ void onGroupCreated(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupCreated - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupCreated - %s (%s)", name.c_str(), id.c_str());
 
             (*g)["created"] = true;
             joinGroup(id.c_str());
@@ -94,7 +96,7 @@ void onGroupDeleted(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupDeleted - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupDeleted - %s (%s)", name.c_str(), id.c_str());
 
             (*g)["created"] = false;
             
@@ -143,7 +145,7 @@ void onGroupConnected(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupConnected - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupConnected - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_INFORMATIONAL, TAG, buff);
         }
@@ -154,7 +156,7 @@ void onGroupConnected(const char *pId, const char *pEventExtraJson)
 void onGroupDisconnected(const char *pId, const char *pEventExtraJson)
 {
     std::string id = pId;
-
+    std::cout << "onGroupDisconnected - " << id << " - " << pEventExtraJson << std::endl;
     g_wq.submit(([id]()
  	{
         nlohmann::json *g = getGroup(id.c_str());
@@ -162,7 +164,7 @@ void onGroupDisconnected(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupDisconnected - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupDisconnected - %s (%s)", name.c_str(), id.c_str());            
 
             engageLogMsg(ENGAGE_LOG_LEVEL_INFORMATIONAL, TAG, buff);
             g_currentState.connected = false;
@@ -182,7 +184,7 @@ void onGroupTxStarted(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupTxStarted - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupTxStarted - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_INFORMATIONAL, TAG, buff);
 
@@ -203,7 +205,7 @@ void onGroupTxEnded(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupTxEnded - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupTxEnded - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_INFORMATIONAL, TAG, buff);
 
@@ -223,7 +225,7 @@ void onGroupTxFailed(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupTxFailed - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupTxFailed - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_ERROR, TAG, buff);
 
@@ -243,7 +245,7 @@ void onGroupTxUsurpedByPriority(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupTxUsurpedByPriority - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupTxUsurpedByPriority - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_INFORMATIONAL, TAG, buff);
 
@@ -263,7 +265,7 @@ void onGroupMaxTxTimeExceeded(const char *pId, const char *pEventExtraJson)
         {
             char buff[256];
             std::string name = (*g)["name"];
-            sprintf(buff, "onGroupMaxTxTimeExceeded - %s (%s)", name.c_str(), id.c_str());
+            snprintf(buff, sizeof(buff), "onGroupMaxTxTimeExceeded - %s (%s)", name.c_str(), id.c_str());
 
             engageLogMsg(ENGAGE_LOG_LEVEL_WARNING, TAG, buff);
 
@@ -407,8 +409,8 @@ void showHelp()
         std::cout << "g  ......................... show groups" << std::endl;
         std::cout << "n  ......................... next group" << std::endl;
         std::cout << "p  ......................... previous group" << std::endl;
-        std::cout << "t  ......................... transmit on" << std::endl;
-        std::cout << "x  ......................... transmit off" << std::endl;
+        std::cout << "t  ......................... transmit on (or 'b' if you're used to engage-cmd)" << std::endl;
+        std::cout << "x  ......................... transmit off (or 'e' if you're used to engage-cm)" << std::endl;
         std::cout << "r  ......................... switch to rallypoint connection" << std::endl;
         std::cout << "m  ......................... switch to multicast connection" << std::endl;
         std::cout << "************************************************" << std::endl;
@@ -581,10 +583,11 @@ int main(int argc, char *argv[])
     g_wq.start();
     
     loadMission();
-    
-    // We will start out at informatiob logging
+
+    // We will start out at informational logging
     engageSetLogLevel(ENGAGE_LOG_LEVEL_INFORMATIONAL);
 
+    engageOpenCertStore(CERTSTORE_FILE_NAME, CERTSTORE_PASSWORD);
     engageInitialize(policyJson, identityJson, "");
     engageStart();
     
@@ -623,11 +626,11 @@ int main(int argc, char *argv[])
         {
             goToPreviousGroup();
         }
-        else if( buff[0] == 't' )
+        else if( buff[0] == 't' || buff[0] == 'b' )
         {
             beginTransmitOnActiveGroup();
         }
-        else if( buff[0] == 'x' )
+        else if( buff[0] == 'x' || buff[0] == 'e' )
         {
             endTransmitOnActiveGroup();
         }
