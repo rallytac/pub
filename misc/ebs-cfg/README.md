@@ -77,7 +77,7 @@ When you run the tool, you start directly in the main **Engage Bridging Service 
 
 ### Service Configuration Menu
 
-When you select "Service Configuration" (option 7), you can configure:
+When you select "Service Configuration" (option 8), you can configure:
 
 1. **Update License from File**
    - Update license and featureset information from a JSON file
@@ -133,14 +133,15 @@ Then the menu options:
 2. **Audio Bridge (Multicast to Rallypoint)** - Wizard to create an audio bridge with txAudio configuration
 3. **TSM Bridge (TSM Radio to Rallypoint)** - Wizard to create a bridge with TSM payload transformations
 4. **MPU Bridge (MPU Radio to Rallypoint)** - Wizard to create a bridge with MPU payload transformations
-5. **Remove (enter number)** - Delete an existing bridge by its number
-6. **Edit Bridges & Groups** - Access detailed editing menus for groups and bridges
-7. **Service Configuration** - Access EBS service settings
-8. **Quit** (or press 'q')
+5. **Silvus Bridge (Silvus Radio to Rallypoint)** - Wizard to create a bridge with Silvus payload transformations
+6. **Remove (enter number)** - Delete an existing bridge by its number
+7. **Edit Bridges & Groups** - Access detailed editing menus for groups and bridges
+8. **Service Configuration** - Access EBS service settings
+9. **Quit** (or press 'q')
 
 #### Edit Bridges & Groups Submenu
 
-When you select "Edit Bridges & Groups" (option 6), you'll see a unified interface with numbered entries:
+When you select "Edit Bridges & Groups" (option 7), you'll see a unified interface with numbered entries:
 
 - **Bridges Table** - Shows all bridges with their groups, numbered starting from 1
 - **Groups Table** - Shows all groups with detailed information, numbered continuing from where bridges end
@@ -372,7 +373,47 @@ The wizard automatically:
 - Creates the bridge connecting them
 - Marks the bridge as wizard-created (no indicator shown)
 - Validates all inputs before creating
-- Configures `customRtpPayloadType` and `inboundRtpPayloadTypeTranslations` for MPU compatibility
+- Configures `customRtpPayloadType` and `inboundRtpPayloadTypeTranslations` for MPU compatibility (only when payload types differ)
+
+### Silvus Bridge (Silvus Radio to Rallypoint) Wizard
+
+This wizard creates a complete bridge setup for connecting a Silvus radio system (trunk side) to a rallypoint group (enterprise side) using Audio groups (type 1) with automatic Silvus payload transformations:
+
+1. **Bridge Name** - Enter a descriptive name (e.g., "Silvus Bridge 1")
+   - The tool automatically generates a valid bridge ID from the name
+   
+2. **Stream ID** - Enter the stream ID for the enterprise/rallypoint side
+   - The tool automatically creates:
+     - Enterprise group: Uses the stream ID you provide
+     - Trunk group: Uses `{stream_id}-trunk` as the ID
+   
+3. **Enterprise Side (Rallypoint)** - Configure:
+   - Rallypoint host address and port
+   - **Audio Configuration (Enterprise Group)** - Configure separately:
+     - Audio encoder (default: 25 - Opus 16 kbit/s)
+     - Full duplex setting
+     - Framing (ms)
+     - Max transmit seconds
+     - Header extension options
+   
+4. **Trunk Side (Multicast)** - Configure:
+   - Multicast RX address and port
+   - Multicast TX address and port
+   - TTL settings
+   - Network interface (optional, can be auto-detected)
+   - **Audio Configuration (Trunk Group)** - Uses same encoder as enterprise group:
+     - Full duplex setting
+     - Framing (ms)
+     - Max transmit seconds
+     - Header extension options (defaults to True for trunk side)
+
+The wizard automatically:
+- Creates both groups (Audio type with txAudio configuration)
+- Applies Silvus payload transformations based on selected encoder
+- Creates the bridge connecting them
+- Marks the bridge as wizard-created (no indicator shown)
+- Validates all inputs before creating
+- Configures `customRtpPayloadType` and `inboundRtpPayloadTypeTranslations` for Silvus compatibility (only when payload types differ)
 
 ### Payload Transformations
 
@@ -381,6 +422,7 @@ When creating or editing Audio groups manually, you can configure payload transf
 1. **Automatic Configuration** - Select from available radio types:
    - **TSM**: Tactical Secure Messaging systems
    - **MPU**: Multi-Purpose Unit radios
+   - **Silvus**: Silvus radio systems
    - **Engage**: Standard Engage systems (no transformations)
 
 2. **Manual Configuration** - Enter custom payload types:
@@ -388,24 +430,19 @@ When creating or editing Audio groups manually, you can configure payload transf
    - Engage RTP payload type for translation
 
 3. **Configuration Applied**:
-   - `customRtpPayloadType` added to `txAudio` object
-   - `inboundRtpPayloadTypeTranslations` array configured for payload mapping
+   - `customRtpPayloadType` added to `txAudio` object (only when external payload type differs from Engage)
+   - `inboundRtpPayloadTypeTranslations` array configured for payload mapping (only when external payload type differs from Engage)
+   - **Important**: If the external radio system's RTP payload type matches the Engage payload type, these fields are not added (no transformation needed)
 
-**Example TSM Configuration (MELPe @ 2.4kbps):**
+**Example TSM Configuration (MELPe @ 2.4kbps) - Payload types match:**
 ```json
 "txAudio": {
-    "encoder": 52,
-    "customRtpPayloadType": 77
-},
-"inboundRtpPayloadTypeTranslations": [
-    {
-        "external": 77,
-        "engage": 77
-    }
-]
+    "encoder": 52
+}
 ```
+*Note: No `customRtpPayloadType` or `inboundRtpPayloadTypeTranslations` fields are added because TSM payload type (77) matches Engage payload type (77).*
 
-**Example MPU Configuration (MELPe @ 2.4kbps):**
+**Example MPU Configuration (MELPe @ 2.4kbps) - Payload types differ:**
 ```json
 "txAudio": {
     "encoder": 52,
@@ -418,12 +455,29 @@ When creating or editing Audio groups manually, you can configure payload transf
     }
 ]
 ```
+*Note: Fields are added because MPU payload type (117) differs from Engage payload type (77).*
+
+**Example Silvus Configuration (G.711 ulaw) - Payload types match:**
+```json
+"txAudio": {
+    "encoder": 1
+}
+```
+*Note: No transformation fields are added because Silvus payload type (0) matches Engage payload type (0).*
+
+**Example Silvus Configuration (Opus @ 16kbps) - Payload types match:**
+```json
+"txAudio": {
+    "encoder": 25
+}
+```
+*Note: No transformation fields are added because Silvus payload type (118) matches Engage payload type (118).*
 
 ## Examples
 
 ### Adding a Multicast Group
 
-1. Select "Edit Bridges & Groups" from main menu (option 6)
+1. Select "Edit Bridges & Groups" from main menu (option 7)
 2. Select "Add (Bridge or Group)" (option 2)
 3. Select "Group"
 4. Enter group ID: `my-group`
@@ -437,7 +491,7 @@ When creating or editing Audio groups manually, you can configure payload transf
 
 ### Editing an Existing Group
 
-1. Select "Edit Bridges & Groups" from main menu (option 6)
+1. Select "Edit Bridges & Groups" from main menu (option 7)
 2. Select "Edit (enter number)" (option 1)
 3. Enter the number of the group to edit
 5. Modify any fields (all pre-populated with current values)
@@ -452,10 +506,11 @@ When creating or editing Audio groups manually, you can configure payload transf
 - **Audio Bridge Wizard**: Select "Audio Bridge (Multicast to Rallypoint)" (option 2)
 - **TSM Bridge Wizard**: Select "TSM Bridge (TSM Radio to Rallypoint)" (option 3)
 - **MPU Bridge Wizard**: Select "MPU Bridge (MPU Radio to Rallypoint)" (option 4)
+- **Silvus Bridge Wizard**: Select "Silvus Bridge (Silvus Radio to Rallypoint)" (option 5)
 - Follow the wizard prompts
 
 **Option 2: Manual Creation**
-1. Select "Edit Bridges & Groups" from main menu (option 6)
+1. Select "Edit Bridges & Groups" from main menu (option 7)
 2. Select "Add (Bridge or Group)" (option 2)
 3. Select "Bridge"
 4. Enter bridge ID: `Bridge1`
@@ -464,7 +519,7 @@ When creating or editing Audio groups manually, you can configure payload transf
 
 ### Editing an Existing Bridge
 
-1. Select "Edit Bridges & Groups" from main menu (option 6)
+1. Select "Edit Bridges & Groups" from main menu (option 7)
 2. Select "Edit (enter number)" (option 1)
 3. Enter the number of the bridge to edit
 5. Modify bridge ID or select different groups
@@ -474,7 +529,7 @@ When creating or editing Audio groups manually, you can configure payload transf
 
 ### Enabling Status Reporting
 
-1. Select "Service Configuration" from main menu (option 7)
+1. Select "Service Configuration" from main menu (option 8)
 2. Select "Status Report Settings" (option 3)
 3. Current values are displayed first
 4. Choose to edit → Yes
@@ -484,7 +539,7 @@ When creating or editing Audio groups manually, you can configure payload transf
 
 ### Updating License Information
 
-1. Select "Service Configuration" from main menu (option 7)
+1. Select "Service Configuration" from main menu (option 8)
 2. Select "Update License from File" (option 1)
 3. Current licensing information is displayed in formatted JSON
 4. Enter the path to your license JSON file
@@ -521,8 +576,9 @@ Engage Bridging Service Configuration (Main Menu)
 ├── 2. Audio Bridge (Multicast to Rallypoint) - Wizard
 ├── 3. TSM Bridge (TSM Radio to Rallypoint) - Wizard
 ├── 4. MPU Bridge (MPU Radio to Rallypoint) - Wizard
-├── 5. Remove (enter number) - Delete bridge by number
-├── 6. Edit Bridges & Groups (Unified Interface)
+├── 5. Silvus Bridge (Silvus Radio to Rallypoint) - Wizard
+├── 6. Remove (enter number) - Delete bridge by number
+├── 7. Edit Bridges & Groups (Unified Interface)
 │   ├── [Numbered Bridges Table - bridges numbered 1, 2, 3...]
 │   ├── [Numbered Groups Table - groups continue numbering 4, 5, 6...]
 │   │
@@ -532,7 +588,7 @@ Engage Bridging Service Configuration (Main Menu)
 │   ├── 4. Show JSON - Display bridges.json in colorized format
 │   └── b. Back (Esc)
 │
-├── 7. Service Configuration
+├── 8. Service Configuration
 │   ├── 1. Update License from File
 │   ├── 2. General Settings (shows current values first)
 │   ├── 3. Status Report Settings (shows current values first)
