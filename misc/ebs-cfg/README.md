@@ -2,7 +2,7 @@
 
 An interactive menu-driven tool to modify Engage Bridging Service (EBS) configuration files.
 
-**Copyright (c) 2025 Rally Tactical Systems Inc**
+**Copyright (c) 2026 Rally Tactical Systems Inc**
 
 ## Overview
 
@@ -182,7 +182,7 @@ The system automatically determines whether you're working with a bridge or grou
 ### Automatic Backups
 
 - Temporary backups are created automatically when you make your first change
-- Backups are timestamped (e.g., `engagebridged_conf.backup_20251123_094314.json`)
+- Backups are timestamped (e.g., `engagebridged_conf.backup_20260127_094314.json`)
 - Backups are automatically deleted when you exit successfully
 - If you exit with Ctrl+C and have unsaved changes, you can choose to revert from backup
 
