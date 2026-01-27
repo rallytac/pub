@@ -496,9 +496,8 @@ class EBSConfigTool:
         licensing = engine_policy.get('licensing', {})
         featureset = engine_policy.get('featureset', {})
         
-        # Check if license is empty (check key fields)
+        # Check if license is empty (check key field only)
         license_empty = (
-            not licensing.get('entitlement') or licensing.get('entitlement').strip() == '' or
             not licensing.get('key') or licensing.get('key').strip() == ''
         )
         
@@ -1957,7 +1956,8 @@ class EBSConfigTool:
                 else:
                     bridges_str = "None"
                 
-                rows.append((i, group_id, name, type_str, encoder_str, multicast_str, rallypoint_str, bridges_str))
+                crypto_str = "Yes" if group.get('cryptoPassword') else "No"
+                rows.append((i, group_id, name, type_str, encoder_str, crypto_str, multicast_str, rallypoint_str, bridges_str))
                 group_mapping[i] = group
             
             # Calculate column widths (minimum width is header length)
@@ -1968,9 +1968,10 @@ class EBSConfigTool:
                     max(len('Name'), max(len(row[2]) for row in rows), 8),
                     max(len('Type'), max(len(row[3]) for row in rows), 8),
                     max(len('Encoder'), max(len(row[4]) for row in rows), 8),
-                    max(len('Multicast'), max(len(row[5]) for row in rows), 8),
-                    max(len('Rallypoint'), max(len(row[6]) for row in rows), 10),
-                    max(len('Used In'), max(len(row[7]) for row in rows), 8)
+                    max(len('Crypto'), max(len(row[5]) for row in rows), 6),
+                    max(len('Multicast'), max(len(row[6]) for row in rows), 8),
+                    max(len('Rallypoint'), max(len(row[7]) for row in rows), 10),
+                    max(len('Used In'), max(len(row[8]) for row in rows), 8)
                 ]
             else:
                 col_widths = [
@@ -1978,29 +1979,30 @@ class EBSConfigTool:
                     max(len('Name'), max(len(row[2]) for row in rows), 8),
                     max(len('Type'), max(len(row[3]) for row in rows), 8),
                     max(len('Encoder'), max(len(row[4]) for row in rows), 8),
-                    max(len('Multicast'), max(len(row[5]) for row in rows), 8),
-                    max(len('Rallypoint'), max(len(row[6]) for row in rows), 10),
-                    max(len('Used In'), max(len(row[7]) for row in rows), 8)
+                    max(len('Crypto'), max(len(row[5]) for row in rows), 6),
+                    max(len('Multicast'), max(len(row[6]) for row in rows), 8),
+                    max(len('Rallypoint'), max(len(row[7]) for row in rows), 10),
+                    max(len('Used In'), max(len(row[8]) for row in rows), 8)
                 ]
             
             print(f"{self.info('Current Groups:')}")
             # Header
             if show_numbers:
-                header_line = f"{'#':<{col_widths[0]}} {'ID':<{col_widths[1]}} {'Name':<{col_widths[2]}} {'Type':<{col_widths[3]}} {'Encoder':<{col_widths[4]}} {'Multicast':<{col_widths[5]}} {'Rallypoint':<{col_widths[6]}} {'Used In':<{col_widths[7]}}"
+                header_line = f"{'#':<{col_widths[0]}} {'ID':<{col_widths[1]}} {'Name':<{col_widths[2]}} {'Type':<{col_widths[3]}} {'Encoder':<{col_widths[4]}} {'Crypto':<{col_widths[5]}} {'Multicast':<{col_widths[6]}} {'Rallypoint':<{col_widths[7]}} {'Used In':<{col_widths[8]}}"
+                print(self.header(header_line))
+                print(self.dim("-" * (sum(col_widths) + 8)))  # +8 for spaces between columns
+                
+                # Group rows
+                for row in rows:
+                    print(f"{self.highlight(f'{row[0]:<{col_widths[0]}}')} {row[1]:<{col_widths[1]}} {row[2]:<{col_widths[2]}} {row[3]:<{col_widths[3]}} {row[4]:<{col_widths[4]}} {row[5]:<{col_widths[5]}} {row[6]:<{col_widths[6]}} {row[7]:<{col_widths[7]}} {row[8]:<{col_widths[8]}}")
+            else:
+                header_line = f"{'ID':<{col_widths[0]}} {'Name':<{col_widths[1]}} {'Type':<{col_widths[2]}} {'Encoder':<{col_widths[3]}} {'Crypto':<{col_widths[4]}} {'Multicast':<{col_widths[5]}} {'Rallypoint':<{col_widths[6]}} {'Used In':<{col_widths[7]}}"
                 print(self.header(header_line))
                 print(self.dim("-" * (sum(col_widths) + 7)))  # +7 for spaces between columns
                 
                 # Group rows
                 for row in rows:
-                    print(f"{self.highlight(f'{row[0]:<{col_widths[0]}}')} {row[1]:<{col_widths[1]}} {row[2]:<{col_widths[2]}} {row[3]:<{col_widths[3]}} {row[4]:<{col_widths[4]}} {row[5]:<{col_widths[5]}} {row[6]:<{col_widths[6]}} {row[7]:<{col_widths[7]}}")
-            else:
-                header_line = f"{'ID':<{col_widths[0]}} {'Name':<{col_widths[1]}} {'Type':<{col_widths[2]}} {'Encoder':<{col_widths[3]}} {'Multicast':<{col_widths[4]}} {'Rallypoint':<{col_widths[5]}} {'Used In':<{col_widths[6]}}"
-                print(self.header(header_line))
-                print(self.dim("-" * (sum(col_widths) + 6)))  # +6 for spaces between columns
-                
-                # Group rows
-                for row in rows:
-                    print(f"{row[1]:<{col_widths[0]}} {row[2]:<{col_widths[1]}} {row[3]:<{col_widths[2]}} {row[4]:<{col_widths[3]}} {row[5]:<{col_widths[4]}} {row[6]:<{col_widths[5]}} {row[7]:<{col_widths[6]}}")
+                    print(f"{row[1]:<{col_widths[0]}} {row[2]:<{col_widths[1]}} {row[3]:<{col_widths[2]}} {row[4]:<{col_widths[3]}} {row[5]:<{col_widths[4]}} {row[6]:<{col_widths[5]}} {row[7]:<{col_widths[6]}} {row[8]:<{col_widths[7]}}")
             print()
             
             return group_mapping
@@ -2124,6 +2126,15 @@ class EBSConfigTool:
         # noHdrExt (from txAudio) - only show if True
         if 'txAudio' in group and group['txAudio'].get('noHdrExt') is True:
             info_parts.append(f"{self.dim('noHdrExt:')}{True}")
+
+        # Crypto password indicator - only show if configured
+        crypto_password = group.get('cryptoPassword')
+        if crypto_password:
+            if len(crypto_password) > 4:
+                crypto_preview = f"{crypto_password[:2]}..{crypto_password[-2:]}"
+            else:
+                crypto_preview = crypto_password
+            info_parts.append(f"{self.dim('Crypto:')}{crypto_preview}")
         
         return ' '.join(info_parts) if info_parts else "No config"
     
@@ -3204,8 +3215,11 @@ class EBSConfigTool:
                                 print(f"Warning: Could not configure {radio_type.upper()} transformations for encoder {encoder_id}")
             
             # Encryption
-            crypto = self._get_input_with_abort("Crypto password (leave empty for none)", "")
-            if crypto:
+            crypto = self._get_input_with_abort("Crypto password (type 'none' for no crypto)", "")
+            if isinstance(crypto, str) and crypto.strip().lower() == "none":
+                if 'cryptoPassword' in group:
+                    del group['cryptoPassword']
+            elif crypto:
                 group['cryptoPassword'] = crypto
             
             # Bridge target output detail - set mode based on group type
@@ -3820,8 +3834,11 @@ class EBSConfigTool:
             
             # Encryption
             old_crypto = self.bridges_config['groups'][idx].get('cryptoPassword', '')
-            crypto = self._get_input_with_abort("Crypto password (leave empty for none)", old_crypto)
-            if crypto:
+            crypto = self._get_input_with_abort("Crypto password (enter to keep, type 'none' to clear)", old_crypto)
+            if isinstance(crypto, str) and crypto.strip().lower() == "none":
+                if 'cryptoPassword' in group:
+                    del group['cryptoPassword']
+            elif crypto:
                 group['cryptoPassword'] = crypto
             elif 'cryptoPassword' in group:
                 del group['cryptoPassword']
@@ -5682,7 +5699,6 @@ class EBSConfigTool:
         engine_policy = self.main_config.get('enginePolicy', {})
         licensing = engine_policy.get('licensing', {})
         license_empty = (
-            not licensing.get('entitlement') or licensing.get('entitlement').strip() == '' or
             not licensing.get('key') or licensing.get('key').strip() == ''
         )
         

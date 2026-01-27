@@ -127,6 +127,7 @@ The main application menu displays:
   - Manually created bridges are marked with a `*` indicator (only shown if there are manually created bridges)
   - Wizard-created bridges have no indicator
   - If there are manually created bridges, a legend "* = Manually created" appears at the bottom
+  - Info column can include multicast/rallypoint details, encoder info, and a crypto preview when set
 
 Then the menu options:
 1. **Raw Bridge (Multicast to Rallypoint)** - Wizard to create a raw bridge connecting multicast and rallypoint groups
@@ -155,10 +156,10 @@ Bridges:
                     trunk-1         RP: 10.0.0.1:7443, Enc: None
 
 Groups:
-#   ID              Name            Type    Encoder         Multicast   Rallypoint  Used In
---- --------------- --------------- ------- --------------- ----------- ----------- -------
-2   enterprise-1    Enterprise      1 (Audio) 25 (G.711)   Yes         No          raw-bridge-1
-3   trunk-1         Trunk           1 (Audio) 25 (G.711)   No          Yes         raw-bridge-1
+#   ID              Name            Type    Encoder         Crypto  Multicast   Rallypoint  Used In
+--- --------------- --------------- ------- --------------- ------ ----------- ----------- -------
+2   enterprise-1    Enterprise      1 (Audio) 25 (G.711)   Yes    Yes         No          raw-bridge-1
+3   trunk-1         Trunk           1 (Audio) 25 (G.711)   No     No          Yes         raw-bridge-1
 ```
 
 Then the menu options:
@@ -209,7 +210,7 @@ When you run the tool for the first time with a new or incomplete configuration,
 1. **Welcome Screen** - Display a welcome message if EBS ID, license, or featureset is missing
 2. **EBS ID Setup** - Prompt you to enter an EBS ID if it's missing
 3. **License Initialization** - Prompt you to provide a license file (JSON format) containing:
-   - `license` or `licensing` object with entitlement, key, and activation code
+   - `license` or `licensing` object with key and activation code (entitlement optional)
    - `featureset` object with signature and features
    
    You can:
@@ -657,6 +658,7 @@ Type `?` when prompted for the encoder to see the complete list with description
 - Group IDs are fully displayed; names are truncated if too long
 - Current values are shown in brackets in prompts for group type and audio encoder
 - Lists are automatically displayed when entering relevant menus
+- Info column shows a crypto preview as `Crypto:AA..F5` when a group has a password
 
 ## Notes
 
