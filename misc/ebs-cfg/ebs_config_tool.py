@@ -3,7 +3,7 @@
 EBS Configuration Tool - Interactive Menu
 A simple interactive tool to modify Engage Bridging Service (EBS) configuration files.
 
-Copyright (c) 2025 Rally Tactical Systems Inc
+Copyright (c) 2025-2026 Rally Tactical Systems Inc
 All rights reserved.
 """
 
@@ -132,7 +132,7 @@ def show_usage():
     print("\n" + "=" * 60)
     print(f"EBS Configuration Tool v{VERSION} - Usage")
     print("=" * 60)
-    print("Copyright (c) 2025 Rally Tactical Systems Inc")
+    print("Copyright (c) 2025-2026 Rally Tactical Systems Inc")
     print("=" * 60)
     print("\n  ./ebs_config_tool.py [options]")
     print("\nOptions:")
@@ -2542,7 +2542,7 @@ class EBSConfigTool:
             # Display permission warnings first so they're always visible
             self.display_permission_warnings()
             # Calculate lengths to match copyright line
-            copyright_text = 'Copyright (c) 2025 Rally Tactical Systems Inc'
+            copyright_text = 'Copyright (c) 2025-2026 Rally Tactical Systems Inc'
             copyright_length = len(copyright_text)
             header_text = f' EBS Config v{VERSION} '
             # Calculate padding needed to center header and match copyright length
@@ -5304,7 +5304,7 @@ class EBSConfigTool:
             # Display permission warnings first so they're always visible
             self.display_permission_warnings()
             print(f"\n{self.header(f'=== Engage Bridging Service Configuration v{VERSION} ===')}")
-            print(f"{self.info('Copyright (c) 2025 Rally Tactical Systems Inc')}")
+            print(f"{self.info('Copyright (c) 2025-2026 Rally Tactical Systems Inc')}")
             print(f"Working on: {self.bridges_config_path}")
             # Calculate separator length to match header (accounting for color codes)
             header_text = f'=== Engage Bridging Service Configuration v{VERSION} ==='
