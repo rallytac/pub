@@ -31,6 +31,9 @@ if [[ "${ENGAGE_LINE}" == "" ]]; then
 	exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ENGAGE_SRC_DEFAULT="${SCRIPT_DIR}/../engage/src"
+
 UNAME_S=`(uname -s | tr A-Z a-z)`
 URL_BASE="https://hq.rallytac.com/builds/${ENGAGE_LINE}"
 
@@ -85,7 +88,7 @@ if [[ "${DOWNLOADER}" != "" ]]; then
 	USEWGET=1
 else
 	DOWNLOADER=$(which curl)
-	if [[ "${VERINFO}" != "" ]]; then
+	if [[ "${DOWNLOADER}" != "" ]]; then
 		USECURL=1
 	else
 		echo "ERROR: Cannot find curl or wget.  Please install one of these tools."
@@ -111,6 +114,17 @@ function getFileFromUrl()
 function fetchVersionFiles()
 {
 	echo "Fetching version files for ${DESIRED_VERSION}"
+
+	TMP_OPENSSL=""
+	if [[ -f "engage/libssl.a" || -f "engage/libcrypto.a" ]]; then
+		TMP_OPENSSL=$(mktemp -d)
+		if [[ -f "engage/libssl.a" ]]; then
+			cp engage/libssl.a "${TMP_OPENSSL}/"
+		fi
+		if [[ -f "engage/libcrypto.a" ]]; then
+			cp engage/libcrypto.a "${TMP_OPENSSL}/"
+		fi
+	fi
 
 	rm -rf "engage"
 	mkdir -p "engage"
@@ -149,8 +163,17 @@ function fetchVersionFiles()
 	fetchArtifactsFile "${DESIRED_VERSION}" "api/c/include" "EngageLm.h"
 	fetchArtifactsFile "${DESIRED_VERSION}" "api/c/include" "EngageNetworkDevice.h"
 	fetchArtifactsFile "${DESIRED_VERSION}" "api/c/include" "EngagePlatformNotifications.h"
-	fetchArtifactsFile "${DESIRED_VERSION}" "${BIN_PLATFORM}" "libengage-shared.${BIN_OS_LIB_EXT}"
 	fetchArtifactsFile "${DESIRED_VERSION}" "${BIN_PLATFORM}" "libengage-static-native.a"
+
+	if [[ -n "${TMP_OPENSSL}" ]]; then
+		if [[ -f "${TMP_OPENSSL}/libssl.a" ]]; then
+			cp "${TMP_OPENSSL}/libssl.a" .
+		fi
+		if [[ -f "${TMP_OPENSSL}/libcrypto.a" ]]; then
+			cp "${TMP_OPENSSL}/libcrypto.a" .
+		fi
+		rm -rf "${TMP_OPENSSL}"
+	fi
 }
 
 

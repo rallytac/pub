@@ -6,15 +6,14 @@ SRCS = Mingage.cpp WorkQueue.cpp
 MAIN = mingage.exe
 INCPATH = .\engage
 LIBPATH = .\engage
-LIBNAME = engaged-shared.dll
+LIBNAME = engage-static.lib
 VER = 
 
 $(MAIN): $(SRCS)
-	cl /EHsc /Fe"$(MAIN)" /DWIN32 /I. /I"$(INCPATH)" $(SRCS) engage-shared.lib /link /LIBPATH:"$(LIBPATH)"
+	cl /EHsc /Fe"$(MAIN)" /DWIN32 /I. /I"$(INCPATH)" $(SRCS) engage-static.lib /link /LIBPATH:"$(LIBPATH)"
 	@echo.
 	@echo ****************************** IMPORTANT ******************************
 	@echo $(LIBNAME) has been placed in '$(LIBPATH)'
-	@echo Be sure to include it in your PATH variable
 	@echo ***********************************************************************
 
 clean:
