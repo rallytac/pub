@@ -1,9 +1,139 @@
 # Change Log
 
+## June 8, 2026 - 1.261.9101
+
+- Adds AES encryption and file-based storage options for platform secret management.
+- Adds Rally Tactical Cloud (RTI Cloud) integration including marketplace enrollment, heartbeat reporting, stream usage tracking, and connection statistics persistence.
+- Adds Network State Machine (NSM) resource-driven bridge activation in Engage Bridge.
+- Adds bridge management commands to engageMain.
+- Adds `requireMulticast` to engine policy networking for multicast-capable NIC selection.
+- Adds fragmented blob transmission and inherited tag support when importing cert store elements.
+- Adds optional licensing and feature manager bypass for RTI cloud deployments.
+- Adds Leaf stream upload/download telemetry, reconnect backoff, and failback handling.
+- Adds CPU usage tracking enhancements.
+- Adds certificate store tagging APIs (`getIdsOfElementsWithTag`, `ENGAGE_CS_TAG_xxx` constants).
+- Improves Android and WASM static linking by merging OpenSSL into JNI/native libraries and streamlining MELPe integration.
+- Improves Engage Bridge and Rallypoint status reporting for RTI Cloud and interactive bridge display.
+- Removes Brotli as a build dependency.
+- Removes `hashIdentifiers` from RTI Cloud settings (simplified configuration).
+- Corrects bridged audio re-encode when engine `internalRate` and/or `internalChannels` are not 8000 Hz mono.
+- Corrects license unpack error logging in the Engine.
+
+## May 8, 2026 - 1.260.9100
+
+- Adds `RtiCloudSettings` configuration object and Rally Tactical Cloud SaaS URL prefix support.
+- Adds `PlatformSecrets` for secure secret storage across platforms.
+- Adds `UrlRetriever` for loading configuration from HTTP/HTTPS URLs (libcurl).
+- Adds `ProcessInstanceGuard` to prevent duplicate Engage Bridge instances using the same configuration.
+- Adds NSM configuration parameters and `ENGAGE_FEATURE_ID_NSM_RESOURCE` feature id.
+- Adds static code analysis support (cppcheck and clang-tidy) in the build system.
+- Adds Git revision tracking in build scripts and tool output.
+- Adds Leaf reconnect backoff logic and cluster connection strategy JSON deserialization.
+- Adds base64 decode utilities and improved SSL certificate verification in UrlRetriever.
+- Improves OpenSSL build process for Android platforms.
+- Improves iOS simulator build handling and Android NDK compatibility.
+- Initializes pointers across multiple modules to prevent undefined behavior.
+- Replaces broad libcurl usage with a focused UrlRetriever HTTP/HTTPS client.
+
+## April 9, 2026 - 1.259.9099
+
+- Refactors NSM build process and enhances related configuration objects.
+
+## April 7, 2026 - 1.258.9098
+
+- Adds `Rfc4733Event` class and RFC 4733 inbound RTP processing support.
+- Adds `BufferParameter` class for improved group blob and raw payload handling.
+- Adds `name` field to Rallypoint configuration object.
+- Adds cert store element lookup by tag with improved tag tokenization.
+- Adds OpenSSL environment sanitization at crypto module startup.
+- Improves InboundRtpProcessor logging and jitter buffer calculations.
+- Improves hex string validation to accept both colon-separated and continuous formats.
+- Refactors OpenSSL message digest context management to use `EVP_MD_CTX_new` / `EVP_MD_CTX_free`.
+- Corrects invalid block count logging in Codec2 and MELPe encoders.
+
+## January 22, 2026 - 1.257.9097
+
+- Improves `readBinaryFile` error handling.
+
+## January 12, 2026 - 1.256.9096
+
+- Adds NSM (Network State Machine) binary build support.
+- Adds CVSD audio codec support and watermarking functionality.
+- Adds `activationHmac` field to license descriptor objects.
+- Adds `-getlicensedescriptor` option to engageMain and related native bindings.
+- Adds cert store management and timeline event native methods for mobile bindings.
+- Adds configuration option to drop all incoming packets on a group (testing/diagnostics).
+- Adds `EP_CAP_NO_MESSAGE_SIGNING` capability for Rallypoint leaf connections.
+- Adds Android 15+ 16 KB page alignment support in CMake.
+- Adds TaskExecutor operation tracking for Engine, AudioInput, and AudioOutput diagnostics.
+- Improves libwebsockets build integration with libevent and OpenSSL via CMake.
+- Improves iOS OpenSSL build configuration (bitcode deprecated, `no-shared`).
+- Improves thread safety in buffer pool and thread-safe object pool allocation.
+- Protects `rts-fips.so` on Android from post-build modifications that would prevent loading.
+
+## November 4, 2025 - 1.255.9095
+
+- Adds `GroupDefaultAudioPriority` configuration object.
+- Improves audio priority handling in the Engine group layer.
+
+## October 17, 2025 - 1.253.9093
+
+- Internal version increment.
+
+## October 3, 2025 - 1.252.9092
+
+> PLEASE NOTE: This release contains substantial bridging, WebSocket, and platform work accumulated since 1.251.9091.
+
+- Adds audio group bridging (`engageCreateBridge`, bridge callbacks, multistream/mixed output modes, and `bomNone` bridging mode).
+- Adds secure WebSocket client support for Rallypoint connections (libwebsockets, TLS, protocol/path configuration).
+- Adds `AbstractedSpeaker` and audio device registry for improved abstracted audio output management.
+- Adds ability to load Rallypoint configuration from a URL.
+- Adds trusted platform root CA certificate loading on Windows, iOS, Linux, and macOS.
+- Adds dynamic CA bundle management and PEM append APIs in the crypto module.
+- Adds `NamedIdentity` and additional identities support for Rallypoint servers.
+- Adds Rallypoint server stream statistics JSON export.
+- Adds `reBegin` support to advanced transmit parameters.
+- Adds `reduceImmediacy` to presence group settings.
+- Adds Git revision output in tools and build metadata.
+- Adds Windows ARM64 build support and improved Visual Studio detection.
+- Adds MemorySanitizer and enhanced AddressSanitizer build options.
+- Adds libevent-based UDP socket handling in `UdpSocketConnection`.
+- Adds network reachability and platform network change notifications to the Engine.
+- Adds randomized backoff for UDP socket reconnects and multicast rejoin timing.
+- Adds SNI logging and secondary host support for Rallypoint leaf connections.
+- Adds stream ID privacy type configuration for Rallypoint servers.
+- Improves OpenSSL integration, FIPS-oriented default curves/ciphers, and certificate verification in Leaf.
+- Improves Android AAR build process, debug archive support, and JNI/native refactoring.
+- Improves SharedKeyUdpStreamer connection state management and logging.
+- Improves WASM memory export flags and compilation fixes.
+- Improves transaction timeout defaults to 10000 ms.
+- Reinstates Engine requirement for a certificate and private key when generating missions.
+- Corrects Android abstracted speaker interaction with high-level audio.
+- Corrects race conditions between Rallypoint connect and multicast disconnect for group disconnected events.
+- Corrects duplicate bridge creation attempts.
+- Corrects MSVC compatibility issues in `SafeRingBuffer`.
+- Corrects PEM file reading for DOS line endings.
+- Corrects InboundRtpProcessor handling of TX_END flags in header extensions.
+
+## January 12, 2025 - 1.250.9090
+
+- Adds MELPe codec support for Darwin ARM64 (Apple Silicon).
+- Adds AWS SDK integration and AWS ELS proxy build support.
+- Adds key/value pair support groundwork in certificate stores.
+- Adds `getNicByName` matching on interface friendly names.
+- Improves group failover/failback event notifications.
+- Improves Linux ALSA audio input by forcing microphone capture to mono on problematic platforms.
+- Improves Engage.cs event definitions for added Engine events.
+- Corrects a race condition between Rallypoint connect and multicast disconnect when firing group disconnected events.
+- Corrects WASM build issues and GCC 11 Lua compilation.
+- Updates nlohmann JSON dependency.
+
 ## October 3, 2024 - 1.249.9089
+
 - Corrects an urgent issue on Linux platforms when using the ALSA audio input in stereo mode.
 
 ## October 2, 2024 - 1.248.9088
+
 - Adds stricter compliance with FIPS 140-2 guidelines with regards to CA processing and advertised ciphers.
 - Adds experimental active and passive IGMP snooping to Rallypoints to optimize inter-RP traffic.
 - Corrects an issue on Linux platforms whereby thread names were not included in log output.
@@ -11,7 +141,7 @@
 
 ## August 30, 2024 - 1.246.9086
 
->PLEASE NOTE: All updates from 1.238.9078 onward to date have been rolled up in this single release.
+> PLEASE NOTE: All updates from 1.238.9078 onward to date have been rolled up in this single release.
 
 - Adds support for multi-element X.509 PEM files, certificate bundles, and intermediate issuer certificates.
 - Adds support for G.729 Annex A audio encoding/decoding.
@@ -59,6 +189,7 @@
 - Corrects random Rallypoint connection race conditions in the WASM build.
 
 ## July 29, 2023 - 1.238.9078
+
 - Adds group-level firewalling capability in Rallypoints based on X.509 certificates.
 - Adds Docker containers for RP, EBS, EAR, and ELS published to Docker Hub.
 - Enhances logging for inbound RTP packet processing. 
@@ -70,6 +201,7 @@
 - Corrects an XCode-related compilation issue for iOS.
 
 ## May 30, 2023 - 1.236.9076
+
 - Adds support for Web Assembly (WASM), allowing Engage to run at near native speed inside modern web browsers.
 - Adds MELPe support under iOS.
 - Adds support for "_attached" element in Group configuration objects.
@@ -87,10 +219,12 @@
 - Corrects an issue related to the creation of temporary files on some OS platforms.
 
 ## January 19, 2023 - 1.234.9074
+
 - Adds the new Engage Linguistics Service (ELS).
 - Corrects an issue whereby groups not associated with an output audio device print debug messages every second after RX has concluded.
 
 ## October 14, 2022 - 1.232.9072
+
 - Adds correct thread name for Sys:SignalListener.
 - Adds correct thread name for Sys:ProcessMonitor.
 - Adds correct thread name for PeriodicTimer.
@@ -120,6 +254,7 @@
 - Corrects an delay in notification of group RX ended for transmissions shorter than the jitter buffer hang time.
 
 ## June 6, 2022 - 1.228.9068
+
 - Adds a security classification level setting to group definitions that allows implementors to determine communication types appropriate for a group.
 - Adds "--version" command-line parameter to engage-cmd, rallypointd, engagebridged, and eard.
 - Corrects a race-condition bug on shutdown that caused periodic memory corruption.
@@ -128,6 +263,7 @@
 - Corrects a bug causing random crashes when packets are sent on a group that has failed over to multicast.
 
 ## May 28, 2022 - 1.226.9066
+
 - Adds connection timeout settings for Rallypoint connections to better handle high-latency transports.
 - Adds preliminary detection of traffic loops on Rallypoint meshes.
 - Adds support for 3rd-party FIPS 140-2 cryptographic engines to be loaded at runtime.
@@ -135,14 +271,17 @@
 - Corrects a bug that generated extraneous onEngineStopped events.
 
 ## April 20, 2022 - 1.224.9062
+
 - Corrects an issue on Android where the Engine was hung during shutdown while receiving audio.
 
 ## April 5, 2022 - 1.222.9060
+
 - Corrects an issue with EBS whereby the enablement of a bridge was being ignored.
 - Adds a hang timer for smoothed audio transmission.
 - Replaces the low-level Android audio interface with a more flexible and portable implementation that takes better advantage of built-in Android audio capabilities.
 
 ## January 26, 2022 - 1.218.9056
+
 - Adds preliminary hardware echo cancellation on select Android devices and OS versions.
 - Adds the ability for application-level provisioning of Android **audio** sessions.
 - Adds an adaptation for obtaining machine identifiers on iOS devices.
@@ -154,8 +293,9 @@
 - Corrects an issue with HTTP/HTTPS downloads for Magellan Discovery & Interrogation.
 - Corrects an issue with invalid receipt of IP multicast packets on different multicast addresses that share the same port.
 - Restricts the TLS subsystem to a minimum TLS version of 1.2.
-  
+
 ## October 7, 2021 - 1.216.9054
+
 - Adds automatic restart of Android speaker and microphone devices when an error is encountered during audio playout or capture.
 - Adds Android-specific audio settings for more fine-grained customization of the audio experience.
 - Adds selected logging of API arguments to help with debugging.
@@ -168,8 +308,9 @@
 - Corrects a transmission-side issue that causes receiving entities to create multiple timeline events for a single transmission.
 - Corrects a sporadic startup crash in Engage Activity Recorder and Engage Bridge.
 - Corrects a race condition in the high-resolution timer on some CPU architectures.
-  
+
 ## August 7, 2021 - 1.212.9050
+
 - Adds per-group RTP profiles for network fine-tuning.
 - Adds per-group discontinuous transmission settings as an option for supported CODECs.
 - Adds (experimental) support for reverse subscription on leaf RP nodes for core-registered multicast reflectors.
@@ -190,6 +331,7 @@
 - Corrects an invalid RX state in the jitter buffer under rare conditions.
 
 ## May 19, 2021 - 1.210.9048
+
 - Adds (experimental) support for application-defined networking devices.
 - Adds support for looped-back network packets into the same group for debugging and testing purposes.
 - Corrects an issue with incorrect processing of Globally Unique Identifiers (GUIDs).
@@ -201,6 +343,7 @@
 - Corrects an issue with an invalid return code in engage-cmd for the "getDeviceId" command-line option.
 
 ## May 1, 2021 - 1.209.9047
+
 - Adds additional support for ultra-low bandwidth environments.
 - Adds the ability to disable jitter buffer trimming for extreme jitter environments.
 - Adds additional protection against over-queuing of inbound audio due to synchronization mismatches.
@@ -213,6 +356,7 @@
 - Corrects a variety of edge-case memory leaks and corruption issues.
 
 ## April 8, 2021 - 1.208.9046
+
 - Adds support for the [Speex](https://www.speex.org/) CODEC for interoperability with legacy systems.
 - Adds experimental support for [Codec2](https://en.wikipedia.org/wiki/Codec_2) for ultra-low bandwidth environments (requires custom Engine build).
 - Adds the engageRefreshAudioDevices() API to request the Engine to update it's internal audio device registry.
@@ -223,6 +367,7 @@
 - Corrects a problem related to node discovery for the local node not occuring if presence groups were created *after* non-presence groups.
 
 ## March 12, 2021 - 1.206.9044
+
 - Adds the ability to source input audio from a file rather than the microphone on a per-transmission basis.
 - Adds automatic audio resamlping for audio resources loaded at runtime.
 - Adds premliminary support for dynamically-loaded external CODECs.
@@ -231,6 +376,7 @@
 - Adds active-lambda tracking in the core task executor to aid in troubleshooting.
 
 ## March 3, 2021 - 1.204.9041
+
 - Adds preliminary support for CUBIC/Vocality radio gateways.
 - Adds additional transmit encoder parameter validation.
 - Optimizes parsing of HTTP response headers.
@@ -241,9 +387,11 @@
 - Corrects an issue in parsing SSDP packets.
 
 ## February 26, 2021 - 1.202.9039
+
 - Corrects a backward incompatibility issue introduced in 1.196.9033.
-  
+
 ## February 25, 2021 - 1.200.9037 (SUPERCEDED BY 1.202.9039)
+
 - Adds non-blocking DNS lookups for enhanced response times when switching link profiles.
 - Adds the ability to disable Engine audio processing on headless systems.
 - Reduces Rallypoint link establishment times to multi-homed RP hosts.
@@ -251,6 +399,7 @@
 - Corrects an issue with the Linux installation package for the Engage Bridge Service.
 
 ## February 20, 2021 - 1.198.9035 (SUPERCEDED BY 1.202.9039)
+
 - Adds app-level enablement of event notifications.
 - Adds automatic silencing of low-priority audio streams in the presence of high-priority stream.
 - Adds an optional Engine-assigned alias for anonymous RTP streams.
@@ -260,6 +409,7 @@
 - Corrects an issue related to dropping of the audio contents of a stream's first packet due to audio resampling shortfalls.
 
 ## February 9, 2021 - 1.196.9033 (SUPERCEDED BY 1.202.9039)
+
 - Adds optional transmission ID to RTP streams.
 - Adds an application-defined hook to capture Engine log output.
 - Adds the ability to configure the minimum presence descriptor transmit interval.
@@ -274,6 +424,7 @@
 - Corrects a static library initialization issue on Windows platforms.
 
 ## November 29, 2020 - 1.192.9029
+
 - Adds microphone input denoising on Android platforms.
 - Adds Automatic Gain Control (AGC) for microphone input and speaker output.
 - Adds support for defaulting of X.509 certificate elements from certificate stores.
@@ -282,10 +433,12 @@
 - Removes Engine-level process abort if policy security is incorrect.
 
 ## October 28, 2020 - 1.189.9026
+
 - Adds rxFlags and txPriority to talker information notifications.
 - Corrects an incorrect duration calculation for audio timeline events.
 
 ## October 17, 2020 - 1.186.9023
+
 - Adds the ability to disable/enable the Engine watchdog.
 - Adds support for iOS.
 - Adds monitoring for licensing changes in policy file to engagebridged.
@@ -301,41 +454,50 @@
 - Optimizations for the internal task executor.
 
 ## September 8, 2020 - 1.182.9019
+
 - Corrects issues reported with audio RX.
 - Corrects stereo panning issues.
 - Corrects a bug in the RX-side jitter buffer.
 - Optimizes audio processing to reduce CPU and battery utilization.
 
 ## August 1, 2020 - 1.178.9015
+
 - Adds the initial release of the Engage Bridging Service.
 - Adds symbolic information to binaries to aid in troubelshooting.
 
 ## July 22, 2020 - 1.176.9013
+
 - Adds preliminary group bridging capabilities.
 - Adds semaphore-based signalling of configuration changes for rallypointd.
 - Corrects the Opus CODEC to prevent use of AVX instructions on older/crippled X86/X64 CPUs.
 - Improves the RTP jitter buffer to further reduce latency.
 
 ## June 5, 2020 - 1.162.8938
+
 - Adds Rallypoint clustering.
 - Adds Acoustic Echo Cancellation.
 - Fixes for Portugese-language code pages on Windows.
 
 ## May 12, 2020 - 1.153.8924
+
 - Adds group restrictions to Rallypoints.
 - Replaces multicast white and blacklists with multicast resrictions in Rallypoints.
 
 ## May 4, 2020 - 1.151.8922
+
 - Adds notification of timeline grooming.
 - Removes the option to disable the system database.
 
 ## May 3, 2020 - 1.150.8921
+
 - Adds ability for the Engage Engine library to run side-by-side with the OS-provided distribution of OpenSSL.
 
 ## May 1, 2020 - 1.148.8914
+
 - Adds timeline grooming based on occupied disk storage.
 
 ## April 28, 2020 - 1.147.8913
+
 - Adds static multicast reflector configuration for Rallypoints.
 - Adds the ability to import X.509 elements into a certificate store from another.
 - Adds display of certificate information by Rallypoints.
@@ -345,11 +507,13 @@
 - Corrects a syntax error in Rallypoint post-installation script.
 
 ## April 10, 2020 - 1.145.8908
+
 - Adds information to TX event notifications.
 - Improves transmit contention (glaring) for talkers with the same priority.
 - Exposes the mission generation for the node.js binding.
 
 ## April 7, 2020 - 1.143.8906
+
 - Adds sourcing of Rallypoint mesh configuration from an executed command.
 - Adds command execution after updates to Rallypoint status file.
 - Adds command execution after updates to Rallypoint links file.
@@ -357,6 +521,7 @@
 - Adds process termination logic in case of Rallypoint hung shutdown.
 
 ## April 2, 2020 - 1.142.8905
+
 - Corrects a TLS packet buffer overflow on Rallypoint peer registration/deregistration messages.
 - Adds the ability to throttle Rallypoint inbound connections to guard against Denial Of Service attacks.
 - Adds the ability to throttle Rallypoint inbound connections based on system CPU utilization.
@@ -369,18 +534,22 @@
 - Offloads realtime timeline event ECDSA signing to a seperate thread so as not to impact core user experience.
 
 ## March 27, 2020 - 1.140.8903
+
 - Corrects an Engine shutdown issue when running under node.js.
 - Corrects an X.509 certificate exchange issue Rallypoint peer links under certain Linux distros.
 - Adds the ability to disable multicast failover at the Engine policy level.
 
 ## March 22, 2020 - 1.133.8893
+
 - Corrects an issue on some Windows network drivers related to multicast receive on a QoS-enabled socket.
 
 ## March 9, 2020 - 1.132.8892
+
 - Adds multicast failover and failback of downed Rallypoint links as a standard feature.
 - Adds JSON clarifier objects to all events fired by the Engine.
 
 ## March 5, 2020 - 1.126.8887
+
 - Adds Engage-managed certificate stores
 - Adds tx mute/unmute for groups - including the ability to begin tx in a muted state
 - Improved handling of QoS settings for TX
@@ -388,6 +557,7 @@
 - Corrects a bug related to the TTL value for multicast traffic
 
 ## February 18, 2020 - 1.121.8880
+
 - Corrects audio issues related to the new multiplexing speaker logic
 - Corrects scratchy G.711 audio
 - Addresses FDX/HDX inconsistencies
@@ -396,24 +566,30 @@
 - Adds Visual C/C++ runtimes to the npm module
 
 ## January 26, 2020 - 1.116.8874
+
 - Corrects an issue with audio on certain versions of Android
 - Corrects a random crash on all platforms during shutdown.  
 - Corrects minor memory leaks
 - Adds performance enhancements for networking
 
 ## December 17, 2019 - 1.109.8864
+
 - Improved support for application-defined audio devices
 
 ## December 10, 2019 - 1.108.8863
+
 - Corrects a number of minor bugs
 - Adds ability to disable audio record but retain timeline metadata
 - Improves performance in the audio resampler
 
 ## November 21, 2019 - 1.102.8857
+
 - Corrects a buffer overflow in the audio resampler for G.711 framed larger than 40ms
 - Corrects a jitter buffer miscalculation
 - Corrects a problem with unknown talker(s) associated with audio
 
 ## November 7, 2019 - 1.95.8851
+
 - Corrects blocked socket issues
 - Corrects a crash on channel leave during RX
+
