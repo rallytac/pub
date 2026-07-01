@@ -1,5 +1,29 @@
 # Change Log
 
+## July 1, 2026 - 1.263.9103
+
+- Adds `ApiCallPacingSettings` and `ApiCallPacer` for lane-based pacing of Engage API calls (topology, transmission, configuration).
+- Adds `NsmNodeElectionGateSettings` for optional external shell-command gate on NSM election wire participation.
+- Adds `NsmNodeCotLocationPollSettings` for optional periodic external commands to refresh NSM CoT point locations.
+- Adds NSM operational status text ("Operational", "Partial", "Down") to CoT status reporting.
+- Adds `getTickAwakeMs` awake-clock uptime measurement that excludes system sleep.
+- Adds Slow I/O TaskExecutor watchdog in the Engine for timeline and storage operations.
+- Adds storage path validation in Timeline event allocation.
+- Adds `removeEmptyDirectories` to TimelineManager.
+- Adds detailed RTP logging option to InboundRtpProcessor.
+- Adds crypto engine version logging at engine initialization and in application startup output.
+- Adds STATIC_ANALYSIS.md and expanded clang-tidy checks for uninitialized member variables.
+- Upgrades OpenSSL from 3.0.8 to 3.1.2.
+- Improves bridge PCM encoding and sample handling in Group audio transmission.
+- Improves EngageInterface error handling when paced API call submission fails (join, leave, create bridge).
+- Improves Timeline event deletion with batched SQL deletes (up to 32 IDs per batch).
+- Improves TimelineManager directory handling and empty-directory cleanup.
+- Improves RTI Cloud heartbeat uptime reporting using awake-clock metrics in Engage Bridge and Rallypoint.
+- Improves Rallypoint stream subscription routing for mesh-leaf peers.
+- Refactors NSM state machine initialization in Engage Bridge via consolidated `applyNsmNodeSettings`.
+- Removes `RallypointServer` configuration object (unused).
+- Removes debug SQL logging in SqlUtils.
+
 ## June 8, 2026 - 1.261.9101
 
 - Adds AES encryption and file-based storage options for platform secret management.
