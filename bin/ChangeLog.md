@@ -1,5 +1,31 @@
 # Change Log
 
+## August 26, 2026 - 1.263.9113
+
+- Adds RNNoise-based noise suppression for capture and render (`Denoiser`, `denoiseInput`, `denoiseOutput` engine audio policy).
+- Adds Opus packet-loss concealment for in-order receive gaps (disable with `ENGAGE_OPUS_PLC=0`).
+- Adds `sni` to `RallypointPeer` so mesh peers can select a far-end `additionalIdentities` TLS certificate.
+- Adds `StatusUploadConfiguration` (`baseUrl`, `apiKey`, TLS policy) for HTTP POST status uploads from Engage Bridge, NSM, and Rallypoint.
+- Adds `NsmNodeStatusReportImmediateConfiguration` for throttled event-driven NSM status reports.
+- Adds SQLite persistence for NSM dashboard node status, history, and events.
+- Adds Docker images for Engage Bridge Service (EBS) and Engage Activity Recorder (EAR).
+- Adds Cursor on Target (CoT) utilities for payload generation and live entity monitoring.
+- Adds `TransportImpairmentRuntime` for directional loss and jitter application.
+- Improves Rallypoint mesh routing by forwarding stream subscriptions across a full-core clique.
+- Improves Rallypoint peering with staggered outbound dialing and deterministic dial direction.
+- Improves Rallypoint peering by applying certificate and protocol changes on reconnect instead of hot-swapping TLS.
+- Improves Rallypoint peering so already-linked fallback hangups are not treated as connection failures.
+- Improves Rallypoint peering configuration reload thread safety and outbound cleanup.
+- Improves SKU UDP inbound counter handling (replay reject vs resync) in Rallypoint and SharedKeyUdpStreamer.
+- Improves bridged talkspurt end detection, TX_END header-extension handling, and RTP transmission cleanup.
+- Improves NSM resource release grace for Engage Bridge groups that use Rallypoint clusters.
+- Improves Rallypoint link-graph generation for client and peer connections.
+- Corrects a jitter-buffer crash when releasing an already-released packet with `enableQueue` false.
+- Corrects Group audio-output registration when audio output is disabled so inbound RX-started events still fire.
+- Removes remaining Brotli compression and decompression APIs.
+- Removes unused wolfSSL and wolfEngine sources and build options.
+- Removes `applicationPercentage` from `TransportImpairment` (use `lossPercentage` and `jitterMs`).
+
 ## July 1, 2026 - 1.263.9103
 
 - Adds `ApiCallPacingSettings` and `ApiCallPacer` for lane-based pacing of Engage API calls (topology, transmission, configuration).
