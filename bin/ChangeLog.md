@@ -25,6 +25,7 @@
 - Removes remaining Brotli compression and decompression APIs.
 - Removes unused wolfSSL and wolfEngine sources and build options.
 - Removes `applicationPercentage` from `TransportImpairment` (use `lossPercentage` and `jitterMs`).
+- Documents OpenSSL 3.1.2 and the FIPS 140-3 validated OpenSSL FIPS Provider (CMVP #4985).
 
 ## July 1, 2026 - 1.263.9103
 
@@ -39,7 +40,7 @@
 - Adds detailed RTP logging option to InboundRtpProcessor.
 - Adds crypto engine version logging at engine initialization and in application startup output.
 - Adds STATIC_ANALYSIS.md and expanded clang-tidy checks for uninitialized member variables.
-- Upgrades OpenSSL from 3.0.8 to 3.1.2.
+- Upgrades OpenSSL from 3.0.8 to 3.1.2 (FIPS 140-3 Provider, CMVP #4985).
 - Improves bridge PCM encoding and sample handling in Group audio transmission.
 - Improves EngageInterface error handling when paced API call submission fails (join, leave, create bridge).
 - Improves Timeline event deletion with batched SQL deletes (up to 32 IDs per batch).
