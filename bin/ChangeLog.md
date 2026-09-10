@@ -1,5 +1,12 @@
 # Change Log
 
+## September 9, 2026
+
+- Adds OpenSSL native QUIC as a Rallypoint transport for leaf and RP-to-RP connections (`RpProtocol` `rppQuic` / protocol `quic`, ALPN `rts-rallypoint-v1`).
+- Adds `RallypointQuicSettings` (`enabled`, `listenPort`; default UDP 7443). QUIC listen is opt-in and defaults to disabled.
+- Adds QUIC failback probing for Rallypoint clusters.
+- Upgrades application OpenSSL from 3.1.2 to 3.5.8 for native QUIC. The FIPS provider remains the frozen CMVP #4985 modules.
+
 ## August 26, 2026 - 1.263.9113
 
 - Adds RNNoise-based noise suppression for capture and render (`Denoiser`, `denoiseInput`, `denoiseOutput` engine audio policy).
